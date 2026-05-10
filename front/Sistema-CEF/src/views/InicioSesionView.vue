@@ -1,6 +1,6 @@
 <template>
-	<v-container class="fill-height d-flex align-center justify-center">
-		<v-card class="pa-6" width="420" elevation="8" color="#f0f0f0" rounded="lg">
+	<v-container fluid class="fill-height d-flex align-center justify-center" style="min-height: 100dvh;">
+		<v-card class="pa-6 login-card" width="420" elevation="8" color="#f0f0f0" rounded="lg">
             <v-img
                 :src="logoImg"
                 alt="Logo CEF"
@@ -23,8 +23,15 @@
 					<v-btn block color="red" size="large" class="mt-2">Entrar</v-btn>
 				</v-form>
 			</v-card-text>
-            <v-card-text class ="pt-0 mt-2" align="center">
-                <v-btn text color="primary" size="small">¿Olvidaste tu contraseña?</v-btn>
+			<v-card-text class="pt-0 mt-2" align="center">
+				<v-btn to="/olvidar-contraseña" variant="flat" color="primary" size="small">
+					¿Olvidaste tu contraseña?
+				</v-btn>
+            </v-card-text>
+			<v-card-text class="pt-0 mt-2" align="center">
+				<v-btn to="/registro" variant="flat" color="primary" size="small">
+					¿No tienes cuenta? Regístrate
+				</v-btn>
             </v-card-text>
 		</v-card>
 	</v-container>
@@ -32,5 +39,16 @@
 
 <script setup>
 import logoImg from '@/assets/logoLargo.png'
-</script>
 
+</script>
+<style scoped>
+.login-card {
+	width: min(420px, calc(100vw - 32px));
+}
+
+@media (max-width: 768px) {
+	.login-card {
+		width: calc(100vw - 24px);
+    }
+}
+</style>
