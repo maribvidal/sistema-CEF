@@ -25,6 +25,9 @@ describe('App', () => {
         stubs: {
           VApp: slotStub,
           VMain: slotStub,
+          VNavigationDrawer: slotStub,
+          VList: slotStub,
+          VListItem: slotStub,
           VContainer: slotStub,
           VRow: slotStub,
           VCol: slotStub,

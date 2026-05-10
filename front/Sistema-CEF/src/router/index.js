@@ -11,7 +11,7 @@ const router = createRouter({
     {
       path: '/inicioSesion',
       name: 'inicioSesion',
-      component: () => import('../views/InicioSesionView.vue'),
+      component: () => import('../views/UsuarioVisitante/InicioSesionView.vue'),
     }
   ],
 })
