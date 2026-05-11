@@ -1,3 +1,4 @@
+alumnos@biblioteca-alumnos02:~$ cat ins.py
 import sqlite3 as sqlite;
 
 ## CONSTANTES
@@ -13,11 +14,27 @@ def conectarse_db() -> sqlite.Cursor:
 
 ## FUNCIONES QUE INSERTAN FILAS EN LAS TABLAS DE LA BD
 
-def insertar_fila_permiso(nombre):
+def insertar_permiso(nombre):
     cursor = conectarse_db();
     cursor.execute(f"""INSERT INTO Permiso (nombre)
                              VALUES ('{nombre}');""");
     cursor.connection.commit();
     cursor.connection.close();
 
-# insertar_fila_permiso('Modificar');
+def insertar_rol(nombre):
+    cursor = conectarse_db();
+    cursor.execute(f"INSERT INTO Rol (nombre) VALUES ('{nombre}')");
+
+    cursor.connection.commit();
+    cursor.connection.close();
+
+# - ¿Descuento y Sala deberían tener otro atributo?
+
+def insertar_profesor(nombre, apellido, genero, dni):
+    cursor = conectarse_db();
+    cursor.ex
+
+    cursor.connection.commit();
+    cursor.connection.close();
+
+# insertar_permiso('Modificar');
