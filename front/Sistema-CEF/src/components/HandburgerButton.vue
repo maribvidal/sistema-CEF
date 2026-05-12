@@ -30,11 +30,24 @@ defineEmits(['toggle'])
     padding: 10px;
     gap: 6px;
     border-radius: 50%;
+    transition: 0.4s; opacity: 0.4s ;
+}
+.handburger-button.active{
+    transform: translateY(7px) rotate(45deg);
 }
 .line {
     width: 40px;
     height: 5px;
     background-color: #fff;
     border-radius: 2px;
+}
+
+@media (max-width: 768px) {
+    .handburger-button {
+        position: fixed;
+        bottom: calc(80% - 20px);
+        right: 16px;
+        z-index: 9999;
+    }
 }
 </style>

@@ -2,14 +2,9 @@
   <v-app>
     <v-main class="bg-light">
       <HandburgerButton class="app-menu-button" @toggle="menuOpen = !menuOpen" />
+      <NavBar v-model="menuOpen" :appMenuIcons="appMenuIcons" />
       <router-view />
-      <v-navigation-drawer v-model="menuOpen" temporary location="left">
-        <v-list>
-          <v-list-item title="Inicio" to="/" />
-          <v-list-item title="Inicio de sesión" to="/inicioSesion" />
-          <v-list-item title="Sobre Nosotros" />
-        </v-list>
-      </v-navigation-drawer>
+      
     </v-main>
   </v-app>
 </template>
@@ -18,8 +13,14 @@
 import { ref } from 'vue'
 
 import HandburgerButton from './components/HandburgerButton.vue'
+import NavBar from './components/NavBar.vue'
 
 const menuOpen = ref(false)
+const appMenuIcons = {
+  home: 'mdi-home',
+  login: 'mdi-login',
+  about: 'mdi-information',
+}
 </script>
 
 <style scoped>

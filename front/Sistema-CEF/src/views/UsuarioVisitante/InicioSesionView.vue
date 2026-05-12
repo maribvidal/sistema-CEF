@@ -44,6 +44,14 @@ import logoImg from '@/assets/logoLargo.png'
 <style scoped>
 .login-card {
 	width: min(420px, calc(100vw - 32px));
+
+}
+.text-h5 {
+	text-align: center;
+}
+.v-card-subtitle {
+	text-align: center;
+	font-size-adjust: 0.5;
 }
 
 @media (max-width: 768px) {
