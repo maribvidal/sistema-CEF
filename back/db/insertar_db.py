@@ -1,40 +1,38 @@
-alumnos@biblioteca-alumnos02:~$ cat ins.py
 import sqlite3 as sqlite;
 
 ## CONSTANTES
 
 NOM_DB = "database.db"
 
-## FUNCIÓN QUE CREA LA CONEXIÓN A LA BD Y DEVUELVE UN CURSOR
+## FUNCIONES DE CONEXIÓN CON LA BD
 
 def conectarse_db() -> sqlite.Cursor:
     conexion = sqlite.connect(NOM_DB);
     cursor = conexion.cursor();
     return cursor;
 
+def commitear(cursor: sqlite.Cursor):
+    cursor.connection.commit();
+    cursor.connection.close();
+
 ## FUNCIONES QUE INSERTAN FILAS EN LAS TABLAS DE LA BD
 
 def insertar_permiso(nombre):
     cursor = conectarse_db();
     cursor.execute(f"""INSERT INTO Permiso (nombre)
-                             VALUES ('{nombre}');""");
-    cursor.connection.commit();
-    cursor.connection.close();
+                                VALUES ('{nombre}');""");
+    commitear(cursor);
 
 def insertar_rol(nombre):
     cursor = conectarse_db();
-    cursor.execute(f"INSERT INTO Rol (nombre) VALUES ('{nombre}')");
-
-    cursor.connection.commit();
-    cursor.connection.close();
-
-# - ¿Descuento y Sala deberían tener otro atributo?
+    cursor.execute(f"""INSERT INTO Rol (nombre) 
+                                VALUES ('{nombre}')""");
+    commitear(cursor);
 
 def insertar_profesor(nombre, apellido, genero, dni):
     cursor = conectarse_db();
-    cursor.ex
-
-    cursor.connection.commit();
-    cursor.connection.close();
+    cursor.execute(f"""INSERT INTO Profesor (nombre, apellido, genero, dni)
+                                VALUES('{nombre}', '{apellido}', '{genero}', '{dni}')""");
+    commitear(cursor);
 
 # insertar_permiso('Modificar');
