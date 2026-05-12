@@ -208,3 +208,4 @@ __marimo__/
 
 # Yo
 database.db
+poetry.lock
