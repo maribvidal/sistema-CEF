@@ -7,9 +7,10 @@ NOM_DB = "database.db"
 ## FUNCIONES DE CONEXIÓN A LA BD
 
 def conectarse_db() -> sqlite.Cursor:
-    conexion = sqlite.connect(NOM_DB);
-    cursor = conexion.cursor();
-    return cursor;
+    """Crear una conexión con la BD y devolver un objeto Cursor"""
+    conexion = sqlite.connect(NOM_DB)
+    cursor = conexion.cursor()
+    return cursor
 
 ## FUNCIONES DE CONSULTA
 
@@ -19,9 +20,11 @@ def conectarse_db() -> sqlite.Cursor:
 # - ¿Puedo refactorizar ests funciones?
 
 def consultar_permiso_por_id(id: int) -> tuple:
-    cursor = conectarse_db();
-    res = cursor.execute(f"SELECT id FROM Permiso WHERE id = {id}");
-    cursor.connection.close();
-    res = res.fetchone();
-    if res != None:
-        return res;
+    """Hace una consulta por un Permiso con un id pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute(f"SELECT id FROM Permiso WHERE id = {id}")
+    cursor.connection.close()
+    res = res.fetchone()
+    if res is not None:
+        return res

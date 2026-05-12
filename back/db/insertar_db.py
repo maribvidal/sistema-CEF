@@ -1,4 +1,4 @@
-import sqlite3 as sqlite;
+import sqlite3 as sqlite
 
 ### TODO:
 ### - Hacer un wrapper para que cualquiera de estas funciones
@@ -20,56 +20,58 @@ NOM_DB = "database.db"
 ## FUNCIONES DE CONEXIÓN CON LA BD
 
 def conectarse_db() -> sqlite.Cursor:
-    conexion = sqlite.connect(NOM_DB);
-    cursor = conexion.cursor();
+    """Crea una conexión a la BD y devuelve un objeto Cursor"""
+    conexion = sqlite.connect(NOM_DB)
+    cursor = conexion.cursor()
     # Habilitar el control de Foreign Keys
-    cursor.execute("PRAGMA foreign_keys = ON;");
-    return cursor;
+    cursor.execute("PRAGMA foreign_keys = ON;")
+    return cursor
 
 def commitear(cursor: sqlite.Cursor):
-    cursor.connection.commit();
-    cursor.connection.close();
+    """Recibe un Cursor y con él hace commit y cierra la conexión con la BD"""
+    cursor.connection.commit()
+    cursor.connection.close()
 
 ## FUNCIONES QUE INSERTAN FILAS EN LAS TABLAS DE LA BD
 
 def insertar_actividad(nombre: str, precio_mensual: float):
     """Permite insertar una fila para la tabla Actividad"""
-    cursor = conectarse_db();
+    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Actividad (nombre, precio_mensual)
-                                VALUES ('{nombre}', {precio_mensual});""");
-    commitear(cursor);
+                                VALUES ('{nombre}', {precio_mensual});""")
+    commitear(cursor)
 
 def insertar_mensualidad(fecha_ini, fecha_fin, usuario_id: int):
     """Permite insertar una fila para la tabla Mensualidad"""
-    cursor = conectarse_db();
+    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)
-                                VALUES ('{fecha_ini}', '{fecha_fin}', {usuario_id});""");
-    commitear(cursor);
+                                VALUES ('{fecha_ini}', '{fecha_fin}', {usuario_id});""")
+    commitear(cursor)
 
 def insertar_permiso(nombre: str):
     """Permite insertar una fila para la tabla Permiso"""
-    cursor = conectarse_db();
+    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Permiso (nombre)
-                                VALUES ('{nombre}');""");
-    commitear(cursor);
+                                VALUES ('{nombre}');""")
+    commitear(cursor)
 
 def insertar_profesor(nombre: str, apellido: str, genero: str, dni: int):
     """Permite insertar una fila para la tabla Profesor"""
-    cursor = conectarse_db();
+    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Profesor (nombre, apellido, genero, dni)
-                                VALUES('{nombre}', '{apellido}', '{genero}', '{dni}');""");
-    commitear(cursor);
+                                VALUES('{nombre}', '{apellido}', '{genero}', '{dni}');""")
+    commitear(cursor)
 
 def insertar_rol(nombre: str):
     """Permite insertar una fila para la tabla Rol"""
-    cursor = conectarse_db();
+    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Rol (nombre) 
-                                VALUES ('{nombre}');""");
-    commitear(cursor);
+                                VALUES ('{nombre}');""")
+    commitear(cursor)
 
 def insertar_usuario(dni: int, nombre: str, apellido: str, contraseña: str, correo: str, telefono: int, genero: str):
     """Permite insertar una fila para la tabla Usuario"""
-    cursor = conectarse_db();
+    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Usuario (dni, nombre, apellido, contraseña, correo, telefono, genero)
-                                VALUES({dni}, '{nombre}', '{apellido}', '{contraseña}', '{correo}', '{telefono}', '{genero}');""");
-    commitear(cursor);
+                                VALUES({dni}, '{nombre}', '{apellido}', '{contraseña}', '{correo}', '{telefono}', '{genero}');""")
+    commitear(cursor)
