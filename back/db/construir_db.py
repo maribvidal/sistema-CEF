@@ -154,7 +154,8 @@ def construir_tabla_clase(cursor: sqlite.Cursor):
 
 def construir_tabla_sala(cursor: sqlite.Cursor):
     cursor.execute(f"""CREATE TABLE Sala (
-                            id INTEGER PRIMARY KEY
+                            id          INTEGER PRIMARY KEY,
+                            nombre      VARCHAR({LONG_NOM})
                         );""");
 
 def construir_tabla_clase_ocurrir_sala(cursor: sqlite.Cursor):
@@ -185,7 +186,8 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
 
 def construir_tabla_descuento(cursor: sqlite.Cursor):
     cursor.execute(f"""CREATE TABLE Descuento (
-                            id INTEGER PRIMARY KEY
+                            id          INTEGER PRIMARY KEY,
+                            nombre      VARCHAR({LONG_NOM})
                         );""");
 
 def construir_tabla_usuario_tener_descuento(cursor: sqlite.Cursor):
