@@ -1,6 +1,6 @@
 <template>
     <button
-        class="handburger-button"
+        class="hamburger-button"
         type="button"
         aria-label="Abrir menú"
         @click="$emit('toggle')"
@@ -17,7 +17,7 @@ defineEmits(['toggle'])
 </script>
 
 <style scoped>
-.handburger-button {
+.hamburger-button {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -32,7 +32,7 @@ defineEmits(['toggle'])
     border-radius: 50%;
     transition: 0.4s; opacity: 0.4s ;
 }
-.handburger-button.active{
+.hamburger-button.active{
     transform: translateY(7px) rotate(45deg);
 }
 .line {
@@ -43,9 +43,14 @@ defineEmits(['toggle'])
 }
 
 @media (max-width: 768px) {
-    .handburger-button {
+    .hamburger-button {
         position: fixed;
-        bottom: calc(80% - 20px);
+        /* Reseteamos el top y left que vienen de App.vue */
+        top: auto !important;
+        left: auto !important;
+        
+        /* Lo posicionamos abajo a la derecha */
+        bottom: 16px;
         right: 16px;
         z-index: 9999;
     }

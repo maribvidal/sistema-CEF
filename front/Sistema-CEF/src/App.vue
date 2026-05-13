@@ -1,8 +1,8 @@
 <template>
   <v-app>
     <v-main class="bg-light">
-      <HandburgerButton class="app-menu-button" @toggle="menuOpen = !menuOpen" />
-      <NavBar v-model="menuOpen" :appMenuIcons="appMenuIcons" />
+      <HamburgerButton class="app-menu-button" @toggle="menuOpen = !menuOpen" />
+      <MenuBar v-model="menuOpen" :appMenuIcons="appMenuIcons" />
       <router-view />
       
     </v-main>
@@ -12,14 +12,15 @@
 <script setup>
 import { ref } from 'vue'
 
-import HandburgerButton from './components/HandburgerButton.vue'
-import NavBar from './components/NavBar.vue'
+import HamburgerButton from './components/HamburgerButton.vue'
+import MenuBar from './components/MenuBar.vue'
 
 const menuOpen = ref(false)
 const appMenuIcons = {
   home: 'mdi-home',
   login: 'mdi-login',
   about: 'mdi-information',
+  close: 'mdi-close',
 }
 </script>
 
@@ -30,4 +31,7 @@ const appMenuIcons = {
   left: 16px;
   z-index: 1000;
 }
+
+
+
 </style>
