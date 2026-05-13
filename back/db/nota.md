@@ -1,0 +1,1 @@
+hice los archivo de consulta a db sin centrarme en ellos, hay que modificar el nombre y checkear si todo esta bien.
