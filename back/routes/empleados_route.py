@@ -4,7 +4,7 @@ from services.empleados_service import cambiar_rol_empleado, obtener_empleados_s
 
 empleados_bp = Blueprint("empleados", __name__)
 
-
+## tengo que revisar como vamos a hacer con lo del token de la secion 
 @empleados_bp.route("/empleados", methods=["GET"])
 def listar_empleados():
     respuesta, status = obtener_empleados_service()

@@ -15,6 +15,7 @@ def registrar_usuario():
     correo = data.get("correo")
     telefono = data.get("telefono")
     genero = data.get("genero")
+    edad = data.get("edad")
 
     respuesta, status = registrar_usuario_service(
         dni,
@@ -23,7 +24,8 @@ def registrar_usuario():
         contraseña,
         correo,
         telefono,
-        genero
+        genero,
+        edad
     )
 
     return jsonify(respuesta), status

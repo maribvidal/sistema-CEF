@@ -34,7 +34,8 @@ def registrar_usuario_service(
         contraseña,
         correo,
         telefono,
-        genero
+        genero,
+        edad
     )
 
     return {
