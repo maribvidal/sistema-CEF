@@ -1,3 +1,4 @@
+from db import conectar_y_commitear
 import sqlite3 as sqlite
 
 ### TODO:
@@ -13,65 +14,40 @@ import sqlite3 as sqlite
 ### - ¿Cómo reacciono ante los errores de parte del motor de la BD?
 ### - ¿Cómo devuelvo los errores de Foreign Keys?
 
-## CONSTANTES
-
-NOM_DB = "database.db"
-
-## FUNCIONES DE CONEXIÓN CON LA BD
-
-def conectarse_db() -> sqlite.Cursor:
-    """Crea una conexión a la BD y devuelve un objeto Cursor"""
-    conexion = sqlite.connect(NOM_DB)
-    cursor = conexion.cursor()
-    # Habilitar el control de Foreign Keys
-    cursor.execute("PRAGMA foreign_keys = ON;")
-    return cursor
-
-def commitear(cursor: sqlite.Cursor):
-    """Recibe un Cursor y con él hace commit y cierra la conexión con la BD"""
-    cursor.connection.commit()
-    cursor.connection.close()
-
 ## FUNCIONES QUE INSERTAN FILAS EN LAS TABLAS DE LA BD
 
-def insertar_actividad(nombre: str, precio_mensual: float):
+@conectar_y_commitear
+def insertar_actividad(cursor: sqlite.Cursor, nombre: str, precio_mensual: float):
     """Permite insertar una fila para la tabla Actividad"""
-    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Actividad (nombre, precio_mensual)
                                 VALUES ('{nombre}', {precio_mensual});""")
-    commitear(cursor)
 
-def insertar_mensualidad(fecha_ini, fecha_fin, usuario_id: int):
+@conectar_y_commitear
+def insertar_mensualidad(cursor: sqlite.Cursor, fecha_ini, fecha_fin, usuario_id: int):
     """Permite insertar una fila para la tabla Mensualidad"""
-    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)
                                 VALUES ('{fecha_ini}', '{fecha_fin}', {usuario_id});""")
-    commitear(cursor)
 
-def insertar_permiso(nombre: str):
+@conectar_y_commitear
+def insertar_permiso(cursor: sqlite.Cursor, nombre: str):
     """Permite insertar una fila para la tabla Permiso"""
-    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Permiso (nombre)
                                 VALUES ('{nombre}');""")
-    commitear(cursor)
 
-def insertar_profesor(nombre: str, apellido: str, genero: str, dni: int):
+@conectar_y_commitear
+def insertar_profesor(cursor: sqlite.Cursor, nombre: str, apellido: str, genero: str, dni: int):
     """Permite insertar una fila para la tabla Profesor"""
-    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Profesor (nombre, apellido, genero, dni)
                                 VALUES('{nombre}', '{apellido}', '{genero}', '{dni}');""")
-    commitear(cursor)
 
-def insertar_rol(nombre: str):
+@conectar_y_commitear
+def insertar_rol(cursor: sqlite.Cursor, nombre: str):
     """Permite insertar una fila para la tabla Rol"""
-    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Rol (nombre) 
                                 VALUES ('{nombre}');""")
-    commitear(cursor)
 
-def insertar_usuario(dni: int, nombre: str, apellido: str, contraseña: str, correo: str, telefono: int, genero: str):
+@conectar_y_commitear
+def insertar_usuario(cursor: sqlite.Cursor, dni: int, nombre: str, apellido: str, contraseña: str, correo: str, telefono: int, genero: str):
     """Permite insertar una fila para la tabla Usuario"""
-    cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Usuario (dni, nombre, apellido, contraseña, correo, telefono, genero)
                                 VALUES({dni}, '{nombre}', '{apellido}', '{contraseña}', '{correo}', '{telefono}', '{genero}');""")
-    commitear(cursor)

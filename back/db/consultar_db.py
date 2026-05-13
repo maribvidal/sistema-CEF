@@ -1,8 +1,6 @@
-import sqlite3 as sqlite;
+from db import NOM_DB
 
-## CONSTANTES
-
-NOM_DB = "database.db"
+import sqlite3 as sqlite
 
 ## FUNCIONES DE CONEXIÓN A LA BD
 
@@ -14,7 +12,7 @@ def conectarse_db() -> sqlite.Cursor:
 
 ## FUNCIONES DE CONSULTA
 
-# - ¿Cómo voy a hacer cuando tenga que devolver varias tuplas? 
+# - ¿Cómo voy a hacer cuando tenga que devolver varias tuplas?
 # - ¿No me conviene hacer una función que devuelva un permiso
 #    en base a un parámetro cualquiera recibido?
 # - ¿Puedo refactorizar ests funciones?
