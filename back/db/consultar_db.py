@@ -1,5 +1,4 @@
 from db import NOM_DB
-
 import sqlite3 as sqlite
 
 ## FUNCIONES DE CONEXIÓN A LA BD

@@ -182,6 +182,7 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
                             dni         INTEGER UNIQUE NOT NULL,
                             nombre      VARCHAR({LONG_NOM}),
                             apellido    VARCHAR({LONG_APE}),
+                            edad        INTEGER NOT NULL,
                             contraseña  VARCHAR({LONG_CONTRA}),
                             correo      VARCHAR({LONG_CORREO}),
                             telefono    VARCHAR({LONG_TEL}),
