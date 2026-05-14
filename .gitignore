@@ -209,3 +209,4 @@ __marimo__/
 # Yo
 database.db
 poetry.lock
+__pycache__

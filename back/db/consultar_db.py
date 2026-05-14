@@ -1,5 +1,8 @@
-from db import NOM_DB
 import sqlite3 as sqlite
+
+# CONSTANTES
+
+NOM_DB = "database.db"
 
 ## FUNCIONES DE CONEXIÓN A LA BD
 

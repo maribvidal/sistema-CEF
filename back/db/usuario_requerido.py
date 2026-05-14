@@ -1,6 +1,5 @@
+from decoradores.decoradores_operaciones import conectar_y_commitear
 import sqlite3 as sqlite
-
-from db import conectar_y_commitear
 
 @conectar_y_commitear
 def checkeo_dni_registrado(cursor: sqlite.Cursor, dni: int):

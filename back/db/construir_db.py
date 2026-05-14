@@ -1,5 +1,13 @@
-from db import NOM_DB, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA, LONG_TEL
 import sqlite3 as sqlite
+
+# CONSTANTES
+
+LONG_NOM = 20
+LONG_APE = 30
+LONG_CORREO = 30
+LONG_CONTRA = 12
+LONG_TEL = 15
+NOM_DB = "database.db"
 
 ### TO-DO:
 ### - ¿Cambiamos las opciones del ON DELETE y del ON UPDATE?

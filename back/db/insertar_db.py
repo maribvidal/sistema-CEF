@@ -1,4 +1,4 @@
-from db import conectar_y_commitear
+from decoradores.decoradores_operaciones import conectar_y_commitear
 import sqlite3 as sqlite
 
 ### TODO:
