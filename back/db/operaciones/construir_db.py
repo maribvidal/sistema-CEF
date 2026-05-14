@@ -1,4 +1,5 @@
 import sqlite3 as sqlite
+import os
 
 # CONSTANTES
 
@@ -11,6 +12,11 @@ NOM_DB = "database.db"
 
 ### TO-DO:
 ### - ¿Cambiamos las opciones del ON DELETE y del ON UPDATE?
+
+def reconstruir_db():
+    """Destruye la BD y luego la vuelve a construir"""
+    os.remove(os.getcwd() + '/' + NOM_DB)
+    construir_db()
 
 def construir_db():
     """Construye la BD si no existía antes"""
