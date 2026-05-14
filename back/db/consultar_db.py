@@ -10,6 +10,8 @@ def conectarse_db() -> sqlite.Cursor:
     """Crear una conexión con la BD y devolver un objeto Cursor"""
     conexion = sqlite.connect(NOM_DB)
     cursor = conexion.cursor()
+    # Habilitar el control de Foreign Keys
+    cursor.execute("PRAGMA foreign_keys = ON;")
     return cursor
 
 ## FUNCIONES DE CONSULTA
@@ -24,7 +26,46 @@ def consultar_permiso_por_id(id: int) -> tuple:
         y devuelve una tupla"""
     cursor = conectarse_db()
     res = cursor.execute(f"SELECT id FROM Permiso WHERE id = {id}")
-    cursor.connection.close()
     res = res.fetchone()
+    cursor.connection.close()
     if res is not None:
         return res
+
+def consultar_usuario_por_dni(dni: int) -> tuple:
+    """Hace una consulta por un Usuario con un dni pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Usuario WHERE dni = ?", (dni,))
+    res = res.fetchone()
+    cursor.connection.close()
+    return res
+
+def consultar_usuario_por_correo(correo: str) -> tuple:
+    """Hace una consulta por un Usuario con un correo pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Usuario WHERE correo = ?", (correo,))
+    res = res.fetchone()
+    cursor.connection.close()
+    return res
+
+def buscar_empleado_por_correo(correo: str) -> tuple:
+    cursor = conectarse_db()
+    res = cursor.execute("""
+        SELECT 
+            e.id, 
+            e.nombre, 
+            r.nombre AS rol
+            CASE 
+                WHEN a.empleado_id IS NOT NULL THEN 'ADMINISTRADOR'
+                WHEN re.empleado_id IS NOT NULL THEN 'RECEPCIONISTA'
+            END AS tipo
+        FROM Empleado e
+        INNNER JOIN Rol r ON e.rol_id = r.id
+        LEFT JOIN administrador ON e.id = a.empleado_id
+        LEFT JOIN recepcionista ON e.id = re.empleado_id 
+        WHERE e.correo = ?      
+    """, (correo,))
+    res = res.fetchone()
+    cursor.connection.close()
+    return res
