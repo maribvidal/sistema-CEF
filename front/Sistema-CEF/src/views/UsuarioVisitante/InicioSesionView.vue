@@ -24,7 +24,7 @@
 				</v-form>
 			</v-card-text>
 			<v-card-text class="pt-0 mt-2" align="center">
-				<v-btn to="/olvidar-contraseña" variant="flat" color="primary" size="small">
+				<v-btn to="/recuperar-contraseña" variant="flat" color="primary" size="small">
 					¿Olvidaste tu contraseña?
 				</v-btn>
             </v-card-text>
