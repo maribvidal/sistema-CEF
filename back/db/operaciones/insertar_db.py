@@ -1,10 +1,8 @@
 import sqlite3 as sqlite
 
 # CONSTANTES
+from db import NOM_DB
 
-NOM_DB = "database.db"
-
-### TODO:
 ### - Hacer un wrapper para que cualquiera de estas funciones
 ###   no haga que se detenga el main si es que reciben una
 ###   excepción. Implementar un exception handler.

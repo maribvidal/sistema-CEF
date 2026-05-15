@@ -1,8 +1,5 @@
 import sqlite3 as sqlite
-
-# CONSTANTES
-
-NOM_DB = "database.db"
+from db import NOM_DB
 
 def conectarse_db() -> sqlite.Cursor:
     """Crea una conexión a la BD y devuelve un objeto Cursor"""
