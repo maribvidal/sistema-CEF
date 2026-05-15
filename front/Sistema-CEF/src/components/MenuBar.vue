@@ -7,16 +7,22 @@
     location="left"
     rail
     :rail-width="60"
-    width="220"
+    width="280" 
     expand-on-hover
   >
     <v-list nav density="compact">
-      
 
       <v-list-item title="Inicio" :prepend-icon="appMenuIcons.home" to="/" />
       <v-list-item title="Iniciar Sesión" :prepend-icon="appMenuIcons.login" to="/inicioSesion" />
       <v-list-item title="Clases" :prepend-icon="appMenuIcons.classes" to="/clases" />
       <v-list-item title="NOSOTROS" :prepend-icon="appMenuIcons.about" to="/sobre-nosotros" />
+      
+      <!-- Botón de Registro modificado con ícono, block para estirarse y márgenes -->
+      <v-btn variant="flat" color="red" class="text-none text-subtitle-1 mt-2 ml-1 px-6" to="/registro">
+                <v-icon start>mdi-account-plus</v-icon>
+                Registrarse
+            </v-btn>
+            
     </v-list>
   </v-navigation-drawer>
 </template>

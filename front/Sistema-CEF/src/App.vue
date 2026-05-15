@@ -25,6 +25,9 @@ const appMenuIcons = {
   login: 'mdi-login',
   about: 'mdi-information',
   close: 'mdi-close',
+  gym: 'mdi-dumbbell',
+  classes: 'mdi-calendar-blank',
+  accountnew: 'mdi-account-plus',
 }
 </script>
 
