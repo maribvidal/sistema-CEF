@@ -11,11 +11,7 @@
     expand-on-hover
   >
     <v-list nav density="compact">
-      <v-list-item class="close-item" @click="localMenuOpen = false">
-        <template #prepend>
-          <v-icon :icon="appMenuIcons.close" />
-        </template>
-      </v-list-item>
+      
 
       <v-list-item title="Inicio" :prepend-icon="appMenuIcons.home" to="/" />
       <v-list-item title="Iniciar Sesión" :prepend-icon="appMenuIcons.login" to="/inicioSesion" />
@@ -51,8 +47,15 @@ const localMenuOpen = computed({
   overflow: hidden;
   background: #fff;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
-  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); /* Suaviza la animación */
-  
+  transition-property: all; /* Suaviza la animación */
+  transition-duration: 600ms;
+
+  margin-top: 60px; /* Separación del botón */
+}
+
+/* Sobrescribe la clase .is-closed para que se oculte hacia arriba y baje al abrirse */
+.menu-drawer.is-closed {
+  transform: translateY(-150%) !important;
 }
 
 .menu-drawer .close-item {
@@ -93,9 +96,9 @@ const localMenuOpen = computed({
 
 @media (max-width: 768px) {
   .menu-drawer {
-    top: auto !important;
+    top: 16px !important;
     left: auto !important;
-    bottom: 16px !important;
+    bottom: auto !important;
     right: 16px !important;
     width: auto !important;
     max-width: 90vw;
