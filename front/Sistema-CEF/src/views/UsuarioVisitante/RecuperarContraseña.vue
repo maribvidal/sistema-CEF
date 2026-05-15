@@ -1,6 +1,6 @@
 <template>
-    <v-container class="fill-height d-flex flex-column align-center justify-center">
-        <v-card class="pa-4" width="400">
+    <v-container class="fill-height d-flex flex-column align-center justify-center" >
+        <v-card class="pa-4" width="400" color="#f0f0f0">
             <v-card-title class="text-h5">Recuperar contraseña</v-card-title>
             <v-card-subtitle>Ingresa tu correo electrónico para recibir instrucciones</v-card-subtitle>
 
