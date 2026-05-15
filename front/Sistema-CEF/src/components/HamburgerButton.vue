@@ -22,35 +22,44 @@ defineEmits(['toggle'])
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
-    background-color: #333;
-    border: none;
+    width: 50px;
+    height: 50px;
+    background-color: #ffffff;
+    border: 1.5px solid #dce4f0;
     cursor: pointer;
-    padding: 10px;
+    padding: 0;
     gap: 6px;
-    border-radius: 50%;
-    transition: 0.4s; opacity: 0.4s ;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    
+}
+.hamburger-button:hover {
+    background-color: #f7f9fc;
 }
 .hamburger-button.active{
     transform: translateY(7px) rotate(45deg);
 }
 .line {
-    width: 40px;
-    height: 5px;
-    background-color: #fff;
+    width: 24px;
+    height: 3px;
+    background-color: #000000;
     border-radius: 2px;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 960px) {
+    .hamburger-button {
+        display: none !important;
+    }
+}
+
+@media (max-width: 959px) {
     .hamburger-button {
         position: fixed;
         /* Reseteamos el top y left que vienen de App.vue */
-        top: auto !important;
         left: auto !important;
         
         /* Lo posicionamos abajo a la derecha */
-        bottom: 16px;
+        top: 8px;
         right: 16px;
         z-index: 9999;
     }

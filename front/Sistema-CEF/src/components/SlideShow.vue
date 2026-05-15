@@ -38,7 +38,7 @@ import img3 from '@/assets/assetsHome/slide3.jpg'
 //import placeholderImage from '@/assets/images/placeholder.png'
 
 // --- CONFIGURACIÓN ---
-const SLIDESHOW_INTERVAL = 3000 // en milisegundos
+const SLIDESHOW_INTERVAL = 10000 // en milisegundos
 
 // --- ESTADO DEL COMPONENTE ---
 const slides = ref([])
@@ -195,5 +195,11 @@ onBeforeUnmount(() => {
 
 .next-btn {
   right: 20px;
+}
+@media (max-width: 768px) {
+  .slideshow{
+    width: 100%;
+  }
+    
 }
 </style>
