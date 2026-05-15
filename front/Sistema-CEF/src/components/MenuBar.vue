@@ -15,6 +15,7 @@
 
       <v-list-item title="Inicio" :prepend-icon="appMenuIcons.home" to="/" />
       <v-list-item title="Iniciar Sesión" :prepend-icon="appMenuIcons.login" to="/inicioSesion" />
+      <v-list-item title="Clases" :prepend-icon="appMenuIcons.classes" to="/clases" />
       <v-list-item title="NOSOTROS" :prepend-icon="appMenuIcons.about" to="/sobre-nosotros" />
     </v-list>
   </v-navigation-drawer>

@@ -1,0 +1,7 @@
+
+NOM_DB = "database.db"
+LONG_NOM = 20
+LONG_APE = 30
+LONG_CORREO = 30
+LONG_CONTRA = 12
+LONG_TEL = 15
