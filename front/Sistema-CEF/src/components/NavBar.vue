@@ -46,4 +46,8 @@ export default {
     transition: background-color 0.3s ease, color 0.3s ease;
 
 }
+.registerButton:hover {
+    background-color: black;
+    color: white;
+}
 </style>
