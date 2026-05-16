@@ -1,5 +1,14 @@
 import sqlite3 as sqlite
 
+
+
+
+# ----------- ME GUSTARIA SEPARAR TODO POR ENTIDAD ASI EN LOS SERVICES IMPORTO TODO DEL ARCHIVO Y YA -----------
+# ej:                                   from consultar_usuario import *
+
+
+
+
 # CONSTANTES
 from db import NOM_DB
 
@@ -89,3 +98,29 @@ def listar_usuarios() -> list:
     cursor.connection.close()
     return res
 
+def consultar_usuario_por_id(id: int) -> tuple:
+    """Hace una consulta por un Usuario con un id pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Usuario WHERE id = ?", (id,))
+    res = res.fetchone()
+    cursor.connection.close()
+    return res
+
+def consultar_pagos_de_usuario(usuario_id: int) -> list:
+    """Hace una consulta por los pagos de un Usuario con un id pasado por parámetro,
+        y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("""
+        SELECT 
+            p.id, 
+            p.monto, 
+            p.fecha, 
+            c.id AS clase_id
+        FROM Pago p
+        INNER JOIN Clase c ON p.clase_id = c.id
+        WHERE p.usuario_id = ?
+    """, (usuario_id,))
+    res = res.fetchall()
+    cursor.connection.close()
+    return res

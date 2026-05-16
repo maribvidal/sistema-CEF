@@ -11,8 +11,8 @@ from db import NOM_DB
 ### - ¿Debería crear un tipo de dato para solucionar el bad smell de
 ###   Long Parameter List?
 ### - ¿Debería hacer una validación previa para los datos antes
-###   de enviarlos a la BD?
-### - ¿Cómo reacciono ante los errores de parte del motor de la BD?
+###   de enviarlos a la BD? <-- esto se hace en los services
+### - ¿Cómo reacciono ante los errores de parte del motor de la BD? 
 ### - ¿Cómo devuelvo los errores de Foreign Keys?
 
 def conectarse_db() -> sqlite.Cursor:

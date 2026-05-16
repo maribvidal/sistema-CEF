@@ -16,3 +16,16 @@ def commitear(cursor: sqlite.Cursor):
     """Recibe un Cursor y con él hace commit y cierra la conexión con la BD"""
     cursor.connection.commit()
     cursor.connection.close()
+
+def modificar_perfil_usuario(
+    usuario_id: int,
+    correo: str,
+    telefono: str
+):
+    cursor = conectarse_db()
+    cursor.execute("""
+        UPDATE Usuario
+        SET correo = ?, telefono = ?
+        WHERE id = ?
+    """, (correo, telefono, usuario_id))
+    commitear(cursor)

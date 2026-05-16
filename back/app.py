@@ -68,10 +68,27 @@ respuesta = u_s.registrar_usuario_service(
     telefono='1234567890', 
     correo='prueba@example.com',  
     genero='M',
-    edad=5
+    edad=5 # edad menor
 )
 
 print(respuesta)
+
+
+respuesta = u_s.registrar_usuario_service(
+    dni=1234567891,  
+    nombre='Juan',
+    apellido='Pérez',
+    contraseña='123',
+    telefono='1234567890', 
+    correo='prueba@example.com',  
+    genero='M',
+    edad=25
+)
+
+print(respuesta)
+
+lista = listar_usuarios()
+print(lista)
 
 desconectarse_db(cursor)
 
