@@ -1,17 +1,77 @@
-from db.operaciones import construir_db
-from db.operaciones import consultar_db as c_db
 import sqlite3 as sqlite
-from db.operaciones import insertar_db
+from db.operaciones import *
 
-construir_db.construir_db()
-conexion = sqlite.connect('database.db')
-cursor = conexion.cursor()
+construir_db()
+cursor = conectarse_db()
 
 
-# def insertar_usuario(dni: int, nombre: str, apellido: str, edad: int, contraseña: str, correo: str, telefono: int, genero: str):
-insertar_db.insertar_usuario(12345678, 'Federico', 'Lozada', 22, 'contra123', 'lozada@gmail.com', 123456789, 'Masculino')
+#insertar_datos_prueba.insertar_datos()
 
-# Esto es para ver en qué posición se encuentra la contraseña, para luego usar esa posición en la función de iniciar sesión, para comparar la contraseña que me pasan por parámetro con la que tengo en la base de datos
-tupla = c_db.consultar_usuario_por_correo('lozada@gmail.com')
+#tupla1 = c_db.consultar_usuario_por_correo('lozada@gmail.com')
+#tupla2 = c_db.consultar_usuario_por_correo('juan.perez@example.com')
 
-print(tupla)
+#print(tupla1)
+#print(tupla2)
+
+
+lista = listar_usuarios()
+print(lista)
+
+import services.usuario_service as u_s
+
+#checkeo de longitudes
+respuesta = u_s.registrar_usuario_service(
+    dni=1,
+    nombre='abcdefghijklmnopqrstuv',  # 21 caracteres, excede el límite de 20
+    apellido='bcdefghijklmnopqrstuvwaasdasdasd',  # 32 caracteres, excede el límite de 30
+    contraseña='12334567890123',  # 13 caracteres, excede el límite de 12
+    telefono='1234567890123451231231231231',  # 15 caracteres, dentro del límite
+    correo='prueba1234567891234@example.com', # 31 caracteres, excede el límite de 30
+    genero='M',
+    edad=25
+)
+
+print(respuesta)
+
+#checkeo de dni, correo repetidos y edad minima
+respuesta = u_s.registrar_usuario_service(
+    dni=12345678,  # DNI repetido
+    nombre='Juan',
+    apellido='Pérez',
+    contraseña='123',
+    telefono='1234567890', 
+    correo='prueba1@gmail.com', 
+    genero='M',
+    edad=25
+)
+
+print(respuesta)
+
+respuesta = u_s.registrar_usuario_service(
+    dni=123456789,  
+    nombre='Juan',
+    apellido='Pérez',
+    contraseña='123',
+    telefono='1234567890', 
+    correo='juan.perez@example.com', # Correo repetido 
+    genero='M',
+    edad=25
+)
+
+print(respuesta)
+
+respuesta = u_s.registrar_usuario_service(
+    dni=123456789,  
+    nombre='Juan',
+    apellido='Pérez',
+    contraseña='123',
+    telefono='1234567890', 
+    correo='prueba@example.com',  
+    genero='M',
+    edad=5
+)
+
+print(respuesta)
+
+desconectarse_db(cursor)
+

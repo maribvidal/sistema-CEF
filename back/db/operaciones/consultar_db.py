@@ -13,6 +13,10 @@ def conectarse_db() -> sqlite.Cursor:
     cursor.execute("PRAGMA foreign_keys = ON;")
     return cursor
 
+def desconectarse_db(cursor: sqlite.Cursor):
+    """Cerrar la conexión con la BD a través del objeto Cursor"""
+    cursor.connection.close()
+
 ## FUNCIONES DE CONSULTA
 
 # - ¿Cómo voy a hacer cuando tenga que devolver varias tuplas?
@@ -68,3 +72,20 @@ def buscar_empleado_por_correo(correo: str) -> tuple:
     res = res.fetchone()
     cursor.connection.close()
     return res
+
+def listar_clases() -> list:
+    """Hace una consulta para listar todas las clases, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Clase")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def listar_usuarios() -> list:
+    """Hace una consulta para listar todos los usuarios, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Usuario")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+

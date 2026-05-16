@@ -1,4 +1,4 @@
-from db.usuario_requerido import buscar_empleado_por_correo, buscar_usuario_por_correo
+from db.operaciones import buscar_empleado_por_correo, buscar_usuario_por_correo
 
 # el tipo se refiere a si es cliente, recepcionista o administrador
 # el rol es necesario para despues checkear los permisos de ciertos endpoints
