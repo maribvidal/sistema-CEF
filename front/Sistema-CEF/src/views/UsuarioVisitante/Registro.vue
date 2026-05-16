@@ -13,7 +13,7 @@
 					<v-text-field label="DNI" variant="outlined" />
                     <v-text-field label="Correo electrónico" prepend-inner-icon="mdi-email" variant="outlined" />
 					<v-text-field label="Teléfono" variant="outlined" />
-					<v-text-field label="Edad" variant="outlined" />
+					<v-text-field label="Fecha de nacimiento" type="date" variant="outlined" /> 
 					<v-combobox
 						label="Género"
 						variant="outlined"
@@ -60,6 +60,8 @@ import { mdiAccountPlus } from '@mdi/js'
 	text-align: center;
 	font-size-adjust: 0.5;
 }
+
+
 
 @media (max-width: 768px) {
 	.login-card {
