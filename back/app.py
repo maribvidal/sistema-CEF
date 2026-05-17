@@ -92,3 +92,15 @@ print(lista)
 
 desconectarse_db(cursor)
 
+from flask import Flask
+from routes import *
+
+app = Flask(__name__)
+
+app.register_blueprint(usuario_bp)
+app.register_blueprint(autenticacion_bp)
+app.register_blueprint(clases_bp)
+app.register_blueprint(empleados_bp)
+
+if __name__ == "__main__":
+    app.run(debug=True)

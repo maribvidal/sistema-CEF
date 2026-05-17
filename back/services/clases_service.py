@@ -1,4 +1,4 @@
-from db.operaciones import insertar_clase, eliminar_clase, cancelar_clase, modificar_clase, listar_clases
+from db.operaciones import insertar_clase, listar_clases
 
 def listar_clases_service():
     clases = listar_clases()

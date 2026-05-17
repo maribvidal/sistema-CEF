@@ -98,6 +98,14 @@ def listar_usuarios() -> list:
     cursor.connection.close()
     return res
 
+def obtener_empleados() -> list:
+    """Hace una consulta para listar todos los empleados, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Empleado")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
 def consultar_usuario_por_id(id: int) -> tuple:
     """Hace una consulta por un Usuario con un id pasado por parámetro,
         y devuelve una tupla"""
@@ -122,5 +130,14 @@ def consultar_pagos_de_usuario(usuario_id: int) -> list:
         WHERE p.usuario_id = ?
     """, (usuario_id,))
     res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def obtener_rol_por_id(id: int) -> tuple:
+    """Hace una consulta por un Rol con un id pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Rol WHERE id = ?", (id,))
+    res = res.fetchone()
     cursor.connection.close()
     return res

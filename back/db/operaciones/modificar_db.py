@@ -29,3 +29,15 @@ def modificar_perfil_usuario(
         WHERE id = ?
     """, (correo, telefono, usuario_id))
     commitear(cursor)
+    
+def actualizar_rol_empleado(
+    empleado_id: int,
+    nuevo_rol_id: int
+):
+    cursor = conectarse_db()
+    cursor.execute("""
+        UPDATE Empleado
+        SET rol_id = ?
+        WHERE id = ?
+    """, (nuevo_rol_id, empleado_id))
+    commitear(cursor)
