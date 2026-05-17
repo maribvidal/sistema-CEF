@@ -44,6 +44,13 @@ defineProps({
   height: 100%;
 }
 
+.slideshow-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Asegura que la imagen llene el contenedor sin deformarse */
+}
+
 .slide-link {
   position: relative;
   display: block;
