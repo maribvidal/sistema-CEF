@@ -1,4 +1,4 @@
-from .insertar_db import insertar_usuario, insertar_profesor, insertar_actividad, insertar_mensualidad, insertar_permiso, insertar_rol
+from .insertar_db import insertar_usuario, insertar_profesor, insertar_actividad, insertar_mensualidad, insertar_permiso, insertar_rol, insertar_pago
 
 def insertar_datos():
     insertar_usuario(12345678, 'Juan', 'Pérez', 30, '123', 'juan.perez@example.com', 1234,'masculino')
@@ -12,4 +12,5 @@ def insertar_datos():
     insertar_permiso('Metricas')
     insertar_rol('Administrador')
     insertar_rol('Recepcionista')
-    
+    insertar_pago(100.0, 1)
+    insertar_pago(150.0, 2)

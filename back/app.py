@@ -1,11 +1,10 @@
 import sqlite3 as sqlite
 from db.operaciones import *
 
-construir_db()
+reconstruir_db()
 cursor = conectarse_db()
 
-
-#insertar_datos_prueba.insertar_datos()
+insertar_datos_prueba.insertar_datos()
 
 #tupla1 = c_db.consultar_usuario_por_correo('lozada@gmail.com')
 #tupla2 = c_db.consultar_usuario_por_correo('juan.perez@example.com')
@@ -13,7 +12,7 @@ cursor = conectarse_db()
 #print(tupla1)
 #print(tupla2)
 
-
+    
 lista = listar_usuarios()
 print(lista)
 
@@ -97,10 +96,12 @@ from routes import *
 
 app = Flask(__name__)
 
+# hay que ver si se puede modularizar esto para no agregar de a uno
 app.register_blueprint(usuario_bp)
 app.register_blueprint(autenticacion_bp)
 app.register_blueprint(clases_bp)
 app.register_blueprint(empleados_bp)
+app.register_blueprint(pagos_bp)
 
 if __name__ == "__main__":
     app.run(debug=True)

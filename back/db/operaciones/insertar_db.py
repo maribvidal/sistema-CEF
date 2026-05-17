@@ -152,8 +152,8 @@ def insertar_usuario_cancelar_clase(usuario_id: int, clase_id: int):
 def insertar_pago(monto: float, usuario_id: int):
     """Permite insertar una fila para la tabla Pago"""
     cursor = conectarse_db()
-    cursor.execute(f"""INSERT INTO Pago (monto, usuario_id)
-                                VALUES ({monto}, {usuario_id});""")
+    cursor.execute(f"""INSERT INTO Pago (monto, usuario_id, fecha)
+                                VALUES ({monto}, {usuario_id}, date('now'));""")
     commitear(cursor)
 
 def insertar_clase_tener_mensualidad(mensualidad_id: int, clase_id: int):

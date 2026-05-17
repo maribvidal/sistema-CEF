@@ -88,6 +88,7 @@ def listar_pagos_usuario_service(usuario_id: int):
             "error": "Usuario no encontrado"
         }, 404
     
+    ## aca hay un tema y es que me tira que no hay pagos para usuarios que si los tienen
     pagos = consultar_pagos_de_usuario(usuario_id)
 
     if not pagos:

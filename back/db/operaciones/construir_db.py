@@ -259,6 +259,7 @@ def construir_tabla_pago(cursor: sqlite.Cursor):
     cursor.execute("""CREATE TABLE IF NOT EXISTS Pago (
                             id         INTEGER PRIMARY KEY,
                             monto      REAL,
+                            fecha     DATE,
                             usuario_id INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE

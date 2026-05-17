@@ -56,3 +56,13 @@ def editar_perfil_usuario(usuario_id):
     )
 
     return jsonify(respuesta), status
+
+
+# endpoint para pruebas
+
+from db.operaciones import listar_usuarios
+
+@usuario_bp.route("/prueba", methods=["GET"])
+def obtener_usuarios():
+    lista = listar_usuarios()
+    return jsonify(lista), 200

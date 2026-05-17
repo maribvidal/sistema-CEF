@@ -106,6 +106,14 @@ def obtener_empleados() -> list:
     cursor.connection.close()
     return res
 
+def listar_pagos() -> list:
+    """Hace una consulta para listar todos los pagos, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Pago")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
 def consultar_usuario_por_id(id: int) -> tuple:
     """Hace una consulta por un Usuario con un id pasado por parámetro,
         y devuelve una tupla"""
@@ -124,9 +132,9 @@ def consultar_pagos_de_usuario(usuario_id: int) -> list:
             p.id, 
             p.monto, 
             p.fecha, 
-            c.id AS clase_id
+            c.clase_id
         FROM Pago p
-        INNER JOIN Clase c ON p.clase_id = c.id
+        INNER JOIN Pago_Pagar_Clase c ON p.id = c.pago_id
         WHERE p.usuario_id = ?
     """, (usuario_id,))
     res = res.fetchall()
