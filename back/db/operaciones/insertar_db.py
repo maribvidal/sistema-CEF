@@ -1,10 +1,8 @@
 import sqlite3 as sqlite
 
 # CONSTANTES
+from db import NOM_DB
 
-NOM_DB = "database.db"
-
-### TODO:
 ### - Hacer un wrapper para que cualquiera de estas funciones
 ###   no haga que se detenga el main si es que reciben una
 ###   excepción. Implementar un exception handler.
@@ -13,8 +11,8 @@ NOM_DB = "database.db"
 ### - ¿Debería crear un tipo de dato para solucionar el bad smell de
 ###   Long Parameter List?
 ### - ¿Debería hacer una validación previa para los datos antes
-###   de enviarlos a la BD?
-### - ¿Cómo reacciono ante los errores de parte del motor de la BD?
+###   de enviarlos a la BD? <-- esto se hace en los services
+### - ¿Cómo reacciono ante los errores de parte del motor de la BD? 
 ### - ¿Cómo devuelvo los errores de Foreign Keys?
 
 def conectarse_db() -> sqlite.Cursor:

@@ -1,5 +1,5 @@
-from db.ejemplo_requerido import (
-    obtener_empleado_por_dni,
+from db.operaciones import (
+    consultar_usuario_por_dni,
     obtener_rol_por_id,
     actualizar_rol_empleado,
     obtener_empleados
@@ -26,7 +26,7 @@ def obtener_empleados_service():
 
 def cambiar_rol_empleado(dni: int, nuevo_rol_id: int):
 
-    empleado = obtener_empleado_por_dni(dni) 
+    empleado = consultar_usuario_por_dni(dni) 
 
     if empleado is None:
         return {

@@ -1,8 +1,16 @@
 import sqlite3 as sqlite
 
-# CONSTANTES
 
-NOM_DB = "database.db"
+
+
+# ----------- ME GUSTARIA SEPARAR TODO POR ENTIDAD ASI EN LOS SERVICES IMPORTO TODO DEL ARCHIVO Y YA -----------
+# ej:                                   from consultar_usuario import *
+
+
+
+
+# CONSTANTES
+from db import NOM_DB
 
 ## FUNCIONES DE CONEXIÓN A LA BD
 
@@ -13,6 +21,10 @@ def conectarse_db() -> sqlite.Cursor:
     # Habilitar el control de Foreign Keys
     cursor.execute("PRAGMA foreign_keys = ON;")
     return cursor
+
+def desconectarse_db(cursor: sqlite.Cursor):
+    """Cerrar la conexión con la BD a través del objeto Cursor"""
+    cursor.connection.close()
 
 ## FUNCIONES DE CONSULTA
 
@@ -66,6 +78,66 @@ def buscar_empleado_por_correo(correo: str) -> tuple:
         LEFT JOIN recepcionista ON e.id = re.empleado_id 
         WHERE e.correo = ?      
     """, (correo,))
+    res = res.fetchone()
+    cursor.connection.close()
+    return res
+
+def listar_clases() -> list:
+    """Hace una consulta para listar todas las clases, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Clase")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def listar_usuarios() -> list:
+    """Hace una consulta para listar todos los usuarios, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Usuario")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def obtener_empleados() -> list:
+    """Hace una consulta para listar todos los empleados, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Empleado")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def consultar_usuario_por_id(id: int) -> tuple:
+    """Hace una consulta por un Usuario con un id pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Usuario WHERE id = ?", (id,))
+    res = res.fetchone()
+    cursor.connection.close()
+    return res
+
+def consultar_pagos_de_usuario(usuario_id: int) -> list:
+    """Hace una consulta por los pagos de un Usuario con un id pasado por parámetro,
+        y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("""
+        SELECT 
+            p.id, 
+            p.monto, 
+            p.fecha, 
+            c.id AS clase_id
+        FROM Pago p
+        INNER JOIN Clase c ON p.clase_id = c.id
+        WHERE p.usuario_id = ?
+    """, (usuario_id,))
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def obtener_rol_por_id(id: int) -> tuple:
+    """Hace una consulta por un Rol con un id pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Rol WHERE id = ?", (id,))
     res = res.fetchone()
     cursor.connection.close()
     return res

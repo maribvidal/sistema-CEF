@@ -1,8 +1,106 @@
 from back.db.operaciones import consultar_db as c_db
-import sqlite3 as sqlite
+from db.operaciones import *
 
-conexion = sqlite.connect('database.db')
-cursor = conexion.cursor()
+construir_db()
+cursor = conectarse_db()
 
-tupla = c_db.consultar_usuario_por_correo('lozada@gmail.com')
-print(tupla)
+
+#insertar_datos_prueba.insertar_datos()
+
+#tupla1 = c_db.consultar_usuario_por_correo('lozada@gmail.com')
+#tupla2 = c_db.consultar_usuario_por_correo('juan.perez@example.com')
+
+#print(tupla1)
+#print(tupla2)
+
+
+lista = listar_usuarios()
+print(lista)
+
+import services.usuario_service as u_s
+
+#checkeo de longitudes
+respuesta = u_s.registrar_usuario_service(
+    dni=1,
+    nombre='abcdefghijklmnopqrstuv',  # 21 caracteres, excede el límite de 20
+    apellido='bcdefghijklmnopqrstuvwaasdasdasd',  # 32 caracteres, excede el límite de 30
+    contraseña='12334567890123',  # 13 caracteres, excede el límite de 12
+    telefono='1234567890123451231231231231',  # 15 caracteres, dentro del límite
+    correo='prueba1234567891234@example.com', # 31 caracteres, excede el límite de 30
+    genero='M',
+    edad=25
+)
+
+print(respuesta)
+
+#checkeo de dni, correo repetidos y edad minima
+respuesta = u_s.registrar_usuario_service(
+    dni=12345678,  # DNI repetido
+    nombre='Juan',
+    apellido='Pérez',
+    contraseña='123',
+    telefono='1234567890', 
+    correo='prueba1@gmail.com', 
+    genero='M',
+    edad=25
+)
+
+print(respuesta)
+
+respuesta = u_s.registrar_usuario_service(
+    dni=123456789,  
+    nombre='Juan',
+    apellido='Pérez',
+    contraseña='123',
+    telefono='1234567890', 
+    correo='juan.perez@example.com', # Correo repetido 
+    genero='M',
+    edad=25
+)
+
+print(respuesta)
+
+respuesta = u_s.registrar_usuario_service(
+    dni=123456789,  
+    nombre='Juan',
+    apellido='Pérez',
+    contraseña='123',
+    telefono='1234567890', 
+    correo='prueba@example.com',  
+    genero='M',
+    edad=5 # edad menor
+)
+
+print(respuesta)
+
+
+respuesta = u_s.registrar_usuario_service(
+    dni=1234567891,  
+    nombre='Juan',
+    apellido='Pérez',
+    contraseña='123',
+    telefono='1234567890', 
+    correo='prueba@example.com',  
+    genero='M',
+    edad=25
+)
+
+print(respuesta)
+
+lista = listar_usuarios()
+print(lista)
+
+desconectarse_db(cursor)
+
+from flask import Flask
+from routes import *
+
+app = Flask(__name__)
+
+app.register_blueprint(usuario_bp)
+app.register_blueprint(autenticacion_bp)
+app.register_blueprint(clases_bp)
+app.register_blueprint(empleados_bp)
+
+if __name__ == "__main__":
+    app.run(debug=True)

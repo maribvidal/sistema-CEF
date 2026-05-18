@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from services.usuario_service import registrar_usuario_service
+from services.usuario_service import *
 
 usuario_bp = Blueprint("usuario", __name__)
 
@@ -26,6 +26,33 @@ def registrar_usuario():
         telefono,
         genero,
         edad
+    )
+
+    return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/pagos", methods=["GET"])
+def listar_pagos_usuario(usuario_id):
+    respuesta, status = listar_pagos_usuario_service(usuario_id)
+
+    return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/perfil", methods=["GET"])
+def obtener_perfil_usuario(usuario_id):
+    respuesta, status = obtener_perfil_usuario_service(usuario_id)
+
+    return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/perfil", methods=["PUT"])
+def editar_perfil_usuario(usuario_id):
+    data = request.get_json()
+
+    correo = data.get("correo")
+    telefono = data.get("telefono")
+
+    respuesta, status = editar_perfil_usuario_service(
+        usuario_id,
+        correo,
+        telefono
     )
 
     return jsonify(respuesta), status
