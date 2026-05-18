@@ -1,4 +1,4 @@
-from db.insertar_db import insertar_usuario
+from back.db.operaciones.insertar_db import insertar_usuario
 from db.usuario_requerido import checkeo_dni_registrado, checkeo_correo_registrado
 
 def registrar_usuario_service(
