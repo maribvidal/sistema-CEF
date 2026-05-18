@@ -1,6 +1,11 @@
-# en los parametros vienen el nombre y el valor a checkear
-# ej [{"name": "nombre", "value": "Maximiliano"},....]
 def checkear_inputs(objetos):
+    """Función que busca que los objetos recibidos
+        cumplan las restricciones especificadas en
+        el módulo restricciones.
+
+        En los parametros vienen el nombre y el valor
+        a checkear.
+        ej: [{"name": "nombre", "value": "Maximiliano"}"""
     from db import restricciones
 
     for restriccion in restricciones:

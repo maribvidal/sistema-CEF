@@ -5,22 +5,25 @@ def registrar_usuario_service(
     dni: int,
     nombre: str,
     apellido: str,
+    edad: int,
     contraseña: str,
     correo: str,
     telefono: str,
-    genero: str,
-    edad: int 
+    genero: str
 ):
+    """"Service que registra un usuario habiendo 
+        realizado una comprobación de las entradas
+        previamente."""
     errores = checkear_inputs(
         [
             {"name": "dni", "value": dni},
             {"name": "nombre", "value": nombre},
             {"name": "apellido", "value": apellido},
+            {"name": "edad", "value": edad},
             {"name": "correo", "value": correo},
             {"name": "contraseña", "value": contraseña},
             {"name": "telefono", "value": telefono},
-            {"name": "genero", "value": genero},
-            {"name": "edad", "value": edad}
+            {"name": "genero", "value": genero}
         ]
     )
     
