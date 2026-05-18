@@ -1,5 +1,4 @@
-import sqlite3 as sqlite
-from db.operaciones import construir_db, reconstruir_db, conectarse_db, insertar_datos_prueba, listar_usuarios, desconectarse_db
+from db.operaciones import reconstruir_db, conectarse_db, insertar_datos_prueba, listar_usuarios, desconectarse_db
 
 reconstruir_db()
 cursor = conectarse_db()
@@ -12,7 +11,6 @@ insertar_datos_prueba.insertar_datos()
 #print(tupla1)
 #print(tupla2)
 
-    
 lista = listar_usuarios()
 print(lista)
 

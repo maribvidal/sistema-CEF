@@ -1,11 +1,8 @@
-from db.operaciones import (
-    consultar_usuario_por_dni,
-    obtener_rol_por_id,
-    actualizar_rol_empleado,
-    obtener_empleados
-)
+from db.operaciones import consultar_usuario_por_dni, obtener_rol_por_id, actualizar_rol_empleado, obtener_empleados
 
 def obtener_empleados_service():
+    """Service que comprueba que hayan empleados registrados,
+        y si los hay, devuelve una lista de empleados"""
     empleados = obtener_empleados()
 
     if not empleados:
@@ -24,8 +21,10 @@ def obtener_empleados_service():
 
     return empleados_lista, 200
 
-def cambiar_rol_empleado(dni: int, nuevo_rol_id: int):
-
+def cambiar_rol_empleado_service(dni: int, nuevo_rol_id: int):
+    """Service que, dado el dni de un empleado, y el
+        id de un rol, le asigna a dicho empleado el
+        nuevo rol."""
     empleado = consultar_usuario_por_dni(dni) 
 
     if empleado is None:

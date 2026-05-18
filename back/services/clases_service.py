@@ -1,6 +1,7 @@
-from db.operaciones import insertar_clase, listar_clases
+from db.operaciones import listar_clases
 
 def listar_clases_service():
+    """Service que lista las clases"""
     clases = listar_clases()
     
     if not clases:
