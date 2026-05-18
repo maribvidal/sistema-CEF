@@ -27,7 +27,7 @@ def iniciar_sesion(correo: str, contrasena: str):
 
     pos_contrasena = 5  # Viendo lo que devuelve la consulta, la contraseña está en la posición 5 de la tupla, pero esto puede cambiar dependiendo de cómo esté estructurada la base de datos, así que habría que verificarlo bien para no tener errores
     
-    if usuario[pos_contrasena] == contrasena:  
+    if usuario[pos_contrasena] == contrasena:
         print("Inicio de sesión exitoso")
         return {
             "id": usuario[0],
@@ -42,5 +42,3 @@ def iniciar_sesion(correo: str, contrasena: str):
 def cerrar_sesion():
     # Aca podes implementar la lógica para cerrar sesión.
     return
-
-    
