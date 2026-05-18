@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-from back.db.operaciones.insertar_db import insertar_usuario
-from db.usuario_requerido import checkeo_dni_registrado, checkeo_correo_registrado
-=======
 from db.operaciones import insertar_usuario, consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id, consultar_pagos_de_usuario, modificar_perfil_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
->>>>>>> 258e8d51f24cb1ae2e5c9ee29de770f5607653d6
 
 def registrar_usuario_service(
     dni: int,
@@ -93,6 +88,7 @@ def listar_pagos_usuario_service(usuario_id: int):
             "error": "Usuario no encontrado"
         }, 404
     
+    ## aca hay un tema y es que me tira que no hay pagos para usuarios que si los tienen
     pagos = consultar_pagos_de_usuario(usuario_id)
 
     if not pagos:
