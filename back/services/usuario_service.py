@@ -46,11 +46,11 @@ def registrar_usuario_service(
         dni,
         nombre,
         apellido,
+        edad,
         contraseña,
         correo,
         telefono,
-        genero,
-        edad
+        genero
     )
 
     return {
