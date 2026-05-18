@@ -1,4 +1,4 @@
-from db.operaciones import reconstruir_db, conectarse_db, insertar_datos_prueba, listar_usuarios, desconectarse_db
+from db.operaciones import reconstruir_db, conectarse_db, insertar_datos_prueba, listar_usuarios
 
 reconstruir_db()
 cursor = conectarse_db()
@@ -87,7 +87,7 @@ print(respuesta)
 lista = listar_usuarios()
 print(lista)
 
-desconectarse_db(cursor)
+cursor.connection.close()
 
 from flask import Flask
 from routes import *

@@ -9,6 +9,8 @@ from db.operaciones import conectarse_db
 # - ¿No me conviene hacer una función que devuelva un permiso
 #    en base a un parámetro cualquiera recibido?
 
+
+
 def consultar_permiso_por_id(id: int) -> tuple:
     """Hace una consulta por un Permiso con un id pasado por parámetro,
         y devuelve una tupla"""
