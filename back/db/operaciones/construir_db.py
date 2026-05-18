@@ -89,7 +89,7 @@ def construir_tabla_empleado(cursor: sqlite.Cursor):
                             apellido    VARCHAR({LONG_APE}),
                             correo      VARCHAR({LONG_CORREO}),
                             contraseña  VARCHAR({LONG_CONTRA}),
-                            genero      CHAR(1),
+                            genero      CHAR(1) CHECK(length(genero) <= 1),
                             dni         INTEGER UNIQUE NOT NULL,
                             rol_id      INTEGER NOT NULL,
                             FOREIGN KEY (rol_id) REFERENCES Rol(id)
@@ -149,7 +149,7 @@ def construir_tabla_profesor(cursor: sqlite.Cursor):
                             id          INTEGER PRIMARY KEY,
                             nombre      VARCHAR({LONG_NOM}),
                             apellido    VARCHAR({LONG_APE}),
-                            genero      CHAR(1),
+                            genero      CHAR(1) CHECK(length(genero) <= 1),
                             dni         INTEGER UNIQUE NOT NULL
                         )""")
 
@@ -201,7 +201,7 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
                             contraseña  VARCHAR({LONG_CONTRA}),
                             correo      VARCHAR({LONG_CORREO}),
                             telefono    VARCHAR({LONG_TEL}),
-                            genero      CHAR(1)
+                            genero      CHAR(1) CHECK(length(genero) <= 1)
                         )""")
 
 def construir_tabla_descuento(cursor: sqlite.Cursor):
