@@ -110,12 +110,6 @@ const fetchLatestArticles = () => {
         titulo: 'Título de prueba 2',
         imagenUrl: img2,
         autor: 'Autor 2'
-      },
-      {
-        id: 'estatico-3',
-        titulo: 'Título de prueba 3',
-        imagenUrl: img3,
-        autor: 'Autor 3'
       }
     ]
   } catch (err) {
@@ -146,7 +140,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 600px;
+  height: 500px;
   overflow: hidden;
   background-color: #f0f0f0;
   color: #333;

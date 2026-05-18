@@ -4,10 +4,7 @@
       <!-- El componente entero es un enlace que lleva al detalle del artículo -->
       <RouterLink :to="'/articulo/' + slide.id" class="slide-link">
         <img :src="slide.imagenUrl" :alt="slide.titulo" />
-        <div class="slide-caption">
-          <h3>{{ slide.titulo }}</h3>
-          <a>Por: {{ slide.autor }}</a>
-        </div>
+        
       </RouterLink>
     </div>
   </transition>
@@ -48,7 +45,9 @@ defineProps({
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Asegura que la imagen llene el contenedor sin deformarse */
+  object-fit: contain; /* Mostrar la imagen completa sin recorte */
+  object-position: center;
+  background-color: #000; /* Evita franjas blancas en imágenes con distinto aspect-ratio */
 }
 
 .slide-link {
@@ -64,7 +63,15 @@ defineProps({
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Asegura que la imagen llene el contenedor sin deformarse */
+  object-fit: contain; /* Mostrar la imagen completa sin recorte */
+  object-position: center;
+  background-color: #000; /* Evita franjas blancas en imágenes con distinto aspect-ratio */
+}
+
+@media (max-width: 768px) {
+  .slideshow-item img {
+    object-position: left;
+  }
 }
 
 /* Título superpuesto sobre la imagen */
