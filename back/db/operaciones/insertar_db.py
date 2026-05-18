@@ -1,7 +1,5 @@
-import sqlite3 as sqlite
-
-# CONSTANTES
-from db import NOM_DB
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.commitear_db import commitear
 
 ### - Hacer un wrapper para que cualquiera de estas funciones
 ###   no haga que se detenga el main si es que reciben una
@@ -11,22 +9,9 @@ from db import NOM_DB
 ### - ¿Debería crear un tipo de dato para solucionar el bad smell de
 ###   Long Parameter List?
 ### - ¿Debería hacer una validación previa para los datos antes
-###   de enviarlos a la BD?
-### - ¿Cómo reacciono ante los errores de parte del motor de la BD?
+###   de enviarlos a la BD? <-- esto se hace en los services
+### - ¿Cómo reacciono ante los errores de parte del motor de la BD? 
 ### - ¿Cómo devuelvo los errores de Foreign Keys?
-
-def conectarse_db() -> sqlite.Cursor:
-    """Crea una conexión a la BD y devuelve un objeto Cursor"""
-    conexion = sqlite.connect(NOM_DB)
-    cursor = conexion.cursor()
-    # Habilitar el control de Foreign Keys
-    cursor.execute("PRAGMA foreign_keys = ON;")
-    return cursor
-
-def commitear(cursor: sqlite.Cursor):
-    """Recibe un Cursor y con él hace commit y cierra la conexión con la BD"""
-    cursor.connection.commit()
-    cursor.connection.close()
 
 ## FUNCIONES QUE INSERTAN FILAS EN LAS TABLAS DE LA BD
 

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from services.empleados_service import cambiar_rol_empleado, obtener_empleados_service
+from services.empleados_service import cambiar_rol_empleado_service, obtener_empleados_service
 
 empleados_bp = Blueprint("empleados", __name__)
 
@@ -24,7 +24,7 @@ def modificar_rol(dni):
             "error": "rol_id es obligatorio"
         }), 400
 
-    respuesta, status = cambiar_rol_empleado(
+    respuesta, status = cambiar_rol_empleado_service(
         dni,
         nuevo_rol_id
     )

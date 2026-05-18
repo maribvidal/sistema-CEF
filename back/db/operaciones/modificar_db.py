@@ -1,18 +1,32 @@
-import sqlite3 as sqlite
-from db import NOM_DB
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.commitear_db import commitear
 
-# CONSTANTES
-
-
-def conectarse_db() -> sqlite.Cursor:
-    """Crea una conexión a la BD y devuelve un objeto Cursor"""
-    conexion = sqlite.connect(NOM_DB)
-    cursor = conexion.cursor()
-    # Habilitar el control de Foreign Keys
-    cursor.execute("PRAGMA foreign_keys = ON;")
-    return cursor
-
-def commitear(cursor: sqlite.Cursor):
-    """Recibe un Cursor y con él hace commit y cierra la conexión con la BD"""
-    cursor.connection.commit()
-    cursor.connection.close()
+def modificar_perfil_usuario(
+    usuario_id: int,
+    correo: str,
+    telefono: str
+):
+    """Recibe el id de un usuario, y recibe el
+        nuevo correo y teléfono que se les quiere
+        poner, y modifica al usuario."""
+    cursor = conectarse_db()
+    cursor.execute("""
+        UPDATE Usuario
+        SET correo = ?, telefono = ?
+        WHERE id = ?
+    """, (correo, telefono, usuario_id))
+    commitear(cursor)
+    
+def actualizar_rol_empleado(
+    empleado_id: int,
+    nuevo_rol_id: int
+):
+    """Recibe el id de un empleado, y el id de un
+        rol, y le asigna al empleado un nuevo rol."""
+    cursor = conectarse_db()
+    cursor.execute("""
+        UPDATE Empleado
+        SET rol_id = ?
+        WHERE id = ?
+    """, (nuevo_rol_id, empleado_id))
+    commitear(cursor)

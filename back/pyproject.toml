@@ -1,6 +1,7 @@
 [project]
 name = "backend-cef"
 version = "0.1.0"
+package-mode = false
 description = "Subsistema de la aplicación donde reside la lógica de negocios de la aplicación y el manejo de la base de datos."
 authors = [
     {name = "Mariano Bazalar Vidal"},

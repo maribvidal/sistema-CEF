@@ -1,24 +1,15 @@
-import sqlite3 as sqlite
+from db.operaciones.conectar_db import conectarse_db
 
-# CONSTANTES
-from db import NOM_DB
-
-## FUNCIONES DE CONEXIÓN A LA BD
-
-def conectarse_db() -> sqlite.Cursor:
-    """Crear una conexión con la BD y devolver un objeto Cursor"""
-    conexion = sqlite.connect(NOM_DB)
-    cursor = conexion.cursor()
-    # Habilitar el control de Foreign Keys
-    cursor.execute("PRAGMA foreign_keys = ON;")
-    return cursor
+# ----------- ME GUSTARIA SEPARAR TODO POR ENTIDAD ASI EN LOS SERVICES IMPORTO TODO DEL ARCHIVO Y YA -----------
+# ej:                                   from consultar_usuario import *
 
 ## FUNCIONES DE CONSULTA
 
 # - ¿Cómo voy a hacer cuando tenga que devolver varias tuplas?
 # - ¿No me conviene hacer una función que devuelva un permiso
 #    en base a un parámetro cualquiera recibido?
-# - ¿Puedo refactorizar ests funciones?
+
+
 
 def consultar_permiso_por_id(id: int) -> tuple:
     """Hace una consulta por un Permiso con un id pasado por parámetro,
@@ -49,6 +40,8 @@ def consultar_usuario_por_correo(correo: str) -> tuple:
     return res
 
 def buscar_empleado_por_correo(correo: str) -> tuple:
+    """Hace una consulta por un Empleado con un correo pasado por parámetro,
+        y devuelve una tupla"""
     cursor = conectarse_db()
     res = cursor.execute("""
         SELECT 
@@ -65,6 +58,66 @@ def buscar_empleado_por_correo(correo: str) -> tuple:
         LEFT JOIN recepcionista ON e.id = re.empleado_id 
         WHERE e.correo = ?      
     """, (correo,))
+    res = res.fetchone()
+    cursor.connection.close()
+    return res
+
+def listar_clases() -> list:
+    """Hace una consulta para listar todas las clases, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Clase")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def listar_usuarios() -> list:
+    """Hace una consulta para listar todos los usuarios, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Usuario")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def obtener_empleados() -> list:
+    """Hace una consulta para listar todos los empleados, y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Empleado")
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def consultar_usuario_por_id(id: int) -> tuple:
+    """Hace una consulta por un Usuario con un id pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Usuario WHERE id = ?", (id,))
+    res = res.fetchone()
+    cursor.connection.close()
+    return res
+
+def consultar_pagos_de_usuario(usuario_id: int) -> list:
+    """Hace una consulta por los pagos de un Usuario con un id pasado por parámetro,
+        y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("""
+        SELECT 
+            p.id, 
+            p.monto, 
+            p.fecha, 
+            c.id AS clase_id
+        FROM Pago p
+        INNER JOIN Clase c ON p.clase_id = c.id
+        WHERE p.usuario_id = ?
+    """, (usuario_id,))
+    res = res.fetchall()
+    cursor.connection.close()
+    return res
+
+def obtener_rol_por_id(id: int) -> tuple:
+    """Hace una consulta por un Rol con un id pasado por parámetro,
+        y devuelve una tupla"""
+    cursor = conectarse_db()
+    res = cursor.execute("SELECT * FROM Rol WHERE id = ?", (id,))
     res = res.fetchone()
     cursor.connection.close()
     return res
