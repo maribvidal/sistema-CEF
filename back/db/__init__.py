@@ -1,4 +1,4 @@
-from db.checkeos.restricciones_objeto import restriccion
+from db.checkeos.restricciones_objeto import Restriccion
 
 NOM_DB = "database.db"
 
@@ -9,9 +9,9 @@ LONG_CONTRA = 12
 LONG_TEL = 15
 
 restricciones = {
-    restriccion("nombre", LONG_NOM),
-    restriccion("apellido", LONG_APE),
-    restriccion("correo", LONG_CORREO),
-    restriccion("contraseña", LONG_CONTRA),
-    restriccion("telefono", LONG_TEL)
+    Restriccion("nombre", LONG_NOM),
+    Restriccion("apellido", LONG_APE),
+    Restriccion("correo", LONG_CORREO),
+    Restriccion("contraseña", LONG_CONTRA),
+    Restriccion("telefono", LONG_TEL)
 }

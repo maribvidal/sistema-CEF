@@ -13,6 +13,6 @@ class Restriccion:
         return {}
 
     def es_nombre(self, nombre_input: str):
-        """Función que comprueba que el nombre del input
+        """Función que comprueba que el nombre del parámetro
             coincida con el que tiene la restricción."""
         return self.nombre == nombre_input
