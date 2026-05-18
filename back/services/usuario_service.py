@@ -1,4 +1,6 @@
-from db.operaciones import insertar_usuario, consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id, consultar_pagos_de_usuario, modificar_perfil_usuario
+from db.operaciones.insertar_db import insertar_usuario
+from db.operaciones.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id, consultar_pagos_de_usuario
+from db.operaciones.modificar_db import modificar_perfil_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
 
 def registrar_usuario_service(

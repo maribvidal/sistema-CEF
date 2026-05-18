@@ -1,4 +1,4 @@
-from db.operaciones import conectarse_db
+from db.operaciones.conectar_db import conectarse_db
 
 # ----------- ME GUSTARIA SEPARAR TODO POR ENTIDAD ASI EN LOS SERVICES IMPORTO TODO DEL ARCHIVO Y YA -----------
 # ej:                                   from consultar_usuario import *

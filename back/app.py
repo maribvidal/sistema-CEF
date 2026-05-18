@@ -1,9 +1,12 @@
-from db.operaciones import reconstruir_db, conectarse_db, insertar_datos_prueba, listar_usuarios
+from db.operaciones.construir_db import reconstruir_db
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.insertar_datos_prueba import insertar_datos
+from db.operaciones.consultar_db import listar_usuarios
 
 reconstruir_db()
 cursor = conectarse_db()
 
-insertar_datos_prueba.insertar_datos()
+insertar_datos()
 
 #tupla1 = c_db.consultar_usuario_por_correo('lozada@gmail.com')
 #tupla2 = c_db.consultar_usuario_por_correo('juan.perez@example.com')

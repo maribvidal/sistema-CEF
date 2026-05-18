@@ -1,4 +1,4 @@
-from db.operaciones import buscar_empleado_por_correo, consultar_usuario_por_correo
+from db.operaciones.consultar_db import buscar_empleado_por_correo, consultar_usuario_por_correo
 
 def login_service(correo: str, contraseña: str):
     """El tipo se refiere a si es cliente, recepcionista 

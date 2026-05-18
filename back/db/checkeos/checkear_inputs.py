@@ -11,7 +11,7 @@ def checkear_inputs(objetos):
     for restriccion in restricciones:
         for objeto in objetos:
             if restriccion.es_nombre(objeto["name"]):
-                result = restriccion.checkearRestriccion(objeto["value"])
+                result = restriccion.checkear_restriccion(objeto["value"])
                 if len(result) > 0:
                     return result
 

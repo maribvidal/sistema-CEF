@@ -1,4 +1,5 @@
-from db.operaciones import conectarse_db, commitear
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.commitear_db import commitear
 
 def modificar_perfil_usuario(
     usuario_id: int,

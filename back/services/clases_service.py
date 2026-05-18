@@ -1,4 +1,4 @@
-from db.operaciones import listar_clases
+from db.operaciones.consultar_db import listar_clases
 
 def listar_clases_service():
     """Service que lista las clases"""
