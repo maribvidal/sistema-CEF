@@ -2,6 +2,9 @@ from db.operaciones.construir_db import reconstruir_db
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.insertar_datos_prueba import insertar_datos
 from db.operaciones.consultar_db import listar_usuarios
+import services.usuario_service as u_s
+import services.autenticacion_service as a_s 
+from pprint import pprint # esto para ver el print mas bonito
 
 reconstruir_db()
 cursor = conectarse_db()
@@ -15,9 +18,7 @@ insertar_datos()
 #print(tupla2)
 
 lista = listar_usuarios()
-print(lista)
-
-import services.usuario_service as u_s
+pprint(lista)
 
 #checkeo de longitudes
 respuesta = u_s.registrar_usuario_service(
@@ -31,7 +32,7 @@ respuesta = u_s.registrar_usuario_service(
     edad=25
 )
 
-print(respuesta)
+pprint(respuesta)
 
 #checkeo de dni, correo repetidos y edad minima
 respuesta = u_s.registrar_usuario_service(
@@ -45,7 +46,7 @@ respuesta = u_s.registrar_usuario_service(
     edad=25
 )
 
-print(respuesta)
+pprint(respuesta)
 
 respuesta = u_s.registrar_usuario_service(
     dni=123456789,  
@@ -58,7 +59,7 @@ respuesta = u_s.registrar_usuario_service(
     edad=25
 )
 
-print(respuesta)
+pprint(respuesta)
 
 respuesta = u_s.registrar_usuario_service(
     dni=123456789,  
@@ -71,7 +72,7 @@ respuesta = u_s.registrar_usuario_service(
     edad=5 # edad menor
 )
 
-print(respuesta)
+pprint(respuesta)
 
 
 respuesta = u_s.registrar_usuario_service(
@@ -85,10 +86,10 @@ respuesta = u_s.registrar_usuario_service(
     edad=25
 )
 
-print(respuesta)
+pprint(respuesta)
 
 lista = listar_usuarios()
-print(lista)
+pprint(lista)
 
 cursor.connection.close()
 
@@ -102,6 +103,40 @@ app.register_blueprint(usuario_bp)
 app.register_blueprint(autenticacion_bp)
 app.register_blueprint(clases_bp)
 app.register_blueprint(empleados_bp)
+
+# --- PRUEBAS DE LOGUEO ---
+print("\n--- TESTEO DE LOGIN ---")
+
+# 1. Intentar loguear un usuario que SÍ existe (Juan Pérez, que viene en los datos de prueba)
+login_exitoso = a_s.login_service(correo='juan.perez@example.com', contraseña='123')
+# 2. Intentar loguear con contraseña incorrecta
+login_clave_mal = a_s.login_service(correo='juan.perez@example.com', contraseña='clave_falsa')
+# 3. Intentar loguear un correo que no existe
+login_fantasma = a_s.login_service(correo='no_existo@gimnasio.com', contraseña='123')
+
+# --- PRUEBAS DE LOGUEO ---
+print("\n--- TESTEO DE LOGIN ---")
+
+# 1. Intentar loguear un usuario que SÍ existe
+print("Login Juan (Debería ser 200):")
+pprint(login_exitoso)
+
+# 2. Intentar loguear con contraseña incorrecta
+print("\nLogin clave incorrecta (Debería ser 400):")
+pprint(login_clave_mal)
+
+# 3. Intentar loguear un correo que no existe
+print("\nLogin usuario inexistente (Debería ser 404):")
+pprint(login_fantasma)
+
+
+
+
+# --- TEST CASES CONSULTAR BASE DE DATOS ---
+import test_cases.test_cases_consulta_db as c_db
+c_db.consultar_esqueleto()
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
