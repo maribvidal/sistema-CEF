@@ -10,7 +10,7 @@ def registrar_usuario_service(
     nombre: str,
     apellido: str,
     contraseña: str,
-    fecha_nac: datetime.date,
+    fecha_nac,
     correo: str,
     telefono: str,
     genero: str
@@ -19,10 +19,19 @@ def registrar_usuario_service(
         realizado una comprobación de las entradas
         previamente."""
 
-    def _obtener_años_hasta_2026(año: int) -> int:
+    def _es_fecha_valida(fecha: str) -> bool:
+        """Se devuelve si la fecha es válida o no"""
+        try:
+            datetime.datetime.strptime(fecha, "%Y-%m-%d")
+            return True
+        except ValueError:
+            return False
+
+    def _obtener_años_hasta_2026(fecha: str) -> int:
         """Se devuelve la cantidad de años que faltan hasta
-            el año actual."""
-        return (datetime.date.today().year - año)
+            el año actual, si la fecha es válida"""
+        fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d")
+        return 2026 - fecha.year
 
     errores = checkear_inputs(
         [
@@ -50,7 +59,12 @@ def registrar_usuario_service(
             "error": "El correo electrónico ya se encuentra registrado"
         }, 400
     
-    if _obtener_años_hasta_2026(fecha_nac.year) < 14:
+    if (_es_fecha_valida(fecha_nac) is False):
+        return {
+            "error": "La fecha de nacimiento no es válida."
+        }, 400
+
+    if _obtener_años_hasta_2026(fecha_nac) < 14:
         return {
             "error": "El usuario debe ser mayor de 14 años"
         }, 400
@@ -61,8 +75,8 @@ def registrar_usuario_service(
         dni,
         nombre,
         apellido,
-        fecha_nac,
         contraseña,
+        fecha_nac,
         correo,
         telefono,
         genero
@@ -85,10 +99,10 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "dni": usuario[1],
         "nombre": usuario[2],
         "apellido": usuario[3],
-        "correo": usuario[5],
-        "telefono": usuario[6],
-        "genero": usuario[7],
-        "edad": usuario[8]
+        "fecha_nac": usuario[5],
+        "correo": usuario[6],
+        "telefono": usuario[7],
+        "genero": usuario[8]
     }
 
     return {

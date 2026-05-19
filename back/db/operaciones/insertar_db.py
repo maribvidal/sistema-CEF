@@ -6,6 +6,7 @@ import datetime
 ### - Hacer un wrapper para que cualquiera de estas funciones
 ###   no haga que se detenga el main si es que reciben una
 ###   excepción. Implementar un exception handler.
+### - ¿Qué tipo de dato usamos con las fechas? Definir para estandarizar.
 ### - ¿Cómo reacciono ante los errores de parte del motor de la BD? 
 ### - ¿Cómo devuelvo los errores de Foreign Keys?
 
@@ -53,11 +54,11 @@ def insertar_rol(nombre: str):
                                 VALUES ('{nombre}');""")
     commitear(cursor)
 
-def insertar_usuario(dni: int, nombre: str, apellido: str, fecha_nac: datetime.date, contraseña: str, correo: str, telefono: int, genero: str):
+def insertar_usuario(dni: int, nombre: str, apellido: str, contraseña: str, fecha_nac, correo: str, telefono: str, genero: str):
     """Permite insertar una fila para la tabla Usuario"""
     cursor = conectarse_db()
-    cursor.execute(f"""INSERT INTO Usuario (dni, nombre, apellido, fecha_nac, contraseña, correo, telefono, genero)
-                                VALUES({dni}, '{nombre}', '{apellido}', '{formattear_fecha(fecha_nac)}', '{contraseña}', '{correo}', '{telefono}', '{genero}');""")
+    cursor.execute(f"""INSERT INTO Usuario (dni, nombre, apellido, contraseña, fecha_nac, correo, telefono, genero)
+                                VALUES({dni}, '{nombre}', '{apellido}', '{contraseña}', '{fecha_nac}', '{correo}', '{telefono}', '{genero}');""")
     commitear(cursor)
 
 def insertar_administrador(dni: int):

@@ -14,12 +14,21 @@ import os
 ### - ¿Cambiamos las opciones del ON DELETE y del ON UPDATE?
 from db import LONG_TEL, NOM_DB, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA, LONG_TEL
 
+
+import os
+
+# MODIFICADA ESTA FUNCIÓN PARA ERROR HANDLING
 def reconstruir_db():
     """Destruye la BD y luego la vuelve a construir"""
+    ruta_completa = os.path.join(os.getcwd(), NOM_DB)
+    
     try:
-        os.remove(os.getcwd() + '/' + NOM_DB)
+        os.remove(ruta_completa)
+        print("Base de datos anterior eliminada.")
     except FileNotFoundError:
-        pass
+        # Si no existe, no hacemos nada y dejamos que el programa siga
+        print("La base de datos no existía, saltando la eliminación.")
+        
     construir_db()
 
 def construir_db():
@@ -200,8 +209,8 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
                             dni         INTEGER UNIQUE NOT NULL,
                             nombre      VARCHAR({LONG_NOM}),
                             apellido    VARCHAR({LONG_APE}),
-                            fecha_nac   DATE NOT NULL,
                             contraseña  VARCHAR({LONG_CONTRA}),
+                            fecha_nac   DATE NOT NULL,
                             correo      VARCHAR({LONG_CORREO}),
                             telefono    VARCHAR({LONG_TEL}),
                             genero      CHAR(1) CHECK(length(genero) <= 1)
@@ -272,7 +281,7 @@ def construir_tabla_mensualidad(cursor: sqlite.Cursor):
     """Construye la tabla Mensualidad"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Mensualidad (
                             id         INTEGER PRIMARY KEY,
-                            fecha_ini  DATE,
+                            fecha_ini  DATE NOT NULL,
                             fecha_fin  DATE,
                             usuario_id INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
