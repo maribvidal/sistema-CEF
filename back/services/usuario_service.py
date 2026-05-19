@@ -101,20 +101,25 @@ def registrar_usuario_service(
 def obtener_perfil_usuario_service(usuario_id: int):
     usuario = consultar_usuario_por_id(usuario_id)
 
-    if not usuario:
+    if usuario['status'] == 'error':
+        return usuario
+    
+    if usuario['status'] == 'success' and not usuario['data']:
         return {
             "error": "Usuario no encontrado"
         }, 404
+        
+    print(" perfil de usuario: ", dict(usuario['data']))
 
     perfil = {
-        "id": usuario[0],
-        "dni": usuario[1],
-        "nombre": usuario[2],
-        "apellido": usuario[3],
-        "fecha_nac": usuario[5],
-        "correo": usuario[6],
-        "telefono": usuario[7],
-        "genero": usuario[8]
+        "id": usuario['data'][0],
+        "dni": usuario['data'][1],
+        "nombre": usuario['data'][2],
+        "apellido": usuario['data'][3],
+        "fecha_nac": usuario['data'][5],
+        "correo": usuario['data'][6],
+        "telefono": usuario['data'][7],
+        "genero": usuario['data'][8]
     }
 
     return {
@@ -142,39 +147,57 @@ def listar_pagos_usuario_service(usuario_id: int):
     }, 200
     
 def editar_perfil_usuario_service(
-    usuario_id: int,
+    usuario_dni: int,
     correo: str,
     telefono: str
 ):
-    usuario = consultar_usuario_por_id(usuario_id)
+    if correo is None and telefono is None:
+        return {
+            "error": "No se proporcionó ningún dato para actualizar"
+        }, 400
+    
+    usuario = consultar_usuario_por_dni(usuario_dni)
+    
 
     if not usuario:
         return {
             "error": "Usuario no encontrado"
         }, 404
 
+    datos_a_actualizar = []
+    
+    if correo is not None:
+        datos_a_actualizar.append({"name": "correo", "value": correo})
+    if telefono is not None:
+        datos_a_actualizar.append({"name": "telefono", "value": telefono})
+    
+    
     errores = checkear_inputs(
-        [
-            {"name": "correo", "value": correo},
-            {"name": "telefono", "value": telefono}
-        ]
+        datos_a_actualizar
     )
     
     if len(errores) > 0:
         return errores, 400
 
-    # Verificar si el nuevo correo ya está registrado por otro usuario
     usuario_con_correo = consultar_usuario_por_correo(correo)
-    if usuario_con_correo and usuario_con_correo[0] != usuario_id:
-        return {
+    
+    
+    if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][1] != usuario_dni:
+         return {
             "error": "El correo electrónico ya se encuentra registrado por otro usuario"
         }, 400
+        
+    if usuario_con_correo['data'] and usuario_con_correo['data'][6] == correo and usuario_con_correo['data'][3] == telefono:
+        return {
+            "error": "No se proporcionó ningún dato nuevo para actualizar"
+        }, 400
     
-    modificar_perfil_usuario(
-        usuario_id,
+    respuesta = modificar_perfil_usuario(
+        usuario_dni,
         correo,
         telefono
     )
+    
 
     return {
         "mensaje": "Perfil actualizado exitosamente"

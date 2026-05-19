@@ -42,15 +42,17 @@ def obtener_perfil_usuario(usuario_id):
 
     return jsonify(respuesta), status
 
-@usuario_bp.route("/usuarios/<int:usuario_id>/perfil", methods=["PUT"])
-def editar_perfil_usuario(usuario_id):
+@usuario_bp.route("/usuarios/<int:usuario_dni>/perfil", methods=["PUT"])
+def editar_perfil_usuario(usuario_dni):
     data = request.get_json()
 
     correo = data.get("correo")
     telefono = data.get("telefono")
+    print("correo:", correo)
+    print("telefono:", telefono)
 
     respuesta, status = editar_perfil_usuario_service(
-        usuario_id,
+        usuario_dni,
         correo,
         telefono
     )

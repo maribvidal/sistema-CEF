@@ -10,7 +10,7 @@
       "name": "Usuario",
       "item": [
         {
-          "name": "Cientes",
+          "name": "Usuarios",
           "request": {
             "method": "GET",
             "header": [],
@@ -38,7 +38,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"dni\": 1,\r\n  \"nombre\": \"Maxi\",\r\n  \"apellido\": \"Falasca\",\r\n  \"contraseña\": \"1234\",\r\n  \"correo\": \"maxi@gmail.com\",\r\n  \"telefono\": \"1122334455\",\r\n  \"genero\": \"M\",\r\n  \"edad\": 22\r\n}",
+              "raw": "{\r\n  \"dni\": 1,\r\n  \"nombre\": \"Maxi\",\r\n  \"apellido\": \"Falasca\",\r\n  \"contraseña\": \"1234\",\r\n  \"correo\": \"maxi@gmail.com\",\r\n  \"telefono\": \"1122334455\",\r\n  \"fecha_nac\": \"2001-05-21\",\r\n  \"genero\": \"M\",\r\n  \"edad\": 22\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -81,6 +81,63 @@
                 "usuarios",
                 "1",
                 "pagos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Usuario/<id>/perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/1/perfil",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "1",
+                "perfil"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "usuario/<id>/perfil",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"correo\" : \"juan.perezz@example.com\",\r\n    \"telefono\" : \"123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/12345678/perfil",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "12345678",
+                "perfil"
               ]
             }
           },
