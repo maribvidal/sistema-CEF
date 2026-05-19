@@ -1,6 +1,7 @@
 import apiClient from './api.js'
 import { ref, readonly } from 'vue'
 import { createImageSrcFromBase64 } from './ImageFormatterService.js'
+import TokenService from './TokenService.js'
 
 /**
  * ----------------------------------------------------------------
@@ -104,6 +105,38 @@ const clearSession = () => {
   _isLoggedIn.value = false
   _userRole.value = null
   _userProfile.value = null
+  TokenService.removeToken()
+}
+
+/**
+ * Inicializa la autenticación desde el token guardado en localStorage.
+ * Se debe llamar en main.js al cargar la aplicación.
+ */
+export const initAuth = () => {
+  const token = TokenService.getToken()
+  console.log('[initAuth] Token encontrado:', !!token)
+  if (token) {
+    const payload = TokenService.getPayload()
+    console.log('[initAuth] Payload decodificado:', payload)
+    if (payload) {
+      // Restaurar el estado del usuario desde el payload del JWT
+      _userProfile.value = {
+        id: payload.id,
+        nombre: payload.nombre,
+        tipo: payload.tipo,
+        rol: payload.rol
+      }
+      _isLoggedIn.value = true
+      _userRole.value = payload.rol || null
+      console.log('[initAuth] Sesión restaurada:', { id: payload.id, nombre: payload.nombre })
+    } else {
+      // Token inválido o expirado
+      console.log('[initAuth] Token inválido, limpiando sesión')
+      clearSession()
+    }
+  } else {
+    console.log('[initAuth] No hay token guardado')
+  }
 }
 
 /**
@@ -121,7 +154,9 @@ const fetchUserProfile = async (force = false) => {
     }
 
     const userId = _userProfile.value.id
-    const profileData = (await AuthApiService.getProfile(userId)).data
+    const resp = (await AuthApiService.getProfile(userId)).data
+    // El backend devuelve { perfil: { ... } }
+    const profileData = resp.perfil || resp
     const avatarResponse = await AuthApiService.getAvatar(userId).catch(() => null)
 
     const avatarUrl =
@@ -131,11 +166,29 @@ const fetchUserProfile = async (force = false) => {
 
     _userProfile.value = { ...profileData, avatarUrl }
     _isLoggedIn.value = true
-    _userRole.value = profileData.rol
+    _userRole.value = profileData.rol || _userRole.value
   } catch (error) {
     // Si hay un error (ej. 401 Unauthorized por cookie inválida), limpiamos la sesión.
     console.error('No se pudo obtener el perfil de usuario, limpiando sesión.', error)
     clearSession()
+  }
+}
+
+const fetchUserProfileById = async (userId) => {
+  try {
+    const resp = (await AuthApiService.getProfile(userId)).data
+    const profileData = resp.perfil || resp
+    const avatarResponse = await AuthApiService.getAvatar(userId).catch(() => null)
+
+    const avatarUrl =
+      avatarResponse && avatarResponse.data.base64
+        ? createImageSrcFromBase64(avatarResponse.data.base64)
+        : null
+
+    return { ...profileData, avatarUrl }
+  } catch (error) {
+    console.error(`No se pudo obtener el perfil del usuario con ID ${userId}.`, error)
+    throw error
   }
 }
 
@@ -147,17 +200,30 @@ const fetchUserProfile = async (force = false) => {
  */
 export const useAuth = () => {
   /**
-   * Inicia sesión, establece la cookie y luego obtiene los datos del perfil.
+   * Inicia sesión, establece el token en localStorage y luego obtiene los datos del perfil.
    * @param {object} credentials - Objeto con email y password.
    */
   const login = async (credentials) => {
     const response = await AuthApiService.login(credentials)
     
+    console.log('[login] Respuesta del servidor:', response.data)
+    
+    // Guardar el token en localStorage
+    if (response.data.token) {
+      TokenService.setToken(response.data.token)
+      console.log('[login] Token guardado en localStorage')
+    }
+    
     // Guardar la información del usuario devuelta por login
     // El backend devuelve la info del usuario en el endpoint /login
-    _userProfile.value = response.data
+    _userProfile.value = response.data.usuario
     _isLoggedIn.value = true
-    _userRole.value = response.data.rol || null
+    _userRole.value = response.data.usuario.rol || null
+    
+    console.log('[login] Estado actualizado:', { 
+      isLoggedIn: _isLoggedIn.value,
+      usuario: _userProfile.value 
+    })
     
     // Opcionalmente, obtener información completa del perfil si es necesario
     // await fetchUserProfile(true)
@@ -204,6 +270,7 @@ export const useAuth = () => {
     changePassword,
     restorePassword,
     confirmNewPassword,
+    fetchUserProfileById,
 
     // También exponemos los métodos de la API para uso directo si es necesario
     // (ej. en vistas de edición de perfil).
@@ -228,26 +295,3 @@ const UsuariosService = {
   // ... Añadir otros métodos si son importados directamente en otros archivos.
 }
 export default UsuariosService
-
-/**
- * Configura los interceptores de Axios para manejar respuestas 401 (No autorizado).
- * Esto permite detectar cuándo el token ha expirado y cerrar la sesión automáticamente.
- * @param {Object} router - La instancia del router de Vue.
- */
-export const setupAxiosInterceptors = (router) => {
-  apiClient.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (error.response && error.response.status === 401) {
-        console.warn('Sesión expirada o no autorizada (401). Cerrando sesión...')
-        clearSession()
-
-        // Redirigir al login si no estamos ya allí
-        if (router && router.currentRoute.value.name !== 'inicioSesion') {
-          router.push({ name: 'inicioSesion' })
-        }
-      }
-      return Promise.reject(error)
-    }
-  )
-}

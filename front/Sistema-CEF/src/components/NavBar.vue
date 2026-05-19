@@ -16,31 +16,42 @@
             <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/sobre-nosotros">Nosotros</v-btn>
             <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/clases">Clases</v-btn>
             <!-- Botón de Registro modificado -->
-            <v-btn variant="flat" color="blue-darken-3" class="text-none text-subtitle-1 ml-4 mr-2" to="/inicioSesion">
+            <v-btn variant="flat" color="blue-darken-3" class="text-none text-subtitle-1 ml-4 mr-2" to="/inicioSesion" v-if="!isLoggedIn">
                  <v-icon start>mdi-login</v-icon>
                 Iniciar Sesión
             </v-btn>
 
-            <v-btn variant="flat" color="red-darken-2" class="text-none text-subtitle-1 ml-2 mr-2" to="/registro">
+            <v-btn variant="flat" color="red-darken-2" class="text-none text-subtitle-1 ml-2 mr-2" to="/registro" v-if="!isLoggedIn">
                 <v-icon start>mdi-account-plus</v-icon>
                 Registrarse
             </v-btn>
+            <!-- Mostrar nombre de usuario si está autenticado -->
+            <span v-if="isLoggedIn" class="ml-4 text-subtitle-2 font-weight-medium">
+                {{ userProfile?.nombre }}
+            </span>
+            <!-- Botón de logout si está autenticado -->
+            <v-btn variant="flat" color="red-darken-2" class="text-none text-subtitle-1 ml-2 mr-2" @click="handleLogout" v-if="isLoggedIn">
+                <v-icon start>mdi-logout</v-icon>
+                Cerrar Sesión
+            </v-btn>
+
+            
+            
         </div>
     </v-app-bar>
 </template>
-<script>
-import logoImg from '@/assets/logoLargo.png'
 
-export default {
-    name: 'NavBar',
-    data() {
-        return {
-            logoImg,
-            appMenuIcons: {
-                accountnew: 'mdi-account-plus'
-            }
-        }
-    },
+<script setup>
+import logoImg from '@/assets/logoLargo.png'
+import { useAuth } from '@/services/UsuariosServices.js'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const { isLoggedIn, userProfile, logout } = useAuth()
+
+const handleLogout = async () => {
+    await logout()
+    router.push('/inicioSesion')
 }
 </script>
 
