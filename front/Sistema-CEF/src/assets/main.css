@@ -1,0 +1,33 @@
+/* Estilos globales y comunes del sitio */
+
+body {
+  background-color: #f5f5f5; /* o var(--v-theme-background) */
+}
+
+/* Tarjetas comunes de login/registro */
+.auth-card {
+  width: min(420px, calc(100vw - 32px)) !important;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .auth-card {
+    width: calc(100vw - 24px) !important;
+  }
+}
+
+/* Titulos centrados para cards de autenticación */
+.auth-title {
+  text-align: center;
+}
+
+.auth-subtitle {
+  text-align: center;
+  font-size-adjust: 0.5;
+}
+
+/* Enlaces sin decoracion */
+.no-decoration {
+  text-decoration: none;
+  color: inherit;
+}
