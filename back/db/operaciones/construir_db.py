@@ -209,8 +209,8 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
                             dni         INTEGER UNIQUE NOT NULL,
                             nombre      VARCHAR({LONG_NOM}),
                             apellido    VARCHAR({LONG_APE}),
-                            edad        INTEGER NOT NULL,
                             contraseña  VARCHAR({LONG_CONTRA}),
+                            fecha_nac   DATE NOT NULL,
                             correo      VARCHAR({LONG_CORREO}),
                             telefono    VARCHAR({LONG_TEL}),
                             genero      CHAR(1)
@@ -281,7 +281,7 @@ def construir_tabla_mensualidad(cursor: sqlite.Cursor):
     """Construye la tabla Mensualidad"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Mensualidad (
                             id         INTEGER PRIMARY KEY,
-                            fecha_ini  DATE,
+                            fecha_ini  DATE NOT NULL,
                             fecha_fin  DATE,
                             usuario_id INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)

@@ -54,14 +54,14 @@ def login_service(correo: str, contraseña: str):
 from db.operaciones.insertar_db import insertar_usuario
 from db.operaciones.consultar_db import consultar_usuario_por_dni
 # Los parametros los tomé en cuenta al ver los text-field del Registro.Vue del frontend, si se necesita agregar o quitar alguno, solo avisenme y lo modifico
-def register_service(nombre: str, apellido: str, dni: int, correo: str, telefono: int, edad: int, contrasena: str) -> bool:
+def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fecha_nac, correo: str, telefono: int) -> bool:
     # Verificar si el usuario ya existe realizando una constulta a la base de datos
     if consultar_usuario_por_dni(dni):
         print("El usuario ya está registrado")
         return False
 
     # Insertar el nuevo usuario
-    insertar_usuario(dni, nombre, apellido, edad, contrasena, correo, telefono, "Otro")
+    insertar_usuario(dni, nombre, apellido, contrasena, fecha_nac, correo, telefono, "Otro")
     print("El usuario registrado exitosamente")
     return True
 

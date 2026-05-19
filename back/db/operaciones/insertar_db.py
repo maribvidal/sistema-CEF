@@ -4,12 +4,7 @@ from db.operaciones.commitear_db import commitear
 ### - Hacer un wrapper para que cualquiera de estas funciones
 ###   no haga que se detenga el main si es que reciben una
 ###   excepción. Implementar un exception handler.
-### - ¿Cómo guardamos las contraseñas?
 ### - ¿Qué tipo de dato usamos con las fechas? Definir para estandarizar.
-### - ¿Debería crear un tipo de dato para solucionar el bad smell de
-###   Long Parameter List?
-### - ¿Debería hacer una validación previa para los datos antes
-###   de enviarlos a la BD? <-- esto se hace en los services
 ### - ¿Cómo reacciono ante los errores de parte del motor de la BD? 
 ### - ¿Cómo devuelvo los errores de Foreign Keys?
 
@@ -50,11 +45,11 @@ def insertar_rol(nombre: str):
                                 VALUES ('{nombre}');""")
     commitear(cursor)
 
-def insertar_usuario(dni: int, nombre: str, apellido: str, edad: int, contraseña: str, correo: str, telefono: int, genero: str):
+def insertar_usuario(dni: int, nombre: str, apellido: str, contraseña: str, fecha_nac, correo: str, telefono: int, genero: str):
     """Permite insertar una fila para la tabla Usuario"""
     cursor = conectarse_db()
-    cursor.execute(f"""INSERT INTO Usuario (dni, nombre, apellido, edad, contraseña, correo, telefono, genero)
-                                VALUES({dni}, '{nombre}', '{apellido}', {edad}, '{contraseña}', '{correo}', '{telefono}', '{genero}');""")
+    cursor.execute(f"""INSERT INTO Usuario (dni, nombre, apellido, contraseña, fecha_nac, correo, telefono, genero)
+                                VALUES({dni}, '{nombre}', '{apellido}', '{contraseña}', '{fecha_nac}', '{correo}', '{telefono}', '{genero}');""")
     commitear(cursor)
 
 def insertar_administrador(dni: int):
@@ -99,7 +94,7 @@ def insertar_clase(estado: str, actividad_id: int, profesor_id: int):
                                 VALUES ('{estado}', {actividad_id}, {profesor_id});""")
     commitear(cursor)
 
-def insertar_clase_ocurrir_sala(clase_id: int, sala_id: int, fecha: str):
+def insertar_clase_ocurrir_sala(clase_id: int, sala_id: int, fecha):
     """Permite insertar una fila para la tabla Clase_Ocurrir_Sala"""
     cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Clase_Ocurrir_Sala (clase_id, sala_id, fecha)
@@ -120,7 +115,7 @@ def insertar_usuario_tener_descuento(usuario_id: int, descuento_id: int):
                                 VALUES ({usuario_id}, {descuento_id});""")
     commitear(cursor)
 
-def insertar_usuario_inscribir_clase(usuario_id: int, clase_id: int, fecha: str):
+def insertar_usuario_inscribir_clase(usuario_id: int, clase_id: int, fecha):
     """Permite insertar una fila para la tabla Usuario_Inscribir_Clase"""
     cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Usuario_Inscribir_Clase (usuario_id, clase_id, fecha)
