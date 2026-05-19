@@ -45,7 +45,7 @@ def insertar_rol(nombre: str):
                                 VALUES ('{nombre}');""")
     commitear(cursor)
 
-def insertar_usuario(dni: int, nombre: str, apellido: str, contraseña: str, fecha_nac, correo: str, telefono: int, genero: str):
+def insertar_usuario(dni: int, nombre: str, apellido: str, contraseña: str, fecha_nac, correo: str, telefono: str, genero: str):
     """Permite insertar una fila para la tabla Usuario"""
     cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Usuario (dni, nombre, apellido, contraseña, fecha_nac, correo, telefono, genero)

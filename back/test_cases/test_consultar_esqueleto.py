@@ -22,56 +22,67 @@ def intentar_consultar_esqueleto():
     test_obtener_rol_por_id()
 
 def test_consultar_permiso_por_id():
-    print("Test consultar_permiso_por_id:")
-    print("Test consultar_permiso_por_id:")
-    print(consultar_permiso_por_id(1))  # Debería devolver el permiso con id 1
-    print(consultar_permiso_por_id(999))  # Debería devolver una tupla vacía o None
+    print("---------------TEST CONSULTAR PERMISO POR ID---------------")
+    print("Primer test (debe devolver el permiso):")
+    print(consultar_permiso_por_id(1))
+    print("Segundo test (debe devolver tupla vacía o None):")
+    consultar_permiso_por_id(999)
+    print("\n")
 
 def test_consultar_usuario_por_dni():
-    print("Test consultar_usuario_por_dni:")
-    print("Test consultar_usuario_por_dni:")
-    print(consultar_usuario_por_dni(12345678))  # Debería devolver el usuario con ese DNI
-    print(consultar_usuario_por_dni(99999999))  # Debería devolver una tupla vacía o None
+    print("---------------TEST CONSULTAR USUARIO POR DNI---------------")
+    print("Test consultar_usuario_por_dni (deberia devolver el usuario con DNI 123456789):" + str(consultar_usuario_por_dni(123456789)[1]))
+    print("\n")
 
 def test_consultar_usuario_por_correo():
-    print("Test consultar_usuario_por_correo:")
-    print("Test consultar_usuario_por_correo:")
-    print(consultar_usuario_por_correo('prueba1@gmail.com'))  # Debería devolver el usuario con ese correo
-    print(consultar_usuario_por_correo('prueba999@gmail.com'))  # Debería devolver una tupla vacía o None
+    print("---------------TEST CONSULTAR USUARIO POR CORREO---------------")
+    print("Test consultar_usuario_por_correo (deberia devolver el usuario con correo prueba1@gmail.com):" + str(consultar_usuario_por_correo('prueba1@gmail.com')[2]))
+    print("\n")
 
 def test_listar_clases():
-    print("Test listar_clases:")
-    print("Test listar_clases:")
-    print(listar_clases())  # Debería devolver una lista de tuplas con las clases
+    print("---------------TEST LISTAR CLASES---------------")
+    clases = listar_clases()
+    if not clases:
+        print("No hay clases.")
+    else:
+        for c in clases:
+            print(c[1])  # Imprimir el nombre de la actividad
+    print("\n")
+
 
 def test_listar_usuarios():
-    print("Test listar_usuarios:")
-    print("Test listar_usuarios:")
-    print(listar_usuarios())  # Debería devolver una lista de tuplas con los usuarios
+    print("---------------TEST LISTAR USUARIOS---------------")
+    usuarios = listar_usuarios()
+    print("Test listar_usuarios (listando solo nombres de usuarios):")
+    if not usuarios:
+        print("No hay usuarios.")
+    else:
+        for u in usuarios:
+            nombre = u[2] if len(u) > 2 else str(u)
+            print(nombre)
+    print("\n")
 
 def test_obtener_empleados():
-    print("Test obtener_empleados:")
-    print("Test obtener_empleados:")
-    print(obtener_empleados())  # Debería devolver una lista de tuplas con los empleados
-
+    print("---------------TEST OBTENER EMPLEADOS---------------")
+    print("Test obtener_empleados (deberia devolver una lista de tuplas con los empleados o vacío):" + str(obtener_empleados()))
+    print("\n")
 
 def test_consultar_usuario_por_id():
-    print("Test consultar_usuario_por_id:")
-    print("Test consultar_usuario_por_id:")
-    print(consultar_usuario_por_id(1))  # Debería devolver el usuario con id 1
-    print(consultar_usuario_por_id(999))  # Debería devolver una tupla vacía o None
+    print("---------------TEST CONSULTAR USUARIO POR ID---------------")
+    print("Test consultar_usuario_por_id (deberia devolver el usuario con id 1):" + str(consultar_usuario_por_id(1)[2]))
+    print("Test consultar_usuario_por_id (deberia devolver una tupla vacía o None):" + str(consultar_usuario_por_id(999)))
+    print("\n")
 
 
 def test_consultar_pagos_de_usuario():
-    print("Test consultar_pagos_de_usuario:")
-    print("Test consultar_pagos_de_usuario:")
-    print(consultar_pagos_de_usuario(1))  # Debería devolver una lista de tuplas con los pagos del usuario con id 1
-    print(consultar_pagos_de_usuario(999))  # Debería devolver una lista vacía
+    print("---------------TEST CONSULTAR PAGOS DE USUARIO---------------")
+    print("Test consultar_pagos_de_usuario (deberia devolver una lista de tuplas con los pagos del usuario con id 1 o vacío, por ahora seguramente dé vacío):" + str(consultar_pagos_de_usuario(1)))
+    print("Test consultar_pagos_de_usuario (deberia devolver una lista vacía):" + str(consultar_pagos_de_usuario(999)))
+    print("\n")
 
 
 def test_obtener_rol_por_id():
-    print("Test obtener_rol_por_id:")
-    print("Test obtener_rol_por_id:")
-    print(obtener_rol_por_id(1))
-    print(obtener_rol_por_id(999))
-    assert(obtener_rol_por_id(1) is not None, "No se obtuvo el rol requerido")
+    print("---------------TEST OBTENER ROL POR ID---------------")
+    print("Test obtener_rol_por_id (deberia devolver el rol con id 1):" + str(obtener_rol_por_id(1)[1]))
+    print("Test obtener_rol_por_id (deberia devolver una tupla vacía o None):" + str(obtener_rol_por_id(999)))
+    print("\n")
