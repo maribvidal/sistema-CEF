@@ -13,7 +13,12 @@ def consultar_usuario_por_correo(correo: str) -> tuple:
     """Hace una consulta por un Usuario con un correo pasado por parámetro,
         y devuelve una tupla"""
     cursor = conectarse_db()
-    res = cursor.execute("SELECT * FROM Usuario WHERE correo = ?", (correo,))
+    res = cursor.execute("""
+            SELECT * 
+            FROM Usuario u
+            INNER JOIN Cuenta c ON u.dni = c.dni
+            WHERE c.correo = ?
+        """, (correo,))
     res = res.fetchone()
     cursor.connection.close()
     return res

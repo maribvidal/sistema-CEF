@@ -1,12 +1,4 @@
-from db.operaciones.consultar_db import obtener_rol_por_id
-from db.operaciones.consultar_db import consultar_permiso_por_id
-from db.operaciones.consultar_db import consultar_usuario_por_dni
-from db.operaciones.consultar_db import consultar_usuario_por_correo
-from db.operaciones.consultar_db import listar_clases
-from db.operaciones.consultar_db import listar_usuarios
-from db.operaciones.consultar_db import obtener_empleados
-from db.operaciones.consultar_db import consultar_pagos_de_usuario
-from db.operaciones.consultar_db import consultar_usuario_por_id
+from db.operaciones import obtener_rol_por_id, consultar_permiso_por_id, consultar_usuario_por_dni, consultar_usuario_por_correo ,listar_clases ,listar_usuarios, obtener_empleados, consultar_pagos_de_usuario, consultar_usuario_por_id
 
 # TODO: Escribir mejor los tests, que expresen algo mas
 
@@ -31,12 +23,20 @@ def test_consultar_permiso_por_id():
 
 def test_consultar_usuario_por_dni():
     print("---------------TEST CONSULTAR USUARIO POR DNI---------------")
-    print("Test consultar_usuario_por_dni (deberia devolver el usuario con DNI 123456789):" + str(consultar_usuario_por_dni(123456789)[1]))
+    usuario = consultar_usuario_por_dni(123456789)
+    if usuario:
+        print("Test consultar_usuario_por_dni (deberia devolver el usuario con DNI 123456789):" + str(usuario[1]))
+    else:
+        print("Test consultar_usuario_por_dni (deberia devolver el usuario con DNI 123456789): No se encontró el usuario")
     print("\n")
 
 def test_consultar_usuario_por_correo():
     print("---------------TEST CONSULTAR USUARIO POR CORREO---------------")
-    print("Test consultar_usuario_por_correo (deberia devolver el usuario con correo prueba1@gmail.com):" + str(consultar_usuario_por_correo('prueba1@gmail.com')[2]))
+    usuario = consultar_usuario_por_correo('prueba1@gmail.com')
+    if usuario:
+        print("Test consultar_usuario_por_correo (deberia devolver el usuario con correo prueba1@gmail.com):" + str(usuario[2]))
+    else:
+        print("Test consultar_usuario_por_correo (deberia devolver el usuario con correo prueba1@gmail.com): No se encontró el usuario")
     print("\n")
 
 def test_listar_clases():

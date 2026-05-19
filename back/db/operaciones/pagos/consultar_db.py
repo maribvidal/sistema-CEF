@@ -34,3 +34,22 @@ def consultar_pagos_de_usuario(usuario_id: int) -> list:
     res = res.fetchall()
     cursor.connection.close()
     return res
+
+def listar_pagos():
+    """Hace una consulta por todos los pagos registrados en la base de datos,
+        y devuelve una lista de tuplas"""
+    cursor = conectarse_db()
+    res = cursor.execute("""
+        SELECT 
+            p.id, 
+            p.monto, 
+            p.fecha, 
+            c.id AS clase_id,
+            u.id AS usuario_id
+        FROM Pago p
+        INNER JOIN Clase c ON p.clase_id = c.id
+        INNER JOIN Usuario u ON p.usuario_id = u.id
+    """)
+    res = res.fetchall()
+    cursor.connection.close()
+    return res

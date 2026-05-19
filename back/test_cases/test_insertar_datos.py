@@ -1,5 +1,4 @@
-from db.operaciones.seed_db import insertar_datos
-from db.operaciones.consultar_db import listar_usuarios
+from db.operaciones import insertar_datos, listar_usuarios
 from pprint import pprint
 
 import datetime
@@ -70,19 +69,19 @@ def insertar_datos_erroneos():
     pprint(respuesta)
     print("\n")
 
-from db.operaciones.insertar_db import insertar_actividad, insertar_clase
+from db.operaciones import insertar_actividad, insertar_clase
 def insertar_clases():
     insertar_clase("Yoga", 2, 1)
     insertar_clase("Pilates", 2, 2)
 
-from db.operaciones.insertar_db import insertar_profesor
+from db.operaciones import insertar_profesor
 def insertar_profesores():
     insertar_profesor("Carlos", "García", "H", 5)
     insertar_profesor("Paez", "García", "H", 4)
 
 
 # def insertar_actividad(nombre: str, precio_mensual: float):
-from db.operaciones.insertar_db import insertar_actividad
+from db.operaciones import insertar_actividad
 def insertar_actividades():
     insertar_actividad("Yoga", 2000)
     insertar_actividad("Pilates", 2500)

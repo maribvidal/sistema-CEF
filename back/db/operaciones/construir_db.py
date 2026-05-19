@@ -55,6 +55,7 @@ def construir_db():
 def construir_tablas(cursor: sqlite.Cursor):
     """Construye todas las tablas de la BD"""
     # Construir tablas para las entidades
+    construir_tabla_cuenta(cursor)  
     construir_tabla_permiso(cursor)
     construir_tabla_rol(cursor)
     construir_tabla_actividad(cursor)
@@ -92,10 +93,7 @@ def construir_tabla_cuenta(cursor: sqlite.Cursor):
                             correo      VARCHAR({LONG_CORREO}),
                             contraseña  VARCHAR({LONG_CONTRA}),
                             genero      CHAR(1) CHECK(length(genero) <= 1),
-                            dni         INTEGER UNIQUE NOT NULL,
-                            FOREIGN KEY (rol_id) REFERENCES Rol(id)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL
+                            dni         INTEGER UNIQUE NOT NULL
                         )""")
 
 def construir_tabla_empleado(cursor: sqlite.Cursor):

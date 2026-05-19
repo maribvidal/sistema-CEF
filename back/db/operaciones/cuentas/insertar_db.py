@@ -3,10 +3,8 @@ from db.operaciones.commitear_db import commitear
 
 def insertar_cuenta(dni: int, nombre: str, apellido: str, contraseña: str, correo: str, genero: str) -> int:
     """Función que inserta una nueva cuenta en la base de datos."""
-    conexion = conectarse_db()
-    cursor = conexion.cursor()
-    cursor.execute("INSERT INTO cuentas (dni, nombre, apellido, contraseña, correo, genero) VALUES (%s, %s, %s, %s, %s, %s)", (dni, nombre, apellido, contraseña, correo, genero))
+    cursor = conectarse_db()
+    cursor.execute("INSERT INTO Cuenta (dni, nombre, apellido, contraseña, correo, genero) VALUES (?, ?, ?, ?, ?, ?)", (dni, nombre, apellido, contraseña, correo, genero))
     nuevo_id = cursor.lastrowid
-    commitear(conexion)
-    conexion.close()
+    commitear(cursor)
     return nuevo_id

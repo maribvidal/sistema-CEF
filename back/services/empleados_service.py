@@ -1,5 +1,4 @@
-from db.operaciones.consultar_db import consultar_usuario_por_dni, obtener_rol_por_id, obtener_empleados
-from db.operaciones.modificar_db import actualizar_rol_empleado
+from db.operaciones import consultar_usuario_por_dni, obtener_rol_por_id, obtener_empleados, actualizar_rol_empleado
 
 def obtener_empleados_service():
     """Service que comprueba que hayan empleados registrados,
