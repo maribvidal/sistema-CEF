@@ -1,4 +1,5 @@
-from db.operaciones.consultar_db import buscar_empleado_por_correo, consultar_usuario_por_correo
+from db.operaciones.empleados.consultar_db import buscar_empleado_por_correo
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 
 # Tabla Usuario/Cliente
 USR_ID = 0
@@ -51,8 +52,8 @@ def login_service(correo: str, contraseña: str):
     }, 200
 
 
-from db.operaciones.insertar_db import insertar_usuario
-from db.operaciones.consultar_db import consultar_usuario_por_dni
+from db.operaciones.usuarios.insertar_db import insertar_usuario
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
 # Los parametros los tomé en cuenta al ver los text-field del Registro.Vue del frontend, si se necesita agregar o quitar alguno, solo avisenme y lo modifico
 def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fecha_nac, correo: str, telefono: str) -> bool:
     # Verificar si el usuario ya existe realizando una constulta a la base de datos

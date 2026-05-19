@@ -1,6 +1,7 @@
-from db.operaciones.insertar_db import insertar_usuario
-from db.operaciones.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id, consultar_pagos_de_usuario
-from db.operaciones.modificar_db import modificar_perfil_usuario
+from db.operaciones.usuarios.insertar_db import insertar_usuario
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id
+from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
+from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
 
 import datetime
