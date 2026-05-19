@@ -1,13 +1,19 @@
-class restriccion:
+class Restriccion:
+    """Clase que representa una restricción"""
+
     def __init__(self, nombre: str, longitud: int):
         self.nombre = nombre
         self.longitud = longitud
-    
-    # hay que modificarlo por los casos en que empieza con La en vez de El
-    def checkearRestriccion(self, valor: str):
+
+    def checkear_longitud(self, valor: str):
+        """Función que comprueba que el valor de un parámetro
+            no exceda la longitud indicada por la restricción."""
+        print(f"Checkeando restricción de longitud para {self.nombre} con valor '{valor}' y len {len(valor)}")
         if len(valor) > self.longitud:
-            return {"error": f"El {self.nombre} no puede exceder {self.longitud} caracteres"}
+            return {"error": f"El parámetro '{self.nombre}' no puede exceder {self.longitud} caracteres"}
         return {}
 
-    def es_nombre(self, nombreInput: str):
-        return self.nombre == nombreInput
+    def es_nombre(self, nombre_input: str):
+        """Función que comprueba que el nombre del parámetro
+            coincida con el que tiene la restricción."""
+        return self.nombre == nombre_input

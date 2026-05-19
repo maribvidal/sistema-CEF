@@ -14,9 +14,21 @@ import os
 ### - ¿Cambiamos las opciones del ON DELETE y del ON UPDATE?
 from db import LONG_TEL, NOM_DB, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA, LONG_TEL
 
+
+import os
+
+# MODIFICADA ESTA FUNCIÓN PARA ERROR HANDLING
 def reconstruir_db():
     """Destruye la BD y luego la vuelve a construir"""
-    os.remove(os.getcwd() + '/' + NOM_DB)
+    ruta_completa = os.path.join(os.getcwd(), NOM_DB)
+    
+    try:
+        os.remove(ruta_completa)
+        print("Base de datos anterior eliminada.")
+    except FileNotFoundError:
+        # Si no existe, no hacemos nada y dejamos que el programa siga
+        print("La base de datos no existía, saltando la eliminación.")
+        
     construir_db()
 
 def construir_db():
@@ -71,6 +83,35 @@ def construir_tablas(cursor: sqlite.Cursor):
 # En este apartado aparecen todas las funciones que crean
 # alguna tabla de la BD.
 
+def construir_tabla_cuenta(cursor: sqlite.Cursor):
+    """Construye la tabla Empleado"""
+    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Cuenta (
+                            id          INTEGER PRIMARY KEY,
+                            nombre      VARCHAR({LONG_NOM}),
+                            apellido    VARCHAR({LONG_APE}),
+                            correo      VARCHAR({LONG_CORREO}),
+                            contraseña  VARCHAR({LONG_CONTRA}),
+                            genero      CHAR(1) CHECK(length(genero) <= 1),
+                            dni         INTEGER UNIQUE NOT NULL,
+                            FOREIGN KEY (rol_id) REFERENCES Rol(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
+
+def construir_tabla_empleado(cursor: sqlite.Cursor):
+    """Construye la tabla Empleado"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Empleado (
+                            id          INTEGER PRIMARY KEY,
+                            dni         INTEGER UNIQUE NOT NULL,
+                            rol_id      INTEGER NOT NULL,
+                            FOREIGN KEY (dni) REFERENCES Cuenta(dni)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL,
+                            FOREIGN KEY (rol_id) REFERENCES Rol(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
+
 def construir_tabla_administrador(cursor: sqlite.Cursor):
     """Construye la tabla Administrador"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Administrador (
@@ -81,18 +122,24 @@ def construir_tabla_administrador(cursor: sqlite.Cursor):
                                         ON DELETE SET NULL
                         )""")
 
-def construir_tabla_empleado(cursor: sqlite.Cursor):
-    """Construye la tabla Empleado"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Empleado (
+def construir_tabla_recepcionista(cursor: sqlite.Cursor):
+    """Construye la tabla Recepcionista"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Recepcionista (
                             id          INTEGER PRIMARY KEY,
-                            nombre      VARCHAR({LONG_NOM}),
-                            apellido    VARCHAR({LONG_APE}),
-                            correo      VARCHAR({LONG_CORREO}),
-                            contraseña  VARCHAR({LONG_CONTRA}),
-                            genero      CHAR(1),
                             dni         INTEGER UNIQUE NOT NULL,
-                            rol_id      INTEGER NOT NULL,
-                            FOREIGN KEY (rol_id) REFERENCES Rol(id)
+                            FOREIGN KEY (dni) REFERENCES Empleado(dni)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
+
+def construir_tabla_usuario(cursor: sqlite.Cursor):
+    """Construye la tabla Usuario"""
+    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Usuario (
+                            id          INTEGER PRIMARY KEY,
+                            dni         INTEGER UNIQUE NOT NULL,
+                            fecha_nac   DATE NOT NULL,
+                            telefono    VARCHAR({LONG_TEL}),
+                            FOREIGN KEY (dni) REFERENCES Cuenta(dni)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
@@ -102,16 +149,6 @@ def construir_tabla_permiso(cursor: sqlite.Cursor):
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Permiso (
                             id          INTEGER PRIMARY KEY,
                             nombre      VARCHAR({LONG_NOM})
-                        )""")
-
-def construir_tabla_recepcionista(cursor: sqlite.Cursor):
-    """Construye la tabla Recepcionista"""
-    cursor.execute("""CREATE TABLE IF NOT EXISTS Recepcionista (
-                            id          INTEGER PRIMARY KEY,
-                            dni         INTEGER UNIQUE NOT NULL,
-                            FOREIGN KEY (dni) REFERENCES Empleado(dni)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL
                         )""")
 
 def construir_tabla_rol(cursor: sqlite.Cursor):
@@ -149,7 +186,7 @@ def construir_tabla_profesor(cursor: sqlite.Cursor):
                             id          INTEGER PRIMARY KEY,
                             nombre      VARCHAR({LONG_NOM}),
                             apellido    VARCHAR({LONG_APE}),
-                            genero      CHAR(1),
+                            genero      CHAR(1) CHECK(length(genero) <= 1),
                             dni         INTEGER UNIQUE NOT NULL
                         )""")
 
@@ -188,20 +225,6 @@ def construir_tabla_clase_ocurrir_sala(cursor: sqlite.Cursor):
                             FOREIGN KEY (sala_id) REFERENCES Sala(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
-                        )""")
-
-def construir_tabla_usuario(cursor: sqlite.Cursor):
-    """Construye la tabla Usuario"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Usuario (
-                            id          INTEGER PRIMARY KEY,
-                            dni         INTEGER UNIQUE NOT NULL,
-                            nombre      VARCHAR({LONG_NOM}),
-                            apellido    VARCHAR({LONG_APE}),
-                            edad        INTEGER NOT NULL,
-                            contraseña  VARCHAR({LONG_CONTRA}),
-                            correo      VARCHAR({LONG_CORREO}),
-                            telefono    VARCHAR({LONG_TEL}),
-                            genero      CHAR(1)
                         )""")
 
 def construir_tabla_descuento(cursor: sqlite.Cursor):
@@ -270,7 +293,7 @@ def construir_tabla_mensualidad(cursor: sqlite.Cursor):
     """Construye la tabla Mensualidad"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Mensualidad (
                             id         INTEGER PRIMARY KEY,
-                            fecha_ini  DATE,
+                            fecha_ini  DATE NOT NULL,
                             fecha_fin  DATE,
                             usuario_id INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)

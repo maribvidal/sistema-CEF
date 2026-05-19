@@ -1,6 +1,7 @@
 [project]
 name = "backend-cef"
 version = "0.1.0"
+package-mode = false
 description = "Subsistema de la aplicación donde reside la lógica de negocios de la aplicación y el manejo de la base de datos."
 authors = [
     {name = "Mariano Bazalar Vidal"},
@@ -10,9 +11,10 @@ authors = [
     {name = "Augusto José Lozada"}
 ]
 license = "MIT License"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<4.0"
 dependencies = [
     "flask (>=3.1.3,<4.0.0)",
+    "flask-cors (>=6.0.2,<7.0.0)",
 ]
 
 [dependency-groups]

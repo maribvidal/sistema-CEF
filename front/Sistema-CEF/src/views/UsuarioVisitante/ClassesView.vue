@@ -6,7 +6,7 @@
 
         <div class="d-flex justify-end mb-6">
           <v-btn
-            color="black"
+            color="blue-darken-1"
             prepend-icon="mdi-plus"
             @click="abrirDialogCrear"
           >

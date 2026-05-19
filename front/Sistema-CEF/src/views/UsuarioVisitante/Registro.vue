@@ -6,27 +6,32 @@
 			<v-card-subtitle>Introduce tus datos para registrarte</v-card-subtitle>
 
 			<v-card-text class="pt-4">
-				<v-form>
-                    <v-text-field label="Nombre" variant="outlined"/>
+				<v-form @submit.prevent="register">
+                    <v-text-field v-model="name" label="Nombre" variant="outlined"/>
                     
-                    <v-text-field label="Apellido" variant="outlined" />
-					<v-text-field label="DNI" variant="outlined" />
-                    <v-text-field label="Correo electrónico" prepend-inner-icon="mdi-email" variant="outlined" />
-					<v-text-field label="Teléfono" variant="outlined" />
-					<v-text-field label="Edad" variant="outlined" />
+					<v-text-field v-model="lastname" label="Apellido" variant="outlined" />
+					<v-text-field v-model="dni" label="DNI" variant="outlined" />
+                    <v-text-field v-model="email" label="Correo electrónico" prepend-inner-icon="mdi-email" variant="outlined" />
+					<v-text-field v-model="cellphone" label="Teléfono" variant="outlined" />
+					<v-text-field v-model="age" label="Fecha de nacimiento" type="date" variant="outlined" /> 
 					<v-combobox
+						v-model="gender"
 						label="Género"
 						variant="outlined"
 						:items="['Masculino', 'Femenino', 'Otro']"
 					/>
-				<v-text-field label="Usuario" prepend-inner-icon="mdi-account" variant="outlined" />
+				
 				<v-text-field
+					v-model="password"
 					label="Contraseña"
 					prepend-inner-icon="mdi-lock"
 					type="password"
 					variant="outlined"
 				/>
-				<v-btn block color="red" size="large" class="mt-2">Registrarse</v-btn>
+				<v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-3">
+					{{ errorMessage }}
+				</v-alert>
+				<v-btn type="submit" block color="red" size="large" class="mt-2">Registrarse</v-btn>
 				</v-form>
 			</v-card-text>
 			<v-card-text class="pt-0 mt-2" align="center">
@@ -46,6 +51,72 @@
 <script setup>
 import SvgIcon from '@jamescoyle/vue-icon'
 import { mdiAccountPlus } from '@mdi/js'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import DateFormatterService from '@/services/DateFormatterService.js'
+
+const router = useRouter()
+const name = ref('')
+const lastname = ref('')
+const email = ref('')
+
+const password = ref('')
+const dni = ref('')
+const age = ref('')
+const cellphone = ref('')
+const gender = ref('')
+const errorMessage = ref('')
+
+const register = async () => {
+  errorMessage.value = ''
+  if (!email.value || !password.value || !name.value || !lastname.value || !age.value || !dni.value || !cellphone.value || !gender.value) {
+    errorMessage.value = 'Por favor, completa todos los campos.'
+    return
+  }
+
+  try {
+    // Calculamos la edad a partir de la fecha de nacimiento (YYYY-MM-DD)
+    const today = new Date();
+    const birthDate = new Date(age.value + "T00:00:00");
+    let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        calculatedAge--;
+    }
+
+    const usuario = {
+		dni: parseInt(dni.value) || 0,
+		nombre: name.value,
+		apellido: lastname.value,
+		contraseña: password.value,
+	  	edad: calculatedAge,
+		correo: email.value.trim(),
+		telefono: cellphone.value,
+		genero: gender.value ? gender.value.charAt(0) : 'O',
+      // El rol se asignará por defecto en el backend, usualmente.
+    }
+
+	const response = await fetch('http://127.0.0.1:5000/usuarios', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(usuario),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.text()
+      throw new Error(errorData || 'Error al registrar el usuario.')
+    }
+
+    // Si el registro es exitoso, redirigir a la página de inicio de sesión
+    router.push({ name: 'inicioSesion' })
+  } catch (error) {
+    console.error('Error en el registro:', error)
+    errorMessage.value = error.message
+  }
+}
+
 </script>
 
 <style scoped>
@@ -60,6 +131,8 @@ import { mdiAccountPlus } from '@mdi/js'
 	text-align: center;
 	font-size-adjust: 0.5;
 }
+
+
 
 @media (max-width: 768px) {
 	.login-card {

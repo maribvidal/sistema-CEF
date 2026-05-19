@@ -12,15 +12,19 @@
 			<v-card-subtitle>Accede al sistema con tus credenciales</v-card-subtitle>
 
 			<v-card-text class="pt-4">
-				<v-form>
-					<v-text-field label="Usuario" prepend-inner-icon="mdi-account" variant="outlined" />
+				<v-form @submit.prevent="login">
+					<v-text-field v-model="email" label="E-Mail" prepend-inner-icon="mdi-account" variant="outlined" />
 					<v-text-field
+						v-model="password"
 						label="Contraseña"
 						prepend-inner-icon="mdi-lock"
 						type="password"
 						variant="outlined"
 					/>
-					<v-btn block color="red" size="large" class="mt-2">Entrar</v-btn>
+					<v-btn block color="red" size="large" class="mt-2" type="submit">Entrar</v-btn>
+					<v-alert v-if="errorMessage" type="error" class="mt-2">
+						{{ errorMessage }}
+					</v-alert>
 				</v-form>
 			</v-card-text>
 			<v-card-text class="pt-0 mt-2" align="center">
@@ -39,7 +43,50 @@
 
 <script setup>
 import logoImg from '@/assets/logoLargo.png'
+import { useAuth } from '@/services/UsuariosServices.js'
+import { ref } from 'vue'
+import { useRouter, RouterLink } from 'vue-router'
 
+const { login: authLogin } = useAuth()
+
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
+const router = useRouter()
+
+const login = async () => {
+	errorMessage.value = ''
+	try {
+		const userInfo = await authLogin({
+			email: email.value,
+			password: password.value,
+		})
+		if (userInfo) {
+			router.push('/')
+		} else {
+			errorMessage.value = 'Credenciales incorrectas. Por favor, inténtalo de nuevo.'
+		}
+	} catch (error) {
+		let serverMessage = 'Error al iniciar sesión. Por favor, inténtalo de nuevo.'
+		if (error.respose){
+			const { status, data } = error.response
+			if (status === 401) {
+				serverMessage = 'No autorizado.'
+			}
+			else if (status === 400) {
+				serverMessage = 'Datos de inicio de sesión inválidos.'
+			}
+			else if (data && typeof data === 'string' && data.trim()) {
+				serverMessage = data
+			}
+			else serverMessage = `Error ${status}: ${error.message}`
+		}
+		else if (error.message) {
+			serverMessage = error.message
+		}
+		errorMessage.value = serverMessage
+	}
+}
 </script>
 <style scoped>
 .login-card {
