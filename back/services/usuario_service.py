@@ -21,7 +21,7 @@ def registrar_usuario_service(
 
     def _obtener_años_hasta_2026(año: int) -> int:
         """Se devuelve la cantidad de años que faltan hasta
-            el 2026."""
+            el año actual."""
         return (datetime.date.today().year - año)
 
     errores = checkear_inputs(
