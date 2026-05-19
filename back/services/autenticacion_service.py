@@ -19,35 +19,38 @@ def login_service(correo: str, contraseña: str):
         checkear los permisos de ciertos endpoints."""
     usuario = consultar_usuario_por_correo(correo)
 
-    if usuario:
-        if usuario[USR_CONTRASENA] != contraseña:
+    if usuario['status'] == 'success' and usuario['data'] is not None:
+        if usuario['data'][USR_CONTRASENA] != contraseña:
             return {"error": "Contraseña incorrecta"}, 400
 
         return {
             "mensaje": "Inicio de sesión exitoso",
             "usuario": {
-                "id": usuario[USR_ID],
-                "nombre": usuario[USR_NOMBRE],
+                "id": usuario['data'][USR_ID],
+                "nombre": usuario['data'][USR_NOMBRE],
                 "tipo": "CLIENTE",
                 "rol": ""
             }
         }, 200
 
     empleado = buscar_empleado_por_correo(correo)
+    
+    if empleado['status'] == 'error':
+        return empleado
 
-    if not empleado:
+    if empleado['status'] == 'success' and empleado['data'] is None:
         return {"error": "Usuario no registrado"}, 404
 
-    if empleado[EMP_CONTRASENA] != contraseña:
+    if empleado['status'] == 'success' and empleado['data'][EMP_CONTRASENA] != contraseña:
         return {"error": "Contraseña incorrecta"}, 400
 
     return {
         "mensaje": "Inicio de sesión exitoso",
         "usuario": {
-            "id": empleado[EMP_ID],
-            "nombre": empleado[EMP_NOMBRE],
-            "tipo": empleado[EMP_TIPO],
-            "rol": empleado[EMP_ROL]
+            "id": empleado['data'][EMP_ID],
+            "nombre": empleado['data'][EMP_NOMBRE],
+            "tipo": empleado['data'][EMP_TIPO],
+            "rol": empleado['data'][EMP_ROL]
         }
     }, 200
 

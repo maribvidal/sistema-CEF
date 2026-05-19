@@ -65,4 +65,8 @@ from db.operaciones import listar_usuarios
 @usuario_bp.route("/prueba", methods=["GET"])
 def obtener_usuarios():
     lista = listar_usuarios()
-    return jsonify(lista), 200
+    if lista['status'] == 'error':
+        return jsonify({"error": "Error al obtener usuarios", "message": lista['message']}), 500
+    if lista['status'] == 'success' and lista['data'] is None:
+        return jsonify({"error": "No se encontraron usuarios"}), 404
+    return jsonify(lista['data']), 200

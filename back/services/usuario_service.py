@@ -11,7 +11,7 @@ def registrar_usuario_service(
     nombre: str,
     apellido: str,
     contraseña: str,
-    fecha_nac,
+    fecha_nac: str,
     correo: str,
     telefono: str,
     genero: str
@@ -19,6 +19,7 @@ def registrar_usuario_service(
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
         previamente."""
+    print("llegue al service")
 
     def _es_fecha_valida(fecha: str) -> bool:
         """Se devuelve si la fecha es válida o no"""
@@ -50,15 +51,25 @@ def registrar_usuario_service(
     if len(errores) > 0:
         return errores, 400
 
-    if consultar_usuario_por_dni(dni):
+    respuesta = consultar_usuario_por_dni(dni)
+    if respuesta['status'] == 'error':
+        return respuesta
+    
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
         return {
             "error": "El DNI ya se encuentra registrado"
         }, 400
     
-    if consultar_usuario_por_correo(correo):
+    respuesta = consultar_usuario_por_correo(correo)
+    if respuesta['status'] == 'error':
+        return respuesta
+
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
         return {
             "error": "El correo electrónico ya se encuentra registrado"
         }, 400
+    
+    print(fecha_nac)
     
     if (_es_fecha_valida(fecha_nac) is False):
         return {
@@ -127,7 +138,7 @@ def listar_pagos_usuario_service(usuario_id: int):
         }, 404
 
     return {
-        "pagos": pagos
+        "pagos": pagos['data']
     }, 200
     
 def editar_perfil_usuario_service(

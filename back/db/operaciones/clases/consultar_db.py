@@ -1,9 +1,5 @@
-from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
 def listar_clases() -> list:
     """Hace una consulta para listar todas las clases, y devuelve una lista de tuplas"""
-    cursor = conectarse_db()
-    res = cursor.execute("SELECT * FROM Clase")
-    res = res.fetchall()
-    cursor.connection.close()
-    return res
+    return ejecutar_fetchall("SELECT * FROM Clase")

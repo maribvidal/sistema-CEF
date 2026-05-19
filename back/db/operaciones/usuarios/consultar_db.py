@@ -1,41 +1,28 @@
-from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
 def consultar_usuario_por_dni(dni: int) -> tuple:
     """Hace una consulta por un Usuario con un dni pasado por parámetro,
         y devuelve una tupla"""
-    cursor = conectarse_db()
-    res = cursor.execute("SELECT * FROM Usuario WHERE dni = ?", (dni,))
-    res = res.fetchone()
-    cursor.connection.close()
-    return res
+    query = f"SELECT * FROM Usuario WHERE dni = {dni}"
+    return ejecutar_fetchone(query)
 
 def consultar_usuario_por_correo(correo: str) -> tuple:
     """Hace una consulta por un Usuario con un correo pasado por parámetro,
         y devuelve una tupla"""
-    cursor = conectarse_db()
-    res = cursor.execute("""
+    query = f"""
             SELECT * 
-            FROM Usuario u
-            INNER JOIN Cuenta c ON u.dni = c.dni
-            WHERE c.correo = ?
-        """, (correo,))
-    res = res.fetchone()
-    cursor.connection.close()
-    return res
+            FROM Usuario
+            INNER JOIN Cuenta c ON Usuario.dni = c.dni  
+            WHERE c.correo = '{correo}'
+        """
+    return ejecutar_fetchone(query)
 
 def consultar_usuario_por_id(id: int) -> tuple:
     """Hace una consulta por un Usuario con un id pasado por parámetro,
         y devuelve una tupla"""
-    cursor = conectarse_db()
-    res = cursor.execute("SELECT * FROM Usuario WHERE id = ?", (id,))
-    res = res.fetchone()
-    cursor.connection.close()
-    return res
+    query = f"SELECT * FROM Usuario WHERE id = {id}"
+    return ejecutar_fetchone(query)
 
 def listar_usuarios() -> list:
     """Hace una consulta para listar todos los usuarios, y devuelve una lista de tuplas"""
-    cursor = conectarse_db()
-    res = cursor.execute("SELECT * FROM Usuario")
-    res = res.fetchall()
-    cursor.connection.close()
-    return res
+    return ejecutar_fetchall("SELECT * FROM Usuario")

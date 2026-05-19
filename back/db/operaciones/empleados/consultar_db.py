@@ -1,19 +1,14 @@
-from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
 def obtener_empleados() -> list:
     """Hace una consulta para listar todos los empleados, y devuelve una lista de tuplas"""
-    cursor = conectarse_db()
-    res = cursor.execute("SELECT * FROM Empleado")
-    res = res.fetchall()
-    cursor.connection.close()
-    return res
+    return ejecutar_fetchall("SELECT * FROM Empleado")
 
 # TODO: Cambiar
 def buscar_empleado_por_correo(correo: str) -> tuple:
     """Hace una consulta por un Empleado con un correo pasado por parámetro,
         y devuelve una tupla. Corregidos los errores de sintaxis y alias."""
-    cursor = conectarse_db()
-    res = cursor.execute("""
+    query = f"""
         SELECT 
             e.id, 
             c.nombre, 
@@ -27,8 +22,6 @@ def buscar_empleado_por_correo(correo: str) -> tuple:
         INNER JOIN Rol r ON e.rol_id = r.id
         LEFT JOIN administrador a ON e.id = a.id
         LEFT JOIN recepcionista re ON e.id = re.id 
-        WHERE c.correo = ?      
-    """, (correo,))
-    res = res.fetchone()
-    cursor.connection.close()
-    return res
+        WHERE c.correo = '{correo}'      
+    """;
+    return ejecutar_fetchone(query)

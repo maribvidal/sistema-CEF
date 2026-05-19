@@ -14,7 +14,7 @@ def checkear_inputs(objetos):
         try:
             if isinstance(fecha, datetime.date):
                 return {}
-            datetime.datetime.strptime(fecha, "%d-%m-%Y")
+            datetime.datetime.strptime(fecha, "%Y-%m-%d")
             return {}
         except:
             return {"error": f"La fecha {fecha} no es válida"}

@@ -1,5 +1,8 @@
-from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.commitear_db import commitear
+from db.operaciones.exception_handler import ejecutar_insertar
+
+import datetime
+from datetime import date
+from dateutil.parser import parse
 
 def formattear_fecha(fecha):
     """Función interna que formattea la fecha al
@@ -16,7 +19,6 @@ def formattear_fecha(fecha):
 
 def insertar_mensualidad(fecha_ini, fecha_fin, usuario_id: int):
     """Permite insertar una fila para la tabla Mensualidad"""
-    cursor = conectarse_db()
-    cursor.execute(f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)
-                                VALUES ('{formattear_fecha(fecha_ini)}', '{formattear_fecha(fecha_fin)}', {usuario_id});""")
-    commitear(cursor)
+    query = f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)
+                VALUES ('{formattear_fecha(fecha_ini)}', '{formattear_fecha(fecha_fin)}', {usuario_id});"""
+    ejecutar_insertar(query)

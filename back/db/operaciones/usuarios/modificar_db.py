@@ -1,5 +1,4 @@
-from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.commitear_db import commitear
+from db.operaciones.exception_handler import ejecutar_query 
 
 def modificar_perfil_usuario(
     usuario_id: int,
@@ -9,10 +8,9 @@ def modificar_perfil_usuario(
     """Recibe el id de un usuario, y recibe el
         nuevo correo y teléfono que se les quiere
         poner, y modifica al usuario."""
-    cursor = conectarse_db()
-    cursor.execute("""
+    query = f"""
         UPDATE Usuario
-        SET correo = ?, telefono = ?
-        WHERE id = ?
-    """, (correo, telefono, usuario_id))
-    commitear(cursor)
+        SET correo = '{correo}', telefono = '{telefono}'
+        WHERE id = {usuario_id}
+    """
+    ejecutar_query(query)

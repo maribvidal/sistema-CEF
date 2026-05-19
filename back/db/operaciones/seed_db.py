@@ -4,6 +4,8 @@ from db.operaciones.actividades.insertar_db import insertar_actividad
 from db.operaciones.mensualidades.insertar_db import insertar_mensualidad
 from db.operaciones.permisos.insertar_db import insertar_permiso
 from db.operaciones.roles.insertar_db import insertar_rol
+from db.operaciones import insertar_pago, insertar_clase
+from db.operaciones import insertar_pago_pagar_clase
 
 def insertar_datos():
     insertar_usuario(12345678, 'Juan', 'Pérez', '123', '2004-10-10', 'juan.perez@example.com', 1234,'M')
@@ -17,3 +19,7 @@ def insertar_datos():
     insertar_permiso('Metricas')
     insertar_rol('Administrador')
     insertar_rol('Recepcionista')
+    insertar_clase('Programada', 1, 1)
+    insertar_pago(50.0, 1)
+    insertar_pago(60.0, 2)
+    insertar_pago_pagar_clase(1, 1)

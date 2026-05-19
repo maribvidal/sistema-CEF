@@ -24,19 +24,23 @@ def test_consultar_permiso_por_id():
 def test_consultar_usuario_por_dni():
     print("---------------TEST CONSULTAR USUARIO POR DNI---------------")
     usuario = consultar_usuario_por_dni(123456789)
-    if usuario:
-        print("Test consultar_usuario_por_dni (deberia devolver el usuario con DNI 123456789):" + str(usuario[1]))
-    else:
+    if usuario['status'] == 'success' and usuario['data'] is not None:
+        print("Test consultar_usuario_por_dni (deberia devolver el usuario con DNI 123456789):" + str(usuario['data']))
+    elif usuario['status'] == 'success':
         print("Test consultar_usuario_por_dni (deberia devolver el usuario con DNI 123456789): No se encontró el usuario")
+    else:
+        print("Test consultar_usuario_por_dni (deberia devolver el usuario con DNI 123456789): Error al ejecutar la consulta: " + str(usuario['message']))
     print("\n")
 
 def test_consultar_usuario_por_correo():
     print("---------------TEST CONSULTAR USUARIO POR CORREO---------------")
     usuario = consultar_usuario_por_correo('prueba1@gmail.com')
-    if usuario:
-        print("Test consultar_usuario_por_correo (deberia devolver el usuario con correo prueba1@gmail.com):" + str(usuario[2]))
-    else:
+    if usuario['status'] == 'success' and usuario['data'] is not None:
+        print("Test consultar_usuario_por_correo (deberia devolver el usuario con correo prueba1@gmail.com):" + str(usuario['data']))
+    elif usuario['status'] == 'success':
         print("Test consultar_usuario_por_correo (deberia devolver el usuario con correo prueba1@gmail.com): No se encontró el usuario")
+    else:
+        print("Test consultar_usuario_por_correo (deberia devolver el usuario con correo prueba1@gmail.com): Error al ejecutar la consulta: " + str(usuario['message']))
     print("\n")
 
 def test_listar_clases():
@@ -69,8 +73,11 @@ def test_obtener_empleados():
 
 def test_consultar_usuario_por_id():
     print("---------------TEST CONSULTAR USUARIO POR ID---------------")
-    print("Test consultar_usuario_por_id (deberia devolver el usuario con id 1):" + str(consultar_usuario_por_id(1)[2]))
-    print("Test consultar_usuario_por_id (deberia devolver una tupla vacía o None):" + str(consultar_usuario_por_id(999)))
+    usuario = consultar_usuario_por_id(1)
+    if usuario['status'] == 'success' and usuario['data'] is not None:
+        print("Test consultar_usuario_por_id (deberia devolver el usuario con id 1):" + str(usuario['data'][2]))
+    else:
+        print("Test consultar_usuario_por_id (deberia devolver una tupla vacía o None):" + str(usuario['data']))
     print("\n")
 
 
@@ -83,6 +90,10 @@ def test_consultar_pagos_de_usuario():
 
 def test_obtener_rol_por_id():
     print("---------------TEST OBTENER ROL POR ID---------------")
-    print("Test obtener_rol_por_id (deberia devolver el rol con id 1):" + str(obtener_rol_por_id(1)[1]))
-    print("Test obtener_rol_por_id (deberia devolver una tupla vacía o None):" + str(obtener_rol_por_id(999)))
+    res = obtener_rol_por_id(1)
+    if res['status'] == 'success' and res['data'] is not None:
+        print("Test obtener_rol_por_id (deberia devolver el rol con id 1):" + str(res['data'][1]))
+    res = obtener_rol_por_id(999)
+    if res['status'] == 'success' and res['data'] is not None:
+        print("Test obtener_rol_por_id (deberia devolver una tupla vacía o None):" + str(res['data']))
     print("\n")
