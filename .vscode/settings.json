@@ -6,6 +6,12 @@
             "driver": "SQLite",
             "database": "${workspaceFolder:sistema-CEF}/back/database.db",
             "name": "Base de Datos CEF"
+        },
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "${workspaceFolder:sistema-CEF}/database.db",
+            "name": "CEFDatabase"
         }
     ]
 }

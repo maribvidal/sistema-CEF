@@ -93,9 +93,11 @@ print(lista)
 cursor.connection.close()
 
 from flask import Flask
+from flask_cors import CORS
 from routes import *
 
 app = Flask(__name__)
+CORS(app)
 
 # hay que ver si se puede modularizar esto para no agregar de a uno
 app.register_blueprint(usuario_bp)
