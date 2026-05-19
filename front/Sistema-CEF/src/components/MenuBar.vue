@@ -10,19 +10,43 @@
     width="280" 
     expand-on-hover
   >
-    <v-list nav density="compact">
+    <v-list nav density="compact" class="menu-content">
+      <v-list-item class="theme-item">
 
-      <v-list-item title="Inicio" :prepend-icon="appMenuIcons.home" to="/" />
-      <v-list-item title="Iniciar Sesión" :prepend-icon="appMenuIcons.login" to="/inicioSesion" />
-      <v-list-item title="Clases" :prepend-icon="appMenuIcons.classes" to="/clases" />
-      <v-list-item title="NOSOTROS" :prepend-icon="appMenuIcons.about" to="/sobre-nosotros" />
-      
-      <!-- Botón de Registro modificado con ícono, block para estirarse y márgenes -->
-      <v-btn variant="flat" color="red" class="text-none text-subtitle-1 mt-2 ml-1 px-6" to="/registro">
-                <v-icon start>mdi-account-plus</v-icon>
-                Registrarse
+      <v-btn density="comfortable" rounded="circle" class="theme-btn" color="blue-darken-3" variant="flat">
+                <v-icon>mdi-moon-waning-crescent</v-icon>
             </v-btn>
-            
+      </v-list-item>
+      <v-list-item class="menu-link-item" to="/">
+        <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
+          <v-icon start>{{ appMenuIcons.home }}</v-icon>
+          Inicio
+        </v-btn>
+      </v-list-item>
+
+    
+
+      <v-list-item class="menu-link-item" to="/clases">
+        <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
+          <v-icon start>{{ appMenuIcons.classes }}</v-icon>
+          Clases
+        </v-btn>
+      </v-list-item>
+
+      <v-list-item class="menu-link-item" to="/sobre-nosotros">
+        <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
+          <v-icon start>{{ appMenuIcons.about }}</v-icon>
+          Nosotros
+        </v-btn>
+      </v-list-item>
+      <v-btn variant="flat" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" color="blue-darken-3">
+          <v-icon start>{{ appMenuIcons.login }}</v-icon>
+          Iniciar Sesión
+        </v-btn>
+      <v-btn variant="flat" color="red-darken-2" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" to="/registro">
+        <v-icon start>mdi-account-plus</v-icon>
+        Registrarse
+      </v-btn>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -72,6 +96,40 @@ const localMenuOpen = computed({
 .menu-drawer :deep(.v-list) {
   padding-block: 8px;
 }
+
+.menu-content {
+  gap: 4px;
+}
+
+.menu-link-item {
+  padding-inline: 0 !important;
+  min-height: auto !important;
+}
+
+.menu-link {
+  width: 100%;
+  justify-content: flex-start;
+  padding-inline: 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.menu-button:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+  transform: translateX(2px);
+}
+
+.menu-register {
+  width: calc(100% - 8px);
+  align-self: center;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menu-register:hover {
+  transform: translateX(2px);
+}
+
 .menu-drawer :deep(.close-item .v-list-item__prepend) {
   margin-inline-end: 0 !important;
 }
@@ -92,7 +150,7 @@ const localMenuOpen = computed({
 }
 
 .menu-drawer :deep(.v-list-item) {
-  margin-bottom: 8px; /* Separación entre botones */
+  margin-bottom: 4px; /* Separación entre botones */
 }
 
 .menu-drawer :deep(.v-list-item__content) {
@@ -112,6 +170,18 @@ const localMenuOpen = computed({
     height: auto !important;
     max-height: 60vh;
   }
+
+  .menu-register {
+    width: 100%;
+  }
+}
+
+.theme-btn {
+    border-radius: 100% !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    max-block-size: 50px;
+    max-width: 30px;
+    margin-right: 30px;
 }
 
 /* Fuerza a que el menú desaparezca del todo si no está activo */
