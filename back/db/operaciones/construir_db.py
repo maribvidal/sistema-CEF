@@ -14,12 +14,21 @@ import os
 ### - ¿Cambiamos las opciones del ON DELETE y del ON UPDATE?
 from db import LONG_TEL, NOM_DB, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA, LONG_TEL
 
+
+import os
+
+# MODIFICADA ESTA FUNCIÓN PARA ERROR HANDLING
 def reconstruir_db():
     """Destruye la BD y luego la vuelve a construir"""
+    ruta_completa = os.path.join(os.getcwd(), NOM_DB)
+    
     try:
-        os.remove(os.getcwd() + '/' + NOM_DB)
+        os.remove(ruta_completa)
+        print("Base de datos anterior eliminada.")
     except FileNotFoundError:
-        pass
+        # Si no existe, no hacemos nada y dejamos que el programa siga
+        print("La base de datos no existía, saltando la eliminación.")
+        
     construir_db()
 
 def construir_db():
