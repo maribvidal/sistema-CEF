@@ -7,8 +7,8 @@ def registrar_usuario_service(
     dni: int,
     nombre: str,
     apellido: str,
-    edad: int,
     contraseña: str,
+    edad: int,
     correo: str,
     telefono: str,
     genero: str
@@ -21,9 +21,9 @@ def registrar_usuario_service(
             {"name": "dni", "value": dni},
             {"name": "nombre", "value": nombre},
             {"name": "apellido", "value": apellido},
+            {"name": "contraseña", "value": contraseña},
             {"name": "edad", "value": edad},
             {"name": "correo", "value": correo},
-            {"name": "contraseña", "value": contraseña},
             {"name": "telefono", "value": telefono},
             {"name": "genero", "value": genero}
         ]
