@@ -9,6 +9,13 @@ import datetime
 ### - ¿Cómo reacciono ante los errores de parte del motor de la BD? 
 ### - ¿Cómo devuelvo los errores de Foreign Keys?
 
+def formattear_fecha(fecha):
+    """Función interna que formattea la fecha al
+        formato pedido."""
+    if (isinstance(fecha, datetime.datetime)):
+        fecha = fecha.strftime("%Y-%m-%d")
+    return fecha
+
 ## FUNCIONES QUE INSERTAN FILAS EN LAS TABLAS DE LA BD
 
 def insertar_actividad(nombre: str, precio_mensual: float):
@@ -18,11 +25,11 @@ def insertar_actividad(nombre: str, precio_mensual: float):
                                 VALUES ('{nombre}', {precio_mensual});""")
     commitear(cursor)
 
-def insertar_mensualidad(fecha_ini: datetime.date, fecha_fin: datetime.date, usuario_id: int):
+def insertar_mensualidad(fecha_ini, fecha_fin, usuario_id: int):
     """Permite insertar una fila para la tabla Mensualidad"""
     cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)
-                                VALUES ('{fecha_ini}', '{fecha_fin}', {usuario_id});""")
+                                VALUES ('{formattear_fecha(fecha_ini)}', '{formattear_fecha(fecha_fin)}', {usuario_id});""")
     commitear(cursor)
 
 def insertar_permiso(nombre: str):
@@ -50,7 +57,7 @@ def insertar_usuario(dni: int, nombre: str, apellido: str, fecha_nac: datetime.d
     """Permite insertar una fila para la tabla Usuario"""
     cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Usuario (dni, nombre, apellido, fecha_nac, contraseña, correo, telefono, genero)
-                                VALUES({dni}, '{nombre}', '{apellido}', {fecha_nac}, '{contraseña}', '{correo}', '{telefono}', '{genero}');""")
+                                VALUES({dni}, '{nombre}', '{apellido}', '{formattear_fecha(fecha_nac)}', '{contraseña}', '{correo}', '{telefono}', '{genero}');""")
     commitear(cursor)
 
 def insertar_administrador(dni: int):
@@ -95,11 +102,11 @@ def insertar_clase(estado: str, actividad_id: int, profesor_id: int):
                                 VALUES ('{estado}', {actividad_id}, {profesor_id});""")
     commitear(cursor)
 
-def insertar_clase_ocurrir_sala(clase_id: int, sala_id: int, fecha: datetime.date):
+def insertar_clase_ocurrir_sala(clase_id: int, sala_id: int, fecha):
     """Permite insertar una fila para la tabla Clase_Ocurrir_Sala"""
     cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Clase_Ocurrir_Sala (clase_id, sala_id, fecha)
-                                VALUES ({clase_id}, {sala_id}, '{fecha}');""")
+                                VALUES ({clase_id}, {sala_id}, '{formattear_fecha(fecha)}');""")
     commitear(cursor)
 
 def insertar_descuento(nombre: str):
@@ -116,11 +123,11 @@ def insertar_usuario_tener_descuento(usuario_id: int, descuento_id: int):
                                 VALUES ({usuario_id}, {descuento_id});""")
     commitear(cursor)
 
-def insertar_usuario_inscribir_clase(usuario_id: int, clase_id: int, fecha: datetime.date):
+def insertar_usuario_inscribir_clase(usuario_id: int, clase_id: int, fecha):
     """Permite insertar una fila para la tabla Usuario_Inscribir_Clase"""
     cursor = conectarse_db()
     cursor.execute(f"""INSERT INTO Usuario_Inscribir_Clase (usuario_id, clase_id, fecha)
-                                VALUES ({usuario_id}, {clase_id}, '{fecha}');""")
+                                VALUES ({usuario_id}, {clase_id}, '{formattear_fecha(fecha)}');""")
     commitear(cursor)
 
 def insertar_usuario_cancelar_clase(usuario_id: int, clase_id: int):

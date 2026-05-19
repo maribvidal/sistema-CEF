@@ -27,7 +27,7 @@ respuesta = u_s.registrar_usuario_service(
     nombre='abcdefghijklmnopqrstuv',  # 21 caracteres, excede el límite de 20
     apellido='bcdefghijklmnopqrstuvwaasdasdasd',  # 32 caracteres, excede el límite de 30
     contraseña='12334567890123',  # 13 caracteres, excede el límite de 12
-    fecha_nac=datetime.date(day=10,month=10,year=2004),
+    fecha_nac=datetime.date(year=2004, month=10, day=5),
     telefono='1234567890123451231231231231',  # 15 caracteres, dentro del límite
     correo='prueba1234567891234@example.com', # 31 caracteres, excede el límite de 30
     genero='M',
@@ -54,7 +54,7 @@ respuesta = u_s.registrar_usuario_service(
     nombre='Juan',
     apellido='Pérez',
     contraseña='123',
-    fecha_nac=datetime.date(day=10,month=10,year=2008),
+    fecha_nac=datetime.datetime.strptime("20-10-2004", "%d-%m-%Y"),
     telefono='1234567890', 
     correo='juan.perez@example.com', # Correo repetido 
     genero='M'
@@ -63,25 +63,11 @@ respuesta = u_s.registrar_usuario_service(
 print(respuesta)
 
 respuesta = u_s.registrar_usuario_service(
-    dni=123456789,  
-    nombre='Juan',
-    apellido='Pérez',
-    contraseña='123',
-    fecha_nac=datetime.date(day=10,month=10,year=2020),
-    telefono='1234567890', 
-    correo='prueba@example.com',  
-    genero='M'
-)
-
-print(respuesta)
-
-
-respuesta = u_s.registrar_usuario_service(
     dni=1234567891,  
     nombre='Juan',
     apellido='Pérez',
     contraseña='123',
-    fecha_nac=datetime.date(day=5,month=10,year=2008),
+    fecha_nac=datetime.date(year=2004, month=3, day=5),
     telefono='1234567890', 
     correo='prueba@example.com',  
     genero='M'

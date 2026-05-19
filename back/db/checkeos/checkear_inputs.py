@@ -12,10 +12,12 @@ def checkear_inputs(objetos):
     
     def _validar_fecha(fecha: datetime.date):
         try:
+            if isinstance(fecha, datetime.date):
+                return {}
             datetime.datetime.strptime(fecha, "%d-%m-%Y")
-            return True
+            return {}
         except:
-            return False
+            return {"error": f"La fecha {fecha} no es válida"}
 
     for restriccion in restricciones:
         for objeto in objetos:
