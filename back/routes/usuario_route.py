@@ -12,7 +12,7 @@ def registrar_usuario():
     nombre = data.get("nombre")
     apellido = data.get("apellido")
     contraseña = data.get("contraseña")
-    edad = data.get("edad")
+    fecha_nacimiento = data.get("fecha_nacimiento")
     correo = data.get("correo")
     telefono = data.get("telefono")
     genero = data.get("genero")
@@ -22,7 +22,7 @@ def registrar_usuario():
         nombre,
         apellido,
         contraseña,
-        edad,
+        fecha_nacimiento,
         correo,
         telefono,
         genero
