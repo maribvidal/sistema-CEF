@@ -8,6 +8,7 @@ class Restriccion:
     def checkear_restriccion(self, valor: str):
         """Función que comprueba que el valor de un parámetro
             no exceda la longitud indicada por la restricción."""
+        print(f"Checkeando restricción de longitud para {self.nombre} con valor '{valor}' y len {len(valor)}")
         if len(valor) > self.longitud:
             return {"error": f"El parámetro '{self.nombre}' no puede exceder {self.longitud} caracteres"}
         return {}

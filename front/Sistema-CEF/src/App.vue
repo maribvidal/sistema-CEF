@@ -8,6 +8,11 @@
       
       <router-view />
       
+
+      <v-footer class="pa-4" color="#f0f0f0">
+        <span>&copy; 2026 CEF. Todos los derechos reservados.</span>
+      </v-footer>
+      
     </v-main>
   </v-app>
 </template>
@@ -28,12 +33,16 @@ const appMenuIcons = {
   gym: 'mdi-dumbbell',
   classes: 'mdi-calendar-blank',
   accountnew: 'mdi-account-plus',
+  moon: 'mdi-moon-waning-crescent',
 }
 </script>
 
 <style scoped>
 
-
-
+.v-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 </style>

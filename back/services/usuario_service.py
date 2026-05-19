@@ -3,12 +3,14 @@ from db.operaciones.consultar_db import consultar_usuario_por_correo, consultar_
 from db.operaciones.modificar_db import modificar_perfil_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
 
+import datetime
+
 def registrar_usuario_service(
     dni: int,
     nombre: str,
     apellido: str,
-    edad: int,
     contraseña: str,
+    fecha_nac: datetime.date,
     correo: str,
     telefono: str,
     genero: str
@@ -16,14 +18,20 @@ def registrar_usuario_service(
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
         previamente."""
+
+    def _obtener_años_hasta_2026(año: int) -> int:
+        """Se devuelve la cantidad de años que faltan hasta
+            el año actual."""
+        return (datetime.date.today().year - año)
+
     errores = checkear_inputs(
         [
             {"name": "dni", "value": dni},
             {"name": "nombre", "value": nombre},
             {"name": "apellido", "value": apellido},
-            {"name": "edad", "value": edad},
-            {"name": "correo", "value": correo},
             {"name": "contraseña", "value": contraseña},
+            {"name": "fecha_nac", "value": fecha_nac},
+            {"name": "correo", "value": correo},
             {"name": "telefono", "value": telefono},
             {"name": "genero", "value": genero}
         ]
@@ -42,16 +50,18 @@ def registrar_usuario_service(
             "error": "El correo electrónico ya se encuentra registrado"
         }, 400
     
-    if edad < 14:
+    if _obtener_años_hasta_2026(fecha_nac.year) < 14:
         return {
             "error": "El usuario debe ser mayor de 14 años"
         }, 400
+
+    ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
     insertar_usuario(
         dni,
         nombre,
         apellido,
-        edad,
+        fecha_nac,
         contraseña,
         correo,
         telefono,

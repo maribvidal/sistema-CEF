@@ -16,7 +16,10 @@ from db import LONG_TEL, NOM_DB, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA, L
 
 def reconstruir_db():
     """Destruye la BD y luego la vuelve a construir"""
-    os.remove(os.getcwd() + '/' + NOM_DB)
+    try:
+        os.remove(os.getcwd() + '/' + NOM_DB)
+    except FileNotFoundError:
+        pass
     construir_db()
 
 def construir_db():
