@@ -1,4 +1,9 @@
-from db.operaciones.insertar_db import insertar_usuario, insertar_profesor, insertar_actividad, insertar_mensualidad, insertar_permiso, insertar_rol
+from db.operaciones.usuarios.insertar_db import insertar_usuario
+from db.operaciones.profesores.insertar_db import insertar_profesor
+from db.operaciones.actividades.insertar_db import insertar_actividad
+from db.operaciones.mensualidades.insertar_db import insertar_mensualidad
+from db.operaciones.permisos.insertar_db import insertar_permiso
+from db.operaciones.roles.insertar_db import insertar_rol
 
 def insertar_datos():
     insertar_usuario(12345678, 'Juan', 'Pérez', '123', '2004-10-10', 'juan.perez@example.com', 1234,'masculino')
