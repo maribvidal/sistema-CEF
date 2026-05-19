@@ -3,6 +3,8 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.insertar_datos_prueba import insertar_datos
 from db.operaciones.consultar_db import listar_usuarios
 
+import datetime
+
 reconstruir_db()
 cursor = conectarse_db()
 
@@ -25,24 +27,24 @@ respuesta = u_s.registrar_usuario_service(
     nombre='abcdefghijklmnopqrstuv',  # 21 caracteres, excede el límite de 20
     apellido='bcdefghijklmnopqrstuvwaasdasdasd',  # 32 caracteres, excede el límite de 30
     contraseña='12334567890123',  # 13 caracteres, excede el límite de 12
+    fecha_nac=datetime.date(day=10,month=10,year=2004),
     telefono='1234567890123451231231231231',  # 15 caracteres, dentro del límite
     correo='prueba1234567891234@example.com', # 31 caracteres, excede el límite de 30
     genero='M',
-    edad=25
 )
 
 print(respuesta)
 
-#checkeo de dni, correo repetidos y edad minima
+#checkeo de dni, correo repetidos, fecha inválida y edad minima
 respuesta = u_s.registrar_usuario_service(
     dni=12345678,  # DNI repetido
     nombre='Juan',
     apellido='Pérez',
     contraseña='123',
+    fecha_nac="pepe",
     telefono='1234567890', 
     correo='prueba1@gmail.com', 
-    genero='M',
-    edad=25
+    genero='M'
 )
 
 print(respuesta)
@@ -52,10 +54,10 @@ respuesta = u_s.registrar_usuario_service(
     nombre='Juan',
     apellido='Pérez',
     contraseña='123',
+    fecha_nac=datetime.date(day=10,month=10,year=2008),
     telefono='1234567890', 
     correo='juan.perez@example.com', # Correo repetido 
-    genero='M',
-    edad=25
+    genero='M'
 )
 
 print(respuesta)
@@ -65,10 +67,10 @@ respuesta = u_s.registrar_usuario_service(
     nombre='Juan',
     apellido='Pérez',
     contraseña='123',
+    fecha_nac=datetime.date(day=10,month=10,year=2020),
     telefono='1234567890', 
     correo='prueba@example.com',  
-    genero='M',
-    edad=5 # edad menor
+    genero='M'
 )
 
 print(respuesta)
@@ -79,10 +81,10 @@ respuesta = u_s.registrar_usuario_service(
     nombre='Juan',
     apellido='Pérez',
     contraseña='123',
+    fecha_nac=datetime.date(day=5,month=10,year=2008),
     telefono='1234567890', 
     correo='prueba@example.com',  
-    genero='M',
-    edad=25
+    genero='M'
 )
 
 print(respuesta)

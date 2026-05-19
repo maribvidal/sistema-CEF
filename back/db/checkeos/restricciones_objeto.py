@@ -5,7 +5,7 @@ class Restriccion:
         self.nombre = nombre
         self.longitud = longitud
 
-    def checkear_restriccion(self, valor: str):
+    def checkear_longitud(self, valor: str):
         """Función que comprueba que el valor de un parámetro
             no exceda la longitud indicada por la restricción."""
         print(f"Checkeando restricción de longitud para {self.nombre} con valor '{valor}' y len {len(valor)}")

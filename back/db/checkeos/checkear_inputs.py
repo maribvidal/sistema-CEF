@@ -1,4 +1,5 @@
-import functools, inspect
+from db import restricciones
+import datetime
 
 def checkear_inputs(objetos):
     """Función que busca que los objetos recibidos
@@ -8,36 +9,24 @@ def checkear_inputs(objetos):
         En los parametros vienen el nombre y el valor
         a checkear.
         ej: [{"name": "nombre", "value": "Maximiliano"}"""
-    from db import restricciones
+    
+    def _validar_fecha(fecha: datetime.date):
+        try:
+            datetime.datetime.strptime(fecha, "%d-%m-%Y")
+            return True
+        except:
+            return False
 
     for restriccion in restricciones:
         for objeto in objetos:
-            if restriccion.es_nombre(objeto["name"]):
-                result = restriccion.checkear_restriccion(objeto["value"])
+            tipo_obj = objeto["name"]
+            # Si el dato es una fecha
+            if (tipo_obj in ['fecha_ini', 'fecha_fin', 'fecha_nac', 'fecha']):
+                return _validar_fecha(objeto["value"])
+            # En cualquier otro caso
+            if restriccion.es_nombre(tipo_obj):
+                result = restriccion.checkear_longitud(objeto["value"])
                 if len(result) > 0:
                     return result
 
     return {}
-
-# WRAPPERS
-
-def validar_inputs_db(func):
-    @functools.wraps(func) # Esto mantiene el nombre original y el docstring de la función
-    def wrapper(*args, **kwargs):
-        sig = inspect.signature(func)
-        bound_args = sig.bind(*args, **kwargs)
-        bound_args.apply_defaults()
-        
-        objetos_a_checkear = [
-            {"name": param_name, "value": param_value}
-            for param_name, param_value in bound_args.arguments.items()
-        ]
-        
-        errores = checkear_inputs(objetos_a_checkear)
-        if errores:
-            raise ValueError(f"Error de validación: {errores}")
-        return func(*args, **kwargs)
-        
-    return wrapper
-
-# TODO: Hacer un wrapper que escupa los errores que tira el motor de la BD
