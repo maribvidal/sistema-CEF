@@ -28,7 +28,7 @@ def registrar_usuario_service(
         except ValueError:
             return False
 
-    def _obtener_años_hasta_2026(fecha: str) -> int:
+    def _obtener_años_hasta_2026(fecha) -> int:
         """Se devuelve la cantidad de años que faltan hasta
             el año actual, si la fecha es válida"""
         fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d")
