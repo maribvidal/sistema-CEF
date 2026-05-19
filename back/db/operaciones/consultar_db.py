@@ -46,16 +46,17 @@ def buscar_empleado_por_correo(correo: str) -> tuple:
     res = cursor.execute("""
         SELECT 
             e.id, 
-            e.nombre, 
-            r.nombre AS rol
+            e.nombre,
+            e.contraseña,
+            r.nombre AS rol,
             CASE 
-                WHEN a.empleado_id IS NOT NULL THEN 'ADMINISTRADOR'
-                WHEN re.empleado_id IS NOT NULL THEN 'RECEPCIONISTA'
+                WHEN a.dni IS NOT NULL THEN 'ADMINISTRADOR'
+                WHEN re.dni IS NOT NULL THEN 'RECEPCIONISTA'
             END AS tipo
         FROM Empleado e
-        INNNER JOIN Rol r ON e.rol_id = r.id
-        LEFT JOIN administrador ON e.id = a.empleado_id
-        LEFT JOIN recepcionista ON e.id = re.empleado_id 
+        INNER JOIN Rol r ON e.rol_id = r.id
+        LEFT JOIN Administrador a ON e.dni = a.dni
+        LEFT JOIN Recepcionista re ON e.dni = re.dni 
         WHERE e.correo = ?      
     """, (correo,))
     res = res.fetchone()
