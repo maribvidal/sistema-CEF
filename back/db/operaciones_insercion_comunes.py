@@ -3,6 +3,8 @@ import sqlite3 as sqlite
 from db.operaciones.actividades.insertar_db import insertar_actividad
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.profesores.insertar_db import insertar_profesor
+from db.operaciones.cuentas.insertar_db import insertar_cuenta
+from db.operaciones.usuarios.insertar_db import insertar_usuario
 
 # Estas operaciones devuelven el id de la fila insertada si hubo 
 # éxito, o -1 si hubo un error.
@@ -43,4 +45,17 @@ def publicar_clase(cursor: sqlite.Cursor, estado: str, actividad_id: int, profes
         return -1
     except Exception as e:
         print(f" > Error al publicar clase: {e}")
+        return -1
+
+def crear_usuario(cursor: sqlite.Cursor, dni: int, nombre: str, apellido: str, contraseña: str, fecha_nac: str, correo: str, telefono: str, genero: str) -> int:
+    """Función que se encarga de insertar un usuario y controlar
+        algunas cuestiones mas."""
+    try:
+        insertar_cuenta(cursor, dni, nombre, apellido, contraseña, correo, genero)
+        return insertar_usuario(cursor, dni, nombre, apellido, contraseña, fecha_nac, correo, telefono, genero)
+    except sqlite.IntegrityError as e:
+        print(f" > Error al crear usuario: DNI {dni} ya existe. Detalles: {e}")
+        return -1
+    except Exception as e:
+        print(f" > Error al crear usuario: {e}")
         return -1

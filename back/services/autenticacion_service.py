@@ -1,11 +1,10 @@
 import jwt
 
+from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.empleados.consultar_db import buscar_empleado_por_correo
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from datetime import datetime, timedelta
-from db.operaciones.usuarios.insertar_db import insertar_usuario
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
-from db.operaciones.consultar_db import buscar_empleado_por_correo, consultar_usuario_por_correo
+from db.operaciones_insercion_comunes import crear_usuario
+from db.operaciones_consulta_comunes import consultar_usuario_por_dni, consultar_usuario_por_correo
 
 # Tabla Usuario/Cliente
 USR_ID = 0
@@ -27,7 +26,10 @@ def login_service(correo: str, contraseña: str):
     """El tipo se refiere a si es cliente, recepcionista 
         o administrador. El rol es necesario para después
         checkear los permisos de ciertos endpoints."""
-    usuario = consultar_usuario_por_correo(correo)
+
+    cursor = conectarse_db()
+
+    usuario = consultar_usuario_por_correo(cursor, correo)
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
         if usuario['data'][USR_CONTRASENA] != contraseña:
@@ -41,6 +43,7 @@ def login_service(correo: str, contraseña: str):
             "rol": ""
         })
 
+        cursor.connection.close()
         return {
             "mensaje": "Inicio de sesión exitoso",
             "token": token,
@@ -55,12 +58,15 @@ def login_service(correo: str, contraseña: str):
     empleado = buscar_empleado_por_correo(correo)
     
     if empleado['status'] == 'error':
+        cursor.connection.close()
         return empleado
 
     if empleado['status'] == 'success' and empleado['data'] is None:
+        cursor.connection.close()
         return {"error": "Usuario no registrado"}, 404
 
     if empleado['status'] == 'success' and empleado['data'][EMP_CONTRASENA] != contraseña:
+        cursor.connection.close()
         return {"error": "Contraseña incorrecta"}, 400
 
     # Generar JWT
@@ -71,6 +77,7 @@ def login_service(correo: str, contraseña: str):
         "rol": empleado["rol"]
     })
 
+    cursor.connection.close()
     return {
         "mensaje": "Inicio de sesión exitoso",
         "token": token,
@@ -85,13 +92,18 @@ def login_service(correo: str, contraseña: str):
 # Los parametros los tomé en cuenta al ver los text-field del Registro.Vue del frontend, si se necesita agregar o quitar alguno, solo avisenme y lo modifico
 def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fecha_nac: str, correo: str, telefono: str) -> bool:
     # Verificar si el usuario ya existe realizando una constulta a la base de datos
-    if consultar_usuario_por_dni(dni):
+
+    cursor = conectarse_db()
+
+    if consultar_usuario_por_dni(cursor, dni):
         print("El usuario ya está registrado")
+        cursor.connection.close()
         return False
 
     # Insertar el nuevo usuario
-    insertar_usuario(dni, nombre, apellido, contrasena, fecha_nac, correo, telefono, "Otro")
+    crear_usuario(cursor, dni, nombre, apellido, contrasena, fecha_nac, correo, telefono, "Otro")
     print("El usuario registrado exitosamente")
+    cursor.connection.close()
     return True
 
 def cerrar_sesion():
