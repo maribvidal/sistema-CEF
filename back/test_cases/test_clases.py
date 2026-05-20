@@ -1,7 +1,10 @@
 import unittest
 
+from db.operaciones.construir_db import reconstruir_db
+from db.operaciones.conectar_db import conectarse_db
 from db.operaciones_consulta_comunes import consultar_clase_por_id
 from db.operaciones_insercion_comunes import crear_actividad, crear_profesor, publicar_clase
+from db.operaciones_eliminar_comunes import eliminar_clase_por_id
 
 class ClasesTestcase(unittest.TestCase):
     """Clase test para probar las operaciones de la BD
@@ -10,23 +13,42 @@ class ClasesTestcase(unittest.TestCase):
     def setUp(self):
         """Fixture para las pruebas."""
         print(" - Iniciando test de clases...")
+        reconstruir_db()
+        self.cursor = conectarse_db()
 
     def tearDown(self):
         """Fixture para terminar las pruebas."""
         print(" - Test de clases finalizado.")
+        self.cursor.connection.close()
 
     def test_publicar_clase(self):
-        """Este test verifica que se pueda publicar una clase 
-            sin errores."""
+        """Este test verifica que se pueda publicar una clase."""
         
-        crear_actividad('Funcional', 150.0)
-        crear_profesor('Gero', 'Arias', 'M', 6656342)
-        res = publicar_clase('programada', 1, 1)
+        id_act = crear_actividad(self.cursor, 'Funcional', 150.0)
+        id_prof = crear_profesor(self.cursor, 'Gero', 'Arias', 'M', 6656342)
+        
+        res = publicar_clase(self.cursor, 'programada', id_act, id_prof)
         self.assertNotEqual(res, -1,
                     "Error al publicar la clase: se devolvió -1")
-        tupla_clase = consultar_clase_por_id(res)
+        tupla_clase = consultar_clase_por_id(self.cursor, res)
         self.assertEqual(tupla_clase[1], 'programada')
         self.assertIsNotNone(tupla_clase, "Error al consultar la clase: se devolvió None")
+
+    def test_eliminar_clase(self):
+        """Este test verifica que se pueda eliminar una clase."""
+
+        # Crear una clase cualquiera.
+        id_act = crear_actividad(self.cursor, 'Matasapos', 150.0)
+        id_prof = crear_profesor(self.cursor, 'Gabriela', 'Perez', 'F', 6656343)
+        res = publicar_clase(self.cursor, 'programada', id_act, id_prof)
+
+        # Eliminar la clase creada.
+        res2 = eliminar_clase_por_id(self.cursor, res)
+        self.assertTrue(res2, "Error al eliminar la clase: se devolvió False")
+        
+        # Comprobar que no existe más en la BD.
+        tupla_clase = consultar_clase_por_id(self.cursor, res)
+        self.assertIsNone(tupla_clase, "Error: La clase sigue existiendo.")
 
 """
 
