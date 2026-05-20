@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 
-from services.clases_service import listar_clases_service, publicar_clase_service
+from services.clases_service import listar_clases_service, publicar_clase_service, modificar_clase_service, eliminar_clase_service
 
 clases_bp = Blueprint('clases', __name__)
  
@@ -31,6 +31,37 @@ def publicar_clase():
 
     return jsonify(respuesta), status
 
+def eliminar_clase():
+    """Este endpoint permite eliminar una clase específica. 
+        Recibe el ID de la clase a eliminar en formato JSON."""
+    data = request.get_json()
+
+    id_clase = data.get("id_clase")
+
+    respuesta, status = eliminar_clase_service(id_clase)
+
+    return jsonify(respuesta), status
+
+def modificar_clase():
+    """Este endpoint permite modificar los detalles de una 
+        clase específica. Recibe el ID de la clase a modificar 
+        y los nuevos datos en formato JSON."""
+    data = request.get_json()
+
+    id_clase = data.get("id_clase")
+    estado = data.get("estado")
+    id_actividad = data.get("id_actividad")
+    id_profesor = data.get("id_profesor")
+
+    respuesta, status = modificar_clase_service(
+        id_clase,
+        estado,
+        id_actividad,
+        id_profesor
+    )
+
+    return jsonify(respuesta), status
+
 """
 def cancelar_clase():
     Este endpoint permite cancelar una clase específica. 
@@ -39,18 +70,3 @@ def cancelar_clase():
 
     # Tengo que ver como se cancelaba una clase
 """
-
-def eliminar_clase():
-    """Este endpoint permite eliminar una clase específica. 
-        Recibe el ID de la clase a eliminar en formato JSON."""
-    data = request.get_json()
-
-    # Por implementar
-
-def modificar_clase():
-    """Este endpoint permite modificar los detalles de una 
-        clase específica. Recibe el ID de la clase a modificar 
-        y los nuevos datos en formato JSON."""
-    data = request.get_json()
-
-    # Por implementar
