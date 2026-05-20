@@ -3,7 +3,7 @@ from db.operaciones.conectar_db import conectarse_db
 from flask import Flask
 from flask_cors import CORS
 from routes import *
-from test_cases import test_consultar_esqueleto, test_insertar_datos, test_login_service
+#from test_cases import test_consultar_esqueleto, test_insertar_datos, test_login_service
 
 from db.operaciones_insercion_comunes import crear_actividad, crear_profesor
 
@@ -15,18 +15,18 @@ app = Flask(__name__)
 CORS(app)
 
 # --- INICIALIZAR BLUEPRINTS DE FLASK ---
-app.register_blueprint(usuario_bp)
-app.register_blueprint(autenticacion_bp)
+#app.register_blueprint(usuario_bp)
+#app.register_blueprint(autenticacion_bp)
 app.register_blueprint(clases_bp)
-app.register_blueprint(empleados_bp)
-app.register_blueprint(pagos_bp)
+#app.register_blueprint(empleados_bp)
+#app.register_blueprint(pagos_bp)
 
 # --- REALIZAR TESTS ---
 cursor = conectarse_db()
 
-test_insertar_datos.intentar_insertar_datos()
-test_consultar_esqueleto.intentar_consultar_esqueleto()
-test_login_service.intentar_login_service()
+#test_insertar_datos.intentar_insertar_datos()
+#test_consultar_esqueleto.intentar_consultar_esqueleto()
+#test_login_service.intentar_login_service()
 
 crear_actividad(cursor, 'Funcional', 150.0)
 crear_profesor(cursor, 'Gero', 'Arias', 'M', 6656342)
