@@ -39,13 +39,20 @@
           Nosotros
         </v-btn>
       </v-list-item>
-      <v-btn variant="flat" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" color="blue-darken-3">
+      <v-btn variant="flat" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" color="blue-darken-3" to="/inicioSesion" v-if="!isLoggedIn">
           <v-icon start>{{ appMenuIcons.login }}</v-icon>
           Iniciar Sesión
         </v-btn>
-      <v-btn variant="flat" color="red-darken-2" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" to="/registro">
+      <v-btn variant="flat" color="red-darken-2" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" to="/registro" v-if="!isLoggedIn">
         <v-icon start>mdi-account-plus</v-icon>
         Registrarse
+      </v-btn>
+      <span v-if="isLoggedIn" class="ml-4 text-subtitle-2 font-weight-medium">
+        {{ userProfile?.nombre }}
+      </span>
+      <v-btn variant="flat" color="red-darken-2" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" @click="handleLogout" v-if="isLoggedIn">
+        <v-icon start>mdi-logout</v-icon>
+        Cerrar Sesión
       </v-btn>
     </v-list>
   </v-navigation-drawer>
@@ -53,7 +60,15 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuth } from '@/services/UsuariosServices.js'
 
+const router = useRouter()
+const { isLoggedIn, userProfile, logout } = useAuth()
+const handleLogout = async () => {
+    await logout()
+    router.push('/inicioSesion')
+}
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   appMenuIcons: { type: Object, required: true },
