@@ -5,6 +5,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones_consulta_comunes import consultar_clase_por_id
 from db.operaciones_insercion_comunes import crear_actividad, crear_profesor, publicar_clase
 from db.operaciones_eliminar_comunes import eliminar_clase_por_id
+from db.operaciones_modificar_comunes import modificar_clase
 
 class ClasesTestcase(unittest.TestCase):
     """Clase test para probar las operaciones de la BD
@@ -49,6 +50,22 @@ class ClasesTestcase(unittest.TestCase):
         # Comprobar que no existe más en la BD.
         tupla_clase = consultar_clase_por_id(self.cursor, res)
         self.assertIsNone(tupla_clase, "Error: La clase sigue existiendo.")
+
+    def test_modificar_clase(self):
+        """Este test verifica que se pueda modificar una clase."""
+
+        # Crear una clase cualquiera.
+        id_act = crear_actividad(self.cursor, 'Snorkel', 150.0)
+        id_prof = crear_profesor(self.cursor, 'Demi', 'Lovato', 'N', 6656344)
+        res = publicar_clase(self.cursor, 'programada', id_act, id_prof)
+
+        # Modificar la clase creada.
+        res2 = modificar_clase(self.cursor, res, 'ocurriendo', id_act, id_prof)
+        self.assertTrue(res2, "Error al modificar la clase: se devolvió False")
+
+        # Comprobar que los cambios se efectuaron en la BD.
+        tupla_clase = consultar_clase_por_id(self.cursor, res)
+        self.assertEqual(tupla_clase[1], 'ocurriendo', "Error: El estado de la clase no se modificó.")
 
 """
 
