@@ -12,6 +12,9 @@ def crear_actividad(cursor: sqlite.Cursor, nombre: str, precio_mensual: float) -
         algunas cuestiones mas."""
     try:
         return insertar_actividad(cursor, nombre, precio_mensual)
+    except sqlite.IntegrityError as e:
+        print(f" > Error al crear actividad: Actividad '{nombre}' ya existe. Detalles: {e}")
+        return -1
     except Exception as e:
         print(f" > Error al crear actividad: {e}")
         return -1
@@ -21,6 +24,9 @@ def crear_profesor(cursor: sqlite.Cursor, nombre: str, apellido: str, genero: st
         algunas cuestiones mas."""
     try:
         return insertar_profesor(cursor, nombre, apellido, genero, dni)
+    except sqlite.IntegrityError as e:
+        print(f" > Error al crear profesor: DNI {dni} ya existe. Detalles: {e}")
+        return -1
     except Exception as e:
         print(f" > Error al crear profesor: {e}")
         return -1
@@ -30,6 +36,9 @@ def publicar_clase(cursor: sqlite.Cursor, estado: str, actividad_id: int, profes
         algunas cuestiones mas."""
     try:
         return insertar_clase(cursor, estado, actividad_id, profesor_id)
+    except sqlite.IntegrityError as e:
+        print(f" > Error al publicar clase: La clase con ID {actividad_id} ya existe. Detalles: {e}")
+        return -1
     except Exception as e:
         print(f" > Error al publicar clase: {e}")
         return -1
