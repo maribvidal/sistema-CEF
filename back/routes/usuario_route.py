@@ -63,10 +63,13 @@ def editar_perfil_usuario(usuario_dni):
 # endpoint para pruebas
 
 from db.operaciones import listar_usuarios
+from db.operaciones import conectarse_db
 
 @usuario_bp.route("/prueba", methods=["GET"])
 def obtener_usuarios():
-    lista = listar_usuarios()
+    cursor = conectarse_db()
+    lista = listar_usuarios(cursor)
+    cursor.connection.close()
     if lista['status'] == 'error':
         return jsonify({"error": "Error al obtener usuarios", "message": lista['message']}), 500
     if lista['status'] == 'success' and lista['data'] is None:

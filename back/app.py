@@ -4,6 +4,7 @@ from flask import Flask
 from flask_cors import CORS
 from routes import *
 from test_cases import test_consultar_esqueleto, test_insertar_datos, test_login_service
+from db.operaciones.seed_db import insertar_datos
 
 # --- INICIALIZAR BD ---
 reconstruir_db()
@@ -22,9 +23,10 @@ app.register_blueprint(pagos_bp)
 # --- REALIZAR TESTS ---
 cursor = conectarse_db()
 
-test_insertar_datos.intentar_insertar_datos()
-test_consultar_esqueleto.intentar_consultar_esqueleto()
-test_login_service.intentar_login_service()
+insertar_datos(cursor)
+#test_insertar_datos.intentar_insertar_datos(cursor)
+#test_consultar_esqueleto.intentar_consultar_esqueleto()
+#test_login_service.intentar_login_service()
 
 cursor.connection.close()
 

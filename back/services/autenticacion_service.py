@@ -1,5 +1,7 @@
 from db.operaciones.empleados.consultar_db import buscar_empleado_por_correo
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.commitear_db import commitear
 
 # Tabla Usuario/Cliente
 USR_ID = 0
@@ -17,9 +19,11 @@ def login_service(correo: str, contraseña: str):
     """El tipo se refiere a si es cliente, recepcionista 
         o administrador. El rol es necesario para después
         checkear los permisos de ciertos endpoints."""
-    usuario = consultar_usuario_por_correo(correo)
+    cursor = conectarse_db()
+    usuario = consultar_usuario_por_correo(correo, cursor)
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
+        commitear(cursor)
         if usuario['data'][USR_CONTRASENA] != contraseña:
             return {"error": "Contraseña incorrecta"}, 400
 
@@ -33,8 +37,9 @@ def login_service(correo: str, contraseña: str):
             }
         }, 200
 
-    empleado = buscar_empleado_por_correo(correo)
+    empleado = buscar_empleado_por_correo(correo, cursor)
     
+    commitear(cursor)
     if empleado['status'] == 'error':
         return empleado
 
@@ -57,15 +62,23 @@ def login_service(correo: str, contraseña: str):
 
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.commitear_db import commitear
 # Los parametros los tomé en cuenta al ver los text-field del Registro.Vue del frontend, si se necesita agregar o quitar alguno, solo avisenme y lo modifico
 def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fecha_nac: str, correo: str, telefono: str) -> bool:
     # Verificar si el usuario ya existe realizando una constulta a la base de datos
-    if consultar_usuario_por_dni(dni):
+    cursor = conectarse_db()
+
+    usuario_existente = consultar_usuario_por_dni(dni, cursor)
+
+    if usuario_existente['status'] == 'success' and usuario_existente['data'] is not None:
+        commitear(cursor)
         print("El usuario ya está registrado")
         return False
 
     # Insertar el nuevo usuario
-    insertar_usuario(dni, nombre, apellido, contrasena, fecha_nac, correo, telefono, "Otro")
+    insertar_usuario(dni, nombre, apellido, contrasena, fecha_nac, correo, telefono, "Otro", cursor)
+    commitear(cursor)
     print("El usuario registrado exitosamente")
     return True
 

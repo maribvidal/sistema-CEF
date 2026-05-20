@@ -17,7 +17,7 @@ from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchon
 #     res = res.fetchall()
 #     cursor.connection.close()
 #     return res
-def consultar_pagos_de_usuario(usuario_id: int) -> list:
+def consultar_pagos_de_usuario(usuario_id: int, cursor) -> list:
     """Hace una consulta por los pagos de un Usuario con un id pasado por parámetro,
        y devuelve una lista de tuplas. Mantiene el formato original de Mariano."""
     query = f"""
@@ -30,9 +30,9 @@ def consultar_pagos_de_usuario(usuario_id: int) -> list:
         INNER JOIN Clase ON Pago_Pagar_Clase.clase_id = Clase.id
         WHERE Pago.usuario_id = '{usuario_id}';
     """
-    return ejecutar_fetchall(query)
+    return ejecutar_fetchall(query, cursor)
 
-def listar_pagos():
+def listar_pagos(cursor):
     """Hace una consulta por todos los pagos registrados en la base de datos,
         y devuelve una lista de tuplas"""
     query = """
@@ -45,4 +45,4 @@ def listar_pagos():
         FROM Pago p
         INNER JOIN Pago_Pagar_Clase c ON p.id = c.pago_id
     """
-    return ejecutar_fetchall(query)
+    return ejecutar_fetchall(query, cursor)
