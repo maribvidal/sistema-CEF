@@ -1,4 +1,5 @@
-from db.operaciones.exception_handler import ejecutar_insertar 
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.commitear_db import commitear
 
 import datetime
 from datetime import date
@@ -21,4 +22,7 @@ def insertar_clase_ocurrir_sala(clase_id: int, sala_id: int, fecha):
     """Permite insertar una fila para la tabla Clase_Ocurrir_Sala"""
     query = f"""INSERT INTO Clase_Ocurrir_Sala (clase_id, sala_id, fecha)
                 VALUES ({clase_id}, {sala_id}, '{formattear_fecha(fecha)}');"""
-    return ejecutar_insertar(query)
+    cursor = conectarse_db()
+    cursor.execute(query)
+    commitear(cursor)
+    return cursor.lastrowid

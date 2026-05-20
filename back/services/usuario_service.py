@@ -19,7 +19,6 @@ def registrar_usuario_service(
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
         previamente."""
-    print("llegue al service")
 
     def _es_fecha_valida(fecha: str) -> bool:
         """Se devuelve si la fecha es válida o no"""
@@ -68,8 +67,6 @@ def registrar_usuario_service(
         return {
             "error": "El correo electrónico ya se encuentra registrado"
         }, 400
-    
-    print(fecha_nac)
     
     if (_es_fecha_valida(fecha_nac) is False):
         return {
@@ -158,7 +155,6 @@ def editar_perfil_usuario_service(
     
     usuario = consultar_usuario_por_dni(usuario_dni)
     
-
     if not usuario:
         return {
             "error": "Usuario no encontrado"
@@ -192,13 +188,12 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato nuevo para actualizar"
         }, 400
     
-    respuesta = modificar_perfil_usuario(
+    modificar_perfil_usuario(
         usuario_dni,
         correo,
         telefono
     )
     
-
     return {
         "mensaje": "Perfil actualizado exitosamente"
     }, 200

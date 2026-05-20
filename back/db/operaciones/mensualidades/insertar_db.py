@@ -1,4 +1,5 @@
-from db.operaciones.exception_handler import ejecutar_insertar
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.commitear_db import commitear
 
 import datetime
 from datetime import date
@@ -21,4 +22,6 @@ def insertar_mensualidad(fecha_ini, fecha_fin, usuario_id: int):
     """Permite insertar una fila para la tabla Mensualidad"""
     query = f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)
                 VALUES ('{formattear_fecha(fecha_ini)}', '{formattear_fecha(fecha_fin)}', {usuario_id});"""
-    ejecutar_insertar(query)
+    cursor = conectarse_db()
+    cursor.execute(query)
+    commitear(cursor)

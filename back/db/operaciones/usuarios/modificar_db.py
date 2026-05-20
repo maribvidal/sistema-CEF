@@ -20,5 +20,5 @@ def modificar_perfil_usuario(
         WHERE dni = {usuario_dni}
     """
 
-    ejecutar_query(query1)
-    ejecutar_query(query2)
+    print(ejecutar_query(query1))
+    print(ejecutar_query(query2))

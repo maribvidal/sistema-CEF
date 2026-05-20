@@ -1,7 +1,10 @@
-from db.operaciones.exception_handler import ejecutar_insertar 
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.commitear_db import commitear
 
 def insertar_actividad(nombre: str, precio_mensual: float):
     """Permite insertar una fila para la tabla Actividad"""
     query = f"""INSERT INTO Actividad (nombre, precio_mensual)
                 VALUES ('{nombre}', {precio_mensual});"""
-    return ejecutar_insertar(query)
+    cursor = conectarse_db()
+    cursor.execute(query)
+    commitear(cursor)

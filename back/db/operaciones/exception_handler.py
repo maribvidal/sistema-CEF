@@ -90,3 +90,22 @@ def ejecutar_query(query):
             "status": "error",
             "message": str(e)
         }
+
+## Wrapper que realiza una acción y commitea, además de
+## manejar excepciones
+
+def manejar_db(func):
+    def wrapper(*args, **kwargs):
+        try:
+            cursor = conectarse_db()
+            resultado = func(cursor, *args, **kwargs)
+
+            commitear(cursor)
+            print(" > Operación realizada con éxito")
+            return resultado
+
+        except Exception as e:
+            print(f" > Error al realizar la operación: {str(e)}")
+            cursor.connection.close()
+
+    return wrapper
