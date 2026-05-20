@@ -4,6 +4,7 @@ import SvgIcon from '@jamescoyle/vue-icon'
 import App from './App.vue'
 import router from './router'
 import vuetify from './plugins/vuetify'
+import { initAuth } from './services/UsuariosServices.js'
 import './assets/main.css'
 
 const app = createApp(App)
@@ -14,5 +15,8 @@ app.component('svg-icon', SvgIcon)
 app.use(createPinia())
 app.use(router)
 app.use(vuetify)
+
+// Inicializar autenticación desde token guardado en localStorage
+initAuth()
 
 app.mount('#app')

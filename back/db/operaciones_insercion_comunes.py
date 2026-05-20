@@ -37,7 +37,9 @@ def publicar_clase(cursor: sqlite.Cursor, estado: str, actividad_id: int, profes
     try:
         return insertar_clase(cursor, estado, actividad_id, profesor_id)
     except sqlite.IntegrityError as e:
-        print(f" > Error al publicar clase: La clase con ID {actividad_id} ya existe. Detalles: {e}")
+        print(f" > Error al publicar clase: Error de integridad. Detalles: {e}")
+        if ("FOREIGN KEY constraint failed" in str(e)):
+            print("   - Verifique que el ID de actividad y profesor existan.")
         return -1
     except Exception as e:
         print(f" > Error al publicar clase: {e}")

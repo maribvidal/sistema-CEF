@@ -18,13 +18,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { RouterLink, RouterView } from 'vue-router'
+import { ref, onMounted, watchEffect } from 'vue'
+import { useAuth } from '@/services/UsuariosServices.js'
 
 import HamburgerButton from './components/HamburgerButton.vue'
 import MenuBar from './components/MenuBar.vue'
 import NavBar from './components/NavBar.vue'
 
 const menuOpen = ref(false)
+
+const { isLoggedIn, userRole, fetchUserProfile } = useAuth()
 const appMenuIcons = {
   home: 'mdi-home',
   login: 'mdi-login',
@@ -35,7 +39,13 @@ const appMenuIcons = {
   accountnew: 'mdi-account-plus',
   moon: 'mdi-moon-waning-crescent',
 }
+onMounted(() => {
+  if (isLoggedIn.value) {
+    fetchUserProfile()
+  }
+})
 </script>
+
 
 <style scoped>
 

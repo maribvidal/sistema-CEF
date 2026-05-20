@@ -1,3 +1,4 @@
+from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
@@ -19,6 +20,8 @@ def registrar_usuario_service(
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
         previamente."""
+
+    cursor = conectarse_db()
 
     def _es_fecha_valida(fecha: str) -> bool:
         """Se devuelve si la fecha es válida o no"""
@@ -81,6 +84,7 @@ def registrar_usuario_service(
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
     insertar_usuario(
+        cursor,
         dni,
         nombre,
         apellido,
@@ -91,17 +95,22 @@ def registrar_usuario_service(
         genero
     )
 
+    cursor.connection.close()
+
     return {
         "mensaje": "Usuario registrado exitosamente"
     }, 201
     
 def obtener_perfil_usuario_service(usuario_id: int):
-    usuario = consultar_usuario_por_id(usuario_id)
+    cursor = conectarse_db()
+    usuario = consultar_usuario_por_id(cursor, usuario_id)
 
     if usuario['status'] == 'error':
+        cursor.connection.close()
         return usuario
     
     if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -119,26 +128,31 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "genero": usuario['data'][8]
     }
 
+    cursor.connection.close()
     return {
         "perfil": perfil
     }, 200
     
 def listar_pagos_usuario_service(usuario_id: int):
-    usuario = consultar_usuario_por_id(usuario_id)
+    cursor = conectarse_db()
+    usuario = consultar_usuario_por_id(cursor, usuario_id)
 
     if not usuario:
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
     
     ## aca hay un tema y es que me tira que no hay pagos para usuarios que si los tienen
-    pagos = consultar_pagos_de_usuario(usuario_id)
+    pagos = consultar_pagos_de_usuario(cursor, usuario_id)
 
     if not pagos:
+        cursor.connection.close()
         return {
             "error": "No se encontraron pagos para este usuario"
         }, 404
 
+    cursor.connection.close()
     return {
         "pagos": pagos['data']
     }, 200
@@ -148,14 +162,17 @@ def editar_perfil_usuario_service(
     correo: str,
     telefono: str
 ):
+    cursor = conectarse_db()
     if correo is None and telefono is None:
+        cursor.connection.close()
         return {
             "error": "No se proporcionó ningún dato para actualizar"
         }, 400
     
-    usuario = consultar_usuario_por_dni(usuario_dni)
+    usuario = consultar_usuario_por_dni(cursor, usuario_dni)
     
     if not usuario:
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -188,12 +205,15 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato nuevo para actualizar"
         }, 400
     
+    cursor = conectarse_db()
     modificar_perfil_usuario(
+        cursor,
         usuario_dni,
         correo,
         telefono
     )
-    
+    cursor.connection.close()
+
     return {
         "mensaje": "Perfil actualizado exitosamente"
     }, 200

@@ -2,7 +2,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones import listar_clases
 from db.operaciones_insercion_comunes import publicar_clase
 from db.operaciones_eliminar_comunes import eliminar_clase_por_id
-from.db.operaciones_modificar_comunes import modificar_clase
+from db.operaciones_modificar_comunes import modificar_clase
 
 def listar_clases_service():
     """Service que lista las clases"""
