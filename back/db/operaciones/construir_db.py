@@ -24,10 +24,10 @@ def reconstruir_db():
     
     try:
         os.remove(ruta_completa)
-        print("Base de datos anterior eliminada.")
+        print(" > Base de datos anterior eliminada.")
     except FileNotFoundError:
         # Si no existe, no hacemos nada y dejamos que el programa siga
-        print("La base de datos no existía, saltando la eliminación.")
+        print(" > La base de datos no existía, saltando la eliminación.")
         
     construir_db()
 
@@ -46,8 +46,8 @@ def construir_db():
     construir_tablas(cursor)
 
     # Prueba de que la BD se creó exitosamente 
-    res = cursor.execute("SELECT name FROM sqlite_master")
-    print(res.fetchall())
+    # res = cursor.execute("SELECT name FROM sqlite_master")
+    # print(res.fetchall())
 
     # Cerrar la conexión
     conexion.close()
