@@ -31,24 +31,22 @@ def publicar_clase():
 
     return jsonify(respuesta), status
 
-def eliminar_clase():
+@clases_bp.route("/clases/<int:id_clase>", methods=["DELETE"])
+def eliminar_clase(id_clase):
     """Este endpoint permite eliminar una clase específica. 
         Recibe el ID de la clase a eliminar en formato JSON."""
-    data = request.get_json()
-
-    id_clase = data.get("id_clase")
 
     respuesta, status = eliminar_clase_service(id_clase)
 
     return jsonify(respuesta), status
 
-def modificar_clase():
+@clases_bp.route("/clases/<int:id_clase>", methods=["PUT"])
+def modificar_clase(id_clase):
     """Este endpoint permite modificar los detalles de una 
         clase específica. Recibe el ID de la clase a modificar 
         y los nuevos datos en formato JSON."""
     data = request.get_json()
 
-    id_clase = data.get("id_clase")
     estado = data.get("estado")
     id_actividad = data.get("id_actividad")
     id_profesor = data.get("id_profesor")

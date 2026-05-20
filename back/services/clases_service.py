@@ -42,7 +42,7 @@ def publicar_clase_service(
     cursor.connection.close()
     return {
         "mensaje": "Clase publicada exitosamente."
-    }
+    }, 201
 
 def modificar_clase_service(
     clase_id: int,
@@ -65,7 +65,7 @@ def modificar_clase_service(
     cursor.connection.close()
     return {
         "mensaje": "Clase modificada exitosamente."
-    }
+    }, 200
 
 def eliminar_clase_service(clase_id: int):
     """Service que elimina una clase"""
@@ -83,4 +83,4 @@ def eliminar_clase_service(clase_id: int):
     cursor.connection.close()
     return {
         "mensaje": "Clase eliminada exitosamente."
-    }
+    }, 200

@@ -3,7 +3,7 @@ from db.operaciones.conectar_db import conectarse_db
 from flask import Flask
 from flask_cors import CORS
 from routes import *
-from test_cases import test_consultar_esqueleto, test_insertar_datos, test_login_service
+#from test_cases import test_consultar_esqueleto, test_insertar_datos, test_login_service
 
 from db.operaciones_insercion_comunes import crear_actividad, crear_profesor
 
