@@ -1,0 +1,176 @@
+{
+  "info": {
+    "_postman_id": "9b6e4650-9ebf-4ea7-9803-cf0b3dd770b9",
+    "name": "sistema-CEF",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "16349549"
+  },
+  "item": [
+    {
+      "name": "Usuario",
+      "item": [
+        {
+          "name": "Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/prueba",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "prueba"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "usuarios",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"dni\": 1,\r\n  \"nombre\": \"Maxi\",\r\n  \"apellido\": \"Falasca\",\r\n  \"contraseña\": \"1234\",\r\n  \"correo\": \"maxi@gmail.com\",\r\n  \"telefono\": \"1122334455\",\r\n  \"fecha_nac\": \"2001-05-21\",\r\n  \"genero\": \"M\",\r\n  \"edad\": 22\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "pagosUsuario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/1/pagos",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "1",
+                "pagos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Usuario/<id>/perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/1/perfil",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "1",
+                "perfil"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "usuario/<id>/perfil",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"correo\" : \"juan.perezz@example.com\",\r\n    \"telefono\" : \"123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/12345678/perfil",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "12345678",
+                "perfil"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pagos",
+      "item": [
+        {
+          "name": "pagos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/pagos",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "pagos"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
