@@ -1,19 +1,25 @@
 import jwt
 from datetime import datetime, timedelta
-from db.operaciones.consultar_db import buscar_empleado_por_correo, consultar_usuario_por_correo
 from db.operaciones.empleados.consultar_db import buscar_empleado_por_correo
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 
-# Tabla Usuario/Cliente
+# Tabla Usuario/Cliente (según consultar_usuario_por_correo)
 USR_ID = 0
-USR_NOMBRE = 2
-USR_CONTRASENA = 5
+USR_DNI = 1
+USR_FECHA_NAC = 2
+USR_TELEFONO = 3
+USR_NOMBRE = 4
+USR_APELLIDO = 5
+USR_CORREO = 6
+USR_CONTRASENA = 7
+USR_GENERO = 8
 
 # Tabla Empleado
 EMP_ID = 0
+EMP_DNI = 1
 EMP_NOMBRE = 2
-EMP_TIPO = 3
-EMP_ROL = 4
+EMP_ROL = 3
+EMP_TIPO = 4
 EMP_CONTRASENA = 5
 
 # Clave secreta para firmar JWT (en producción, usar variable de entorno)
@@ -32,8 +38,9 @@ def login_service(correo: str, contraseña: str):
 
         # Generar JWT
         token = _generate_jwt({
-            "id": usuario["id"],
-            "nombre": usuario["nombre"],
+            "id": usuario['data'][USR_ID],
+            "dni": usuario['data'][USR_DNI],
+            "nombre": usuario['data'][USR_NOMBRE],
             "tipo": "CLIENTE",
             "rol": ""
         })
@@ -43,6 +50,7 @@ def login_service(correo: str, contraseña: str):
             "token": token,
             "usuario": {
                 "id": usuario['data'][USR_ID],
+                "dni": usuario['data'][USR_DNI],
                 "nombre": usuario['data'][USR_NOMBRE],
                 "tipo": "CLIENTE",
                 "rol": ""
@@ -62,10 +70,11 @@ def login_service(correo: str, contraseña: str):
 
     # Generar JWT
     token = _generate_jwt({
-        "id": empleado["id"],
-        "nombre": empleado["nombre"],
-        "tipo": empleado["tipo"],
-        "rol": empleado["rol"]
+        "id": empleado['data'][EMP_ID],
+        "dni": empleado['data'][EMP_DNI],
+        "nombre": empleado['data'][EMP_NOMBRE],
+        "tipo": empleado['data'][EMP_TIPO],
+        "rol": empleado['data'][EMP_ROL]
     })
 
     return {
@@ -73,6 +82,7 @@ def login_service(correo: str, contraseña: str):
         "token": token,
         "usuario": {
             "id": empleado['data'][EMP_ID],
+            "dni": empleado['data'][EMP_DNI],
             "nombre": empleado['data'][EMP_NOMBRE],
             "tipo": empleado['data'][EMP_TIPO],
             "rol": empleado['data'][EMP_ROL]
