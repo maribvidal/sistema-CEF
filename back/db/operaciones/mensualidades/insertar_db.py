@@ -1,4 +1,3 @@
-from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.commitear_db import commitear
 
 import datetime
@@ -18,10 +17,10 @@ def formattear_fecha(fecha):
         fecha = parse(fecha, dayfirst=False)
         return fecha.date().strftime("%Y-%m-%d")
 
-def insertar_mensualidad(fecha_ini, fecha_fin, usuario_id: int):
+def insertar_mensualidad(cursor, fecha_ini, fecha_fin, usuario_id: int):
     """Permite insertar una fila para la tabla Mensualidad"""
     query = f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)
                 VALUES ('{formattear_fecha(fecha_ini)}', '{formattear_fecha(fecha_fin)}', {usuario_id});"""
-    cursor = conectarse_db()
     cursor.execute(query)
     commitear(cursor)
+    return cursor.lastrowid

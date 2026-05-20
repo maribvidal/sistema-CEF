@@ -1,2 +1,2 @@
-from db.operaciones.exception_handler import ejecutar_query 
+from db.operaciones.commitear_db import commitear
 

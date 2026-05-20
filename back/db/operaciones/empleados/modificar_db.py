@@ -1,6 +1,6 @@
-from db.operaciones.exception_handler import ejecutar_query 
+from db.operaciones.commitear_db import commitear
 
-def actualizar_rol_empleado(
+def actualizar_rol_empleado(cursor, 
     empleado_id: int,
     nuevo_rol_id: int
 ):
@@ -9,4 +9,5 @@ def actualizar_rol_empleado(
     query = f"""UPDATE Empleado
                 SET rol_id = {nuevo_rol_id}
                 WHERE id = {empleado_id};"""
-    ejecutar_query(query)
+    cursor.execute(query)
+    commitear(cursor)

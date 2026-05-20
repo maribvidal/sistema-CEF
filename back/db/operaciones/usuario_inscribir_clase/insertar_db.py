@@ -1,4 +1,3 @@
-from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.commitear_db import commitear
 
 import datetime
@@ -18,10 +17,10 @@ def formattear_fecha(fecha):
         fecha = parse(fecha, dayfirst=False)
         return fecha.date().strftime("%Y-%m-%d")
 
-def insertar_usuario_inscribir_clase(usuario_id: int, clase_id: int, fecha):
+def insertar_usuario_inscribir_clase(cursor, usuario_id: int, clase_id: int, fecha):
     """Permite insertar una fila para la tabla Usuario_Inscribir_Clase"""
     query = f"""INSERT INTO Usuario_Inscribir_Clase (usuario_id, clase_id, fecha)
                 VALUES ({usuario_id}, {clase_id}, '{formattear_fecha(fecha)}');"""
-    cursor = conectarse_db()
     cursor.execute(query)
     commitear(cursor)
+    return cursor.lastrowid
