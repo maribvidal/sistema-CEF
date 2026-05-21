@@ -3,3 +3,5 @@ from .usuario_route import usuario_bp
 from .clases_route import clases_bp
 from .pagos_route import pagos_bp
 from .salas_route import salas_bp
+from .actividades_route import actividades_bp
+from .profesores_route import profesores_bp

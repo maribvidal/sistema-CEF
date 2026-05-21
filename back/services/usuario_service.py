@@ -5,7 +5,6 @@ from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.commitear_db import commitear
 
 import datetime
 
@@ -60,35 +59,35 @@ def registrar_usuario_service(
     cursor = conectarse_db()
     respuesta = consultar_usuario_por_dni(dni, cursor)
     if respuesta['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return respuesta, 400
     
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "El DNI ya se encuentra registrado"
         }, 400
     
     respuesta = consultar_usuario_por_correo(correo, cursor)
     if respuesta['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "El correo electrónico ya se encuentra registrado"
         }, 400
     
     if (_es_fecha_valida(fecha_nac) is False):
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "La fecha de nacimiento no es válida."
         }, 400
     
     print("cantidad años: ", _obtener_años_hasta_2026(fecha_nac))
     if _obtener_años_hasta_2026(fecha_nac) < 14:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "El usuario debe ser mayor de 14 años"
         }, 400
@@ -109,12 +108,12 @@ def registrar_usuario_service(
     )
     
     if res['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": res['message']
         }, 500
 
-    commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Usuario registrado exitosamente"
     }, 201
@@ -147,7 +146,7 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "rol_id": usuario['data'][9]
     }
 
-    commitear(cursor)
+    cursor.connection.close()
     return {
         "perfil": perfil
     }, 200
@@ -181,7 +180,7 @@ def listar_pagos_usuario_service(usuario_id: int):
             "error": "No se encontraron pagos para este usuario"
         }, 404
 
-    commitear(cursor)
+    cursor.connection.close()
     cursor.connection.close()
     return pagos['data'], 200
     
@@ -257,7 +256,7 @@ def editar_perfil_usuario_service(
             "error": res['message']
         }, 500
 
-    commitear(cursor)
+    cursor.connection.close()
     cursor.connection.close()
     return {
         "mensaje": "Perfil actualizado exitosamente"

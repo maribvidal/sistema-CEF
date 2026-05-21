@@ -1,5 +1,4 @@
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.commitear_db import commitear
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.modificar_db import modificar_clase_ocurrir_sala
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id
@@ -15,18 +14,18 @@ def listar_clases_service():
     respuesta = listar_clases(cursor)
 
     if respuesta['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         cursor.connection.close()
         return respuesta, 400
 
     if respuesta['status'] == 'success' and not respuesta['data']:
-        commitear(cursor)
+        cursor.connection.close()
         cursor.connection.close()
         return {
             "error": "No se encontraron clases"
         }, 404
 
-    commitear(cursor)
+    cursor.connection.close()
     cursor.connection.close()
     return respuesta['data'], 200
 
@@ -55,7 +54,7 @@ def publicar_clase_service(
         cursor.connection.close()
         return respuesta2, 400
 
-    commitear(cursor)
+    cursor.connection.close()
     cursor.connection.close()
     return {
         "mensaje": "Clase publicada exitosamente."
@@ -98,7 +97,7 @@ def modificar_clase_service(
         cursor.connection.close()
         return respuesta2, 400
     
-    commitear(cursor)
+    cursor.connection.close()
 
     cursor.connection.close()
 
@@ -132,7 +131,7 @@ def eliminar_clase_service(clase_id: int):
         cursor.connection.close()
         return respuesta, 400
 
-    commitear(cursor)
+    cursor.connection.close()
     cursor.connection.close()
     return {
         "mensaje": "Clase eliminada exitosamente."
@@ -161,7 +160,7 @@ def cancelar_clase_service(clase_id: int):
         cursor.connection.close()
         return respuesta, 400
 
-    commitear(cursor)
+    cursor.connection.close()
     cursor.connection.close()
     return {
         "mensaje": "Clase cancelada exitosamente."
