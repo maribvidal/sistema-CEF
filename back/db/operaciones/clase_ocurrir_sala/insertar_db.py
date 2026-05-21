@@ -17,8 +17,8 @@ def formattear_fecha(fecha):
         fecha = parse(fecha, dayfirst=False)
         return fecha.date().strftime("%Y-%m-%d")
 
-def insertar_clase_ocurrir_sala(clase_id: int, sala_id: int, fecha):
+def insertar_clase_ocurrir_sala(clase_id: int, sala_id: int, fecha, cursor):
     """Permite insertar una fila para la tabla Clase_Ocurrir_Sala"""
     query = f"""INSERT INTO Clase_Ocurrir_Sala (clase_id, sala_id, fecha)
                 VALUES ({clase_id}, {sala_id}, '{formattear_fecha(fecha)}');"""
-    return ejecutar_insertar(query)
+    return ejecutar_insertar(query, cursor)

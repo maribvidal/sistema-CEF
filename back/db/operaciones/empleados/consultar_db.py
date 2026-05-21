@@ -1,11 +1,11 @@
 from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
-def obtener_empleados() -> list:
+def obtener_empleados(cursor) -> list:
     """Hace una consulta para listar todos los empleados, y devuelve una lista de tuplas"""
-    return ejecutar_fetchall("SELECT * FROM Empleado")
+    return ejecutar_fetchall("SELECT * FROM Empleado", cursor)
 
 # TODO: Cambiar
-def buscar_empleado_por_correo(correo: str) -> tuple:
+def buscar_empleado_por_correo(correo: str, cursor) -> tuple:
     """Hace una consulta por un Empleado con un correo pasado por parámetro,
         y devuelve una tupla. Corregidos los errores de sintaxis y alias."""
     query = f"""
@@ -24,4 +24,4 @@ def buscar_empleado_por_correo(correo: str) -> tuple:
         LEFT JOIN recepcionista re ON e.id = re.id 
         WHERE c.correo = '{correo}'      
     """;
-    return ejecutar_fetchone(query)
+    return ejecutar_fetchone(query, cursor)

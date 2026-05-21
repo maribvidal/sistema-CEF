@@ -1,19 +1,12 @@
-from db.operaciones.commitear_db import commitear
-from db.operaciones.conectar_db import conectarse_db
-
-def ejecutar_fetchall(query):
+def ejecutar_fetchall(query, cursor):
 
     try:
-        cursor = conectarse_db()
-
         cursor.execute(query)
 
         resultado = cursor.fetchall()
 
         # me tiraba error por el tipo de dato que devuelve el fetchall, así que lo convertí a una lista de diccionarios
         datos = [dict(fila) for fila in resultado]
-
-        cursor.connection.close()
 
         return {
             "status": "success",
@@ -27,16 +20,12 @@ def ejecutar_fetchall(query):
         }
 
 
-def ejecutar_fetchone(query):
+def ejecutar_fetchone(query, cursor):
 
     try:
-        cursor = conectarse_db()
-
         cursor.execute(query)
 
         resultado = cursor.fetchone()
-
-        cursor.connection.close()
 
         return {
             "status": "success",
@@ -49,16 +38,15 @@ def ejecutar_fetchone(query):
             "message": str(e)
         }
         
-def ejecutar_insertar(query):
+def ejecutar_insertar(query, cursor):
 
     try:
-        cursor = conectarse_db()
 
         cursor.execute(query)
         
         nuevo_id = cursor.lastrowid
 
-        commitear(cursor)
+        cursor.connection.commit()
 
         return {
             "status": "success",
@@ -71,14 +59,13 @@ def ejecutar_insertar(query):
             "message": str(e)
         }
 
-def ejecutar_query(query):
+def ejecutar_query(query, cursor):
 
     try:
-        cursor = conectarse_db()
 
         cursor.execute(query)
 
-        commitear(cursor)
+        cursor.connection.commit()
 
         return {
             "status": "success",
