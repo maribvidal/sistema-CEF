@@ -14,6 +14,7 @@
 
               <div class="text-h5">{{ userName }} {{ lastName }}</div>
               <div class="text-subtitle-1 text--secondary">{{ userEmail }}</div>
+              <div class="text-subtitle-1 text--secondary">Fecha de nacimiento: <strong>{{ userBirthDate }}</strong></div>
               <div class="mt-3">Rol: <strong>{{ userRole }}</strong></div>
 
               <v-row class="mt-6" align="center" v-if="isOwnProfile">
@@ -37,10 +38,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/services/UsuariosServices.js'
 import defaultLogo from '@/assets/logoLargo.png'
+import DateFormatterService from '@/services/DateFormatterService.js'
 
 const router = useRouter()
 const route = useRoute()
 const { logout, fetchUserProfileById, userProfile: currentUser } = useAuth()
+const { formatSpanishDate } = DateFormatterService
 
 const profileData = ref(null)
 
@@ -61,6 +64,7 @@ const userName = computed(() => profileData.value?.nombre || 'Usuario')
 const lastName = computed(() => profileData.value?.apellido || '')
 const userEmail = computed(() => profileData.value?.correo || '')
 const userRole = computed(() => profileData.value?.rol || profileData.value?.tipo || 'Visitante')
+const userBirthDate = computed(() => formatSpanishDate(profileData.value?.fecha_nac))
 const avatarSrc = computed(() => profileData.value?.avatarUrl || defaultLogo)
 
 // Mostrar botones solo si el perfil que estamos viendo es el nuestro

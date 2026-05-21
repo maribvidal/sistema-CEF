@@ -27,25 +27,62 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import SlideshowItem from '@/components/SlideShowItem.vue'
 
 // Opcional: Si quieres que Vite empaquete las imágenes, impórtalas o usa de forma estática su ruta.
 // Asegúrate de agregar las imágenes correspondientes en la carpeta src/assets/assetsHome/
 import img1 from '@/assets/assetsHome/slide1.jpg'
 import img2 from '@/assets/assetsHome/slide2.jpg'
-import img3 from '@/assets/assetsHome/slide3.jpg'
+import img1phone from '@/assets/assetsHome/slide1phone.png'
+import img2phone from '@/assets/assetsHome/slide2phone.png'
 //import placeholderImage from '@/assets/images/placeholder.png'
 
 // --- CONFIGURACIÓN ---
 const SLIDESHOW_INTERVAL = 10000 // en milisegundos
 
 // --- ESTADO DEL COMPONENTE ---
-const slides = ref([])
+const isMobile = ref(false)
+const slides = computed(() => {
+  if (isMobile.value) {
+    return [
+      {
+        id: 'estatico-1',
+        titulo: 'Título de prueba 1',
+        imagenUrl: img1phone,
+        autor: 'Autor 1'
+      },
+      {
+        id: 'estatico-2',
+        titulo: 'Título de prueba 2',
+        imagenUrl: img2phone,
+        autor: 'Autor 2'
+      }
+    ]
+  }
+  return [
+    {
+      id: 'estatico-1',
+      titulo: 'Título de prueba 1',
+      imagenUrl: img1, 
+      autor: 'Autor 1'
+    },
+    {
+      id: 'estatico-2',
+      titulo: 'Título de prueba 2',
+      imagenUrl: img2,
+      autor: 'Autor 2'
+    }
+  ]
+})
 const currentSlide = ref(0)
 const isLoading = ref(true)
 const error = ref(null)
 let slideInterval = null
+
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768
+}
 
 // --- LÓGICA DE NAVEGACIÓN ---
 /**
@@ -95,23 +132,7 @@ const resetInterval = () => {
  */
 const fetchLatestArticles = () => {
   try {
-    // Array estático de prueba para el slideshow. 
-    // Puedes reemplazar las imágenes usando imports o rutas directas si están en /public/
-    slides.value = [
-      {
-        id: 'estatico-1',
-        titulo: 'Título de prueba 1',
-        // imagenUrl: img1, // Descomentar cuando tengas la imagen importada
-        imagenUrl: img1, 
-        autor: 'Autor 1'
-      },
-      {
-        id: 'estatico-2',
-        titulo: 'Título de prueba 2',
-        imagenUrl: img2,
-        autor: 'Autor 2'
-      }
-    ]
+    // Array estático de prueba manejado por la propiedad computada 'slides'.
   } catch (err) {
     console.error('Error al cargar datos locales para el slideshow:', err)
     error.value = 'No se pudieron cargar los artículos estáticos.'
@@ -122,6 +143,9 @@ const fetchLatestArticles = () => {
 
 // --- HOOKS DE CICLO DE VIDA ---
 onMounted(() => {
+  handleResize()
+  window.addEventListener('resize', handleResize)
+  
   fetchLatestArticles()
   if (!error.value) {
     startSlideshow()
@@ -129,6 +153,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
   clearInterval(slideInterval)
 })
 </script>
@@ -194,6 +219,7 @@ onBeforeUnmount(() => {
   .slideshow{
     width: 100%;
   }
+
     
 }
 </style>
