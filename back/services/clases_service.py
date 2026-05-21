@@ -145,10 +145,9 @@ def eliminar_clase_service(clase_id: int):
             "error": "Clase no encontrada"
         }, 404
 
-    respuesta = borrar_clase(clase_id, cursor)
+    respuesta = modificar_clase(clase_id, 'Borrada', id_actividad, id_profesor, cursor)
 
     if respuesta['status'] == 'error':
-        # Hay que avisar si hay pagos pendientes
         cursor.connection.close()
         return respuesta
 
