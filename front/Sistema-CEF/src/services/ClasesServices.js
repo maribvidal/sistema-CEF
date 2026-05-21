@@ -20,10 +20,17 @@ export const ClasesService = {
     throw new Error(response.data?.message || 'Error al obtener actividades')
   },
   listarProfesores: async () => {
-    const response = await apiClient.get('/empleados')
+    const response = await apiClient.get('/profesores')
     if (response.data?.status === 'success') {
       return response.data.data
     }
     throw new Error(response.data?.message || 'Error al obtener profesores')
+  },
+  listarSalas: async () => {
+    const response = await apiClient.get('/salas')
+    if (response.data?.status === 'success') {
+      return response.data.data
+    }
+    throw new Error(response.data?.message || 'Error al obtener salas')
   }
 }

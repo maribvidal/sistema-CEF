@@ -190,7 +190,9 @@
               <v-col cols="12" sm="6">
                 <v-select
                   v-model="nuevaClase.sala"
-                  :items="['1', '2', '3']"
+                  :items="salas"
+                  item-title="nombre"
+                  item-value="id"
                   label="Sala"
                   variant="outlined"
                   density="compact"
@@ -232,13 +234,14 @@ const nuevaClase = ref({
 const clases = ref([])
 const actividades = ref([])
 const profesores = ref([])
+const salas = ref([])
 
 const fetchAuxData = async () => {
   try {
-    const [resAct, resProf] = await Promise.all([
+    const [resAct, resProf, resSalas] = await Promise.all([
       ClasesService.listarActividades(),
-      ClasesService.listarProfesores()
-    ])
+      ClasesService.listarProfesores(),
+      ClasesService.listarSalas()])
     
     if (Array.isArray(resAct)) {
       actividades.value = resAct.map(a => ({ id: a.id ?? a[0], nombre: a.nombre ?? a[1] }))
@@ -247,6 +250,10 @@ const fetchAuxData = async () => {
       // El backend devuelve: 0: id, 1: dni, 2: nombre, 3: apellido...
       profesores.value = resProf.map(p => ({ id: p.id ?? p[0], nombre: `${p.nombre ?? p[2]} ${p.apellido ?? p[3]}` }))
     }
+    if (Array.isArray(resSalas)) {
+      salas.value = resSalas.map(s => ({ id: s.id ?? s[0], nombre: s.nombre ?? s[1] }))
+    }
+  
   } catch (error) {
     console.error('Error al cargar datos auxiliares:', error)
   }
@@ -304,7 +311,7 @@ const abrirDialogCrear = () => {
 const cerrarDialog = () => {
   dialog.value = false
   nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
-  fechaSeleccionada.value = null
+  dia.value = null
   isEditing.value = false
 }
 
