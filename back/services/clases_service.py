@@ -78,11 +78,15 @@ def modificar_clase_service(
 def eliminar_clase_service(clase_id: int):
     """Service que elimina una clase"""
 
+    ## Recibir id del usuario. Buscar rol del usuario.
+    ## Si no tiene el permiso necesario, tirar un error.
+
     cursor = conectarse_db()
 
     respuesta = borrar_clase(clase_id, cursor)
 
     if respuesta['status'] == 'error':
+        # Hay que avisar si hay pagos pendientes
         cursor.connection.close()
         return respuesta
 

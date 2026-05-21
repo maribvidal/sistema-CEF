@@ -1,5 +1,11 @@
 # Documentación backend
 
+## Roles
+
+- 1: Administrador
+- 2: Recepcionista
+- 3: Usuario
+
 ## API
 
 ### Servidor

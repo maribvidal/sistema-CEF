@@ -17,7 +17,8 @@ def registrar_usuario_service(
     fecha_nac: str,
     correo: str,
     telefono: str,
-    genero: str
+    genero: str,
+    rol: int
 ):
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
@@ -48,7 +49,8 @@ def registrar_usuario_service(
             {"name": "fecha_nac", "value": fecha_nac},
             {"name": "correo", "value": correo},
             {"name": "telefono", "value": telefono},
-            {"name": "genero", "value": genero}
+            {"name": "genero", "value": genero},
+            {"name": "rol", "value": rol}
         ]
     )
     
@@ -101,6 +103,7 @@ def registrar_usuario_service(
         correo,
         telefono,
         genero,
+        rol,
         cursor
     )
 
@@ -133,7 +136,8 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "fecha_nac": usuario['data'][5],
         "correo": usuario['data'][6],
         "telefono": usuario['data'][7],
-        "genero": usuario['data'][8]
+        "genero": usuario['data'][8],
+        "rol": usuario['rol'][9]
     }
 
     commitear(cursor)
@@ -187,7 +191,6 @@ def editar_perfil_usuario_service(
     
     cursor = conectarse_db()
     usuario = consultar_usuario_por_dni(usuario_dni, cursor)
-    
 
     if usuario['status'] == 'error':
         commitear(cursor)
