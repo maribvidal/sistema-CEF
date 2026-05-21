@@ -26,9 +26,13 @@
                 Registrarse
             </v-btn>
             <!-- Mostrar nombre de usuario si está autenticado -->
-            <span v-if="isLoggedIn" class="ml-4 text-subtitle-2 font-weight-medium">
-                {{ userProfile?.nombre }}
-            </span>
+            <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" :to="{ name: 'perfil', params: { id: userProfile?.id } }" v-if="isLoggedIn">
+                <v-avatar size="32" class="mr-2" v-if="userProfile?.avatarUrl">
+                    <v-img :src="userProfile?.avatarUrl" alt="Foto de perfil" cover></v-img>
+                </v-avatar>
+                <v-icon size="32" class="mr-2" v-else>mdi-account-circle</v-icon>
+                Mi Perfil: {{ userProfile?.nombre || 'Usuario' }}
+            </v-btn>
             <!-- Botón de logout si está autenticado -->
             <v-btn variant="flat" color="red-darken-2" class="text-none text-subtitle-1 ml-2 mr-2" @click="handleLogout" v-if="isLoggedIn">
                 <v-icon start>mdi-logout</v-icon>
