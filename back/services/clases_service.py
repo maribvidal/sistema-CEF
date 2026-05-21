@@ -168,3 +168,32 @@ def eliminar_clase_service(clase_id: int):
     return {
         "mensaje": "Clase eliminada exitosamente."
     }, 200
+
+def cancelar_clase_service(clase_id: int):
+    """Service que cancela una clase"""
+
+    cursor = conectarse_db()
+
+    respuesta_consulta = consultar_clase_por_id(clase_id, cursor)
+
+    if respuesta_consulta['status'] == 'error':
+        cursor.connection.close()
+        return respuesta_consulta
+
+    if respuesta_consulta['status'] == 'success' and not respuesta_consulta['data']:
+        cursor.connection.close()
+        return {
+            "error": "Clase no encontrada"
+        }, 404
+
+    respuesta = modificar_clase_estado(clase_id, 'Cancelada', cursor)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return respuesta
+
+    commitear(cursor)
+    cursor.connection.close()
+    return {
+        "mensaje": "Clase cancelada exitosamente."
+    }, 200
