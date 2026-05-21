@@ -1,11 +1,9 @@
 from datetime import datetime, timedelta
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.commitear_db import commitear
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.commitear_db import commitear
 
 import jwt
 
@@ -41,7 +39,7 @@ def login_service(correo: str, contraseña: str) -> tuple:
     print("Consultando usuario por correo...")
     
     usuario = consultar_usuario_por_correo(correo, cursor)
-    commitear(cursor)
+    cursor.connection.close()
     
     print(" resultado consulta usuario: ", dict(usuario['data']) if usuario['data'] else None)
     if usuario["status"] == "error":
@@ -134,7 +132,7 @@ def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fech
             "error" : resultado['message']
         }, 500
     print("El usuario registrado exitosamente")
-    commitear(cursor)
+    cursor.connection.close()
     cursor.connection.close()
     return {
         "mensaje": "Usuario registrado exitosamente",

@@ -1,7 +1,5 @@
-from flask import Blueprint, request, jsonify
-from services.clases_service import (
-    listar_salas_service
-)
+from flask import Blueprint, jsonify
+from services.salas_service import listar_salas_service
 
 salas_bp = Blueprint('salas', __name__)
 
@@ -12,4 +10,3 @@ def listar_salas():
     respuesta, status = listar_salas_service()
     
     return jsonify(respuesta), status
-

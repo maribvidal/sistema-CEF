@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from services.clases_service import (
     listar_clases_service, publicar_clase_service, 
     modificar_clase_service, eliminar_clase_service,
-    listar_actividades_service, listar_profesores_service
+    cancelar_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -12,20 +12,6 @@ def listar_clases():
     """Este endpoint permite listar todas las clases disponibles 
         en el sistema."""
     respuesta, status = listar_clases_service()
-    
-    return jsonify(respuesta), status
-
-@clases_bp.route('/actividades', methods=['GET'])
-def listar_actividades():
-    """Endpoint para obtener la lista de actividades."""
-    respuesta, status = listar_actividades_service()
-    
-    return jsonify(respuesta), status
-
-@clases_bp.route('/empleados', methods=['GET'])
-def listar_profesores():
-    """Endpoint para obtener la lista de profesores (empleados)."""
-    respuesta, status = listar_profesores_service()
     
     return jsonify(respuesta), status
 
@@ -89,11 +75,14 @@ def modificar_clase(id_clase):
 
     return jsonify(respuesta), status
 
-"""
-def cancelar_clase():
-    Este endpoint permite cancelar una clase específica. 
-        Recibe el ID de la clase a cancelar en formato JSON.
-    data = request.get_json()
+## Habría que ver si a una clase cancelada hay que hacerle otra
+## cosa que no sea cambiarle el estado.
 
-    # Tengo que ver como se cancelaba una clase
-"""
+@clases_bp.route("/clases/<int:id_clase>", methods=["PATCH"])
+def cancelar_clase(id_clase):
+    """Este endpoint permite cancelar una clase específica. 
+        Recibe el ID de la clase a cancelar en formato JSON."""
+
+    respuesta, status = cancelar_clase_service(id_clase)
+
+    return jsonify(respuesta), status
