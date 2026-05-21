@@ -4,6 +4,8 @@ from db.operaciones.clases.consultar_db import listar_clases
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.borrar_db import borrar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
+from db.operaciones.actividades.consultar_db import listar_actividades
+from db.operaciones.profesores.consultar_db import listar_profesores
 
 def listar_clases_service():
     """Service que lista las clases"""
@@ -26,9 +28,24 @@ def listar_clases_service():
 
     commitear(cursor)
     cursor.connection.close()
-    return {
-        "clases": respuesta['data']
-    }, 200
+    return respuesta, 200
+
+def listar_actividades_service():
+    """Service que lista las actividades"""
+    cursor = conectarse_db()
+    respuesta = listar_actividades(cursor)
+    commitear(cursor)
+    cursor.connection.close()
+    # No devolvemos 404 si está vacío para que el select del front no falle, solo devolvemos la lista vacía
+    return respuesta, 200
+
+def listar_profesores_service():
+    """Service que lista los profesores"""
+    cursor = conectarse_db()
+    respuesta = listar_profesores(cursor)
+    commitear(cursor)
+    cursor.connection.close()
+    return respuesta, 200
 
 def publicar_clase_service(
     estado: str,
