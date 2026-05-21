@@ -21,10 +21,7 @@ def ejecutar_fetchall(query, cursor):
             "message": str(e)
         }
 
-
-def ejecutar_fetchone(query, cursor):
-    """Ejecuta una consulta SQL que devuelve una sola fila y
-        maneja las excepciones."""
+def ejecutar_fetchone(query, cursor) -> dict:
     try:
         cursor.execute(query)
         resultado = cursor.fetchone()
