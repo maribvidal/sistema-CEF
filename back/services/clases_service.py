@@ -21,7 +21,7 @@ def listar_clases_service():
     if respuesta['status'] == 'error':
         commitear(cursor)
         cursor.connection.close()
-        return respuesta
+        return respuesta, 400
 
     if respuesta['status'] == 'success' and not respuesta['data']:
         commitear(cursor)
@@ -84,7 +84,7 @@ def publicar_clase_service(
     if respuesta2['status'] == 'error':
         print(respuesta2['message'])
         cursor.connection.close()
-        return respuesta2
+        return respuesta2, 400
 
     commitear(cursor)
     cursor.connection.close()
@@ -109,7 +109,7 @@ def modificar_clase_service(
 
     if respuesta_consulta['status'] == 'error':
         cursor.connection.close()
-        return respuesta_consulta
+        return respuesta_consulta, 400
 
     if respuesta_consulta['status'] == 'success' and not respuesta_consulta['data']:
         cursor.connection.close()
@@ -121,13 +121,13 @@ def modificar_clase_service(
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta
+        return respuesta, 400
 
     respuesta2 = modificar_clase_ocurrir_sala(clase_id, sala, fecha, hora, cursor)
 
     if respuesta2['status'] == 'error':
         cursor.connection.close()
-        return respuesta2
+        return respuesta2, 400
     
     commitear(cursor)
 
@@ -149,7 +149,7 @@ def eliminar_clase_service(clase_id: int):
 
     if respuesta_consulta['status'] == 'error':
         cursor.connection.close()
-        return respuesta_consulta
+        return respuesta_consulta, 400
 
     if respuesta_consulta['status'] == 'success' and not respuesta_consulta['data']:
         cursor.connection.close()
@@ -161,7 +161,7 @@ def eliminar_clase_service(clase_id: int):
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta
+        return respuesta, 400
 
     commitear(cursor)
     cursor.connection.close()
@@ -178,7 +178,7 @@ def cancelar_clase_service(clase_id: int):
 
     if respuesta_consulta['status'] == 'error':
         cursor.connection.close()
-        return respuesta_consulta
+        return respuesta_consulta, 400
 
     if respuesta_consulta['status'] == 'success' and not respuesta_consulta['data']:
         cursor.connection.close()
@@ -190,7 +190,7 @@ def cancelar_clase_service(clase_id: int):
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta
+        return respuesta, 400
 
     commitear(cursor)
     cursor.connection.close()

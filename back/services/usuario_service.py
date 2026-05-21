@@ -61,7 +61,7 @@ def registrar_usuario_service(
     respuesta = consultar_usuario_por_dni(dni, cursor)
     if respuesta['status'] == 'error':
         commitear(cursor)
-        return respuesta
+        return respuesta, 400
     
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
         commitear(cursor)
@@ -125,7 +125,7 @@ def obtener_perfil_usuario_service(usuario_id: int):
 
     if usuario['status'] == 'error':
         cursor.connection.close()
-        return usuario
+        return usuario, 400
     
     if usuario['status'] == 'success' and not usuario['data']:
         cursor.connection.close()
@@ -158,7 +158,7 @@ def listar_pagos_usuario_service(usuario_id: int):
     
     if usuario['status'] == 'error':
         cursor.connection.close()
-        return usuario
+        return usuario, 400
 
     if usuario['status'] == 'success' and not usuario['data']:
         cursor.connection.close()
@@ -229,7 +229,7 @@ def editar_perfil_usuario_service(
 
     if usuario_con_correo['status'] == 'error':
         cursor.connection.close()
-        return usuario_con_correo
+        return usuario_con_correo, 400
     
     
     if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][1] != usuario_dni:

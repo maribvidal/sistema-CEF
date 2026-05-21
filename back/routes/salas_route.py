@@ -12,4 +12,3 @@ def listar_salas():
     respuesta, status = listar_salas_service()
     
     return jsonify(respuesta), status
-
