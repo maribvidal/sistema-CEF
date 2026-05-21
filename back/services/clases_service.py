@@ -23,9 +23,8 @@ def listar_clases_service():
             "error": "No se encontraron clases"
         }, 404
 
-    cursor.connection.commit()
     cursor.connection.close()
-    return respuesta['data'], 200
+    return respuesta, 200
 
 def publicar_clase_service(
     estado: str,
