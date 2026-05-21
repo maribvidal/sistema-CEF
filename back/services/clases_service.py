@@ -15,17 +15,15 @@ def listar_clases_service():
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        cursor.connection.close()
         return respuesta, 400
 
     if respuesta['status'] == 'success' and not respuesta['data']:
-        cursor.connection.close()
         cursor.connection.close()
         return {
             "error": "No se encontraron clases"
         }, 404
 
-    cursor.connection.close()
+    cursor.connection.commit()
     cursor.connection.close()
     return respuesta['data'], 200
 
@@ -54,7 +52,7 @@ def publicar_clase_service(
         cursor.connection.close()
         return respuesta2, 400
 
-    cursor.connection.close()
+    cursor.connection.commit()
     cursor.connection.close()
     return {
         "mensaje": "Clase publicada exitosamente."
@@ -97,8 +95,7 @@ def modificar_clase_service(
         cursor.connection.close()
         return respuesta2, 400
     
-    cursor.connection.close()
-
+    cursor.connection.commit()
     cursor.connection.close()
 
     return {
@@ -131,7 +128,7 @@ def eliminar_clase_service(clase_id: int):
         cursor.connection.close()
         return respuesta, 400
 
-    cursor.connection.close()
+    cursor.connection.commit()
     cursor.connection.close()
     return {
         "mensaje": "Clase eliminada exitosamente."
@@ -160,7 +157,7 @@ def cancelar_clase_service(clase_id: int):
         cursor.connection.close()
         return respuesta, 400
 
-    cursor.connection.close()
+    cursor.connection.commit()
     cursor.connection.close()
     return {
         "mensaje": "Clase cancelada exitosamente."

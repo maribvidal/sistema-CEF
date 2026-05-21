@@ -113,6 +113,7 @@ def registrar_usuario_service(
             "error": res['message']
         }, 500
 
+    cursor.connection.commit()
     cursor.connection.close()
     return {
         "mensaje": "Usuario registrado exitosamente"
@@ -146,6 +147,7 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "rol_id": usuario['data'][9]
     }
 
+    cursor.connection.commit()
     cursor.connection.close()
     return {
         "perfil": perfil
@@ -180,7 +182,7 @@ def listar_pagos_usuario_service(usuario_id: int):
             "error": "No se encontraron pagos para este usuario"
         }, 404
 
-    cursor.connection.close()
+    cursor.connection.commit()
     cursor.connection.close()
     return pagos['data'], 200
     
@@ -256,7 +258,7 @@ def editar_perfil_usuario_service(
             "error": res['message']
         }, 500
 
-    cursor.connection.close()
+    cursor.connection.commit()
     cursor.connection.close()
     return {
         "mensaje": "Perfil actualizado exitosamente"

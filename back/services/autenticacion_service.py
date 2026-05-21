@@ -39,7 +39,6 @@ def login_service(correo: str, contraseña: str) -> tuple:
     print("Consultando usuario por correo...")
     
     usuario = consultar_usuario_por_correo(correo, cursor)
-    cursor.connection.close()
     
     print(" resultado consulta usuario: ", dict(usuario['data']) if usuario['data'] else None)
     if usuario["status"] == "error":
@@ -69,6 +68,7 @@ def login_service(correo: str, contraseña: str) -> tuple:
             "rol": ""
         })
 
+        cursor.connection.commit()
         cursor.connection.close()
         return {
             "mensaje": "Inicio de sesión exitoso",
@@ -132,7 +132,7 @@ def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fech
             "error" : resultado['message']
         }, 500
     print("El usuario registrado exitosamente")
-    cursor.connection.close()
+    cursor.connection.commit()
     cursor.connection.close()
     return {
         "mensaje": "Usuario registrado exitosamente",

@@ -6,5 +6,4 @@ def listar_salas_service():
     cursor = conectarse_db()
     respuesta = listar_salas(cursor)
     cursor.connection.close()
-    cursor.connection.close()
     return respuesta, 200
