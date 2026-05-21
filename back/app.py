@@ -24,9 +24,9 @@ app.register_blueprint(pagos_bp)
 cursor = conectarse_db()
 
 insertar_datos(cursor)
-#test_insertar_datos.intentar_insertar_datos(cursor)
-#test_consultar_esqueleto.intentar_consultar_esqueleto()
-#test_login_service.intentar_login_service()
+test_insertar_datos.intentar_insertar_datos(cursor)
+test_consultar_esqueleto.intentar_consultar_esqueleto(cursor)
+test_login_service.intentar_login_service(cursor)
 
 cursor.connection.close()
 

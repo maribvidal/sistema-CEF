@@ -1,16 +1,21 @@
 from pprint import pprint
 import services.autenticacion_service as a_s
 
-def intentar_login_service():
+def intentar_login_service(cursor):
     # --- PRUEBAS DE LOGUEO ---
     print("\n--- TESTEO DE LOGIN ---")
 
     # 1. Intentar loguear un usuario que SÍ existe (Juan Pérez, que viene en los datos de prueba)
-    login_exitoso = a_s.login_service(correo='juan.perez@example.com', contraseña='123')
+    correo = 'juan.perez@example.com'
+    contraseña = '123'
+    login_exitoso = a_s.login_service(correo, contraseña)
     # 2. Intentar loguear con contraseña incorrecta
-    login_clave_mal = a_s.login_service(correo='juan.perez@example.com', contraseña='clave_falsa')
+    contraseña = 'clave_falsa'
+    login_clave_mal = a_s.login_service(correo, contraseña)
     # 3. Intentar loguear un correo que no existe
-    login_fantasma = a_s.login_service(correo='no_existo@gimnasio.com', contraseña='123')
+    correo = 'no_existo@gimnasio.com'
+    contraseña = '123'
+    login_fantasma = a_s.login_service(correo, contraseña)
 
     # --- PRUEBAS DE LOGUEO ---
     print("\n--- TESTEO DE LOGIN ---")
