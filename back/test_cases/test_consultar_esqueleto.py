@@ -8,7 +8,6 @@ def intentar_consultar_esqueleto(cursor):
     test_consultar_usuario_por_correo(cursor)
     test_listar_clases(cursor)
     test_listar_usuarios(cursor)
-    test_obtener_empleados(cursor)
     test_consultar_usuario_por_id(cursor)
     test_consultar_pagos_de_usuario(cursor)
     test_obtener_rol_por_id(cursor)
@@ -62,13 +61,6 @@ def test_listar_clases(cursor):
 def test_listar_usuarios(cursor):
     print("---------------TEST LISTAR USUARIOS---------------")
     res = procesar_consulta(listar_usuarios(cursor))
-    print(res)
-    print("\n")
-
-def test_obtener_empleados(cursor):
-    print("---------------TEST OBTENER EMPLEADOS---------------")
-    print("Test obtener_empleados (deberia devolver una lista de tuplas con los empleados o vacío):")
-    res = procesar_consulta(obtener_empleados(cursor))
     print(res)
     print("\n")
 
