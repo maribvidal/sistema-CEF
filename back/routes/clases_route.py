@@ -2,8 +2,7 @@ from flask import Blueprint, request, jsonify
 from services.clases_service import (
     listar_clases_service, publicar_clase_service, 
     modificar_clase_service, eliminar_clase_service,
-    cancelar_clase_service,
-    listar_actividades_service, listar_profesores_service
+    cancelar_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -13,20 +12,6 @@ def listar_clases():
     """Este endpoint permite listar todas las clases disponibles 
         en el sistema."""
     respuesta, status = listar_clases_service()
-    
-    return jsonify(respuesta), status
-
-@clases_bp.route('/actividades', methods=['GET'])
-def listar_actividades():
-    """Endpoint para obtener la lista de actividades."""
-    respuesta, status = listar_actividades_service()
-    
-    return jsonify(respuesta), status
-
-@clases_bp.route('/empleados', methods=['GET'])
-def listar_profesores():
-    """Endpoint para obtener la lista de profesores (empleados)."""
-    respuesta, status = listar_profesores_service()
     
     return jsonify(respuesta), status
 
