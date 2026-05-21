@@ -1,4 +1,4 @@
-from db.operaciones.commitear_db import commitear
+from db.operaciones.exception_handler import ejecutar_insertar
 
 def insertar_actividad(nombre: str, precio_mensual: float, cursor):
     """Permite insertar una fila para la tabla Actividad"""

@@ -93,7 +93,6 @@ def registrar_usuario_service(
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
     insertar_usuario(
-        cursor,
         dni,
         nombre,
         apellido,
@@ -237,7 +236,6 @@ def editar_perfil_usuario_service(
     
     cursor = conectarse_db()
     modificar_perfil_usuario(
-        cursor,
         usuario_dni,
         correo,
         telefono,

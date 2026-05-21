@@ -1,4 +1,4 @@
-from db.operaciones.commitear_db import commitear
+from db.operaciones.exception_handler import ejecutar_insertar
 
 import datetime
 from datetime import date

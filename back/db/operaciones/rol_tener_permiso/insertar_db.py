@@ -1,4 +1,4 @@
-from db.operaciones.commitear_db import commitear
+from db.operaciones.exception_handler import ejecutar_insertar
 
 def insertar_rol_tener_permiso(rol_id: int, permiso_id: int, cursor):
     """Permite insertar una fila para la tabla Rol_Tener_Permiso"""

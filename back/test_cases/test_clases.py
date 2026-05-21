@@ -2,10 +2,12 @@ import unittest
 
 from db.operaciones.construir_db import reconstruir_db
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones_consulta_comunes import consultar_clase_por_id
-from db.operaciones_insercion_comunes import crear_actividad, crear_profesor, publicar_clase
-from db.operaciones_eliminar_comunes import eliminar_clase_por_id
-from db.operaciones_modificar_comunes import modificar_clase
+from db.operaciones.actividades.insertar_db import insertar_actividad
+from db.operaciones.profesores.insertar_db import insertar_profesor
+from db.operaciones.clases.insertar_db import insertar_clase
+from db.operaciones.clases.consultar_db import consultar_clase_por_id
+from db.operaciones.clases.modificar_db import modificar_clase
+from db.operaciones.clases.borrar_db import borrar_clase
 
 class ClasesTestcase(unittest.TestCase):
     """Clase test para probar las operaciones de la BD
@@ -25,78 +27,74 @@ class ClasesTestcase(unittest.TestCase):
     def test_publicar_clase(self):
         """Este test verifica que se pueda publicar una clase."""
         
-        id_act = crear_actividad(self.cursor, 'Funcional', 150.0)
-        id_prof = crear_profesor(self.cursor, 'Gero', 'Arias', 'M', 6656342)
+        id_act = insertar_actividad('Funcional', 150.0, self.cursor)
+        id_prof = insertar_profesor('Gero', 'Arias', 'M', 6656342, self.cursor)
         
-        res = publicar_clase(self.cursor, 'programada', id_act, id_prof)
-        self.assertNotEqual(res, -1,
-                    "Error al publicar la clase: se devolvió -1")
-        tupla_clase = consultar_clase_por_id(self.cursor, res)
-        self.assertEqual(tupla_clase[1], 'programada')
-        self.assertIsNotNone(tupla_clase, "Error al consultar la clase: se devolvió None")
+        res = insertar_clase(self.cursor, 'programada', id_act["data"], id_prof["data"])
+
+        self.assertEqual(res["status"], "success", "No se pudo publicar la clase.")
+
+        # Consultar la clase y extraer el registro en distintos formatos.
+        tupla_clase = consultar_clase_por_id(res["data"], self.cursor)
+        if isinstance(tupla_clase, dict):
+            self.assertEqual(tupla_clase.get('status'), 'success', f"Error al consultar la clase: {tupla_clase}")
+            datos = tupla_clase.get('data')
+            registro = datos[0] if isinstance(datos, list) and datos else datos
+        else:
+            registro = tupla_clase
+
+        self.assertIsNotNone(registro, "Error al consultar la clase: se devolvió None")
+        self.assertEqual(registro[1], 'programada')
 
     def test_eliminar_clase(self):
         """Este test verifica que se pueda eliminar una clase."""
 
         # Crear una clase cualquiera.
-        id_act = crear_actividad(self.cursor, 'Matasapos', 150.0)
-        id_prof = crear_profesor(self.cursor, 'Gabriela', 'Perez', 'F', 6656343)
-        res = publicar_clase(self.cursor, 'programada', id_act, id_prof)
+        id_act = insertar_actividad('Matasapos', 150.0, self.cursor)
+        id_prof = insertar_profesor('Gabriela', 'Perez', 'F', 6656343, self.cursor)
+        res = insertar_clase('programada', id_act["data"], id_prof["data"], self.cursor)
+        if isinstance(res, dict):
+            self.assertEqual(res.get('status'), 'success', f"Error al publicar la clase: {res}")
+            res = res.get('data')
 
         # Eliminar la clase creada.
-        res2 = eliminar_clase_por_id(self.cursor, res)
+        res2 = borrar_clase(res, self.cursor)
         self.assertTrue(res2, "Error al eliminar la clase: se devolvió False")
         
         # Comprobar que no existe más en la BD.
-        tupla_clase = consultar_clase_por_id(self.cursor, res)
-        self.assertIsNone(tupla_clase, "Error: La clase sigue existiendo.")
+        tupla_clase = consultar_clase_por_id(res, self.cursor)
+        if isinstance(tupla_clase, dict):
+            # Si la consulta devuelve estructura, comprobar data vacía o None
+            self.assertTrue(tupla_clase.get('data') in (None, [], {}), "Error: La clase sigue existiendo.")
+        else:
+            self.assertIsNone(tupla_clase, "Error: La clase sigue existiendo.")
 
     def test_modificar_clase(self):
         """Este test verifica que se pueda modificar una clase."""
 
         # Crear una clase cualquiera.
-        id_act = crear_actividad(self.cursor, 'Snorkel', 150.0)
-        id_prof = crear_profesor(self.cursor, 'Demi', 'Lovato', 'N', 6656344)
-        res = publicar_clase(self.cursor, 'programada', id_act, id_prof)
+        id_act = insertar_actividad('Snorkel', 150.0, self.cursor)
+        id_prof = insertar_profesor('Demi', 'Lovato', 'N', 6656344, self.cursor)
+        res = insertar_clase('programada', id_act["data"], id_prof["data"], self.cursor)
+        if isinstance(res, dict):
+            self.assertEqual(res.get('status'), 'success', f"Error al publicar la clase: {res}")
+            res = res.get('data')
 
         # Modificar la clase creada.
-        res2 = modificar_clase(self.cursor, res, 'ocurriendo', id_act, id_prof)
+        res2 = modificar_clase(self.cursor, res, 'ocurriendo', id_act["data"], id_prof["data"])
         self.assertTrue(res2, "Error al modificar la clase: se devolvió False")
 
         # Comprobar que los cambios se efectuaron en la BD.
-        tupla_clase = consultar_clase_por_id(self.cursor, res)
-        self.assertEqual(tupla_clase[1], 'ocurriendo', "Error: El estado de la clase no se modificó.")
+        tupla_clase = consultar_clase_por_id(res, self.cursor)
+        if isinstance(tupla_clase, dict):
+            self.assertEqual(tupla_clase.get('status'), 'success', f"Error al consultar la clase: {tupla_clase}")
+            datos = tupla_clase.get('data')
+            registro = datos[0] if isinstance(datos, list) and datos else datos
+        else:
+            registro = tupla_clase
 
-"""
-
-    def test_fetch_missing_user(self):
-        # Debe devolver None si el registro no existe.
-        self.cursor.execute('SELECT id FROM users WHERE name = ?', ('Bob',))
-        row = self.cursor.fetchone()
-        self.assertIsNone(row)
-
-    def test_insert_user_no_exception(self):
-        # Operación que debe funcionar sin lanzar excepción.
-        self.cursor.execute(
-            'INSERT INTO users (name, email) VALUES (?, ?)',
-            ('Bob', 'bob@example.com'),
-        )
-        self.connection.commit()
-        self.cursor.execute('SELECT COUNT(*) FROM users')
-        count = self.cursor.fetchone()[0]
-        self.assertEqual(count, 2)
-
-    def test_update_user_no_exception(self):
-        # Otra operación para comprobar que no hay excepciones.
-        self.cursor.execute(
-            'UPDATE users SET email = ? WHERE name = ?',
-            ('alice@newdomain.com', 'Alice'),
-        )
-        self.connection.commit()
-        self.cursor.execute('SELECT email FROM users WHERE name = ?', ('Alice',))
-        email = self.cursor.fetchone()[0]
-        self.assertEqual(email, 'alice@newdomain.com')
-"""
+        self.assertIsNotNone(registro, "Error al consultar la clase después de modificarla: se devolvió None")
+        self.assertEqual(registro[1], 'ocurriendo', "Error: El estado de la clase no se modificó.")
 
 if __name__ == '__main__':
     unittest.main()

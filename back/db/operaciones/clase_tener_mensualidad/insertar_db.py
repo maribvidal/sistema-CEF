@@ -1,4 +1,4 @@
-from db.operaciones.commitear_db import commitear
+from db.operaciones.exception_handler import ejecutar_insertar
 
 def insertar_clase_tener_mensualidad(mensualidad_id: int, clase_id: int, cursor):
     """Permite insertar una fila para la tabla Clase_Tener_Mensualidad"""

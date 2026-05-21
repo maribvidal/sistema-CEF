@@ -1,4 +1,4 @@
-from db.operaciones.commitear_db import commitear
+from db.operaciones.exception_handler import ejecutar_insertar
 
 def insertar_usuario_tener_descuento(usuario_id: int, descuento_id: int, cursor):
     """Permite insertar una fila para la tabla Usuario_Tener_Descuento"""

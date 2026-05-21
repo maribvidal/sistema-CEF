@@ -1,6 +1,6 @@
 import sqlite3 as sqlite
 
-def ejecutar_fetchall(cursor, query):
+def ejecutar_fetchall(query, cursor):
     """Ejecuta una consulta SQL que devuelve varias filas y 
         maneja las excepciones."""
     try:
@@ -22,7 +22,7 @@ def ejecutar_fetchall(cursor, query):
         }
 
 
-def ejecutar_fetchone(cursor, query):
+def ejecutar_fetchone(query, cursor):
     """Ejecuta una consulta SQL que devuelve una sola fila y
         maneja las excepciones."""
     try:
@@ -40,28 +40,40 @@ def ejecutar_fetchone(cursor, query):
             "message": str(e)
         }
         
-def ejecutar_insertar(cursor, query) -> int:
+def ejecutar_insertar(query, cursor) -> int:
     """Ejecuta una consulta SQL de inserción y maneja 
         las excepciones."""
     try:
-        cursor.execute(query)
-        nuevo_id = cursor.lastrowid
-        cursor.connection.commit()
-        return nuevo_id
-    except sqlite.IntegrityError as e:
-        print(f" > Error de integridad al ejecutar inserción: {e}")
-        return -1
-    except Exception as e:
-        print(f" > Error al ejecutar inserción: {e}")
-        return -1
 
-def ejecutar_query(cursor, query) -> tuple:
+        cursor.execute(query)
+        
+        nuevo_id = cursor.lastrowid
+
+        cursor.connection.commit()
+
+        return {
+            "status": "success",
+            "data": nuevo_id
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+def ejecutar_query(query, cursor) -> tuple:
     """Ejecuta una consulta SQL que no devuelve datos 
         y maneja las excepciones."""
     try:
         cursor.execute(query)
         cursor.connection.commit()
-        return True
+        return {
+            "status": "success",
+            "data": None
+        }
     except Exception as e:
-        print(f" > Error al ejecutar consulta: {e}")
-        return False
+        return {
+            "status": "error",
+            "message": str(e)
+        }
