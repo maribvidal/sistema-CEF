@@ -27,6 +27,7 @@ def registrar_usuario():
     correo = data.get("correo")
     telefono = data.get("telefono")
     genero = data.get("genero")
+    rol = data.get("rol")
 
     respuesta, status = registrar_usuario_service(
         dni,
@@ -36,7 +37,8 @@ def registrar_usuario():
         fecha_nac,
         correo,
         telefono,
-        genero
+        genero,
+        rol
     )
 
     return jsonify(respuesta), status
@@ -95,3 +97,5 @@ def obtener_usuarios():
     if lista['status'] == 'success' and lista['data'] is None:
         return jsonify({"error": "No se encontraron usuarios"}), 404
     return jsonify(lista['data']), 200
+
+# falta un delete

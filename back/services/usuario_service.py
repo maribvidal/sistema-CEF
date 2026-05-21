@@ -18,7 +18,7 @@ def registrar_usuario_service(
     correo: str,
     telefono: str,
     genero: str,
-    rol: int
+    rol_id: int
 ):
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
@@ -50,7 +50,7 @@ def registrar_usuario_service(
             {"name": "correo", "value": correo},
             {"name": "telefono", "value": telefono},
             {"name": "genero", "value": genero},
-            {"name": "rol", "value": rol}
+            {"name": "rol_id", "value": rol_id}
         ]
     )
     
@@ -85,7 +85,8 @@ def registrar_usuario_service(
         return {
             "error": "La fecha de nacimiento no es válida."
         }, 400
-
+    
+    print("cantidad años: ", _obtener_años_hasta_2026(fecha_nac))
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         commitear(cursor)
         return {
@@ -94,7 +95,7 @@ def registrar_usuario_service(
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
-    insertar_usuario(
+    res = insertar_usuario(
         dni,
         nombre,
         apellido,
@@ -103,9 +104,15 @@ def registrar_usuario_service(
         correo,
         telefono,
         genero,
-        rol,
+        rol_id,
         cursor
     )
+    
+    if res['status'] == 'error':
+        commitear(cursor)
+        return {
+            "error": res['message']
+        }, 500
 
     commitear(cursor)
     return {
@@ -137,7 +144,7 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "correo": usuario['data'][6],
         "telefono": usuario['data'][7],
         "genero": usuario['data'][8],
-        "rol": usuario['rol'][9]
+        "rol_id": usuario['data'][9]
     }
 
     commitear(cursor)
@@ -148,7 +155,7 @@ def obtener_perfil_usuario_service(usuario_id: int):
 def listar_pagos_usuario_service(usuario_id: int):
     cursor = conectarse_db()
     usuario = consultar_usuario_por_id(usuario_id, cursor)
-
+    
     if usuario['status'] == 'error':
         commitear(cursor)
         return usuario
@@ -164,7 +171,9 @@ def listar_pagos_usuario_service(usuario_id: int):
 
     if pagos['status'] == 'error':
         commitear(cursor)
-        return pagos
+        return {
+            "error": pagos['message']
+        }, 500
 
     if not pagos['data']:
         commitear(cursor)
@@ -173,9 +182,7 @@ def listar_pagos_usuario_service(usuario_id: int):
         }, 404
 
     commitear(cursor)
-    return {
-        "pagos": pagos['data']
-    }, 200
+    return pagos['data'], 200
     
 def editar_perfil_usuario_service(
     usuario_dni: int,
@@ -189,7 +196,6 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato para actualizar"
         }, 400
     
-    cursor = conectarse_db()
     usuario = consultar_usuario_por_dni(usuario_dni, cursor)
 
     if usuario['status'] == 'error':
@@ -237,13 +243,18 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato nuevo para actualizar"
         }, 400
     
-    cursor = conectarse_db()
-    modificar_perfil_usuario(
+    res = modificar_perfil_usuario(
         usuario_dni,
         correo,
         telefono,
         cursor
     )
+    
+    if res['status'] == 'error':
+        commitear(cursor)
+        return {
+            "error": res['message']
+        }, 500
 
     commitear(cursor)
     return {
