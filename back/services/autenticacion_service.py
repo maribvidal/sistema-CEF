@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from db.operaciones.empleados.consultar_db import buscar_empleado_por_correo
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.commitear_db import commitear

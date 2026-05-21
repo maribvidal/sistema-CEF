@@ -82,7 +82,7 @@ def construir_tablas(cursor: sqlite.Cursor):
 
 def construir_tabla_usuario(cursor: sqlite.Cursor):
     """Construye la tabla Usuario"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Cuenta (
+    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Usuario (
                             id          INTEGER PRIMARY KEY,
                             dni         INTEGER UNIQUE NOT NULL,
                             nombre      VARCHAR({LONG_NOM}) NOT NULL,
