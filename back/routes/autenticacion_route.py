@@ -16,8 +16,7 @@ def login():
 
     print("Datos recibidos - Correo: ", correo, " Contraseña: ", contraseña)
     respuesta, status = login_service(
-        correo,
-        contraseña
+        correo, contraseña
     )
 
     print("Respuesta: ", respuesta)

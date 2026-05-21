@@ -33,7 +33,7 @@ EMP_CONTRASENA = 5
 JWT_SECRET_KEY = "tu-clave-secreta-super-segura-aqui"
 JWT_EXPIRATION_HOURS = 24
 
-def login_service(correo: str, contraseña: str):
+def login_service(correo: str, contraseña: str) -> tuple:
     """El tipo se refiere a si es cliente, recepcionista 
         o administrador. El rol es necesario para después
         checkear los permisos de ciertos endpoints."""
@@ -41,11 +41,20 @@ def login_service(correo: str, contraseña: str):
     print("Consultando usuario por correo...")
     
     usuario = consultar_usuario_por_correo(correo, cursor)
+    commitear(cursor)
     
     print(" resultado consulta usuario: ", dict(usuario['data']) if usuario['data'] else None)
+    if usuario["status"] == "error":
+        return {
+            "error": usuario["message"]
+        }, 500
+    
+    if usuario["status"] == 'success' and usuario["data"] is None:
+        return {
+            "error": "Usuario no encontrado"
+        }, 404
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
-        commitear(cursor)
         print("constraseña: ",usuario['data'][USR_CONTRASENA])
         if usuario['data'][USR_CONTRASENA] != contraseña:
             return {"error": "Contraseña incorrecta"}, 400
@@ -59,7 +68,6 @@ def login_service(correo: str, contraseña: str):
             "rol": ""
         })
 
-        cursor.connection.close()
         return {
             "mensaje": "Inicio de sesión exitoso",
             "token": token,
@@ -71,43 +79,9 @@ def login_service(correo: str, contraseña: str):
                 "rol": ""
             }
         }, 200
-
-    empleado = buscar_empleado_por_correo(correo, cursor)
+    return {"error": "Error desconocido"}, 500
     
-    commitear(cursor)
-    if empleado['status'] == 'error':
-        cursor.connection.close()
-        return empleado
 
-    if empleado['status'] == 'success' and empleado['data'] is None:
-        cursor.connection.close()
-        return {"error": "Usuario no registrado"}, 404
-
-    if empleado['status'] == 'success' and empleado['data'][EMP_CONTRASENA] != contraseña:
-        cursor.connection.close()
-        return {"error": "Contraseña incorrecta"}, 400
-
-    # Generar JWT
-    token = _generate_jwt({
-        "id": empleado['data'][EMP_ID],
-        "dni": empleado['data'][EMP_DNI],
-        "nombre": empleado['data'][EMP_NOMBRE],
-        "tipo": empleado['data'][EMP_TIPO],
-        "rol": empleado['data'][EMP_ROL]
-    })
-
-    cursor.connection.close()
-    return {
-        "mensaje": "Inicio de sesión exitoso",
-        "token": token,
-        "usuario": {
-            "id": empleado['data'][EMP_ID],
-            "dni": empleado['data'][EMP_DNI],
-            "nombre": empleado['data'][EMP_NOMBRE],
-            "tipo": empleado['data'][EMP_TIPO],
-            "rol": empleado['data'][EMP_ROL]
-        }
-    }, 200
 
 def _generate_jwt(user_data):
     """Genera un JWT token con los datos del usuario."""
@@ -130,7 +104,7 @@ def verify_jwt(token):
         return None
 
 # Los parametros los tomé en cuenta al ver los text-field del Registro.Vue del frontend, si se necesita agregar o quitar alguno, solo avisenme y lo modifico
-def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fecha_nac: str, correo: str, telefono: str, genero: str, rol_id: int) -> bool:
+def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fecha_nac: str, correo: str, telefono: str, genero: str, rol_id: int):
     # Verificar si el usuario ya existe realizando una constulta a la base de datos
     cursor = conectarse_db()
 
