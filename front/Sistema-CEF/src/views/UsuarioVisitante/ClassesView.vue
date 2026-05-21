@@ -267,22 +267,21 @@ const fetchClases = async () => {
       console.error('Se esperaba un array de clases pero se recibió:', data)
       return
     }
-
     clases.value = data.map(c => ({
      // Si el backend usa dict(fila), usamos nombres de columnas. 
       // Si todavía usa tuplas, usamos índices como respaldo.
-      id: c.id ?? c[0],
-      estado: c.estado ?? c[1],
-      id_actividad: c.id_actividad ?? c[2],
-      id_profesor: c.id_profesor ?? c[3],
+      id_actividad: c.actividad_id,
+      estado: c.estado,
+      fecha: c["fecha"] ?? 'A confirmar',
+      hora: c.hora ?? '--:--',
+      id_profesor: c.profesor_id,
+      salas: salas.value.find(s => s.id == (s.sala_id ?? c[5]))?.nombre,
       // Resolvemos el ID a un nombre usando las listas cargadas
-      categoria: actividades.value.find(a => a.id == (c.id_actividad ?? c[2]))?.nombre 
-                 || `ID Act: ${c.id_actividad ?? c[2]}`,
-      profesor: profesores.value.find(p => p.id == (c.id_profesor ?? c[3]))?.nombre 
-                || `ID Prof: ${c.id_profesor ?? c[3]}`,
-      fecha: c.fecha ?? c[4] ?? 'A confirmar',
-      hora: c.hora ?? c[5] ?? '--:--',
-      sala: c.sala || c[6] || 'Gimnasio',
+      categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[0]))?.nombre 
+                 || `ID Act: ${c.actividad_id ?? c[0]}`,
+      profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[4]))?.nombre 
+                || `ID Prof: ${c.profesor_id ?? c[4]}`,
+      sala: c.sala || c[5] || 'Gimnasio',
       imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
     }))
   } catch (error) {
