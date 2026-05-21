@@ -79,7 +79,7 @@ const register = async () => {
     // También podemos usar DateFormatterService para asegurar consistencia si proviene de otras fuentes.
     const fechaBackend = DateFormatterService.formatDateForBackend(age.value) || age.value;
 
-    const usuario = {
+      const usuario = {
 		dni: parseInt(dni.value) || 0,
 		nombre: name.value,
 		apellido: lastname.value,
@@ -89,6 +89,7 @@ const register = async () => {
 		telefono: cellphone.value,
 		genero: gender.value ? gender.value.charAt(0) : 'O',
       // El rol se asignará por defecto en el backend, usualmente.
+        rol: 3
     }
 
 	const response = await fetch('http://127.0.0.1:5000/usuarios', {
