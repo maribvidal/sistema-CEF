@@ -190,7 +190,9 @@
               <v-col cols="12" sm="6">
                 <v-select
                   v-model="nuevaClase.sala"
-                  :items="['1', '2', '3']"
+                  :items="salas"
+                  item-title="nombre"
+                  item-value="id"
                   label="Sala"
                   variant="outlined"
                   density="compact"
@@ -213,16 +215,18 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ClasesService } from '@/services/ClasesServices'
+import DateFormatterService from '@/services/DateFormatterService.js'
 
 const isEditing = ref(false)
 const dialog = ref(false)
 const menuFecha = ref(false)
-const fechaSeleccionada = ref(null)
+
+
 
 const nuevaClase = ref({
   id_actividad: null, // Usar id_actividad para el v-select
   id_profesor: null,  // Usar id_profesor para el v-select
-  dia: '',
+  fecha: '',
   hora: '',
   sala: ''
 })
@@ -230,13 +234,14 @@ const nuevaClase = ref({
 const clases = ref([])
 const actividades = ref([])
 const profesores = ref([])
+const salas = ref([])
 
 const fetchAuxData = async () => {
   try {
-    const [resAct, resProf] = await Promise.all([
+    const [resAct, resProf, resSalas] = await Promise.all([
       ClasesService.listarActividades(),
-      ClasesService.listarProfesores()
-    ])
+      ClasesService.listarProfesores(),
+      ClasesService.listarSalas()])
     
     if (Array.isArray(resAct)) {
       actividades.value = resAct.map(a => ({ id: a.id ?? a[0], nombre: a.nombre ?? a[1] }))
@@ -245,6 +250,10 @@ const fetchAuxData = async () => {
       // El backend devuelve: 0: id, 1: dni, 2: nombre, 3: apellido...
       profesores.value = resProf.map(p => ({ id: p.id ?? p[0], nombre: `${p.nombre ?? p[2]} ${p.apellido ?? p[3]}` }))
     }
+    if (Array.isArray(resSalas)) {
+      salas.value = resSalas.map(s => ({ id: s.id ?? s[0], nombre: s.nombre ?? s[1] }))
+    }
+  
   } catch (error) {
     console.error('Error al cargar datos auxiliares:', error)
   }
@@ -258,22 +267,21 @@ const fetchClases = async () => {
       console.error('Se esperaba un array de clases pero se recibió:', data)
       return
     }
-
     clases.value = data.map(c => ({
      // Si el backend usa dict(fila), usamos nombres de columnas. 
       // Si todavía usa tuplas, usamos índices como respaldo.
-      id: c.id ?? c[0],
-      estado: c.estado ?? c[1],
-      id_actividad: c.id_actividad ?? c[2],
-      id_profesor: c.id_profesor ?? c[3],
+      id_actividad: c.actividad_id,
+      estado: c.estado,
+      fecha: c["fecha"] ?? 'A confirmar',
+      hora: c.hora ?? '--:--',
+      id_profesor: c.profesor_id,
+      salas: salas.value.find(s => s.id == (s.sala_id ?? c[5]))?.nombre,
       // Resolvemos el ID a un nombre usando las listas cargadas
-      categoria: actividades.value.find(a => a.id == (c.id_actividad ?? c[2]))?.nombre 
-                 || `ID Act: ${c.id_actividad ?? c[2]}`,
-      profesor: profesores.value.find(p => p.id == (c.id_profesor ?? c[3]))?.nombre 
-                || `ID Prof: ${c.id_profesor ?? c[3]}`,
-      dia: c.dia ?? c[4] ?? 'A confirmar',
-      hora: c.hora ?? c[5] ?? '--:--',
-      sala: c.sala || c[6] || 'Gimnasio',
+      categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[0]))?.nombre 
+                 || `ID Act: ${c.actividad_id ?? c[0]}`,
+      profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[4]))?.nombre 
+                || `ID Prof: ${c.profesor_id ?? c[4]}`,
+      sala: c.sala || c[5] || 'Gimnasio',
       imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
     }))
   } catch (error) {
@@ -302,7 +310,7 @@ const abrirDialogCrear = () => {
 const cerrarDialog = () => {
   dialog.value = false
   nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
-  fechaSeleccionada.value = null
+  dia.value = null
   isEditing.value = false
 }
 
@@ -311,7 +319,10 @@ const guardarClase = async () => {
     const payload = {
       estado: 'Activa',
       id_actividad: nuevaClase.value.id_actividad,
-      id_profesor: nuevaClase.value.id_profesor
+      id_profesor: nuevaClase.value.id_profesor,
+      fecha: DateFormatterService.formatDateForBackend(nuevaClase.value.dia),
+      hora: nuevaClase.value.hora,
+      sala: nuevaClase.value.sala
     }
 
     if (isEditing.value) {
