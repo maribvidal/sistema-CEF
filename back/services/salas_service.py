@@ -5,6 +5,5 @@ def listar_salas_service():
     """Service que lista las salas"""
     cursor = conectarse_db()
     respuesta = listar_salas(cursor)
-    cursor.connection.commit()
     cursor.connection.close()
     return respuesta, 200
