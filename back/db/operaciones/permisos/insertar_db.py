@@ -1,4 +1,4 @@
-from db.operaciones.exception_handler import ejecutar_insertar 
+from db.operaciones.exception_handler import ejecutar_insertar
 
 def insertar_permiso(nombre: str, cursor):
     """Permite insertar una fila para la tabla Permiso"""

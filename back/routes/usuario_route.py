@@ -1,11 +1,22 @@
 from flask import Blueprint, request, jsonify
 
-from services.usuario_service import *
+from services.usuario_service import (
+    registrar_usuario_service,
+    listar_pagos_usuario_service,
+    obtener_perfil_usuario_service,
+    editar_perfil_usuario_service,
+)
 
 usuario_bp = Blueprint("usuario", __name__)
 
 @usuario_bp.route("/usuarios", methods=["POST"])
 def registrar_usuario():
+    """Este endpoint registra un nuevo usuario en el sistema. 
+        Recibe los datos del usuario en formato JSON, incluyendo 
+        su DNI, nombre, apellido, contraseña, fecha de nacimiento, 
+        correo electrónico, teléfono y género. Luego, llama al 
+        servicio correspondiente para procesar el registro y devuelve 
+        una respuesta con el resultado de la operación."""
     data = request.get_json()
 
     dni = data.get("dni")
@@ -16,6 +27,7 @@ def registrar_usuario():
     correo = data.get("correo")
     telefono = data.get("telefono")
     genero = data.get("genero")
+    rol = data.get("rol")
 
     respuesta, status = registrar_usuario_service(
         dni,
@@ -25,25 +37,35 @@ def registrar_usuario():
         fecha_nac,
         correo,
         telefono,
-        genero
+        genero,
+        rol
     )
 
     return jsonify(respuesta), status
 
 @usuario_bp.route("/usuarios/<int:usuario_id>/pagos", methods=["GET"])
 def listar_pagos_usuario(usuario_id):
+    """Este endpoint permite listar los pagos realizados 
+        por un usuario específico."""
     respuesta, status = listar_pagos_usuario_service(usuario_id)
 
     return jsonify(respuesta), status
 
 @usuario_bp.route("/usuarios/<int:usuario_id>/perfil", methods=["GET"])
 def obtener_perfil_usuario(usuario_id):
+    """Este endpoint permite obtener el perfil de un usuario 
+        específico."""
     respuesta, status = obtener_perfil_usuario_service(usuario_id)
 
     return jsonify(respuesta), status
 
 @usuario_bp.route("/usuarios/<int:usuario_dni>/perfil", methods=["PUT"])
 def editar_perfil_usuario(usuario_dni):
+    """Este endpoint permite editar el perfil de un usuario específico.
+        Recibe los datos actualizados del usuario en formato JSON, 
+        incluyendo su correo electrónico y teléfono. Luego, llama al 
+        servicio correspondiente para procesar la actualización y devuelve 
+        una respuesta con el resultado de la operación."""
     data = request.get_json()
 
     correo = data.get("correo")

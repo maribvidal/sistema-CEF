@@ -4,6 +4,8 @@ from db.operaciones.clases.consultar_db import listar_clases
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.borrar_db import borrar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
+from db.operaciones.actividades.consultar_db import listar_actividades
+from db.operaciones.profesores.consultar_db import listar_profesores
 
 def listar_clases_service():
     """Service que lista las clases"""
@@ -14,19 +16,36 @@ def listar_clases_service():
 
     if respuesta['status'] == 'error':
         commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     if respuesta['status'] == 'success' and not respuesta['data']:
         commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "No se encontraron clases"
         }, 404
 
     commitear(cursor)
-    return {
-        "clases": respuesta['data']
-    }, 200
+    cursor.connection.close()
+    return respuesta['data'], 200
 
+def listar_actividades_service():
+    """Service que lista las actividades"""
+    cursor = conectarse_db()
+    respuesta = listar_actividades(cursor)
+    commitear(cursor)
+    cursor.connection.close()
+    # No devolvemos 404 si está vacío para que el select del front no falle, solo devolvemos la lista vacía
+    return respuesta, 200
+
+def listar_profesores_service():
+    """Service que lista los profesores"""
+    cursor = conectarse_db()
+    respuesta = listar_profesores(cursor)
+    commitear(cursor)
+    cursor.connection.close()
+    return respuesta, 200
 
 def publicar_clase_service(
     estado: str,
@@ -41,13 +60,14 @@ def publicar_clase_service(
 
     if respuesta['status'] == 'error':
         commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Clase publicada exitosamente."
     }, 201
-
 
 def modificar_clase_service(
     clase_id: int,
@@ -63,26 +83,32 @@ def modificar_clase_service(
 
     if respuesta['status'] == 'error':
         commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Clase modificada exitosamente."
     }, 200
 
-
 def eliminar_clase_service(clase_id: int):
     """Service que elimina una clase"""
 
+    ## Recibir id del usuario. Buscar rol del usuario.
+    ## Si no tiene el permiso necesario, tirar un error.
+
     cursor = conectarse_db()
 
-    respuesta = borrar_clase(cursor, clase_id)
+    respuesta = borrar_clase(clase_id, cursor)
 
     if respuesta['status'] == 'error':
-        commitear(cursor)
+        # Hay que avisar si hay pagos pendientes
+        cursor.connection.close()
         return respuesta
 
     commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Clase eliminada exitosamente."
     }, 200

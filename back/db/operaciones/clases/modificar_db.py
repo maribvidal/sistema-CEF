@@ -1,4 +1,4 @@
-from db.operaciones.exception_handler import ejecutar_query 
+from db.operaciones.exception_handler import ejecutar_query
 
 def modificar_clase(cursor, clase_id: int, estado: str, actividad_id: int, profesor_id: int):
     """Permite modificar una fila para la tabla Clase.

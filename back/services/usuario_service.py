@@ -1,3 +1,4 @@
+from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
@@ -16,12 +17,14 @@ def registrar_usuario_service(
     fecha_nac: str,
     correo: str,
     telefono: str,
-    genero: str
+    genero: str,
+    rol: int
 ):
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
         previamente."""
-    print("llegue al service")
+
+    cursor = conectarse_db()
 
     def _es_fecha_valida(fecha: str) -> bool:
         """Se devuelve si la fecha es válida o no"""
@@ -46,7 +49,8 @@ def registrar_usuario_service(
             {"name": "fecha_nac", "value": fecha_nac},
             {"name": "correo", "value": correo},
             {"name": "telefono", "value": telefono},
-            {"name": "genero", "value": genero}
+            {"name": "genero", "value": genero},
+            {"name": "rol", "value": rol}
         ]
     )
     
@@ -76,8 +80,6 @@ def registrar_usuario_service(
             "error": "El correo electrónico ya se encuentra registrado"
         }, 400
     
-    print(fecha_nac)
-    
     if (_es_fecha_valida(fecha_nac) is False):
         commitear(cursor)
         return {
@@ -93,7 +95,7 @@ def registrar_usuario_service(
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
-    insertar_usuario(
+    res = insertar_usuario(
         dni,
         nombre,
         apellido,
@@ -102,8 +104,15 @@ def registrar_usuario_service(
         correo,
         telefono,
         genero,
+        rol,
         cursor
     )
+    
+    if res['status'] == 'error':
+        commitear(cursor)
+        return {
+            "error": res['message']
+        }, 500
 
     commitear(cursor)
     return {
@@ -134,7 +143,8 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "fecha_nac": usuario['data'][5],
         "correo": usuario['data'][6],
         "telefono": usuario['data'][7],
-        "genero": usuario['data'][8]
+        "genero": usuario['data'][8],
+        "rol_id": usuario['data'][9]
     }
 
     commitear(cursor)
@@ -145,7 +155,7 @@ def obtener_perfil_usuario_service(usuario_id: int):
 def listar_pagos_usuario_service(usuario_id: int):
     cursor = conectarse_db()
     usuario = consultar_usuario_por_id(usuario_id, cursor)
-
+    
     if usuario['status'] == 'error':
         commitear(cursor)
         return usuario
@@ -161,7 +171,9 @@ def listar_pagos_usuario_service(usuario_id: int):
 
     if pagos['status'] == 'error':
         commitear(cursor)
-        return pagos
+        return {
+            "error": pagos['message']
+        }, 500
 
     if not pagos['data']:
         commitear(cursor)
@@ -170,23 +182,21 @@ def listar_pagos_usuario_service(usuario_id: int):
         }, 404
 
     commitear(cursor)
-    return {
-        "pagos": pagos['data']
-    }, 200
+    return pagos['data'], 200
     
 def editar_perfil_usuario_service(
     usuario_dni: int,
     correo: str,
     telefono: str
 ):
+    cursor = conectarse_db()
     if correo is None and telefono is None:
+        cursor.connection.close()
         return {
             "error": "No se proporcionó ningún dato para actualizar"
         }, 400
     
-    cursor = conectarse_db()
     usuario = consultar_usuario_por_dni(usuario_dni, cursor)
-    
 
     if usuario['status'] == 'error':
         commitear(cursor)
@@ -233,12 +243,18 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato nuevo para actualizar"
         }, 400
     
-    respuesta = modificar_perfil_usuario(
+    res = modificar_perfil_usuario(
         usuario_dni,
         correo,
         telefono,
         cursor
     )
+    
+    if res['status'] == 'error':
+        commitear(cursor)
+        return {
+            "error": res['message']
+        }, 500
 
     commitear(cursor)
     return {

@@ -1,4 +1,4 @@
-from db.operaciones.exception_handler import ejecutar_insertar 
+from db.operaciones.exception_handler import ejecutar_insertar
 
 def insertar_usuario_cancelar_clase(usuario_id: int, clase_id: int, cursor):
     """Permite insertar una fila para la tabla Usuario_Cancelar_Clase"""

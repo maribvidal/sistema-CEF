@@ -16,7 +16,7 @@
         
         <v-row>
           <v-col 
-            v-for="clase in clasesMock" 
+            v-for="clase in clases"  
             :key="clase.id" 
             cols="12"
           >
@@ -148,8 +148,10 @@
             <v-row>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="nuevaClase.categoria"
-                  :items="['Yoga', 'Funcional', 'Pilates']"
+                  v-model="nuevaClase.id_actividad"
+                  :items="actividades"
+                  item-title="nombre"
+                  item-value="id"
                   label="Actividad"
                   variant="outlined"
                   density="compact"
@@ -157,8 +159,10 @@
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="nuevaClase.profesor"
-                  :items="['Lucas Gómez', 'Elena Paz', 'Marcos Rueda']"
+                  v-model="nuevaClase.id_profesor"
+                  :items="profesores"
+                  item-title="nombre"
+                  item-value="id"
                   label="Profesor"
                   variant="outlined"
                   density="compact"
@@ -207,7 +211,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { ClasesService } from '@/services/ClasesServices'
 
 const isEditing = ref(false)
 const dialog = ref(false)
@@ -215,11 +220,71 @@ const menuFecha = ref(false)
 const fechaSeleccionada = ref(null)
 
 const nuevaClase = ref({
-  categoria: '',
-  profesor: '',
+  id_actividad: null, // Usar id_actividad para el v-select
+  id_profesor: null,  // Usar id_profesor para el v-select
   dia: '',
   hora: '',
   sala: ''
+})
+
+const clases = ref([])
+const actividades = ref([])
+const profesores = ref([])
+
+const fetchAuxData = async () => {
+  try {
+    const [resAct, resProf] = await Promise.all([
+      ClasesService.listarActividades(),
+      ClasesService.listarProfesores()
+    ])
+    
+    if (Array.isArray(resAct)) {
+      actividades.value = resAct.map(a => ({ id: a.id ?? a[0], nombre: a.nombre ?? a[1] }))
+    }
+    if (Array.isArray(resProf)) {
+      // El backend devuelve: 0: id, 1: dni, 2: nombre, 3: apellido...
+      profesores.value = resProf.map(p => ({ id: p.id ?? p[0], nombre: `${p.nombre ?? p[2]} ${p.apellido ?? p[3]}` }))
+    }
+  } catch (error) {
+    console.error('Error al cargar datos auxiliares:', error)
+  }
+}
+
+const fetchClases = async () => {
+  try {
+    const data = await ClasesService.listarClases()
+    
+    if (!Array.isArray(data)) {
+      console.error('Se esperaba un array de clases pero se recibió:', data)
+      return
+    }
+
+    clases.value = data.map(c => ({
+     // Si el backend usa dict(fila), usamos nombres de columnas. 
+      // Si todavía usa tuplas, usamos índices como respaldo.
+      id: c.id ?? c[0],
+      estado: c.estado ?? c[1],
+      id_actividad: c.id_actividad ?? c[2],
+      id_profesor: c.id_profesor ?? c[3],
+      // Resolvemos el ID a un nombre usando las listas cargadas
+      categoria: actividades.value.find(a => a.id == (c.id_actividad ?? c[2]))?.nombre 
+                 || `ID Act: ${c.id_actividad ?? c[2]}`,
+      profesor: profesores.value.find(p => p.id == (c.id_profesor ?? c[3]))?.nombre 
+                || `ID Prof: ${c.id_profesor ?? c[3]}`,
+      dia: c.dia ?? c[4] ?? 'A confirmar',
+      hora: c.hora ?? c[5] ?? '--:--',
+      sala: c.sala || c[6] || 'Gimnasio',
+      imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
+    }))
+  } catch (error) {
+    console.error('Error al cargar clases:', error)
+  }
+}
+
+onMounted(async () => {
+  // Cargamos primero los datos auxiliares para poder mapear los nombres después
+  await fetchAuxData()
+  await fetchClases()
 })
 
 const confirmarFecha = (val) => {
@@ -227,55 +292,40 @@ const confirmarFecha = (val) => {
   menuFecha.value = false
 }
 
-// Datos de prueba (Mock data) para el diseño
-const clasesMock = ref([
-  {
-    id: 1,
-    categoria: 'Funcional',
-    profesor: 'Lucas Gómez',
-    dia: 'Lunes',
-    hora: '08:00',
-    sala: 'Sala 1',
-    imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
-  },
-  {
-    id: 2,
-    categoria: 'Yoga',
-    profesor: 'Elena Paz',
-    dia: 'Martes',
-    hora: '10:00',
-    sala: 'Sala 2',
-    imagen: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=500'
-  },
-  {
-    id: 3,
-    categoria: 'Pilates',
-    profesor: 'Marcos Rueda',
-    dia: 'Miércoles',
-    hora: '19:00',
-    sala: 'Sala 3',
-    imagen: 'https://images.unsplash.com/photo-1534258936925-c58bed479fcb?q=80&w=500'
-  }
-  ])
 
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { categoria: '', profesor: '', dia: '', hora: '', sala: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
   dialog.value = true
 }
 
 const cerrarDialog = () => {
   dialog.value = false
-  nuevaClase.value = { categoria: '', profesor: '', dia: '', hora: '', sala: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
   fechaSeleccionada.value = null
   isEditing.value = false
 }
 
-const guardarClase = () => {
-  console.log('Simulando guardado de clase:', nuevaClase.value)
-  const accion = isEditing.value ? 'Actualizando' : 'Creando'
-  console.log(`${accion} clase:`, nuevaClase.value)
-  cerrarDialog()
+const guardarClase = async () => {
+  try {
+    const payload = {
+      estado: 'Activa',
+      id_actividad: nuevaClase.value.id_actividad,
+      id_profesor: nuevaClase.value.id_profesor
+    }
+
+    if (isEditing.value) {
+      await ClasesService.modificarClase(nuevaClase.value.id, payload)
+    } else {
+      await ClasesService.publicarClase(payload)
+    }
+    
+    await fetchClases() // Recargar la lista
+    cerrarDialog()
+  } catch (error) {
+    console.error('Error al guardar clase:', error)
+    alert('Hubo un error al procesar la clase')
+  }
 }
 
 const editarClase = (clase) => {
@@ -285,8 +335,15 @@ const editarClase = (clase) => {
   dialog.value = true
 }
 
-const eliminarClase = (id) => {
-  console.log('Eliminando clase con ID:', id)
+const eliminarClase = async (id) => {
+  if (confirm('¿Estás seguro de que deseas eliminar esta clase?')) {
+    try {
+      await ClasesService.eliminarClase(id)
+      await fetchClases()
+    } catch (error) {
+      console.error('Error al eliminar clase:', error)
+    }
+  }
 }
 
 const cancelarClase = (id) => {

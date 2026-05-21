@@ -6,15 +6,17 @@ autenticacion_bp = Blueprint("autenticacion", __name__)
 
 @autenticacion_bp.route("/login", methods=["POST"])
 def login():
-
+    print("Recibiendo solicitud de login...")
     data = request.get_json()
 
     correo = data.get("correo")
     contraseña = data.get("contraseña")
 
+    print("Datos recibidos - Correo: ", correo, " Contraseña: ", contraseña)
     respuesta, status = login_service(
         correo,
         contraseña
     )
 
+    print("Respuesta: ", respuesta)
     return jsonify(respuesta), status

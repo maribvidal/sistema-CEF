@@ -1,1 +1,0 @@
-from db.operaciones.exception_handler import ejecutar_query 
