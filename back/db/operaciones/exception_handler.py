@@ -23,9 +23,12 @@ def ejecutar_fetchall(query, cursor):
 
 def ejecutar_fetchone(query, cursor) -> dict:
     try:
+        print("Ejecutando query de consulta: ", query)
         cursor.execute(query)
+        
         resultado = cursor.fetchone()
 
+        print("Resultado consulta: ", resultado)
         return {
             "status": "success",
             "data": resultado
