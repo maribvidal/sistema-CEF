@@ -10,19 +10,9 @@ def consultar_usuario_por_correo(correo: str, cursor) -> tuple:
     """Hace una consulta por un Usuario con un correo pasado por parámetro,
         y devuelve una tupla"""
     query = f"""
-            SELECT 
-                u.id,
-                c.dni,
-                u.fecha_nac,
-                u.telefono,
-                c.nombre,
-                c.apellido,
-                c.correo,
-                c.contraseña,
-                c.genero
-            FROM Usuario u
-            INNER JOIN Cuenta c ON u.dni = c.dni  
-            WHERE c.correo = '{correo}'
+            SELECT *
+            FROM Usuario
+            WHERE correo = '{correo}'
         """
     return ejecutar_fetchone(query, cursor)
 

@@ -29,7 +29,8 @@ def insertar_datos_erroneos():
         fecha_nac=datetime.date(year=2005, month=10, day=5).strftime("%Y-%m-%d"),
         telefono='1234567890123451231231231231',  # 15 caracteres, dentro del límite
         correo='prueba1234567891234@example.com', # 31 caracteres, excede el límite de 30
-        genero='M'
+        genero='M',
+        rol='2'
     )
 
     print("Respuesta del registro de usuario:")
@@ -46,7 +47,8 @@ def insertar_datos_erroneos():
         fecha_nac=datetime.date(year=2006, month=10, day=5).strftime("%Y-%m-%d"),
         telefono='1234567890', 
         correo='prueba1@gmail.com', 
-        genero='M'
+        genero='M',
+        rol='1'
     )
 
     print("Respuesta del registro de usuario:")
@@ -62,7 +64,8 @@ def insertar_datos_erroneos():
         fecha_nac="elpepe",
         telefono='1234567890',
         correo='prueba10@gmail.com',
-        genero='M'
+        genero='M',
+        rol='3'
     )
 
     print("Respuesta del registro de usuario:")
