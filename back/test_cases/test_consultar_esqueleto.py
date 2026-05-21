@@ -74,6 +74,8 @@ def test_obtener_empleados(cursor):
 def test_consultar_usuario_por_id(cursor):
     print("---------------TEST CONSULTAR USUARIO POR ID---------------")
     usuario = consultar_usuario_por_id(1, cursor)
+    usuario = consultar_usuario_por_id(999, cursor)
+    print("usuario con id 1: " + str(usuario['data']))
     if usuario['status'] == 'success' and usuario['data'] is not None:
         print("Test consultar_usuario_por_id (deberia devolver el usuario con id 1):" + str(usuario['data'][2]))
     else:

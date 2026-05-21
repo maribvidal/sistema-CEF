@@ -20,6 +20,3 @@ def insertar_datos(cursor):
     insertar_rol('Administrador', cursor)
     insertar_rol('Recepcionista', cursor)
     insertar_clase('Programada', 1, 1, cursor)
-    insertar_pago(50.0, 1, cursor)
-    insertar_pago(60.0, 2, cursor)
-    insertar_pago_pagar_clase(1, 1, cursor)

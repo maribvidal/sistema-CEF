@@ -83,7 +83,8 @@ def registrar_usuario_service(
         return {
             "error": "La fecha de nacimiento no es válida."
         }, 400
-
+    
+    print("cantidad años: ", _obtener_años_hasta_2026(fecha_nac))
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         commitear(cursor)
         return {

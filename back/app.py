@@ -7,7 +7,7 @@ from test_cases import test_consultar_esqueleto, test_insertar_datos, test_login
 from db.operaciones.seed_db import insertar_datos
 
 # --- INICIALIZAR BD ---
-reconstruir_db()
+#reconstruir_db()
 
 # --- INICIALIZAR APP FLASK ---
 app = Flask(__name__)
@@ -23,7 +23,7 @@ app.register_blueprint(pagos_bp)
 # --- REALIZAR TESTS ---
 cursor = conectarse_db()
 
-insertar_datos(cursor)
+#insertar_datos(cursor)
 test_insertar_datos.intentar_insertar_datos(cursor)
 test_consultar_esqueleto.intentar_consultar_esqueleto(cursor)
 test_login_service.intentar_login_service(cursor)
