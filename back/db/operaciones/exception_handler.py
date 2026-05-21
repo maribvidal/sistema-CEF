@@ -40,7 +40,7 @@ def ejecutar_fetchone(query, cursor):
             "message": str(e)
         }
         
-def ejecutar_insertar(query, cursor) -> int:
+def ejecutar_insertar(query, cursor):
     """Ejecuta una consulta SQL de inserción y maneja 
         las excepciones."""
     try:
@@ -62,7 +62,7 @@ def ejecutar_insertar(query, cursor) -> int:
             "message": str(e)
         }
 
-def ejecutar_query(query, cursor) -> tuple:
+def ejecutar_query(query, cursor):
     """Ejecuta una consulta SQL que no devuelve datos 
         y maneja las excepciones."""
     try:
