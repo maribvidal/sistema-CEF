@@ -1,19 +1,14 @@
-from db.operaciones.commitear_db import commitear
-from db.operaciones.conectar_db import conectarse_db
+import sqlite3 as sqlite
 
-def ejecutar_fetchall(query):
-
+def ejecutar_fetchall(cursor, query):
+    """Ejecuta una consulta SQL que devuelve varias filas y 
+        maneja las excepciones."""
     try:
-        cursor = conectarse_db()
-
         cursor.execute(query)
-
         resultado = cursor.fetchall()
 
         # me tiraba error por el tipo de dato que devuelve el fetchall, así que lo convertí a una lista de diccionarios
         datos = [dict(fila) for fila in resultado]
-
-        cursor.connection.close()
 
         return {
             "status": "success",
@@ -27,16 +22,12 @@ def ejecutar_fetchall(query):
         }
 
 
-def ejecutar_fetchone(query):
-
+def ejecutar_fetchone(cursor, query):
+    """Ejecuta una consulta SQL que devuelve una sola fila y
+        maneja las excepciones."""
     try:
-        cursor = conectarse_db()
-
         cursor.execute(query)
-
         resultado = cursor.fetchone()
-
-        cursor.connection.close()
 
         return {
             "status": "success",
@@ -49,63 +40,28 @@ def ejecutar_fetchone(query):
             "message": str(e)
         }
         
-def ejecutar_insertar(query):
-
+def ejecutar_insertar(cursor, query) -> int:
+    """Ejecuta una consulta SQL de inserción y maneja 
+        las excepciones."""
     try:
-        cursor = conectarse_db()
-
         cursor.execute(query)
-        
         nuevo_id = cursor.lastrowid
-
-        commitear(cursor)
-
-        return {
-            "status": "success",
-            "data": nuevo_id
-        }
-
+        cursor.connection.commit()
+        return nuevo_id
+    except sqlite.IntegrityError as e:
+        print(f" > Error de integridad al ejecutar inserción: {e}")
+        return -1
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+        print(f" > Error al ejecutar inserción: {e}")
+        return -1
 
-def ejecutar_query(query):
-
+def ejecutar_query(cursor, query) -> tuple:
+    """Ejecuta una consulta SQL que no devuelve datos 
+        y maneja las excepciones."""
     try:
-        cursor = conectarse_db()
-
         cursor.execute(query)
-
-        commitear(cursor)
-
-        return {
-            "status": "success",
-            "data": None
-        }
-
+        cursor.connection.commit()
+        return True
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
-
-## Wrapper que realiza una acción y commitea, además de
-## manejar excepciones
-
-def manejar_db(func):
-    def wrapper(*args, **kwargs):
-        try:
-            cursor = conectarse_db()
-            resultado = func(cursor, *args, **kwargs)
-
-            commitear(cursor)
-            print(" > Operación realizada con éxito")
-            return resultado
-
-        except Exception as e:
-            print(f" > Error al realizar la operación: {str(e)}")
-            cursor.connection.close()
-
-    return wrapper
+        print(f" > Error al ejecutar consulta: {e}")
+        return False
