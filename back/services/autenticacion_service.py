@@ -12,13 +12,14 @@ import jwt
 # Tabla Usuario/Cliente (según consultar_usuario_por_correo)
 USR_ID = 0
 USR_DNI = 1
-USR_FECHA_NAC = 2
-USR_TELEFONO = 3
-USR_NOMBRE = 4
-USR_APELLIDO = 5
-USR_CORREO = 6
-USR_CONTRASENA = 7
+USR_NOMBRE = 2
+USR_APELLIDO = 3
+USR_CORREO = 4
+USR_CONTRASENA = 5
+USR_FECHA_NAC = 6
+USR_TELEFONO = 7
 USR_GENERO = 8
+USR_ROL = 9
 
 # Tabla Empleado
 EMP_ID = 0
@@ -37,10 +38,15 @@ def login_service(correo: str, contraseña: str):
         o administrador. El rol es necesario para después
         checkear los permisos de ciertos endpoints."""
     cursor = conectarse_db()
+    print("Consultando usuario por correo...")
+    
     usuario = consultar_usuario_por_correo(correo, cursor)
+    
+    print(" resultado consulta usuario: ", dict(usuario['data']) if usuario['data'] else None)
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
         commitear(cursor)
+        print("constraseña: ",usuario['data'][USR_CONTRASENA])
         if usuario['data'][USR_CONTRASENA] != contraseña:
             return {"error": "Contraseña incorrecta"}, 400
 
@@ -124,22 +130,34 @@ def verify_jwt(token):
         return None
 
 # Los parametros los tomé en cuenta al ver los text-field del Registro.Vue del frontend, si se necesita agregar o quitar alguno, solo avisenme y lo modifico
-def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fecha_nac: str, correo: str, telefono: str) -> bool:
+def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fecha_nac: str, correo: str, telefono: str, genero: str, rol_id: int) -> bool:
     # Verificar si el usuario ya existe realizando una constulta a la base de datos
     cursor = conectarse_db()
 
+    print(dni)
     usuario_existente = consultar_usuario_por_dni(dni, cursor)
-
+    print("Consultando usuario por DNI...")
+    print("status: ", usuario_existente['status'])
+    print("Resultado consulta usuario por DNI: ", dict(usuario_existente['data']) if usuario_existente['data'] else None)
+    
     if usuario_existente['status'] == 'success' and usuario_existente['data'] is not None:
         commitear(cursor)
         print("El usuario ya está registrado")
         return False
 
     # Insertar el nuevo usuario
-    insertar_usuario(dni, nombre, apellido, contrasena, fecha_nac, correo, telefono, "Otro", cursor)
+    resultado = insertar_usuario(dni, nombre, apellido, contrasena, fecha_nac, correo, telefono, genero, rol_id, cursor)
     commitear(cursor)
+    if resultado['status'] == 'error':
+        print("Error al registrar usuario: ", resultado['message'])
+        return {
+            "error" : resultado['message']
+        }, 500
     print("El usuario registrado exitosamente")
-    return True
+    return {
+        "mensaje": "Usuario registrado exitosamente",
+        "usuario_id": resultado['data']
+    }, 201
 
 def cerrar_sesion():
     # Aca podes implementar la lógica para cerrar sesión.

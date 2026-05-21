@@ -85,7 +85,8 @@ def registrar_usuario_service(
         return {
             "error": "La fecha de nacimiento no es válida."
         }, 400
-
+    
+    print("cantidad años: ", _obtener_años_hasta_2026(fecha_nac))
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         commitear(cursor)
         return {
@@ -106,7 +107,12 @@ def registrar_usuario_service(
         rol_id,
         cursor
     )
-    print(res)
+    
+    if res['status'] == 'error':
+        commitear(cursor)
+        return {
+            "error": res['message']
+        }, 500
 
     commitear(cursor)
     return {
@@ -149,7 +155,7 @@ def obtener_perfil_usuario_service(usuario_id: int):
 def listar_pagos_usuario_service(usuario_id: int):
     cursor = conectarse_db()
     usuario = consultar_usuario_por_id(usuario_id, cursor)
-
+    
     if usuario['status'] == 'error':
         commitear(cursor)
         return usuario
@@ -165,7 +171,9 @@ def listar_pagos_usuario_service(usuario_id: int):
 
     if pagos['status'] == 'error':
         commitear(cursor)
-        return pagos
+        return {
+            "error": pagos['message']
+        }, 500
 
     if not pagos['data']:
         commitear(cursor)
@@ -174,9 +182,7 @@ def listar_pagos_usuario_service(usuario_id: int):
         }, 404
 
     commitear(cursor)
-    return {
-        "pagos": pagos['data']
-    }, 200
+    return pagos['data'], 200
     
 def editar_perfil_usuario_service(
     usuario_dni: int,
@@ -190,7 +196,6 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato para actualizar"
         }, 400
     
-    cursor = conectarse_db()
     usuario = consultar_usuario_por_dni(usuario_dni, cursor)
 
     if usuario['status'] == 'error':
@@ -238,13 +243,18 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato nuevo para actualizar"
         }, 400
     
-    cursor = conectarse_db()
-    modificar_perfil_usuario(
+    res = modificar_perfil_usuario(
         usuario_dni,
         correo,
         telefono,
         cursor
     )
+    
+    if res['status'] == 'error':
+        commitear(cursor)
+        return {
+            "error": res['message']
+        }, 500
 
     commitear(cursor)
     return {

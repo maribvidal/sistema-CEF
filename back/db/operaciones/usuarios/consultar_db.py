@@ -27,4 +27,4 @@ def consultar_usuario_por_id(id: int, cursor) -> dict:
 
 def listar_usuarios(cursor) -> dict:
     """Hace una consulta para listar todos los usuarios, y devuelve una lista de tuplas"""
-    return ejecutar_fetchall("SELECT * FROM Usuario LEFT JOIN Cuenta ON Usuario.dni = Cuenta.dni", cursor)
+    return ejecutar_fetchall("SELECT * FROM Usuario", cursor)

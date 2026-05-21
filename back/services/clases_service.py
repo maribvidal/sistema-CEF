@@ -28,7 +28,7 @@ def listar_clases_service():
 
     commitear(cursor)
     cursor.connection.close()
-    return respuesta, 200
+    return respuesta['data'], 200
 
 def listar_actividades_service():
     """Service que lista las actividades"""

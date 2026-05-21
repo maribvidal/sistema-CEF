@@ -5,6 +5,7 @@ from db.operaciones.commitear_db import commitear
 def obtener_pagos_service():
     cursor = conectarse_db()
     pagos = listar_pagos(cursor)
+    print("pagos: ", pagos)
 
     commitear(cursor)
     if pagos['status'] == 'error':
@@ -18,6 +19,4 @@ def obtener_pagos_service():
             "error": "No se encontraron pagos"
         }, 404
 
-    return {
-        "pagos": pagos['data']
-    }, 200
+    return pagos['data'], 200
