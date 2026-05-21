@@ -17,7 +17,6 @@ CORS(app)
 #app.register_blueprint(usuario_bp)
 #app.register_blueprint(autenticacion_bp)
 app.register_blueprint(clases_bp)
-#app.register_blueprint(empleados_bp)
 #app.register_blueprint(pagos_bp)
 
 # --- REALIZAR TESTS ---
