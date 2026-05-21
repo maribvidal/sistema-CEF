@@ -19,9 +19,7 @@ def ejecutar_fetchall(query, cursor):
             "message": str(e)
         }
 
-
-def ejecutar_fetchone(query, cursor):
-
+def ejecutar_fetchone(query, cursor) -> dict:
     try:
         cursor.execute(query)
 

@@ -8,8 +8,8 @@ from db.operaciones import insertar_pago, insertar_clase, insertar_cuenta
 from db.operaciones import insertar_pago_pagar_clase
 
 def insertar_datos(cursor):   
-    insertar_usuario(12345678, 'Juan', 'Pérez', '123', '2004-10-10', 'juan.perez@example.com', 1234,'M', cursor)
-    insertar_usuario(87654321, 'María', 'Gómez', '456', '2008-07-10', 'maria.gomez@example.com', 5678,'F', cursor)
+    insertar_usuario(12345678, 'Juan', 'Pérez', '123', '2004-10-10', 'juan.perez@example.com', "1234",'M', cursor)
+    insertar_usuario(87654321, 'María', 'Gómez', '456', '2008-07-10', 'maria.gomez@example.com', "5678",'F', cursor)
     insertar_profesor('Carlos', 'López', 'M', 11223344, cursor)
     insertar_profesor('Ana', 'Martínez', 'F', 44332211, cursor)
     insertar_actividad('Yoga', 50.0, cursor)
