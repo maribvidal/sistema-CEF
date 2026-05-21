@@ -9,6 +9,7 @@ from db.operaciones.clases.modificar_db import modificar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
 from db.operaciones.actividades.consultar_db import listar_actividades
 from db.operaciones.profesores.consultar_db import listar_profesores
+from db.operaciones.salas.consultar_db import listar_salas
 
 def listar_clases_service():
     """Service que lista las clases"""
@@ -49,6 +50,16 @@ def listar_profesores_service():
     commitear(cursor)
     cursor.connection.close()
     return respuesta, 200
+
+def listar_salas_service():
+    """Service que lista las salas"""
+    cursor = conectarse_db()
+    respuesta = listar_salas(cursor)
+    commitear(cursor)
+    cursor.connection.close()
+    return respuesta, 200
+
+
 
 def publicar_clase_service(
     estado: str,
