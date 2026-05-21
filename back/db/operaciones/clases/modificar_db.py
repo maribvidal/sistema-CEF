@@ -7,3 +7,10 @@ def modificar_clase(clase_id: int, estado: str, actividad_id: int, profesor_id: 
                 SET estado = '{estado}', actividad_id = {actividad_id}, profesor_id = {profesor_id}
                 WHERE id = {clase_id};"""
     return ejecutar_query(query, cursor)
+
+def modificar_clase_estado(clase_id: int, estado: str, cursor):
+    """Permite modificar el estado de una clase a 'Borrada'."""
+    query = f"""UPDATE Clase
+                SET estado = '{estado}'
+                WHERE id = {clase_id};"""
+    return ejecutar_query(query, cursor)

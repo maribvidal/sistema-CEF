@@ -6,6 +6,7 @@ from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_po
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.borrar_db import borrar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
+from db.operaciones.clases.modificar_db import modificar_clase_estado
 from db.operaciones.actividades.consultar_db import listar_actividades
 from db.operaciones.profesores.consultar_db import listar_profesores
 
@@ -67,7 +68,7 @@ def publicar_clase_service(
         cursor.connection.close()
         return respuesta['message'], 400
 
-    respuesta2 = insertar_clase_ocurrir_sala(respuesta['data'], sala, fecha, hora, cursor)
+    respuesta2 = insertar_clase_ocurrir_sala(int(respuesta['data']), sala, fecha, hora, cursor)
 
     if respuesta2['status'] == 'error':
         print(respuesta2['message'])
@@ -145,7 +146,7 @@ def eliminar_clase_service(clase_id: int):
             "error": "Clase no encontrada"
         }, 404
 
-    respuesta = modificar_clase(clase_id, 'Borrada', id_actividad, id_profesor, cursor)
+    respuesta = modificar_clase_estado(clase_id, 'Borrado', cursor)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
