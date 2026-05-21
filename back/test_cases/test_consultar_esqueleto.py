@@ -11,7 +11,7 @@ def intentar_consultar_esqueleto(cursor):
     test_consultar_usuario_por_id(cursor)
     test_consultar_pagos_de_usuario(cursor)
     test_obtener_rol_por_id(cursor)
-    cursor.connection.close()
+    cursor.connection.commit()
 
 def test_consultar_permiso_por_id(cursor):
     print("---------------TEST CONSULTAR PERMISO POR ID---------------")
