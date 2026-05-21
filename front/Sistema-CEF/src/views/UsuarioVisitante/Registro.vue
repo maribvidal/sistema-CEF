@@ -75,21 +75,16 @@ const register = async () => {
   }
 
   try {
-    // Calculamos la edad a partir de la fecha de nacimiento (YYYY-MM-DD)
-    const today = new Date();
-    const birthDate = new Date(age.value + "T00:00:00");
-    let calculatedAge = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        calculatedAge--;
-    }
+    // El input tipo 'date' ya devuelve el valor en formato 'YYYY-MM-DD', el cual es ideal para SQLite.
+    // También podemos usar DateFormatterService para asegurar consistencia si proviene de otras fuentes.
+    const fechaBackend = DateFormatterService.formatDateForBackend(age.value) || age.value;
 
     const usuario = {
 		dni: parseInt(dni.value) || 0,
 		nombre: name.value,
 		apellido: lastname.value,
 		contraseña: password.value,
-	  	edad: calculatedAge,
+	  	fecha_nac: fechaBackend,
 		correo: email.value.trim(),
 		telefono: cellphone.value,
 		genero: gender.value ? gender.value.charAt(0) : 'O',

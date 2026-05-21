@@ -87,10 +87,66 @@ function parseFlexibleDate(dateString) {
   return parsed
 }
 
+/**
+ * Formatea una fecha para mostrarla como "16 de Junio de 1997".
+ * @param {string} dateString - La fecha de entrada.
+ * @returns {string} Fecha en formato texto español.
+ */
+export function formatSpanishDate(dateString) {
+  if (!dateString) return ''
+
+  let dateObj
+  // Si ya es un formato YYYY-MM-DD
+  if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const [year, month, day] = dateString.split('-')
+    dateObj = new Date(year, month - 1, day)
+  } else {
+    dateObj = parseFlexibleDate(dateString)
+  }
+
+  if (!dateObj) return dateString
+
+  const meses = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ]
+
+  const day = dateObj.getDate()
+  const month = meses[dateObj.getMonth()]
+  const year = dateObj.getFullYear()
+
+  return `${day} de ${month} de ${year}`
+}
+
+/**
+ * Convierte una fecha a formato YYYY-MM-DD apto para SQLite / Backend.
+ * @param {string} dateString - La fecha de entrada.
+ * @returns {string} Fecha en formato "YYYY-MM-DD"
+ */
+export function formatDateForBackend(dateString) {
+  if (!dateString) return ''
+  
+  // Si la fecha ya viene del input type="date", ya es "YYYY-MM-DD"
+  if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return dateString
+  }
+
+  const dateObj = parseFlexibleDate(dateString)
+  if (!dateObj) return dateString // falla graciosa devolviendo el original
+
+  const year = dateObj.getFullYear()
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+  const day = String(dateObj.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
 const DateFormatterService = {
   formatDisplayDate,
   getCurrentDateFormatted,
   parseDMYDate,
+  formatSpanishDate,
+  formatDateForBackend,
 }
 
 export default DateFormatterService

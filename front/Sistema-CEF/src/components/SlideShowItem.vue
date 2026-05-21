@@ -70,7 +70,8 @@ defineProps({
 
 @media (max-width: 768px) {
   .slideshow-item img {
-    object-position: left;
+    object-fit: fill; /* En móviles, recorta para llenar el espacio */
+    background-color: #000;
   }
 }
 

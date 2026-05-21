@@ -11,17 +11,19 @@ def buscar_empleado_por_correo(correo: str) -> tuple:
     query = f"""
         SELECT 
             e.id, 
+            c.dni,
             c.nombre, 
             r.nombre AS rol,
             CASE 
                 WHEN a.id IS NOT NULL THEN 'ADMINISTRADOR'
                 WHEN re.id IS NOT NULL THEN 'RECEPCIONISTA'
-            END AS tipo
+            END AS tipo,
+            c.contraseña
         FROM Empleado e
         INNER JOIN Cuenta c ON e.dni = c.dni
         INNER JOIN Rol r ON e.rol_id = r.id
         LEFT JOIN administrador a ON e.id = a.id
         LEFT JOIN recepcionista re ON e.id = re.id 
         WHERE c.correo = '{correo}'      
-    """;
+    """
     return ejecutar_fetchone(query)
