@@ -18,7 +18,7 @@ def registrar_usuario_service(
     correo: str,
     telefono: str,
     genero: str,
-    rol: int
+    rol_id: int
 ):
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
@@ -50,7 +50,7 @@ def registrar_usuario_service(
             {"name": "correo", "value": correo},
             {"name": "telefono", "value": telefono},
             {"name": "genero", "value": genero},
-            {"name": "rol", "value": rol}
+            {"name": "rol_id", "value": rol_id}
         ]
     )
     
@@ -103,7 +103,7 @@ def registrar_usuario_service(
         correo,
         telefono,
         genero,
-        rol,
+        rol_id,
         cursor
     )
     print(res)
