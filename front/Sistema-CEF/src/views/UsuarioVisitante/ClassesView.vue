@@ -272,7 +272,7 @@ const fetchClases = async () => {
       // Si todavía usa tuplas, usamos índices como respaldo.
       id_actividad: c.actividad_id,
       estado: c.estado,
-      fecha: c["fecha"] ?? 'A confirmar',
+      dia: c.fecha ?? 'A confirmar',
       hora: c.hora ?? '--:--',
       id_profesor: c.profesor_id,
       salas: salas.value.find(s => s.id == (s.sala_id ?? c[5]))?.nombre,
