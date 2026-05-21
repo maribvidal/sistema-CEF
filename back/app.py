@@ -7,7 +7,7 @@ from db.operaciones.seed_db import insertar_datos
 from test_cases.test_consultar_esqueleto import intentar_consultar_esqueleto
 
 # --- INICIALIZAR BD ---
-# reconstruir_db()
+reconstruir_db()
 
 # --- INICIALIZAR APP FLASK ---
 app = Flask(__name__)

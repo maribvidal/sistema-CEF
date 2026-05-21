@@ -124,11 +124,11 @@ def obtener_perfil_usuario_service(usuario_id: int):
     usuario = consultar_usuario_por_id(usuario_id, cursor)
 
     if usuario['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return usuario
     
     if usuario['status'] == 'success' and not usuario['data']:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -157,11 +157,11 @@ def listar_pagos_usuario_service(usuario_id: int):
     usuario = consultar_usuario_por_id(usuario_id, cursor)
     
     if usuario['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return usuario
 
     if usuario['status'] == 'success' and not usuario['data']:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -170,18 +170,19 @@ def listar_pagos_usuario_service(usuario_id: int):
     pagos = consultar_pagos_de_usuario(usuario_id, cursor)
 
     if pagos['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": pagos['message']
         }, 500
 
     if not pagos['data']:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "No se encontraron pagos para este usuario"
         }, 404
 
     commitear(cursor)
+    cursor.connection.close()
     return pagos['data'], 200
     
 def editar_perfil_usuario_service(
@@ -199,11 +200,11 @@ def editar_perfil_usuario_service(
     usuario = consultar_usuario_por_dni(usuario_dni, cursor)
 
     if usuario['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return usuario
 
     if usuario['status'] == 'success' and not usuario['data']:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -221,24 +222,24 @@ def editar_perfil_usuario_service(
     )
     
     if len(errores) > 0:
-        commitear(cursor)
+        cursor.connection.close()
         return errores, 400
 
     usuario_con_correo = consultar_usuario_por_correo(correo, cursor)
 
     if usuario_con_correo['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return usuario_con_correo
     
     
     if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][1] != usuario_dni:
-         commitear(cursor)
+         cursor.connection.close()
          return {
             "error": "El correo electrónico ya se encuentra registrado por otro usuario"
         }, 400
         
     if usuario_con_correo['data'] and usuario_con_correo['data'][6] == correo and usuario_con_correo['data'][3] == telefono:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "No se proporcionó ningún dato nuevo para actualizar"
         }, 400
@@ -251,12 +252,13 @@ def editar_perfil_usuario_service(
     )
     
     if res['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": res['message']
         }, 500
 
     commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Perfil actualizado exitosamente"
     }, 200

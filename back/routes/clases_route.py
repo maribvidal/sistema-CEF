@@ -39,11 +39,17 @@ def publicar_clase():
     estado = data.get("estado")
     id_actividad = data.get("id_actividad")
     id_profesor = data.get("id_profesor")
+    fecha = data.get("fecha")
+    hora = data.get("hora")
+    sala = data.get("sala")
 
     respuesta, status = publicar_clase_service(
         estado,
         id_actividad,
-        id_profesor
+        id_profesor,
+        fecha,
+        hora,
+        sala
     )
 
     return jsonify(respuesta), status
@@ -67,12 +73,18 @@ def modificar_clase(id_clase):
     estado = data.get("estado")
     id_actividad = data.get("id_actividad")
     id_profesor = data.get("id_profesor")
+    fecha = data.get("fecha")
+    hora = data.get("hora")
+    sala = data.get("sala")
 
     respuesta, status = modificar_clase_service(
         id_clase,
         estado,
         id_actividad,
-        id_profesor
+        id_profesor,
+        fecha,
+        hora,
+        sala
     )
 
     return jsonify(respuesta), status

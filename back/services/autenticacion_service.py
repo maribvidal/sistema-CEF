@@ -45,11 +45,13 @@ def login_service(correo: str, contraseña: str) -> tuple:
     
     print(" resultado consulta usuario: ", dict(usuario['data']) if usuario['data'] else None)
     if usuario["status"] == "error":
+        cursor.connection.close()
         return {
             "error": usuario["message"]
         }, 500
     
     if usuario["status"] == 'success' and usuario["data"] is None:
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -57,6 +59,7 @@ def login_service(correo: str, contraseña: str) -> tuple:
     if usuario['status'] == 'success' and usuario['data'] is not None:
         print("constraseña: ",usuario['data'][USR_CONTRASENA])
         if usuario['data'][USR_CONTRASENA] != contraseña:
+            cursor.connection.close()
             return {"error": "Contraseña incorrecta"}, 400
 
         # Generar JWT
@@ -68,6 +71,7 @@ def login_service(correo: str, contraseña: str) -> tuple:
             "rol": ""
         })
 
+        cursor.connection.close()
         return {
             "mensaje": "Inicio de sesión exitoso",
             "token": token,
@@ -78,7 +82,9 @@ def login_service(correo: str, contraseña: str) -> tuple:
                 "tipo": "CLIENTE",
                 "rol": ""
             }
-        }, 200
+        }, 
+    
+    cursor.connection.close()
     return {"error": "Error desconocido"}, 500
     
 
@@ -115,19 +121,21 @@ def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fech
     print("Resultado consulta usuario por DNI: ", dict(usuario_existente['data']) if usuario_existente['data'] else None)
     
     if usuario_existente['status'] == 'success' and usuario_existente['data'] is not None:
-        commitear(cursor)
+        cursor.connection.close()
         print("El usuario ya está registrado")
         return False
 
     # Insertar el nuevo usuario
     resultado = insertar_usuario(dni, nombre, apellido, contrasena, fecha_nac, correo, telefono, genero, rol_id, cursor)
-    commitear(cursor)
     if resultado['status'] == 'error':
+        cursor.connection.close()
         print("Error al registrar usuario: ", resultado['message'])
         return {
             "error" : resultado['message']
         }, 500
     print("El usuario registrado exitosamente")
+    commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Usuario registrado exitosamente",
         "usuario_id": resultado['data']

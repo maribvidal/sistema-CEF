@@ -1,6 +1,6 @@
 from db.operaciones.exception_handler import ejecutar_query
 
-def modificar_clase(cursor, clase_id: int, estado: str, actividad_id: int, profesor_id: int):
+def modificar_clase(clase_id: int, estado: str, actividad_id: int, profesor_id: int, cursor):
     """Permite modificar una fila para la tabla Clase.
         Se modifican todas las variables, excepto su id."""
     query = f"""UPDATE Clase
