@@ -94,7 +94,7 @@ def registrar_usuario_service(
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
-    insertar_usuario(
+    res = insertar_usuario(
         dni,
         nombre,
         apellido,
@@ -106,6 +106,7 @@ def registrar_usuario_service(
         rol,
         cursor
     )
+    print(res)
 
     commitear(cursor)
     return {
@@ -137,7 +138,7 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "correo": usuario['data'][6],
         "telefono": usuario['data'][7],
         "genero": usuario['data'][8],
-        "rol": usuario['rol'][9]
+        "rol_id": usuario['data'][9]
     }
 
     commitear(cursor)

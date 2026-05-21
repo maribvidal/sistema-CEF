@@ -20,11 +20,9 @@ def consultar_usuario_por_id(id: int, cursor) -> dict:
     """Hace una consulta por un Usuario con un id pasado por parámetro,
         y devuelve una tupla"""
     query = f"""
-        SELECT 
-            c.id, c.dni, c.nombre, c.apellido, c.contraseña, u.fecha_nac, c.correo, u.telefono, c.genero 
-        FROM Usuario u
-        INNER JOIN Cuenta c ON u.dni = c.dni
-        WHERE c.id = {id}"""
+        SELECT * 
+        FROM Usuario
+        WHERE id = {id}"""
     return ejecutar_fetchone(query, cursor)
 
 def listar_usuarios(cursor) -> dict:

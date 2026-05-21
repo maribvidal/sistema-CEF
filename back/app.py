@@ -14,7 +14,7 @@ app = Flask(__name__)
 CORS(app)
 
 # --- INICIALIZAR BLUEPRINTS DE FLASK ---
-#app.register_blueprint(usuario_bp)
+app.register_blueprint(usuario_bp)
 #app.register_blueprint(autenticacion_bp)
 app.register_blueprint(clases_bp)
 #app.register_blueprint(pagos_bp)
