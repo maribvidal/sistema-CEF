@@ -1,4 +1,4 @@
-from db.operaciones import obtener_rol_por_id, consultar_permiso_por_id, consultar_usuario_por_dni, consultar_usuario_por_correo ,listar_clases ,listar_usuarios, obtener_empleados, consultar_pagos_de_usuario, consultar_usuario_por_id
+from db.operaciones import obtener_rol_por_id, consultar_permiso_por_id, consultar_usuario_por_dni, consultar_usuario_por_correo ,listar_clases ,listar_usuarios, consultar_pagos_de_usuario, consultar_usuario_por_id
 
 # TODO: Escribir mejor los tests, que expresen algo mas
 
@@ -8,7 +8,6 @@ def intentar_consultar_esqueleto(cursor):
     test_consultar_usuario_por_correo(cursor)
     test_listar_clases(cursor)
     test_listar_usuarios(cursor)
-    test_obtener_empleados(cursor)
     test_consultar_usuario_por_id(cursor)
     test_consultar_pagos_de_usuario(cursor)
     test_obtener_rol_por_id(cursor)
@@ -64,11 +63,6 @@ def test_listar_usuarios(cursor):
         for u in usuarios:
             nombre = u[2] if len(u) > 2 else str(u)
             print(nombre)
-    print("\n")
-
-def test_obtener_empleados(cursor):
-    print("---------------TEST OBTENER EMPLEADOS---------------")
-    print("Test obtener_empleados (deberia devolver una lista de tuplas con los empleados o vacío):" + str(obtener_empleados(cursor)))
     print("\n")
 
 def test_consultar_usuario_por_id(cursor):
