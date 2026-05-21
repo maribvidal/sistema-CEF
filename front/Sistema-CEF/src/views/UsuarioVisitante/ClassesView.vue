@@ -213,16 +213,18 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ClasesService } from '@/services/ClasesServices'
+import DateFormatterService from '@/services/DateFormatterService.js'
 
 const isEditing = ref(false)
 const dialog = ref(false)
 const menuFecha = ref(false)
-const fechaSeleccionada = ref(null)
+
+
 
 const nuevaClase = ref({
   id_actividad: null, // Usar id_actividad para el v-select
   id_profesor: null,  // Usar id_profesor para el v-select
-  dia: '',
+  fecha: '',
   hora: '',
   sala: ''
 })
@@ -271,7 +273,7 @@ const fetchClases = async () => {
                  || `ID Act: ${c.id_actividad ?? c[2]}`,
       profesor: profesores.value.find(p => p.id == (c.id_profesor ?? c[3]))?.nombre 
                 || `ID Prof: ${c.id_profesor ?? c[3]}`,
-      dia: c.dia ?? c[4] ?? 'A confirmar',
+      fecha: c.fecha ?? c[4] ?? 'A confirmar',
       hora: c.hora ?? c[5] ?? '--:--',
       sala: c.sala || c[6] || 'Gimnasio',
       imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
@@ -311,7 +313,10 @@ const guardarClase = async () => {
     const payload = {
       estado: 'Activa',
       id_actividad: nuevaClase.value.id_actividad,
-      id_profesor: nuevaClase.value.id_profesor
+      id_profesor: nuevaClase.value.id_profesor,
+      fecha: DateFormatterService.formatDateForBackend(nuevaClase.value.dia),
+      hora: nuevaClase.value.hora,
+      sala: nuevaClase.value.sala
     }
 
     if (isEditing.value) {
