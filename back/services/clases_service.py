@@ -34,7 +34,7 @@ def publicar_clase_service(
     id_actividad: int,
     id_profesor: int,
     fecha,
-    hora: int,
+    hora: str,
     sala: int
 ):
     """Service que publica una clase"""
@@ -66,7 +66,7 @@ def modificar_clase_service(
     id_actividad: int,
     id_profesor: int,
     fecha,
-    hora: int,
+    hora: str,
     sala: int
 ):
     """Service que modifica una clase"""
