@@ -5,13 +5,13 @@ import datetime
 import services.usuario_service as u_s
 
 
-def intentar_insertar_datos():
-    insertar_datos()
-    insertar_actividades()
-    insertar_profesores()
-    insertar_clases()
+def intentar_insertar_datos(cursor):
+    insertar_datos(cursor)
+    insertar_actividades(cursor)
+    insertar_profesores(cursor)
+    insertar_clases(cursor)
 
-    lista = listar_usuarios()
+    lista = listar_usuarios(cursor)
     print("Usuarios después de insertar datos:")
     pprint(lista)
     print("\n")
@@ -70,18 +70,18 @@ def insertar_datos_erroneos():
     print("\n")
 
 from db.operaciones import insertar_actividad, insertar_clase
-def insertar_clases():
-    insertar_clase("Yoga", 2, 1)
-    insertar_clase("Pilates", 2, 2)
+def insertar_clases(cursor):
+    insertar_clase("Yoga", 2, 1, cursor)
+    insertar_clase("Pilates", 2, 2, cursor)
 
 from db.operaciones import insertar_profesor
-def insertar_profesores():
-    insertar_profesor("Carlos", "García", "H", 5)
-    insertar_profesor("Paez", "García", "H", 4)
+def insertar_profesores(cursor):
+    insertar_profesor("Carlos", "García", "H", 5, cursor)
+    insertar_profesor("Paez", "García", "H", 4, cursor)
 
 
 # def insertar_actividad(nombre: str, precio_mensual: float):
 from db.operaciones import insertar_actividad
-def insertar_actividades():
-    insertar_actividad("Yoga", 2000)
-    insertar_actividad("Pilates", 2500)
+def insertar_actividades(cursor):
+    insertar_actividad("Yoga", 2000, cursor)
+    insertar_actividad("Pilates", 2500, cursor)

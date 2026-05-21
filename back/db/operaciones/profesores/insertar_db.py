@@ -1,10 +1,7 @@
 from db.operaciones.commitear_db import commitear
 
-def insertar_profesor(cursor, nombre: str, apellido: str, genero: str, dni: int) -> int:
-    """Permite insertar una fila para la tabla Profesor
-        y retorna el ID de la fila insertada"""
+def insertar_profesor(nombre: str, apellido: str, genero: str, dni: int, cursor):
+    """Permite insertar una fila para la tabla Profesor"""
     query = f"""INSERT INTO Profesor (nombre, apellido, genero, dni)
                 VALUES('{nombre}', '{apellido}', '{genero}', '{dni}');"""
-    cursor.execute(query)
-    commitear(cursor)
-    return cursor.lastrowid
+    ejecutar_insertar(query, cursor)

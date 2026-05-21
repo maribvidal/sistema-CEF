@@ -6,5 +6,4 @@ def modificar_clase(cursor, clase_id: int, estado: str, actividad_id: int, profe
     query = f"""UPDATE Clase
                 SET estado = '{estado}', actividad_id = {actividad_id}, profesor_id = {profesor_id}
                 WHERE id = {clase_id};"""
-    cursor.execute(query)
-    commitear(cursor)
+    return ejecutar_query(query, cursor)

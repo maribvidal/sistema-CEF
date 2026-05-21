@@ -1,4 +1,23 @@
-def consultar_pagos_de_usuario(cursor, usuario_id: int) -> list:
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
+
+# def consultar_pagos_de_usuario(usuario_id: int) -> list:
+#     """Hace una consulta por los pagos de un Usuario con un id pasado por parámetro,
+#         y devuelve una lista de tuplas"""
+#     cursor = conectarse_db()
+#     res = cursor.execute("""
+#         SELECT 
+#             p.id, 
+#             p.monto, 
+#             p.fecha, 
+#             c.id AS clase_id
+#         FROM Pago p
+#         INNER JOIN Clase c ON p.clase_id = c.id
+#         WHERE p.usuario_id = ?
+#     """, (usuario_id,))
+#     res = res.fetchall()
+#     cursor.connection.close()
+#     return res
+def consultar_pagos_de_usuario(usuario_id: int, cursor) -> list:
     """Hace una consulta por los pagos de un Usuario con un id pasado por parámetro,
        y devuelve una lista de tuplas."""
     query = """
@@ -11,11 +30,9 @@ def consultar_pagos_de_usuario(cursor, usuario_id: int) -> list:
         INNER JOIN Clase ON Pago_Pagar_Clase.clase_id = Clase.id
         WHERE Pago.usuario_id = ?;
     """
-    res = cursor.execute(query, (usuario_id,))
-    return res.fetchall()
+    return ejecutar_fetchall(query, cursor)
 
-
-def listar_pagos(cursor) -> list:
+def listar_pagos(cursor):
     """Hace una consulta por todos los pagos registrados en la base de datos,
         y devuelve una lista de tuplas"""
     query = """
@@ -28,5 +45,4 @@ def listar_pagos(cursor) -> list:
         FROM Pago p
         INNER JOIN Pago_Pagar_Clase c ON p.id = c.pago_id
     """
-    res = cursor.execute(query)
-    return res.fetchall()
+    return ejecutar_fetchall(query, cursor)

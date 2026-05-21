@@ -1,6 +1,6 @@
-def consultar_cuenta_por_id(cursor, id: int) -> tuple:
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
+
+def consultar_cuenta_por_id(id: int, cursor) -> tuple:
     """Función que consulta una cuenta por su id, y devuelve la tupla."""
     query = f"SELECT * FROM Cuenta WHERE id_cuenta = {id};"
-    res = cursor.execute(query)
-    res = res.fetchone()
-    return res
+    return ejecutar_fetchone(query, cursor)

@@ -1,9 +1,7 @@
 from db.operaciones.commitear_db import commitear
 
-def insertar_rol(cursor, nombre: str):
+def insertar_rol(nombre: str, cursor):
     """Permite insertar una fila para la tabla Rol"""
     query = f"""INSERT INTO Rol (nombre) 
                 VALUES ('{nombre}');"""
-    cursor.execute(query)
-    commitear(cursor)
-    return cursor.lastrowid
+    ejecutar_insertar(query, cursor)

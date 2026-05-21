@@ -122,6 +122,7 @@ export const initAuth = () => {
       // Restaurar el estado del usuario desde el payload del JWT
       _userProfile.value = {
         id: payload.id,
+        dni: payload.dni,
         nombre: payload.nombre,
         tipo: payload.tipo,
         rol: payload.rol
@@ -278,7 +279,9 @@ export const useAuth = () => {
       if (!_userProfile.value) throw new Error('No hay sesión activa')
       // Incluimos el ID en el cuerpo de la petición también, por si el backend lo espera en el modelo.
       const payload = { ...profileData, id: _userProfile.value.id }
-      return AuthApiService.updateProfile(_userProfile.value.id, payload)
+      // El backend requiere el DNI en la URL (usuario_dni)
+      const identifier = _userProfile.value.dni || _userProfile.value.id
+      return AuthApiService.updateProfile(identifier, payload)
     },
     uploadAvatar: (avatarData) => {
       if (!_userProfile.value) throw new Error('No hay sesión activa')

@@ -1,6 +1,11 @@
 from db.operaciones.commitear_db import commitear
 
-def modificar_perfil_usuario(cursor, usuario_dni: int, correo: str, telefono: str):
+def modificar_perfil_usuario(
+    usuario_dni: int,
+    correo: str,
+    telefono: str,
+    cursor
+):
     """Recibe el id de un usuario, y recibe el
         nuevo correo y teléfono que se les quiere
         poner, y modifica al usuario."""
@@ -16,6 +21,5 @@ def modificar_perfil_usuario(cursor, usuario_dni: int, correo: str, telefono: st
         WHERE dni = {usuario_dni}
     """
 
-    cursor.execute(query1)
-    cursor.execute(query2)
-    commitear(cursor)
+    ejecutar_query(query1,cursor)
+    ejecutar_query(query2,cursor)

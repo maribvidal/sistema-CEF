@@ -3,9 +3,8 @@ from db.operaciones.conectar_db import conectarse_db
 from flask import Flask
 from flask_cors import CORS
 from routes import *
-#from test_cases import test_consultar_esqueleto, test_insertar_datos, test_login_service
-
-from db.operaciones_insercion_comunes import crear_actividad, crear_profesor
+from test_cases import test_consultar_esqueleto, test_insertar_datos, test_login_service
+from db.operaciones.seed_db import insertar_datos
 
 # --- INICIALIZAR BD ---
 reconstruir_db()
@@ -24,12 +23,10 @@ app.register_blueprint(clases_bp)
 # --- REALIZAR TESTS ---
 cursor = conectarse_db()
 
-#test_insertar_datos.intentar_insertar_datos()
+insertar_datos(cursor)
+#test_insertar_datos.intentar_insertar_datos(cursor)
 #test_consultar_esqueleto.intentar_consultar_esqueleto()
 #test_login_service.intentar_login_service()
-
-crear_actividad(cursor, 'Funcional', 150.0)
-crear_profesor(cursor, 'Gero', 'Arias', 'M', 6656342)
 
 cursor.connection.close()
 

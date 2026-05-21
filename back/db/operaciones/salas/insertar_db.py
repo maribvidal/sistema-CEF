@@ -1,9 +1,7 @@
 from db.operaciones.commitear_db import commitear
 
-def insertar_sala(cursor, nombre: str):
+def insertar_sala(nombre: str, cursor):
     """Permite insertar una fila para la tabla Sala"""
     query = f"""INSERT INTO Sala (nombre)
                 VALUES ('{nombre}');"""
-    cursor.execute(query)
-    commitear(cursor)
-    return cursor.lastrowid
+    ejecutar_insertar(query, cursor)
