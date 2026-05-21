@@ -14,15 +14,18 @@ def listar_clases_service():
 
     if respuesta['status'] == 'error':
         commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     if respuesta['status'] == 'success' and not respuesta['data']:
         commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "No se encontraron clases"
         }, 404
 
     commitear(cursor)
+    cursor.connection.close()
     return {
         "clases": respuesta['data']
     }, 200
@@ -40,9 +43,11 @@ def publicar_clase_service(
 
     if respuesta['status'] == 'error':
         commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Clase publicada exitosamente."
     }, 201
@@ -61,9 +66,11 @@ def modificar_clase_service(
 
     if respuesta['status'] == 'error':
         commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Clase modificada exitosamente."
     }, 200
@@ -73,13 +80,14 @@ def eliminar_clase_service(clase_id: int):
 
     cursor = conectarse_db()
 
-    respuesta = borrar_clase(cursor, clase_id)
+    respuesta = borrar_clase(clase_id, cursor)
 
     if respuesta['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     commitear(cursor)
+    cursor.connection.close()
     return {
         "mensaje": "Clase eliminada exitosamente."
     }, 200
