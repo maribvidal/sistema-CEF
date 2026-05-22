@@ -30,6 +30,15 @@
                     cover
                     class="class-image"
                   >
+                    <v-chip
+                      v-if="clase.estado === 'Cancelada' || clase.estado === 'Borrado'"
+                      :color="clase.estado === 'Cancelada' ? 'red-darken-4' : 'grey-darken-3'"
+                      class="ma-2 font-weight-bold"
+                      style="position: absolute; top: 0; right: 0; z-index: 1;"
+                      label
+                    >
+                      {{ clase.estado.toUpperCase() }}
+                    </v-chip>
                     <div class="d-flex fill-height align-end">
                       <v-card-title class="class-title-overlay text-uppercase font-weight-black w-100">
                         {{ clase.categoria }}
@@ -116,7 +125,7 @@
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
-                    @click="cancelarClase(clase.id)"
+                    @click="cancelarClase(clase)"
                   >
                     Cancelar Clase
                   </v-btn>
@@ -129,7 +138,7 @@
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
-                    @click="eliminarClase(clase.id)"
+                    @click="eliminarClase(clase)"
                   >
                     Eliminar Clase
                   </v-btn>
@@ -301,25 +310,23 @@ const fetchClases = async () => {
       return
     }
     console.log(data[0])
-    clases.value = data.map(c => ({
-     // Si el backend usa dict(fila), usamos nombres de columnas. 
-      // Si todavía usa tuplas: 0:id, 1:estado, 2:act_id, 3:prof_id, 4:fecha, 5:hora, 6:sala_id
-      id: c.id ?? c[0],
-      id_actividad: c.actividad_id ?? c[2],
-      estado: c.estado ?? c[1],
-      dia: (c.fecha ?? c[4]) ?? 'A confirmar',
-      hora: (c.hora ?? c[5]) ?? '--:--',
-      id_profesor: c.profesor_id ?? c[3],
-      sala: c.sala_id ?? c[6],
-      // Resolvemos el ID a un nombre usando las listas cargadas
-      categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
-                 || `ID Act: ${c.actividad_id ?? c[2]}`,
-      profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
-                || `ID Prof: ${c.profesor_id ?? c[3]}`,
-      sala_nombre: salas.value.find(s => s.id == (c.sala_id ?? c[6]))?.nombre 
-                || `Sala ID: ${c.sala_id ?? c[6]}`,
-      imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
-    }))
+    clases.value = data
+      .map(c => ({
+        id: c.id ?? c[0],
+        id_actividad: c.actividad_id ?? c[2],
+        estado: c.estado ?? c[1],
+        dia: (c.fecha ?? c[4]) ?? 'A confirmar',
+        hora: (c.hora ?? c[5]) ?? '--:--',
+        id_profesor: c.profesor_id ?? c[3],
+        sala: c.sala_id ?? c[6],
+        categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
+                   || `ID Act: ${c.actividad_id ?? c[2]}`,
+        profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
+                  || `ID Prof: ${c.profesor_id ?? c[3]}`,
+        sala_nombre: salas.value.find(s => s.id == (c.sala_id ?? c[6]))?.nombre 
+                  || `Sala ID: ${c.sala_id ?? c[6]}`,
+        imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
+      }))
   } catch (error) {
     console.error('Error al cargar clases:', error)
   }
@@ -391,19 +398,30 @@ const editarClase = (clase) => {
   dialog.value = true
 }
 
-const eliminarClase = async (id) => {
-  if (confirm('¿Estás seguro de que deseas eliminar esta clase?')) {
+const eliminarClase = async (clase) => {
+  console.log('Objeto de la clase a eliminar:', clase)
+  if (confirm(`¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`)) {
     try {
-      await ClasesService.eliminarClase(id)
+      await ClasesService.eliminarClase(clase.id)
       await fetchClases()
     } catch (error) {
       console.error('Error al eliminar clase:', error)
+      alert('No se pudo eliminar la clase.')
     }
   }
 }
 
-const cancelarClase = (id) => {
-  console.log('Cancelando clase con ID:', id)
+const cancelarClase = async (clase) => {
+  console.log('Objeto de la clase a cancelar:', clase)
+  if (confirm(`¿Estás seguro de que deseas marcar la clase de ${clase.categoria} como cancelada?`)) {
+    try {
+      await ClasesService.cancelarClase(clase.id)
+      await fetchClases() // Refresca la lista para mostrar el chip de "CANCELADA"
+    } catch (error) {
+      console.error('Error al cancelar clase:', error)
+      alert('No se pudo cancelar la clase.')
+    }
+  }
 }
 
 const reservarClase = (id) => {

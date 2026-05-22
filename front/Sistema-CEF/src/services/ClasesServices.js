@@ -12,6 +12,8 @@ export const ClasesService = {
   publicarClase: (clase) => apiClient.post('/clases', clase),
   modificarClase: (id, clase) => apiClient.put(`/clases/${id}`, clase),
   eliminarClase: (id) => apiClient.delete(`/clases/${id}`),
+  cancelarClase: (id) => apiClient.patch(`/clases/${id}`),
+  
   listarActividades: async () => {
     const response = await apiClient.get('/actividades')
     if (response.data?.status === 'success') {
