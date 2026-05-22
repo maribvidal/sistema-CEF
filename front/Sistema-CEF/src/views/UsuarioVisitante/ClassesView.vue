@@ -4,7 +4,7 @@
       <v-col cols="12" md="10">
         <h1 class="text-h4 mb-6 text-center font-weight-bold">Nuestras Clases</h1>
 
-        <div class="d-flex justify-end mb-6">
+        <div class="d-flex justify-center justify-md-end mb-6">
           <v-btn
             color="blue-darken-1"
             prepend-icon="mdi-plus"
@@ -16,7 +16,7 @@
         
         <v-row>
           <v-col 
-            v-for="clase in clasesMock" 
+            v-for="clase in clases"  
             :key="clase.id" 
             cols="12"
           >
@@ -26,10 +26,19 @@
                 <v-col cols="12" md="4" sm="5">
                   <v-img
                     :src="clase.imagen"
-                    height="175"
+                    :height="$vuetify.display.xs ? 200 : 175"
                     cover
                     class="class-image"
                   >
+                    <v-chip
+                      v-if="clase.estado === 'Cancelada' || clase.estado === 'Borrado'"
+                      :color="clase.estado === 'Cancelada' ? 'red-darken-4' : 'grey-darken-3'"
+                      class="ma-2 font-weight-bold"
+                      style="position: absolute; top: 0; right: 0; z-index: 1;"
+                      label
+                    >
+                      {{ clase.estado.toUpperCase() }}
+                    </v-chip>
                     <div class="d-flex fill-height align-end">
                       <v-card-title class="class-title-overlay text-uppercase font-weight-black w-100">
                         {{ clase.categoria }}
@@ -39,7 +48,7 @@
                 </v-col>
 
                 <!-- Contenido de la clase -->
-                <v-col cols="12" md="5" sm="7" class="pa-2 d-flex flex-column justify-center">
+                <v-col cols="12" md="5" sm="7" :class="$vuetify.display.mdAndUp ? 'pa-2' : 'pa-4'" class="d-flex flex-column justify-center">
                   <div class="d-flex align-center mb-1">
                     <v-icon size="small" class="mr-2" color="red-darken-2">mdi-account-tie</v-icon>
                     <span class="text-body-1 font-weight-bold">Profesor:</span>
@@ -61,34 +70,35 @@
                   <div class="d-flex align-center">
                     <v-icon size="small" class="mr-2" color="red-darken-2">mdi-map-marker-outline</v-icon>
                     <span class="text-body-1 font-weight-bold">Sala:</span>
-                    <span class="text-body-1 ml-2">{{ clase.sala }}</span>
+                    <span class="text-body-1 ml-2">{{ clase.sala_nombre }}</span>
                   </div>
                 </v-col>
 
                 <!-- Acciones -->
                 <v-divider vertical class="hidden-sm-and-down"></v-divider>
-                <v-col cols="12" md="3" class="pa-0 d-flex flex-column">
+                <v-col cols="12" md="3" :class="$vuetify.display.mdAndUp ? 'pa-0' : 'pa-4 ga-2 bg-grey-lighten-4'" class="d-flex flex-column justify-center bg-md-transparent">
                   <v-btn
                     color="success"
-                    variant="tonal"
+                    :variant="$vuetify.display.mdAndUp ? 'tonal' : 'elevated'"
                     prepend-icon="mdi-calendar-check"
-                    
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="reservarClase(clase.id)"
                   >
                     Reservar Clase
                   </v-btn>
                   <v-btn
                     color="orange-darken-1"
-                    variant="tonal"
+                    :variant="$vuetify.display.mdAndUp ? 'tonal' : 'outlined'"
                     prepend-icon="mdi-calendar-remove"
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="cancelarReserva(clase.id)"
                   >
                     Cancelar Reserva
@@ -97,10 +107,11 @@
                     color="blue-darken-1"
                     variant="tonal"
                     prepend-icon="mdi-pencil"
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="editarClase(clase)"
                   >
                     Editar Clase
@@ -109,11 +120,12 @@
                     color="orange-darken-1"
                     variant="tonal"
                     prepend-icon="mdi-close-circle"
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
-                    @click="cancelarClase(clase.id)"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
+                    @click="cancelarClase(clase)"
                   >
                     Cancelar Clase
                   </v-btn>
@@ -121,11 +133,12 @@
                     color="red-darken-1"
                     variant="tonal"
                     prepend-icon="mdi-delete"
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
-                    @click="eliminarClase(clase.id)"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
+                    @click="eliminarClase(clase)"
                   >
                     Eliminar Clase
                   </v-btn>
@@ -148,8 +161,10 @@
             <v-row>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="nuevaClase.categoria"
-                  :items="['Yoga', 'Funcional', 'Pilates']"
+                  v-model="nuevaClase.id_actividad"
+                  :items="actividades"
+                  item-title="nombre"
+                  item-value="id"
                   label="Actividad"
                   variant="outlined"
                   density="compact"
@@ -157,8 +172,10 @@
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="nuevaClase.profesor"
-                  :items="['Lucas Gómez', 'Elena Paz', 'Marcos Rueda']"
+                  v-model="nuevaClase.id_profesor"
+                  :items="profesores"
+                  item-title="nombre"
+                  item-value="id"
                   label="Profesor"
                   variant="outlined"
                   density="compact"
@@ -181,12 +198,33 @@
                 </v-menu>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="nuevaClase.hora" label="Hora" type="time" variant="outlined" density="compact"></v-text-field>
+                <v-row no-gutters>
+                  <v-col cols="7" class="pr-1">
+                    <v-select
+                      v-model="horaSel"
+                      :items="horas"
+                      label="Hora"
+                      variant="outlined"
+                      density="compact"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="5" class="pl-1">
+                    <v-select
+                      v-model="minutoSel"
+                      :items="minutos"
+                      label="Min"
+                      variant="outlined"
+                      density="compact"
+                    ></v-select>
+                  </v-col>
+                </v-row>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
                   v-model="nuevaClase.sala"
-                  :items="['1', '2', '3']"
+                  :items="salas"
+                  item-title="nombre"
+                  item-value="id"
                   label="Sala"
                   variant="outlined"
                   density="compact"
@@ -207,19 +245,97 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
+import { ClasesService } from '@/services/ClasesServices'
+import DateFormatterService from '@/services/DateFormatterService.js'
 
 const isEditing = ref(false)
 const dialog = ref(false)
 const menuFecha = ref(false)
 const fechaSeleccionada = ref(null)
 
+const horas = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
+const minutos = ['00', '30']
+const horaSel = ref('08')
+const minutoSel = ref('00')
+
+watch([horaSel, minutoSel], ([h, m]) => {
+  nuevaClase.value.hora = `${h}:${m}`
+})
+
+
+
 const nuevaClase = ref({
-  categoria: '',
-  profesor: '',
-  dia: '',
+  id_actividad: null, // Usar id_actividad para el v-select
+  id_profesor: null,  // Usar id_profesor para el v-select
+  fecha: '',
   hora: '',
   sala: ''
+})
+
+const clases = ref([])
+const actividades = ref([])
+const profesores = ref([])
+const salas = ref([])
+
+const fetchAuxData = async () => {
+  try {
+    const [resAct, resProf, resSalas] = await Promise.all([
+      ClasesService.listarActividades(),
+      ClasesService.listarProfesores(),
+      ClasesService.listarSalas()])
+    
+    if (Array.isArray(resAct)) {
+      actividades.value = resAct.map(a => ({ id: a.id ?? a[0], nombre: a.nombre ?? a[1] }))
+    }
+    if (Array.isArray(resProf)) {
+      // El backend devuelve: 0: id, 1: dni, 2: nombre, 3: apellido...
+      profesores.value = resProf.map(p => ({ id: p.id ?? p[0], nombre: `${p.nombre ?? p[2]} ${p.apellido ?? p[3]}` }))
+    }
+    if (Array.isArray(resSalas)) {
+      salas.value = resSalas.map(s => ({ id: s.id ?? s[0], nombre: s.nombre ?? s[1] }))
+    }
+  
+  } catch (error) {
+    console.error('Error al cargar datos auxiliares:', error)
+  }
+}
+
+const fetchClases = async () => {
+  try {
+    const data = await ClasesService.listarClases()
+    
+    if (!Array.isArray(data)) {
+      console.error('Se esperaba un array de clases pero se recibió:', data)
+      return
+    }
+    console.log(data[0])
+    clases.value = data
+      .map(c => ({
+        id: c.id ?? c[0],
+        id_actividad: c.actividad_id ?? c[2],
+        estado: c.estado ?? c[1],
+        dia: (c.fecha ?? c[4]) ?? 'A confirmar',
+        hora: (c.hora ?? c[5]) ?? '--:--',
+        id_profesor: c.profesor_id ?? c[3],
+        sala: c.sala_id ?? c[6],
+        categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
+                   || `ID Act: ${c.actividad_id ?? c[2]}`,
+        profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
+                  || `ID Prof: ${c.profesor_id ?? c[3]}`,
+        sala_nombre: salas.value.find(s => s.id == (c.sala_id ?? c[6]))?.nombre 
+                  || `Sala ID: ${c.sala_id ?? c[6]}`,
+        imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
+      }))
+  } catch (error) {
+    console.error('Error al cargar clases:', error)
+  }
+}
+
+onMounted(async () => {
+  // Cargamos primero los datos auxiliares para poder mapear los nombres después
+  await fetchAuxData()
+  await fetchClases()
 })
 
 const confirmarFecha = (val) => {
@@ -227,70 +343,85 @@ const confirmarFecha = (val) => {
   menuFecha.value = false
 }
 
-// Datos de prueba (Mock data) para el diseño
-const clasesMock = ref([
-  {
-    id: 1,
-    categoria: 'Funcional',
-    profesor: 'Lucas Gómez',
-    dia: 'Lunes',
-    hora: '08:00',
-    sala: 'Sala 1',
-    imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
-  },
-  {
-    id: 2,
-    categoria: 'Yoga',
-    profesor: 'Elena Paz',
-    dia: 'Martes',
-    hora: '10:00',
-    sala: 'Sala 2',
-    imagen: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=500'
-  },
-  {
-    id: 3,
-    categoria: 'Pilates',
-    profesor: 'Marcos Rueda',
-    dia: 'Miércoles',
-    hora: '19:00',
-    sala: 'Sala 3',
-    imagen: 'https://images.unsplash.com/photo-1534258936925-c58bed479fcb?q=80&w=500'
-  }
-  ])
 
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { categoria: '', profesor: '', dia: '', hora: '', sala: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', sala: '' }
+  horaSel.value = '08'
+  minutoSel.value = '00'
   dialog.value = true
 }
 
 const cerrarDialog = () => {
   dialog.value = false
-  nuevaClase.value = { categoria: '', profesor: '', dia: '', hora: '', sala: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
   fechaSeleccionada.value = null
   isEditing.value = false
 }
 
-const guardarClase = () => {
-  console.log('Simulando guardado de clase:', nuevaClase.value)
-  const accion = isEditing.value ? 'Actualizando' : 'Creando'
-  console.log(`${accion} clase:`, nuevaClase.value)
-  cerrarDialog()
+const guardarClase = async () => {
+  try {
+    const payload = {
+      estado: 'Activa',
+      id_actividad: nuevaClase.value.id_actividad,
+      id_profesor: nuevaClase.value.id_profesor,
+      fecha: DateFormatterService.formatDateForBackend(nuevaClase.value.dia),
+      hora: nuevaClase.value.hora,
+      sala: nuevaClase.value.sala
+    }
+
+    if (isEditing.value) {
+      await ClasesService.modificarClase(nuevaClase.value.id, payload)
+    } else {
+      await ClasesService.publicarClase(payload)
+    }
+    
+    await fetchClases() // Recargar la lista
+    cerrarDialog()
+  } catch (error) {
+    console.error('Error al guardar clase:', error)
+    alert('Hubo un error al procesar la clase')
+  }
 }
 
 const editarClase = (clase) => {
   console.log('Editando clase:', clase)
   isEditing.value = true
   nuevaClase.value = { ...clase }
+
+  if (clase.hora && clase.hora.includes(':')) {
+    const [h, m] = clase.hora.split(':')
+    horaSel.value = h
+    minutoSel.value = minutos.includes(m) ? m : '00'
+  }
+
   dialog.value = true
 }
 
-const eliminarClase = (id) => {
-  console.log('Eliminando clase con ID:', id)
+const eliminarClase = async (clase) => {
+  console.log('Objeto de la clase a eliminar:', clase)
+  if (confirm(`¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`)) {
+    try {
+      await ClasesService.eliminarClase(clase.id)
+      await fetchClases()
+    } catch (error) {
+      console.error('Error al eliminar clase:', error)
+      alert('No se pudo eliminar la clase.')
+    }
+  }
 }
 
-const cancelarClase = (id) => {
-  console.log('Cancelando clase con ID:', id)
+const cancelarClase = async (clase) => {
+  console.log('Objeto de la clase a cancelar:', clase)
+  if (confirm(`¿Estás seguro de que deseas marcar la clase de ${clase.categoria} como cancelada?`)) {
+    try {
+      await ClasesService.cancelarClase(clase.id)
+      await fetchClases() // Refresca la lista para mostrar el chip de "CANCELADA"
+    } catch (error) {
+      console.error('Error al cancelar clase:', error)
+      alert('No se pudo cancelar la clase.')
+    }
+  }
 }
 
 const reservarClase = (id) => {

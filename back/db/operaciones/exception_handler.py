@@ -23,9 +23,12 @@ def ejecutar_fetchall(query, cursor):
 
 def ejecutar_fetchone(query, cursor) -> dict:
     try:
+        print("Ejecutando query de consulta: ", query)
         cursor.execute(query)
+        
         resultado = cursor.fetchone()
 
+        print("Resultado consulta: ", resultado)
         return {
             "status": "success",
             "data": resultado
@@ -41,12 +44,14 @@ def ejecutar_insertar(query, cursor):
     """Ejecuta una consulta SQL de inserción y maneja 
         las excepciones."""
     try:
-
+        print("Ejecutando query de inserción: ", query)
         cursor.execute(query)
-        
+        print("Query ejecutada exitosamente.")
         nuevo_id = cursor.lastrowid
+        print("ID del nuevo registro insertado: ", nuevo_id)
 
         cursor.connection.commit()
+        print("Cambios commiteados exitosamente.")
 
         return {
             "status": "success",

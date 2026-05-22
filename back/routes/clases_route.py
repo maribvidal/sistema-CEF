@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
-
-from services.clases_service import listar_clases_service, publicar_clase_service, modificar_clase_service, eliminar_clase_service
+from services.clases_service import (
+    listar_clases_service, publicar_clase_service, 
+    modificar_clase_service, eliminar_clase_service,
+    cancelar_clase_service
+)
 
 clases_bp = Blueprint('clases', __name__)
  
@@ -22,11 +25,17 @@ def publicar_clase():
     estado = data.get("estado")
     id_actividad = data.get("id_actividad")
     id_profesor = data.get("id_profesor")
+    fecha = data.get("fecha")
+    hora = data.get("hora")
+    sala = data.get("sala")
 
     respuesta, status = publicar_clase_service(
         estado,
         id_actividad,
-        id_profesor
+        id_profesor,
+        fecha,
+        hora,
+        sala
     )
 
     return jsonify(respuesta), status
@@ -50,21 +59,30 @@ def modificar_clase(id_clase):
     estado = data.get("estado")
     id_actividad = data.get("id_actividad")
     id_profesor = data.get("id_profesor")
+    fecha = data.get("fecha")
+    hora = data.get("hora")
+    sala = data.get("sala")
 
     respuesta, status = modificar_clase_service(
         id_clase,
         estado,
         id_actividad,
-        id_profesor
+        id_profesor,
+        fecha,
+        hora,
+        sala
     )
 
     return jsonify(respuesta), status
 
-"""
-def cancelar_clase():
-    Este endpoint permite cancelar una clase específica. 
-        Recibe el ID de la clase a cancelar en formato JSON.
-    data = request.get_json()
+## Habría que ver si a una clase cancelada hay que hacerle otra
+## cosa que no sea cambiarle el estado.
 
-    # Tengo que ver como se cancelaba una clase
-"""
+@clases_bp.route("/clases/<int:id_clase>", methods=["PATCH"])
+def cancelar_clase(id_clase):
+    """Este endpoint permite cancelar una clase específica. 
+        Recibe el ID de la clase a cancelar en formato JSON."""
+
+    respuesta, status = cancelar_clase_service(id_clase)
+
+    return jsonify(respuesta), status

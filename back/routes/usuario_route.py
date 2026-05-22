@@ -97,3 +97,5 @@ def obtener_usuarios():
     if lista['status'] == 'success' and lista['data'] is None:
         return jsonify({"error": "No se encontraron usuarios"}), 404
     return jsonify(lista['data']), 200
+
+# falta un delete

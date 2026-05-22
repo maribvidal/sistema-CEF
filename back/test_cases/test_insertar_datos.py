@@ -30,7 +30,7 @@ def insertar_datos_erroneos():
         telefono='1234567890123451231231231231',  # 15 caracteres, dentro del límite
         correo='prueba1234567891234@example.com', # 31 caracteres, excede el límite de 30
         genero='M',
-        rol='2'
+        rol=2
     )
 
     print("Respuesta del registro de usuario:")
@@ -48,7 +48,7 @@ def insertar_datos_erroneos():
         telefono='1234567890', 
         correo='prueba1@gmail.com', 
         genero='M',
-        rol='1'
+        rol=1
     )
 
     print("Respuesta del registro de usuario:")
@@ -65,7 +65,7 @@ def insertar_datos_erroneos():
         telefono='1234567890',
         correo='prueba10@gmail.com',
         genero='M',
-        rol='3'
+        rol=3
     )
 
     print("Respuesta del registro de usuario:")

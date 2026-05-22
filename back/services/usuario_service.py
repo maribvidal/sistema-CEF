@@ -5,7 +5,6 @@ from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.commitear_db import commitear
 
 import datetime
 
@@ -18,7 +17,7 @@ def registrar_usuario_service(
     correo: str,
     telefono: str,
     genero: str,
-    rol: int
+    rol_id: int
 ):
     """"Service que registra un usuario habiendo 
         realizado una comprobación de las entradas
@@ -50,7 +49,7 @@ def registrar_usuario_service(
             {"name": "correo", "value": correo},
             {"name": "telefono", "value": telefono},
             {"name": "genero", "value": genero},
-            {"name": "rol", "value": rol}
+            {"name": "rol_id", "value": rol_id}
         ]
     )
     
@@ -60,34 +59,35 @@ def registrar_usuario_service(
     cursor = conectarse_db()
     respuesta = consultar_usuario_por_dni(dni, cursor)
     if respuesta['status'] == 'error':
-        commitear(cursor)
-        return respuesta
+        cursor.connection.close()
+        return respuesta, 400
     
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "El DNI ya se encuentra registrado"
         }, 400
     
     respuesta = consultar_usuario_por_correo(correo, cursor)
     if respuesta['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return respuesta
 
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "El correo electrónico ya se encuentra registrado"
         }, 400
     
     if (_es_fecha_valida(fecha_nac) is False):
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "La fecha de nacimiento no es válida."
         }, 400
-
+    
+    print("cantidad años: ", _obtener_años_hasta_2026(fecha_nac))
     if _obtener_años_hasta_2026(fecha_nac) < 14:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "El usuario debe ser mayor de 14 años"
         }, 400
@@ -103,12 +103,18 @@ def registrar_usuario_service(
         correo,
         telefono,
         genero,
-        rol,
+        rol_id,
         cursor
     )
-    print(res)
+    
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
 
-    commitear(cursor)
+    cursor.connection.commit()
+    cursor.connection.close()
     return {
         "mensaje": "Usuario registrado exitosamente"
     }, 201
@@ -118,11 +124,11 @@ def obtener_perfil_usuario_service(usuario_id: int):
     usuario = consultar_usuario_por_id(usuario_id, cursor)
 
     if usuario['status'] == 'error':
-        commitear(cursor)
-        return usuario
+        cursor.connection.close()
+        return usuario, 400
     
     if usuario['status'] == 'success' and not usuario['data']:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -141,7 +147,8 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "rol_id": usuario['data'][9]
     }
 
-    commitear(cursor)
+    cursor.connection.commit()
+    cursor.connection.close()
     return {
         "perfil": perfil
     }, 200
@@ -149,13 +156,13 @@ def obtener_perfil_usuario_service(usuario_id: int):
 def listar_pagos_usuario_service(usuario_id: int):
     cursor = conectarse_db()
     usuario = consultar_usuario_por_id(usuario_id, cursor)
-
+    
     if usuario['status'] == 'error':
-        commitear(cursor)
-        return usuario
+        cursor.connection.close()
+        return usuario, 400
 
     if usuario['status'] == 'success' and not usuario['data']:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -164,19 +171,20 @@ def listar_pagos_usuario_service(usuario_id: int):
     pagos = consultar_pagos_de_usuario(usuario_id, cursor)
 
     if pagos['status'] == 'error':
-        commitear(cursor)
-        return pagos
+        cursor.connection.close()
+        return {
+            "error": pagos['message']
+        }, 500
 
     if not pagos['data']:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "No se encontraron pagos para este usuario"
         }, 404
 
-    commitear(cursor)
-    return {
-        "pagos": pagos['data']
-    }, 200
+    cursor.connection.commit()
+    cursor.connection.close()
+    return pagos['data'], 200
     
 def editar_perfil_usuario_service(
     usuario_dni: int,
@@ -190,15 +198,14 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato para actualizar"
         }, 400
     
-    cursor = conectarse_db()
     usuario = consultar_usuario_por_dni(usuario_dni, cursor)
 
     if usuario['status'] == 'error':
-        commitear(cursor)
+        cursor.connection.close()
         return usuario
 
     if usuario['status'] == 'success' and not usuario['data']:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
         }, 404
@@ -216,37 +223,43 @@ def editar_perfil_usuario_service(
     )
     
     if len(errores) > 0:
-        commitear(cursor)
+        cursor.connection.close()
         return errores, 400
 
     usuario_con_correo = consultar_usuario_por_correo(correo, cursor)
 
     if usuario_con_correo['status'] == 'error':
-        commitear(cursor)
-        return usuario_con_correo
+        cursor.connection.close()
+        return usuario_con_correo, 400
     
     
     if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][1] != usuario_dni:
-         commitear(cursor)
+         cursor.connection.close()
          return {
             "error": "El correo electrónico ya se encuentra registrado por otro usuario"
         }, 400
         
     if usuario_con_correo['data'] and usuario_con_correo['data'][6] == correo and usuario_con_correo['data'][3] == telefono:
-        commitear(cursor)
+        cursor.connection.close()
         return {
             "error": "No se proporcionó ningún dato nuevo para actualizar"
         }, 400
     
-    cursor = conectarse_db()
-    modificar_perfil_usuario(
+    res = modificar_perfil_usuario(
         usuario_dni,
         correo,
         telefono,
         cursor
     )
+    
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
 
-    commitear(cursor)
+    cursor.connection.commit()
+    cursor.connection.close()
     return {
         "mensaje": "Perfil actualizado exitosamente"
     }, 200

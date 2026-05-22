@@ -15,15 +15,18 @@ CORS(app)
 
 # --- INICIALIZAR BLUEPRINTS DE FLASK ---
 app.register_blueprint(usuario_bp)
-#app.register_blueprint(autenticacion_bp)
+app.register_blueprint(autenticacion_bp)
 app.register_blueprint(clases_bp)
-#app.register_blueprint(pagos_bp)
+app.register_blueprint(pagos_bp)
+app.register_blueprint(salas_bp)
+app.register_blueprint(actividades_bp)
+app.register_blueprint(profesores_bp)
 
 # --- REALIZAR TESTS ---
 cursor = conectarse_db()
 
 insertar_datos(cursor)
-intentar_consultar_esqueleto(cursor)
+#intentar_consultar_esqueleto(cursor)
 
 #test_insertar_datos.intentar_insertar_datos(cursor)
 #test_consultar_esqueleto.intentar_consultar_esqueleto()

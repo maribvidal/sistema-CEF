@@ -169,7 +169,8 @@ def construir_tabla_clase_ocurrir_sala(cursor: sqlite.Cursor):
                             id        INTEGER PRIMARY KEY,
                             clase_id  INTEGER NOT NULL,
                             sala_id   INTEGER NOT NULL,
-                            fecha     DATE,
+                            fecha     DATE NOT NULL,
+                            hora      VARCHAR(5) NOT NULL,
                             FOREIGN KEY (clase_id) REFERENCES Clase(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
