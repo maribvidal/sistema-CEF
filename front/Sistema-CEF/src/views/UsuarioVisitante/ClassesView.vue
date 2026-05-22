@@ -185,7 +185,26 @@
                 </v-menu>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="nuevaClase.hora" label="Hora" type="time" variant="outlined" density="compact"></v-text-field>
+                <v-row no-gutters>
+                  <v-col cols="7" class="pr-1">
+                    <v-select
+                      v-model="horaSel"
+                      :items="horas"
+                      label="Hora"
+                      variant="outlined"
+                      density="compact"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="5" class="pl-1">
+                    <v-select
+                      v-model="minutoSel"
+                      :items="minutos"
+                      label="Min"
+                      variant="outlined"
+                      density="compact"
+                    ></v-select>
+                  </v-col>
+                </v-row>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
@@ -213,13 +232,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { ClasesService } from '@/services/ClasesServices'
 import DateFormatterService from '@/services/DateFormatterService.js'
 
 const isEditing = ref(false)
 const dialog = ref(false)
 const menuFecha = ref(false)
+const fechaSeleccionada = ref(null)
+
+const horas = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
+const minutos = ['00', '30']
+const horaSel = ref('08')
+const minutoSel = ref('00')
+
+watch([horaSel, minutoSel], ([h, m]) => {
+  nuevaClase.value.hora = `${h}:${m}`
+})
 
 
 
@@ -275,13 +304,13 @@ const fetchClases = async () => {
       dia: c.fecha ?? 'A confirmar',
       hora: c.hora ?? '--:--',
       id_profesor: c.profesor_id,
-      salas: salas.value.find(s => s.id == (s.sala_id ?? c[5]))?.nombre,
       // Resolvemos el ID a un nombre usando las listas cargadas
       categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[0]))?.nombre 
                  || `ID Act: ${c.actividad_id ?? c[0]}`,
       profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[4]))?.nombre 
                 || `ID Prof: ${c.profesor_id ?? c[4]}`,
-      sala: c.sala || c[5] || 'Gimnasio',
+      sala: c.sala_id,
+      salas: salas.value.find(s => s.id == (s.sala_id ?? c[5]))?.nombre,
       imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
     }))
   } catch (error) {
@@ -303,14 +332,16 @@ const confirmarFecha = (val) => {
 
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', sala: '' }
+  horaSel.value = '08'
+  minutoSel.value = '00'
   dialog.value = true
 }
 
 const cerrarDialog = () => {
   dialog.value = false
   nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
-  dia.value = null
+  fechaSeleccionada.value = null
   isEditing.value = false
 }
 
@@ -343,6 +374,13 @@ const editarClase = (clase) => {
   console.log('Editando clase:', clase)
   isEditing.value = true
   nuevaClase.value = { ...clase }
+
+  if (clase.hora && clase.hora.includes(':')) {
+    const [h, m] = clase.hora.split(':')
+    horaSel.value = h
+    minutoSel.value = minutos.includes(m) ? m : '00'
+  }
+
   dialog.value = true
 }
 
