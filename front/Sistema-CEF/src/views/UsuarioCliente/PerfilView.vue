@@ -64,7 +64,7 @@ const rolUser = computed(() => {
   if(profileData.value?.rol_id) {
     switch(profileData.value.rol_id) {
       case 1: return 'Administrador'
-      case 2: return 'Gerente'
+      case 2: return 'Reccepcionista'
       case 3: return 'Cliente'
       default: return 'Desconocido'
     }
