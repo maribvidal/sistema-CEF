@@ -5,6 +5,7 @@ from services.usuario_service import (
     listar_pagos_usuario_service,
     obtener_perfil_usuario_service,
     editar_perfil_usuario_service,
+    modificar_contraseña_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -68,25 +69,44 @@ def editar_perfil_usuario(usuario_id):
         una respuesta con el resultado de la operación."""
     data = request.get_json()
 
+    dni = data.get("dni")
+    nombre = data.get("nombre")
+    apellido = data.get("apellido")
+    fecha_nac = data.get("fecha_nac")
     correo = data.get("correo")
     telefono = data.get("telefono")
-    print("correo:", correo)
-    print("telefono:", telefono)
 
     respuesta, status = editar_perfil_usuario_service(
         usuario_id,
+        dni,
+        nombre,
+        apellido,
+        fecha_nac,
         correo,
         telefono
     )
 
     return jsonify(respuesta), status
 
-
-# Contraseña
+# HUs de las contraseñas
 
 @usuario_bp.route("/usuarios/<int:usuario_id>/contraseña", methods=["PUT"])
-def modificar_contraseña():
-    pass
+def modificar_contraseña(usuario_id):
+    """Este endpoint permite que un usuario pueda modificar su contraseña.
+        Recibe el ID del usuario a través de la URL, la contraseña actual 
+        del usuario y la nueva contraseña  en formato JSON."""
+    
+    data = request.get_json()
+
+    contraseña_actual = data.get("contraseña_actual")
+    contraseña_nueva = data.get("contraseña_nueva")
+
+    # Por ahora, se devuelve una respuesta de ejemplo
+    respuesta, status = modificar_contraseña_service(
+        usuario_id, contraseña_actual, contraseña_nueva
+    )
+
+    return jsonify(respuesta), status
 
 # endpoint para pruebas
 
