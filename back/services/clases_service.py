@@ -44,7 +44,7 @@ def publicar_clase_service(
         cursor.connection.close()
         return respuesta['message'], 400
 
-    respuesta2 = insertar_clase_ocurrir_sala(int(respuesta['data']), sala, fecha, hora, cursor)
+    respuesta2 = insertar_clase_ocurrir_sala(respuesta['data'], sala, fecha, hora, cursor)
 
     if respuesta2['status'] == 'error':
         print(respuesta2['message'])
