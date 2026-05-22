@@ -140,54 +140,68 @@ export const initAuth = () => {
 }
 
 /**
- * Obtiene los datos del perfil y el avatar desde el backend y actualiza el estado global.
- * Esta es la única función que debe modificar el estado del perfil.
- * @param {boolean} force - Si es true, recarga los datos incluso si ya existen.
+ * ----------------------------------------------------------------
+ * LÓGICA COMPARTIDA DE EXTRACCIÓN DE DATOS
+ * ----------------------------------------------------------------
+ */
+
+/**
+ * Encapsula la lógica repetitiva de consultar perfil y avatar de un usuario
+ * para luego unificarlos en un solo objeto.
+ * 
+ * @param {string|number} userId - Identificador del usuario.
+ * @returns {Promise<object>} Los datos unificados del perfil y la URL del avatar.
+ */
+const fetchAndFormatProfileData = async (userId) => {
+  const profileResponse = await AuthApiService.getProfile(userId)
+  const profileData = profileResponse.data.perfil || profileResponse.data
+
+  const avatarResponse = await AuthApiService.getAvatar(userId).catch(() => null)
+  const avatarUrl = avatarResponse?.data?.base64
+    ? createImageSrcFromBase64(avatarResponse.data.base64)
+    : null
+
+  return { ...profileData, avatarUrl }
+}
+
+/**
+ * Obtiene los datos del perfil y el avatar desde el backend para el usuario en sesión
+ * y actualiza el estado global. Esta es la única función que debe modificar el estado del perfil.
+ * 
+ * @param {boolean} force - Si es true, fuerza la recarga de los datos aunque ya existan.
  */
 const fetchUserProfile = async (force = false) => {
   if (_userProfile.value && !force) return
 
   try {
-    // Si no tenemos ID de usuario, no podemos obtener el perfil
-    if (!_userProfile.value || !_userProfile.value.id) {
-      throw new Error('No hay ID de usuario disponible')
+    if (!_userProfile.value?.id) {
+      throw new Error('No se puede obtener perfil: falta ID de usuario en sesión.')
     }
 
-    const userId = _userProfile.value.id
-    const resp = (await AuthApiService.getProfile(userId)).data
-    // El backend devuelve { perfil: { ... } }
-    const profileData = resp.perfil || resp
-    const avatarResponse = await AuthApiService.getAvatar(userId).catch(() => null)
+    const mergedProfileData = await fetchAndFormatProfileData(_userProfile.value.id)
 
-    const avatarUrl =
-      avatarResponse && avatarResponse.data.base64
-        ? createImageSrcFromBase64(avatarResponse.data.base64)
-        : null
-
-    _userProfile.value = { ...profileData, avatarUrl }
+    _userProfile.value = mergedProfileData
     _isLoggedIn.value = true
-    _userRole.value = profileData.rol || _userRole.value
+    _userRole.value = mergedProfileData.rol || _userRole.value
+
   } catch (error) {
-    // Si hay un error (ej. 401 Unauthorized por cookie inválida), limpiamos la sesión.
-    console.error('No se pudo obtener el perfil de usuario, limpiando sesión.', error)
+    console.error('[fetchUserProfile] Falló la obtención del perfil local, limpiando estado.', error)
     clearSession()
   }
 }
 
+/**
+ * Consulta un perfil aleatorio o arbitrario según su ID.
+ * Útil para roles de admin que deseen ver otro perfil además del propio.
+ * 
+ * @param {string|number} userId - Identificador único del usuario a consultar.
+ * @returns {Promise<object>} Objeto final con perfil y avatar.
+ */
 const fetchUserProfileById = async (userId) => {
   try {
-    const resp = (await AuthApiService.getProfile(userId)).data
-    const profileData = resp.perfil || resp
-    const avatarResponse = await AuthApiService.getAvatar(userId).catch(() => null)
-
-    const avatarUrl =
-      avatarResponse && avatarResponse.data.base64
-        ? createImageSrcFromBase64(avatarResponse.data.base64)
-        : null
-
-    return { ...profileData, avatarUrl }
+    return await fetchAndFormatProfileData(userId)
   } catch (error) {
-    console.error(`No se pudo obtener el perfil del usuario con ID ${userId}.`, error)
+    console.error(`[fetchUserProfileById] Error al obtener el perfil del userId [${userId}]:`, error)
     throw error
   }
 }
