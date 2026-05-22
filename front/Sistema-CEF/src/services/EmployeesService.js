@@ -1,0 +1,39 @@
+import apiClient from './api.js'
+
+export const EmployeesService = {
+  /**
+   * Obtiene la lista completa de empleados
+   * Endpoint: GET /empleados
+   */
+  getEmployees: async () => {
+    const response = await apiClient.get('/empleados')
+    return response.data
+  },
+
+  /**
+   * Actualiza el rol de un empleado mediante su DNI
+   * Endpoint: PUT /empleados/(dni)/rol
+   */
+  updateEmployeeRole: async (dni, roleId) => {
+    const response = await apiClient.put(`/empleados/${dni}/rol`, { 
+      rol_id: roleId 
+    })
+    return response.data
+  },
+
+  /**
+   * Crea un nuevo profesor
+   */
+  createProfessor: async (professorData) => {
+    const response = await apiClient.post('/empleados', professorData)
+    return response.data
+  },
+
+  /**
+   * Crea un nuevo recepcionista (Usuario con rol 2)
+   */
+  createReceptionist: async (receptionistData) => {
+    const response = await apiClient.post('/empleados', { ...receptionistData, rol: 2 })
+    return response.data
+  }
+}

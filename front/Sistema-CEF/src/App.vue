@@ -37,6 +37,7 @@ const appMenuIcons = {
   gym: 'mdi-dumbbell',
   classes: 'mdi-calendar-blank',
   accountnew: 'mdi-account-plus',
+  employees: 'mdi-account-multiple-cog',
   moon: 'mdi-moon-waning-crescent',
 }
 onMounted(() => {

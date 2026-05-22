@@ -1,10 +1,11 @@
 <template>
     <v-container class="home-view" fluid>
-        <v-containeer class="slideshow-container" fluid>
+        <v-container class="slideshow-container" fluid>
 
         <SlideShow />
         
-        </v-containeer>
+        </v-container>
+
         <v-card-text class="elige-planes">
         <h2 class="text-center mb-4">Elige tu forma de pago</h2>
         <v-row class="justify-center">

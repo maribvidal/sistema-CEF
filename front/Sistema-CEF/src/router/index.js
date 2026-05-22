@@ -34,7 +34,11 @@ const router = createRouter({
       component: () => import('../views/UsuarioCliente/PerfilView.vue'),
       props: true,
     },
-    
+    {
+      path: '/administracionEmpleados',
+      name: 'administraconEmpleados',
+      component: () => import('../views/UsuarioAdministrador/EmployeesView.vue'),
+    },
   ],
 })
 
