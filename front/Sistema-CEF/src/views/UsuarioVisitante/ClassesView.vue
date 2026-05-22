@@ -113,6 +113,7 @@
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="editarClase(clase)"
+                    v-if="userProfile?.rol === 2 || userRole === 2 || userProfile?.rol === 1 || userRole === 1"
                   >
                     Editar Clase
                   </v-btn>
@@ -126,6 +127,7 @@
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="cancelarClase(clase)"
+                    v-if="userProfile?.rol === 2 || userRole === 2 || userProfile?.rol === 1 || userRole === 1"
                   >
                     Cancelar Clase
                   </v-btn>
@@ -139,6 +141,7 @@
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="eliminarClase(clase)"
+                    v-if="userProfile?.rol === 2 || userRole === 2 || userProfile?.rol === 1 || userRole === 1"
                   >
                     Eliminar Clase
                   </v-btn>
@@ -245,10 +248,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { ClasesService } from '@/services/ClasesServices'
 import DateFormatterService from '@/services/DateFormatterService.js'
+import { useAuth } from '@/services/UsuariosServices.js'
 
+const { userProfile, userRole } = useAuth()
 const isEditing = ref(false)
 const dialog = ref(false)
 const menuFecha = ref(false)
