@@ -17,3 +17,19 @@ def modificar_perfil_usuario(
     """
 
     return ejecutar_query(query,cursor)
+
+def modificar_contraseña(
+    usuario_id: int,
+    nueva_contraseña: str,
+    cursor
+):
+    """Recibe el id de un usuario, y lo actualiza cambiando
+        su contraseña por una nueva."""
+
+    query = f"""
+        UPDATE Usuario
+        SET contraseña = '{nueva_contraseña}'
+        WHERE id = {usuario_id};
+    """
+
+    return ejecutar_query(query,cursor)
