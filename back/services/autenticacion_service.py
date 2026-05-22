@@ -64,8 +64,8 @@ def login_service(correo: str, contraseña: str) -> tuple:
             "id": usuario['data'][USR_ID],
             "dni": usuario['data'][USR_DNI],
             "nombre": usuario['data'][USR_NOMBRE],
-            "tipo": "CLIENTE",
-            "rol": ""
+            "tipo": "CLIENTE" if usuario['data'][USR_ROL] == 3 else "STAFF",
+            "rol": usuario['data'][USR_ROL]
         })
 
         cursor.connection.commit()
@@ -77,8 +77,8 @@ def login_service(correo: str, contraseña: str) -> tuple:
                 "id": usuario['data'][USR_ID],
                 "dni": usuario['data'][USR_DNI],
                 "nombre": usuario['data'][USR_NOMBRE],
-                "tipo": "CLIENTE",
-                "rol": ""
+                "tipo": "CLIENTE" if usuario['data'][USR_ROL] == 3 else "STAFF",
+                "rol": usuario['data'][USR_ROL]
             }
         }, 200
     
