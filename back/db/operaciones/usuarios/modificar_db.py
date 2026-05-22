@@ -1,7 +1,7 @@
 from db.operaciones.exception_handler import ejecutar_query 
 
 def modificar_perfil_usuario(
-    usuario_dni: int,
+    usuario_id: int,
     correo: str,
     telefono: str,
     cursor
@@ -13,7 +13,7 @@ def modificar_perfil_usuario(
     query = f"""
         UPDATE Usuario
         SET telefono = '{telefono}', correo = '{correo}'
-        WHERE dni = {usuario_dni}
+        WHERE id = {usuario_id};
     """
 
     return ejecutar_query(query,cursor)

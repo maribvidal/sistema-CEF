@@ -75,6 +75,9 @@ def ejecutar_query(query, cursor):
             "data": None
         }
     except Exception as e:
+        print("ERROR SQL:")
+        print(e)
+
         return {
             "status": "error",
             "message": str(e)

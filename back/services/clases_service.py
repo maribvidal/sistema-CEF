@@ -1,6 +1,7 @@
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.modificar_db import modificar_clase_ocurrir_sala
+from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_fecha_hora_sala
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
@@ -35,21 +36,52 @@ def publicar_clase_service(
     sala: int
 ):
     """Service que publica una clase"""
+    def _revisar_ocupacion_sala(sala, fecha, hora, cursor) -> dict:
+        """Función auxiliar que revisa si la sala está ocupada en la 
+            fecha y hora dadas"""
+        tupla_consulta = consultar_clase_ocurrir_sala_por_fecha_hora_sala(sala, fecha, hora, cursor)
+
+        if tupla_consulta['status'] == 'error':
+            return {
+                "status": "error",
+                "message": tupla_consulta['message']
+            }
+
+        # Si no tiró antes, todo debería estar bien
+        if tupla_consulta['status'] == 'success' and tupla_consulta['data'] is not None:
+             return {
+                "status": "error",
+                "message": "La sala ya está ocupada en la fecha y hora dadas"
+            }
+
+        return tupla_consulta
 
     cursor = conectarse_db()
 
-    respuesta = insertar_clase(estado, id_actividad, id_profesor, cursor)
+    # Comprobar que la sala no se encuentre ocupada en la fecha y hora dadas
+
+    respuesta = _revisar_ocupacion_sala(sala, fecha, hora, cursor)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta['message'], 400
+        return respuesta, 400
 
-    respuesta2 = insertar_clase_ocurrir_sala(int(respuesta['data']), sala, fecha, hora, cursor)
+    # Intentar insertar la clase
+
+    respuesta2 = insertar_clase(estado, id_actividad, id_profesor, cursor)
 
     if respuesta2['status'] == 'error':
-        print(respuesta2['message'])
         cursor.connection.close()
-        return respuesta2, 400
+        return respuesta2['message'], 400
+
+    # Intentar insertar la relación clase_ocurrir_sala
+
+    respuesta3 = insertar_clase_ocurrir_sala(respuesta2['data'], sala, fecha, hora, cursor)
+
+    if respuesta3['status'] == 'error':
+        print(respuesta3['message'])
+        cursor.connection.close()
+        return respuesta3, 400
 
     cursor.connection.commit()
     cursor.connection.close()
