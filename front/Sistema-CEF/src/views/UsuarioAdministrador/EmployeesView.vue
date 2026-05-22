@@ -7,6 +7,27 @@
             <v-icon icon="mdi-account-group" class="mr-3"></v-icon>
             <span class="text-h5">Administración de Empleados</span>
             <v-spacer></v-spacer>
+            <v-btn
+              color="white"
+              variant="outlined"
+              prepend-icon="mdi-account-tie"
+              class="mr-2 text-none"
+              density="comfortable"
+              @click="crearProfesor"
+            >
+              Crear Profesor
+            </v-btn>
+            <v-btn
+              color="white"
+              variant="outlined"
+              prepend-icon="mdi-account-star"
+              class="mr-4 text-none"
+              density="comfortable"
+              @click="crearRecepcionista"
+            >
+              Crear Recepcionista
+            </v-btn>
+            <v-spacer></v-spacer>
             <v-text-field
               v-model="search"
               prepend-inner-icon="mdi-magnify"
@@ -34,12 +55,40 @@
             </template>
 
             <template v-slot:item.acciones="{ item }">
-              <v-btn
-                icon="mdi-pencil"
-                variant="text"
-                color="blue-darken-1"
-                @click="abrirEditorRol(item)"
-              ></v-btn>
+              <div class="d-flex justify-end">
+                <v-btn
+                  icon="mdi-pencil"
+                  variant="text"
+                  color="blue-darken-1"
+                  size="small"
+                  @click="modificarEmpleado(item)"
+                  title="Modificar Datos"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-shield-key"
+                  variant="text"
+                  color="orange-darken-2"
+                  size="small"
+                  @click="abrirEditorRol(item)"
+                  title="Cambiar Permisos/Rol"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-account-off"
+                  variant="text"
+                  color="grey-darken-1"
+                  size="small"
+                  @click="desactivarEmpleado(item)"
+                  title="Desactivar"
+                ></v-btn>
+                <v-btn
+                  icon="mdi-delete"
+                  variant="text"
+                  color="red-darken-1"
+                  size="small"
+                  @click="eliminarEmpleado(item)"
+                  title="Eliminar"
+                ></v-btn>
+              </div>
             </template>
           </v-data-table>
         </v-card>
@@ -70,6 +119,65 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Diálogo para Crear Profesor -->
+    <v-dialog v-model="dialogProfesor" max-width="500px">
+      <v-card rounded="lg">
+        <v-card-title class="pa-4 bg-black text-white">Crear Nuevo Profesor</v-card-title>
+        <v-card-text class="pt-4">
+          <v-form ref="formProfesor">
+            <v-text-field v-model="nuevoProfesor.nombre" label="Nombre" variant="outlined" density="comfortable" class="mb-2"></v-text-field>
+            <v-text-field v-model="nuevoProfesor.apellido" label="Apellido" variant="outlined" density="comfortable" class="mb-2"></v-text-field>
+            <v-text-field v-model="nuevoProfesor.dni" label="DNI" variant="outlined" density="comfortable" type="number"></v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="dialogProfesor = false">Cancelar</v-btn>
+          <v-btn color="black" variant="elevated" @click="guardarProfesor">Crear Profesor</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Diálogo para Crear Recepcionista -->
+    <v-dialog v-model="dialogRecepcionista" max-width="500px">
+      <v-card rounded="lg">
+        <v-card-title class="pa-4 bg-black text-white">Crear Nuevo Recepcionista</v-card-title>
+        <v-card-text class="pt-4">
+          <v-form ref="formRecepcionista">
+            <v-row>
+              <v-col cols="12" sm="6" class="py-1">
+                <v-text-field v-model="nuevoRecepcionista.nombre" label="Nombre" variant="outlined" density="comfortable"></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="py-1">
+                <v-text-field v-model="nuevoRecepcionista.apellido" label="Apellido" variant="outlined" density="comfortable"></v-text-field>
+              </v-col>
+              <v-col cols="12" class="py-1">
+                <v-text-field v-model="nuevoRecepcionista.dni" label="DNI" variant="outlined" density="comfortable" type="number"></v-text-field>
+              </v-col>
+              <v-col cols="12" class="py-1">
+                <v-text-field v-model="nuevoRecepcionista.correo" label="Correo Electrónico" variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"></v-text-field>
+              </v-col>
+              <v-col cols="12" class="py-1">
+                <v-text-field
+                  v-model="nuevoRecepcionista.contraseña"
+                  label="Contraseña"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-lock"
+                  type="password"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="dialogRecepcionista = false">Cancelar</v-btn>
+          <v-btn color="black" variant="elevated" @click="guardarRecepcionista">Crear Recepcionista</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -83,6 +191,23 @@ const loading = ref(false)
 const dialog = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
+
+// Estados para creación de personal
+const dialogProfesor = ref(false)
+const dialogRecepcionista = ref(false)
+
+const nuevoProfesor = ref({
+  nombre: '',
+  apellido: '',
+  dni: ''
+})
+const nuevoRecepcionista = ref({
+  nombre: '',
+  apellido: '',
+  dni: '',
+  correo: '',
+  contraseña: ''
+})
 
 const headers = [
   { title: 'DNI', key: 'dni', sortable: true },
@@ -108,20 +233,91 @@ const getRoleColor = (id) => {
 
 const cargarEmpleados = async () => {
   loading.value = true
+  // Empleado hardcodeado para pruebas
+  const hardcoded = {
+    dni: 45678901,
+    nombre: 'Carlos',
+    apellido: 'Admin',
+    correo: 'carlos.admin@cef.com',
+    rol_id: 1
+  }
+
   try {
     const data = await EmployeesService.getEmployees()
-    // Si el backend devuelve tuplas: 0:id, 1:dni, 2:nombre, 3:apellido, 6:correo, 9:rol_id
-    empleados.value = data.map(e => ({
+    const fetched = (data || []).map(e => ({
       dni: e.dni ?? e[1],
       nombre: e.nombre ?? e[2],
       apellido: e.apellido ?? e[3],
       correo: e.correo ?? e[6],
       rol_id: e.rol_id ?? e[9]
     }))
+    empleados.value = [hardcoded, ...fetched]
   } catch (error) {
     console.error('Error cargando empleados:', error)
+    empleados.value = [hardcoded] // Mostramos al menos el hardcoded si la API falla
   } finally {
     loading.value = false
+  }
+}
+
+const crearProfesor = () => {
+  nuevoProfesor.value = { nombre: '', apellido: '', dni: '' }
+  dialogProfesor.value = true
+}
+
+const guardarProfesor = async () => {
+  try {
+    if (!nuevoProfesor.value.nombre || !nuevoProfesor.value.dni) {
+      alert('Por favor complete los campos obligatorios')
+      return
+    }
+    await EmployeesService.createProfessor(nuevoProfesor.value)
+    alert('Profesor creado exitosamente')
+    dialogProfesor.value = false
+    await cargarEmpleados()
+  } catch (error) {
+    console.error('Error al crear profesor:', error)
+    alert('No se pudo crear el profesor')
+  }
+}
+
+const crearRecepcionista = () => {
+  nuevoRecepcionista.value = { nombre: '', apellido: '', dni: '', correo: '', contraseña: '' }
+  dialogRecepcionista.value = true
+}
+
+const guardarRecepcionista = async () => {
+  try {
+    if (!nuevoRecepcionista.value.correo || !nuevoRecepcionista.value.contraseña) {
+      alert('Por favor complete los campos de acceso (correo y contraseña)')
+      return
+    }
+    await EmployeesService.createReceptionist(nuevoRecepcionista.value)
+    alert('Recepcionista creado exitosamente')
+    dialogRecepcionista.value = false
+    await cargarEmpleados()
+  } catch (error) {
+    console.error('Error al crear recepcionista:', error)
+    alert('No se pudo crear el recepcionista: ' + (error.response?.data?.error || ''))
+  }
+}
+
+const modificarEmpleado = (empleado) => {
+  console.log('Modificando datos de:', empleado)
+  // Lógica para abrir un diálogo de edición de perfil
+}
+
+const desactivarEmpleado = (empleado) => {
+  if (confirm(`¿Estás seguro de que deseas desactivar la cuenta de ${empleado.nombre}?`)) {
+    console.log('Desactivando empleado DNI:', empleado.dni)
+    // Llamada al servicio para cambiar estado a 'Inactivo'
+  }
+}
+
+const eliminarEmpleado = (empleado) => {
+  if (confirm(`¿ELIMINAR PERMANENTEMENTE a ${empleado.nombre} ${empleado.apellido}?`)) {
+    console.log('Eliminando empleado DNI:', empleado.dni)
+    // Llamada al servicio de borrado
   }
 }
 

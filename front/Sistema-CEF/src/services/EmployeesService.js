@@ -19,5 +19,21 @@ export const EmployeesService = {
       rol_id: roleId 
     })
     return response.data
+  },
+
+  /**
+   * Crea un nuevo profesor
+   */
+  createProfessor: async (professorData) => {
+    const response = await apiClient.post('/empleados', professorData)
+    return response.data
+  },
+
+  /**
+   * Crea un nuevo recepcionista (Usuario con rol 2)
+   */
+  createReceptionist: async (receptionistData) => {
+    const response = await apiClient.post('/empleados', { ...receptionistData, rol: 2 })
+    return response.data
   }
 }
