@@ -64,7 +64,7 @@ const rolUser = computed(() => {
   if(profileData.value?.rol_id) {
     switch(profileData.value.rol_id) {
       case 1: return 'Administrador'
-      case 2: return 'Reccepcionista'
+      case 2: return 'Recepcionista'
       case 3: return 'Cliente'
       default: return 'Desconocido'
     }
@@ -90,7 +90,7 @@ const onLogout = async () => {
 
 const goToEdit = () => {
   // Ruta de ejemplo; modificar según rutas reales de la app
-  router.push('/editar-perfil')
+  router.push(`/editarPerfil/${route.params.id}`)
 }
 </script>
 
