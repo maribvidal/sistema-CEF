@@ -7,27 +7,25 @@
 
 			<v-card-text class="pt-4">
 				<v-form @submit.prevent="register">
-                    <v-text-field v-model="name" label="Nombre" variant="outlined"/>
-                    
-					<v-text-field v-model="lastname" label="Apellido" variant="outlined" />
 					<v-text-field v-model="dni" label="DNI" variant="outlined" />
+                    <v-text-field v-model="name" label="Nombre" variant="outlined"/>
+					<v-text-field v-model="lastname" label="Apellido" variant="outlined" />
+					<v-text-field
+					v-model="password"
+					label="Contraseña"
+					prepend-inner-icon="mdi-lock"
+					type="password"
+					variant="outlined"
+					/>
+					<v-text-field v-model="age" label="Fecha de nacimiento" type="date" variant="outlined" />
                     <v-text-field v-model="email" label="Correo electrónico" prepend-inner-icon="mdi-email" variant="outlined" />
 					<v-text-field v-model="cellphone" label="Teléfono" variant="outlined" />
-					<v-text-field v-model="age" label="Fecha de nacimiento" type="date" variant="outlined" /> 
 					<v-combobox
 						v-model="gender"
 						label="Género"
 						variant="outlined"
 						:items="['Masculino', 'Femenino', 'Otro']"
 					/>
-				
-				<v-text-field
-					v-model="password"
-					label="Contraseña"
-					prepend-inner-icon="mdi-lock"
-					type="password"
-					variant="outlined"
-				/>
 				<v-alert v-if="errorMessage" type="error" variant="tonal" class="mb-3">
 					{{ errorMessage }}
 				</v-alert>

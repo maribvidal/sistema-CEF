@@ -12,7 +12,8 @@ def insertar_datos(cursor):
     # Crear usuarios
     insertar_usuario(12345678, 'Juan', 'Pérez', '123', '2004-10-10', 'juan.perez@example.com', "1234",'M', 1, cursor)
     insertar_usuario(87654321, 'María', 'Gómez', '456', '2008-07-10', 'maria.gomez@example.com', "5678",'F', 3, cursor)
-    
+    insertar_usuario(39674828, 'Ernesto', 'Garcia', '1234', '1997-07-10', 'ernesto.garcia@example.com', "5678",'M', 2, cursor)
+
     # Crear profesores
     insertar_profesor('Carlos', 'López', 'M', 11223344, cursor)
     insertar_profesor('Ana', 'Martínez', 'F', 44332211, cursor)
@@ -39,7 +40,7 @@ def insertar_datos(cursor):
 
     # Crear clase
     insertar_clase('Programada', 1, 1, cursor)
-    insertar_clase_ocurrir_sala(1, 1, '2024-07-01', "10:00", cursor)
+    insertar_clase_ocurrir_sala(1, 1, '2024-07-01', '10:00', cursor)
 
     # Crear pagos
     insertar_pago(50.0, 1, cursor)

@@ -140,8 +140,9 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "dni": usuario['data'][1],
         "nombre": usuario['data'][2],
         "apellido": usuario['data'][3],
-        "fecha_nac": usuario['data'][5],
-        "correo": usuario['data'][6],
+        "contraseña": usuario['data'][5],
+        "fecha_nac": usuario['data'][6],
+        "correo": usuario['data'][4],
         "telefono": usuario['data'][7],
         "genero": usuario['data'][8],
         "rol_id": usuario['data'][9]
@@ -187,7 +188,7 @@ def listar_pagos_usuario_service(usuario_id: int):
     return pagos['data'], 200
     
 def editar_perfil_usuario_service(
-    usuario_dni: int,
+    usuario_id: int,
     correo: str,
     telefono: str
 ):
@@ -198,7 +199,7 @@ def editar_perfil_usuario_service(
             "error": "No se proporcionó ningún dato para actualizar"
         }, 400
     
-    usuario = consultar_usuario_por_dni(usuario_dni, cursor)
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
 
     if usuario['status'] == 'error':
         cursor.connection.close()
@@ -233,7 +234,7 @@ def editar_perfil_usuario_service(
         return usuario_con_correo, 400
     
     
-    if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][1] != usuario_dni:
+    if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][0] != usuario_id:
          cursor.connection.close()
          return {
             "error": "El correo electrónico ya se encuentra registrado por otro usuario"
@@ -246,7 +247,7 @@ def editar_perfil_usuario_service(
         }, 400
     
     res = modificar_perfil_usuario(
-        usuario_dni,
+        usuario_id,
         correo,
         telefono,
         cursor
