@@ -61,7 +61,7 @@
                   <div class="d-flex align-center">
                     <v-icon size="small" class="mr-2" color="red-darken-2">mdi-map-marker-outline</v-icon>
                     <span class="text-body-1 font-weight-bold">Sala:</span>
-                    <span class="text-body-1 ml-2">{{ clase.sala }}</span>
+                    <span class="text-body-1 ml-2">{{ clase.sala_nombre }}</span>
                   </div>
                 </v-col>
 
@@ -296,21 +296,24 @@ const fetchClases = async () => {
       console.error('Se esperaba un array de clases pero se recibió:', data)
       return
     }
+    console.log(data[0])
     clases.value = data.map(c => ({
      // Si el backend usa dict(fila), usamos nombres de columnas. 
-      // Si todavía usa tuplas, usamos índices como respaldo.
-      id_actividad: c.actividad_id,
-      estado: c.estado,
-      dia: c.fecha ?? 'A confirmar',
-      hora: c.hora ?? '--:--',
-      id_profesor: c.profesor_id,
+      // Si todavía usa tuplas: 0:id, 1:estado, 2:act_id, 3:prof_id, 4:fecha, 5:hora, 6:sala_id
+      id: c.id ?? c[0],
+      id_actividad: c.actividad_id ?? c[2],
+      estado: c.estado ?? c[1],
+      dia: (c.fecha ?? c[4]) ?? 'A confirmar',
+      hora: (c.hora ?? c[5]) ?? '--:--',
+      id_profesor: c.profesor_id ?? c[3],
+      sala: c.sala_id ?? c[6],
       // Resolvemos el ID a un nombre usando las listas cargadas
-      categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[0]))?.nombre 
-                 || `ID Act: ${c.actividad_id ?? c[0]}`,
-      profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[4]))?.nombre 
-                || `ID Prof: ${c.profesor_id ?? c[4]}`,
-      sala: c.sala_id,
-      salas: salas.value.find(s => s.id == (s.sala_id ?? c[5]))?.nombre,
+      categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
+                 || `ID Act: ${c.actividad_id ?? c[2]}`,
+      profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
+                || `ID Prof: ${c.profesor_id ?? c[3]}`,
+      sala_nombre: salas.value.find(s => s.id == (c.sala_id ?? c[6]))?.nombre 
+                || `Sala ID: ${c.sala_id ?? c[6]}`,
       imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
     }))
   } catch (error) {

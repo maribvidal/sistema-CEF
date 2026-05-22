@@ -80,7 +80,7 @@ def login_service(correo: str, contraseña: str) -> tuple:
                 "tipo": "CLIENTE",
                 "rol": ""
             }
-        }, 
+        }, 200
     
     cursor.connection.close()
     return {"error": "Error desconocido"}, 500
