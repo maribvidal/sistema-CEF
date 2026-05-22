@@ -140,8 +140,9 @@ def obtener_perfil_usuario_service(usuario_id: int):
         "dni": usuario['data'][1],
         "nombre": usuario['data'][2],
         "apellido": usuario['data'][3],
-        "fecha_nac": usuario['data'][5],
-        "correo": usuario['data'][6],
+        "contraseña": usuario['data'][5],
+        "fecha_nac": usuario['data'][6],
+        "correo": usuario['data'][4],
         "telefono": usuario['data'][7],
         "genero": usuario['data'][8],
         "rol_id": usuario['data'][9]
