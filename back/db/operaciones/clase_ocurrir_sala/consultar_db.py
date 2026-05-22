@@ -4,7 +4,7 @@ def consultar_clase_ocurrir_sala_por_fecha_hora_sala(sala_id, fecha, hora, curso
     """Función que consulta la clase_ocurrir_sala por fecha, hora y sala"""
     query = f"""
         SELECT clase_id, sala_id, fecha, hora
-        FROM clase_ocurrir_sala
+        FROM Clase_Ocurrir_Sala
         WHERE sala_id = {sala_id} AND fecha = '{fecha}' AND hora = '{hora}'
     """
 
