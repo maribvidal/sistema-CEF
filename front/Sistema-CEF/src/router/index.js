@@ -39,6 +39,12 @@ const router = createRouter({
       name: 'administraconEmpleados',
       component: () => import('../views/UsuarioAdministrador/EmployeesView.vue'),
     },
+    {
+      path: '/editarPerfil/:id',
+      name: 'editarPerfil',
+      component: () => import('../views/UsuarioCliente/EditarPerfilView.vue'),
+      props: true,
+    }
   ],
 })
 
