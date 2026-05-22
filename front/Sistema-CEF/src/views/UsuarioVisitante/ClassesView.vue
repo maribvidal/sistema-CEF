@@ -4,7 +4,7 @@
       <v-col cols="12" md="10">
         <h1 class="text-h4 mb-6 text-center font-weight-bold">Nuestras Clases</h1>
 
-        <div class="d-flex justify-end mb-6">
+        <div class="d-flex justify-center justify-md-end mb-6">
           <v-btn
             color="blue-darken-1"
             prepend-icon="mdi-plus"
@@ -26,7 +26,7 @@
                 <v-col cols="12" md="4" sm="5">
                   <v-img
                     :src="clase.imagen"
-                    height="175"
+                    :height="$vuetify.display.xs ? 200 : 175"
                     cover
                     class="class-image"
                   >
@@ -39,7 +39,7 @@
                 </v-col>
 
                 <!-- Contenido de la clase -->
-                <v-col cols="12" md="5" sm="7" class="pa-2 d-flex flex-column justify-center">
+                <v-col cols="12" md="5" sm="7" :class="$vuetify.display.mdAndUp ? 'pa-2' : 'pa-4'" class="d-flex flex-column justify-center">
                   <div class="d-flex align-center mb-1">
                     <v-icon size="small" class="mr-2" color="red-darken-2">mdi-account-tie</v-icon>
                     <span class="text-body-1 font-weight-bold">Profesor:</span>
@@ -67,28 +67,29 @@
 
                 <!-- Acciones -->
                 <v-divider vertical class="hidden-sm-and-down"></v-divider>
-                <v-col cols="12" md="3" class="pa-0 d-flex flex-column">
+                <v-col cols="12" md="3" :class="$vuetify.display.mdAndUp ? 'pa-0' : 'pa-4 ga-2 bg-grey-lighten-4'" class="d-flex flex-column justify-center bg-md-transparent">
                   <v-btn
                     color="success"
-                    variant="tonal"
+                    :variant="$vuetify.display.mdAndUp ? 'tonal' : 'elevated'"
                     prepend-icon="mdi-calendar-check"
-                    
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="reservarClase(clase.id)"
                   >
                     Reservar Clase
                   </v-btn>
                   <v-btn
                     color="orange-darken-1"
-                    variant="tonal"
+                    :variant="$vuetify.display.mdAndUp ? 'tonal' : 'outlined'"
                     prepend-icon="mdi-calendar-remove"
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="cancelarReserva(clase.id)"
                   >
                     Cancelar Reserva
@@ -97,10 +98,11 @@
                     color="blue-darken-1"
                     variant="tonal"
                     prepend-icon="mdi-pencil"
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="editarClase(clase)"
                   >
                     Editar Clase
@@ -109,10 +111,11 @@
                     color="orange-darken-1"
                     variant="tonal"
                     prepend-icon="mdi-close-circle"
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="cancelarClase(clase.id)"
                   >
                     Cancelar Clase
@@ -121,10 +124,11 @@
                     color="red-darken-1"
                     variant="tonal"
                     prepend-icon="mdi-delete"
-                    size="x-small"
-                    density="compact"
-                    rounded="0"
-                    class="flex-grow-1"
+                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+                    block
+                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="eliminarClase(clase.id)"
                   >
                     Eliminar Clase
