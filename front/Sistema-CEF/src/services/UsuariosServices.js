@@ -53,6 +53,10 @@ const AuthApiService = {
     apiClient.put(`/usuarios/${userId}/perfil`, {
       correo: profileData.correo || profileData.email,
       telefono: profileData.telefono || profileData.phone,
+      fecha_nac: profileData.fecha_nac || profileData.birthDate,
+      // Incluir otros campos que el backend pueda esperar, como nombre, apellido, etc.
+      nombre: profileData.nombre || profileData.name,
+      apellido: profileData.apellido || profileData.lastName,
     }),
 
   // UploadAvatar: mapea Usuarios/SubirAvatar → No implementado en backend
@@ -292,8 +296,8 @@ export const useAuth = () => {
       if (!_userProfile.value) throw new Error('No hay sesión activa')
       // Incluimos el ID en el cuerpo de la petición también, por si el backend lo espera en el modelo.
       const payload = { ...profileData, id: _userProfile.value.id }
-      // El backend requiere el DNI en la URL (usuario_dni)
-      const identifier = _userProfile.value.dni || _userProfile.value.id
+      // El backend requiere el ID en la URL (usuario_id)
+      const identifier = _userProfile.value.id
       return AuthApiService.updateProfile(identifier, payload)
     },
     uploadAvatar: (avatarData) => {
