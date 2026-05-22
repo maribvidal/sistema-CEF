@@ -59,8 +59,8 @@ def obtener_perfil_usuario(usuario_id):
 
     return jsonify(respuesta), status
 
-@usuario_bp.route("/usuarios/<int:usuario_dni>/perfil", methods=["PUT"])
-def editar_perfil_usuario(usuario_dni):
+@usuario_bp.route("/usuarios/<int:usuario_id>/perfil", methods=["PUT"])
+def editar_perfil_usuario(usuario_id):
     """Este endpoint permite editar el perfil de un usuario específico.
         Recibe los datos actualizados del usuario en formato JSON, 
         incluyendo su correo electrónico y teléfono. Luego, llama al 
@@ -74,13 +74,19 @@ def editar_perfil_usuario(usuario_dni):
     print("telefono:", telefono)
 
     respuesta, status = editar_perfil_usuario_service(
-        usuario_dni,
+        usuario_id,
         correo,
         telefono
     )
 
     return jsonify(respuesta), status
 
+
+# Contraseña
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/contraseña", methods=["PUT"])
+def modificar_contraseña():
+    pass
 
 # endpoint para pruebas
 
