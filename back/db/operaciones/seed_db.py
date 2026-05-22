@@ -39,7 +39,7 @@ def insertar_datos(cursor):
 
     # Crear clase
     insertar_clase('Programada', 1, 1, cursor)
-    insertar_clase_ocurrir_sala(1, 1, '2024-07-01', 10, cursor)
+    insertar_clase_ocurrir_sala(1, 1, '2024-07-01', "10:00", cursor)
 
     # Crear pagos
     insertar_pago(50.0, 1, cursor)
