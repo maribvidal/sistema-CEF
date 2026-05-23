@@ -1,6 +1,8 @@
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.empleados.consultar_db import listar_empleados
 from db.operaciones.empleados.modificar_db import modificar_empleado
+from db.operaciones.empleados.modificar_db import borrar_empleado
+from db.operaciones.empleados.modificar_db import desactivar_empleado
 
 def listar_empleados_service():
     print("listar_empleados_service: Iniciando servicio para listar empleados")
@@ -47,3 +49,45 @@ def modificar_empleado_service(
     print("KEYS DE LA RESPUESTA")
     print(respuesta.keys())
     return respuesta, 200
+
+
+def borrar_empleado_service(empleado_dni: int):
+    """Service que borra un empleado"""
+    print("borrar_empleado_service: Iniciando servicio para borrar empleado")
+    cursor = conectarse_db()
+    respuesta = borrar_empleado(empleado_dni, cursor)
+    print("RESPUESTA: ", respuesta)
+    cursor.connection.close()
+
+    if respuesta['status'] == 'error':
+        return {
+            "error": "Error al intentar borrar empleado",
+            "message": respuesta['message']
+        }, 500
+    elif respuesta['status'] == 'success' and not respuesta['data']:
+        return {
+            "error": "No se encontraron empleados"
+        }, 404
+
+    return respuesta['data'], 200
+
+def desactivar_empleado_service(empleado_dni: int):
+   """Service que desactiva un empleado""" 
+   print("desactivar_empleado_service: Iniciando servicio para desactivar empleado")
+
+   cursor = conectarse_db()
+   respuesta = desactivar_empleado(empleado_dni, cursor)
+   print("RESPUESTA: ", respuesta)
+   cursor.connection.close()
+
+   if respuesta['status'] == 'error':
+       return {
+           "error": "Error al intentar borrar empleado",
+           "message": respuesta['message']
+       }, 500
+# ESTO NO ES NECESARIO: CUANDO HAGO EJECUTAR QUERY ME DEVUELVE "SUCCESS" PRO CON DATA = NONE, y eso no significa que no se encontró el empleado, sino que se ejecutó la consulta pero no devuelve datos, lo cual es normal porque es un UPDATE, no un SELECT
+#    elif respuesta['status'] == 'success' and not respuesta['data']: 
+#        return {
+#            "error": "No se encontraron empleados"
+#        }, 404
+   return respuesta['data'], 200

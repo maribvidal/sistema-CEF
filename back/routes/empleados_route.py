@@ -1,10 +1,11 @@
 from flask import Blueprint, request, jsonify
 from services.empleados_service import modificar_empleado_service
 from services.empleados_service import listar_empleados_service
+from services.empleados_service import borrar_empleado_service
+from services.empleados_service import desactivar_empleado_service
 
 empleados_bp = Blueprint('empleados', __name__)
 
-## FALTA IMPLEMENTAR listar_empleados_service()
 @empleados_bp.route('/empleados', methods=['GET'])
 def listar_empleados():
     """Endpoint para obtener la lista de empleados."""
@@ -13,8 +14,6 @@ def listar_empleados():
     return jsonify(respuesta), status
 
 
-# def modificar_empleado(empleado_dni: int, nombre: str, apellido, correo, contrasena, fecha_nac, telefono, genero, rol_id, cursor) -> dict:
-# FALTA IMPLEMENTAAAAAAAAAAAAAAAAAR
 @empleados_bp.route("/empleados/<int:empleado_dni>", methods=["POST"])
 def modificar_empleado(empleado_dni):
     """Endpoint para modificar un empleado específico. 
@@ -24,7 +23,6 @@ def modificar_empleado(empleado_dni):
     print(request.content_type)
     print(request.data)
     data = request.get_json()
-
 
     print("Request procesado")
 
@@ -51,4 +49,17 @@ def modificar_empleado(empleado_dni):
         rol_id,
     )
 
+    return jsonify(respuesta), status
+
+@empleados_bp.route("/empleados/<int:empleado_dni>", methods=["DELETE"])
+def borrar_empleado(empleado_dni):
+
+    respuesta, status = borrar_empleado_service(empleado_dni)
+
+    return jsonify(respuesta), status
+
+
+@empleados_bp.route("/empleados/<int:empleado_dni>", methods=["PUT"])
+def desactivar_empleado(empleado_dni):
+    respuesta, status = desactivar_empleado_service(empleado_dni)
     return jsonify(respuesta), status
