@@ -23,10 +23,6 @@ def modificar_empleado(
         WHERE dni = {empleado_dni}
     """
     usuario = ejecutar_fetchone(query_verificacion, cursor)
-    print("FUNCIONA ESTO?")
-    print(usuario["data"].keys())
-    print(usuario["data"]["rol_id"])
-
 
     if not usuario:
         return {
@@ -39,9 +35,6 @@ def modificar_empleado(
             "status": "error",
             "message": "El usuario no es un empleado"
         }
-    
-    print("Se encontró el usuario creo")
-    print("ROL ID EL CUAL SE VA A MODIFICAR: ", rol_id)
     
     query_update = f"""
         UPDATE Usuario

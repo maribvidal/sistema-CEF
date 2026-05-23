@@ -16,6 +16,7 @@ El servidor se va a abrir en la dirección **http://127.0.0.1:5000**
 
 Autenticación
 
+
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
 | /login | POST | correo, contraseña | 400: Usuario no encontrado <br> 401: Contraseña incorrecta <br> 500: Error interno del servidor / Error desconocido <br> 200: Inicio de sesión exitoso. Se devuelve junto con el token JWT y la información de la cuenta. |
@@ -41,7 +42,10 @@ Empleados
 
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
-| /empleados | GET | - | 404: No se encontraron empleados <br> 200: Se devuelve una lista de los empleados con su información personal y organizacional. |
+| /empleados | GET | - | 404: No se encontraron empleados <br> 500: Error al obtener empleados <br> 200: Se devuelve una lista de los empleados con su información personal y organizacional. |
+| /empleados/(dni) | PUT | nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id | 500: Error al intentar modificar empleado <br> 200: Empleado modificado exitosamente. |
+| /empleados/(dni) | DELETE | - | 404: No se encontraron empleados <br> 500: Error al intentar borrar empleado <br> 200: Empleado borrado exitosamente. |
+| /empleados/(dni)/desactivar | PUT | - | 500: Error al intentar borrar (desactivar) empleado <br> 200: Empleado desactivado exitosamente. |
 | /empleados/(dni)/rol | PUT | Id del nuevo rol | 400: El id del rol es obligatorio o el empleado ya posee dicho rol <br> 404: El empleado no fue encontrado o el rol es inexistente <br> 200: Rol actualizado correctamente. |
 
 Profesores
