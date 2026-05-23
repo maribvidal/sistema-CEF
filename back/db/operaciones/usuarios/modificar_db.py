@@ -13,7 +13,7 @@ def modificar_perfil_usuario(
     """Recibe el id de un usuario, y recibe cualquiera
         de los atributos de usuario que se quieran cambiar."""
 
-    query = "UPDATE Usuario SET "
+    query = "UPDATE Usuario SET"
     if dni is not None:
         query += f" dni = '{dni}',"
     if nombre is not None:
@@ -26,7 +26,10 @@ def modificar_perfil_usuario(
         query += f" correo = '{correo}',"
     if telefono is not None:
         query += f" telefono = '{telefono}'"
-    query += f"WHERE id = {usuario_id};"
+    query = query.strip(",")  # Elimina la coma final si existe
+    query += f" WHERE id = {usuario_id};"
+
+    print(query)
 
     return ejecutar_query(query,cursor)
 

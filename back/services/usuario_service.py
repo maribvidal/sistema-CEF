@@ -235,28 +235,16 @@ def editar_perfil_usuario_service(
     if len(errores) > 0:
         cursor.connection.close()
         return errores, 402
-
-    usuario_con_correo = consultar_usuario_por_correo(correo, cursor)
-
-    if usuario_con_correo['status'] == 'error':
-        cursor.connection.close()
-        return usuario_con_correo, 403
-        
-    if usuario_con_correo['data'] and usuario_con_correo['data'][6] == correo and usuario_con_correo['data'][3] == telefono:
-        cursor.connection.close()
-        return {
-            "error": "No se proporcionó ningún dato nuevo para actualizar"
-        }, 404
     
     res = modificar_perfil_usuario(
         cursor,
         usuario_id,
-        dni,
-        nombre,
-        apellido,
-        fecha_nac,
-        correo,
-        telefono
+        dni or None,
+        nombre or None,
+        apellido or None,
+        fecha_nac or None,
+        correo or None,
+        telefono or None
     )
     
     if res['status'] == 'error':
