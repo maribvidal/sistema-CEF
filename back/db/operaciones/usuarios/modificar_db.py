@@ -29,8 +29,6 @@ def modificar_perfil_usuario(
     query = query.strip(",")  # Elimina la coma final si existe
     query += f" WHERE id = {usuario_id};"
 
-    print(query)
-
     return ejecutar_query(query,cursor)
 
 def modificar_contraseña(

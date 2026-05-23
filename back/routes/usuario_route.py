@@ -69,12 +69,12 @@ def editar_perfil_usuario(usuario_id):
         una respuesta con el resultado de la operación."""
     data = request.get_json()
 
-    dni = data.get("dni") or None
-    nombre = data.get("nombre") or None
-    apellido = data.get("apellido") or None
-    fecha_nac = data.get("fecha_nac") or None
-    correo = data.get("correo") or None
-    telefono = data.get("telefono") or None
+    dni = data.get("dni")
+    nombre = data.get("nombre")
+    apellido = data.get("apellido")
+    fecha_nac = data.get("fecha_nac")
+    correo = data.get("correo")
+    telefono = data.get("telefono")
 
     respuesta, status = editar_perfil_usuario_service(
         usuario_id,

@@ -196,11 +196,6 @@ def editar_perfil_usuario_service(
 ):
     
     cursor = conectarse_db()
-    if correo is None and telefono is None:
-        cursor.connection.close()
-        return {
-            "error": "No se proporcionó ningún dato para actualizar"
-        }, 400
     
     usuario = consultar_usuario_por_id(usuario_id, cursor)
 
@@ -239,12 +234,12 @@ def editar_perfil_usuario_service(
         cursor.connection.close()
         return errores, 403
 
+    """
     usuario_con_correo = consultar_usuario_por_correo(correo, cursor)
 
     if usuario_con_correo['status'] == 'error':
         cursor.connection.close()
         return usuario_con_correo, 404
-    
     
     if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][0] != usuario_id:
          cursor.connection.close()
@@ -257,6 +252,8 @@ def editar_perfil_usuario_service(
         return {
             "error": "No se proporcionó ningún dato nuevo para actualizar"
         }, 406
+    ¿Un usuario no puede tener el correo de otro usuario?
+    """
     
     res = modificar_perfil_usuario(
         cursor,
