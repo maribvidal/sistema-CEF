@@ -1,6 +1,7 @@
 from db.operaciones.exception_handler import ejecutar_query 
 
 def modificar_perfil_usuario(
+    cursor,
     usuario_id: int,
     dni=None,
     nombre=None,
@@ -8,7 +9,6 @@ def modificar_perfil_usuario(
     fecha_nac=None,
     correo=None,
     telefono=None,
-    cursor
 ):
     """Recibe el id de un usuario, y recibe cualquiera
         de los atributos de usuario que se quieran cambiar."""

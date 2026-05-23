@@ -249,14 +249,14 @@ def editar_perfil_usuario_service(
         }, 404
     
     res = modificar_perfil_usuario(
+        cursor,
         usuario_id,
         dni,
         nombre,
         apellido,
         fecha_nac,
         correo,
-        telefono,
-        cursor
+        telefono
     )
     
     if res['status'] == 'error':
