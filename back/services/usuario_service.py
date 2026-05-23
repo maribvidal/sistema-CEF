@@ -2,7 +2,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
-from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario
+from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 
@@ -60,37 +60,37 @@ def registrar_usuario_service(
     respuesta = consultar_usuario_por_dni(dni, cursor)
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta, 400
+        return respuesta, 401
     
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
         cursor.connection.close()
         return {
-            "error": "El DNI ya se encuentra registrado"
-        }, 400
+            "error": "El DNI ya se encuentra registrado."
+        }, 402
     
     respuesta = consultar_usuario_por_correo(correo, cursor)
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta
+        return respuesta, 403
 
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
         cursor.connection.close()
         return {
-            "error": "El correo electrónico ya se encuentra registrado"
-        }, 400
+            "error": "El correo electrónico ya se encuentra registrado."
+        }, 404
     
     if (_es_fecha_valida(fecha_nac) is False):
         cursor.connection.close()
         return {
             "error": "La fecha de nacimiento no es válida."
-        }, 400
+        }, 405
     
     print("cantidad años: ", _obtener_años_hasta_2026(fecha_nac))
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         cursor.connection.close()
         return {
             "error": "El usuario debe ser mayor de 14 años"
-        }, 400
+        }, 406
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
@@ -116,7 +116,7 @@ def registrar_usuario_service(
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Usuario registrado exitosamente"
+        "mensaje": "Usuario registrado exitosamente."
     }, 201
     
 def obtener_perfil_usuario_service(usuario_id: int):
@@ -130,10 +130,8 @@ def obtener_perfil_usuario_service(usuario_id: int):
     if usuario['status'] == 'success' and not usuario['data']:
         cursor.connection.close()
         return {
-            "error": "Usuario no encontrado"
-        }, 404
-        
-    print(" perfil de usuario: ", dict(usuario['data']))
+            "error": "Usuario no encontrado."
+        }, 401
 
     perfil = {
         "id": usuario['data'][0],
@@ -165,8 +163,8 @@ def listar_pagos_usuario_service(usuario_id: int):
     if usuario['status'] == 'success' and not usuario['data']:
         cursor.connection.close()
         return {
-            "error": "Usuario no encontrado"
-        }, 404
+            "error": "Usuario no encontrado."
+        }, 401
     
     ## aca hay un tema y es que me tira que no hay pagos para usuarios que si los tienen
     pagos = consultar_pagos_de_usuario(usuario_id, cursor)
@@ -180,8 +178,8 @@ def listar_pagos_usuario_service(usuario_id: int):
     if not pagos['data']:
         cursor.connection.close()
         return {
-            "error": "No se encontraron pagos para este usuario"
-        }, 404
+            "error": "No se encontraron pagos para este usuario."
+        }, 402
 
     cursor.connection.commit()
     cursor.connection.close()
@@ -189,35 +187,44 @@ def listar_pagos_usuario_service(usuario_id: int):
     
 def editar_perfil_usuario_service(
     usuario_id: int,
-    correo: str,
-    telefono: str
+    dni=None,
+    nombre=None,
+    apellido=None,
+    fecha_nac=None,
+    correo=None,
+    telefono=None
 ):
+    
     cursor = conectarse_db()
-    if correo is None and telefono is None:
-        cursor.connection.close()
-        return {
-            "error": "No se proporcionó ningún dato para actualizar"
-        }, 400
     
     usuario = consultar_usuario_por_id(usuario_id, cursor)
 
     if usuario['status'] == 'error':
         cursor.connection.close()
-        return usuario
+        return {
+            "error": usuario['message']
+        }, 400
 
     if usuario['status'] == 'success' and not usuario['data']:
         cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
-        }, 404
+        }, 402
 
     datos_a_actualizar = []
     
+    if dni is not None:
+        datos_a_actualizar.append({"name": "dni", "value": dni})
+    if nombre is not None:
+        datos_a_actualizar.append({"name": "nombre", "value": nombre})
+    if apellido is not None:
+        datos_a_actualizar.append({"name": "apellido", "value": apellido})
+    if fecha_nac is not None:
+        datos_a_actualizar.append({"name": "fecha_nac", "value": fecha_nac})
     if correo is not None:
         datos_a_actualizar.append({"name": "correo", "value": correo})
     if telefono is not None:
         datos_a_actualizar.append({"name": "telefono", "value": telefono})
-    
     
     errores = checkear_inputs(
         datos_a_actualizar
@@ -225,42 +232,127 @@ def editar_perfil_usuario_service(
     
     if len(errores) > 0:
         cursor.connection.close()
-        return errores, 400
+        return errores, 403
 
+    """
     usuario_con_correo = consultar_usuario_por_correo(correo, cursor)
 
     if usuario_con_correo['status'] == 'error':
         cursor.connection.close()
-        return usuario_con_correo, 400
-    
+        return usuario_con_correo, 404
     
     if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][0] != usuario_id:
          cursor.connection.close()
          return {
             "error": "El correo electrónico ya se encuentra registrado por otro usuario"
-        }, 400
+        }, 405
         
     if usuario_con_correo['data'] and usuario_con_correo['data'][6] == correo and usuario_con_correo['data'][3] == telefono:
         cursor.connection.close()
         return {
             "error": "No se proporcionó ningún dato nuevo para actualizar"
-        }, 400
+        }, 406
+    ¿Un usuario no puede tener el correo de otro usuario?
+    """
     
     res = modificar_perfil_usuario(
+        cursor,
         usuario_id,
-        correo,
-        telefono,
-        cursor
+        dni or None,
+        nombre or None,
+        apellido or None,
+        fecha_nac or None,
+        correo or None,
+        telefono or None
     )
     
     if res['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": res['message']
+            "error": "Se produjo un error desde el lado del servidor al modificar el perfil del usuario."
         }, 500
 
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Perfil actualizado exitosamente"
+        "mensaje": "Perfil actualizado exitosamente."
+    }, 200
+
+# Servicios para las HUs de contraseñas
+
+def modificar_contraseña_service(
+    usuario_id: int,
+    contraseña_actual: str,
+    contraseña_nueva: str
+):
+    """Service que permite modificar la contraseña de un usuario,
+        habiendo realizado previamente una comprobación de las entradas."""
+
+    def _validar_input_contraseña(contraseña: str) -> bool:
+        """Se devuelve si la nueva contraseña cumple con las validaciones."""
+        if len(contraseña) < 8:
+            return False
+        if contraseña[0].isdigit():
+            return False
+        return True
+
+    # Validaciones de contraseña
+
+    if not _validar_input_contraseña(contraseña_nueva):
+        return {
+            "error": "La nueva contraseña no cumple con las validaciones."
+        }, 400
+
+    # Comprobar que el usuario existe
+
+    cursor = conectarse_db()
+    
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 401
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado."
+        }, 402
+
+    # Comprobar que la contraseña actual coincide
+
+    if usuario['data'][5] != contraseña_actual:
+        cursor.connection.close()
+        return {
+            "error": "La contraseña actual es incorrecta."
+        }, 403
+
+    # Comprobar que la contraseña actual no sea igual a la nueva contraseña
+    
+    if contraseña_actual == contraseña_nueva:
+        cursor.connection.close()
+        return {
+            "error": "La nueva contraseña no puede ser igual a la contraseña actual."
+        }, 404
+
+    # Modificar la contraseña del usuario
+
+    res = modificar_contraseña(
+        usuario_id,
+        contraseña_nueva,
+        cursor
+    )
+
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Se produjo un error desde el lado del servidor al modificar la contraseña."
+        }, 500
+
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "mensaje": "Contraseña modificada exitosamente."
     }, 200
