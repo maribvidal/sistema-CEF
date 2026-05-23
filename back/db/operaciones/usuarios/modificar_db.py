@@ -13,9 +13,7 @@ def modificar_perfil_usuario(
     """Recibe el id de un usuario, y recibe cualquiera
         de los atributos de usuario que se quieran cambiar."""
 
-    query = f"""
-        UPDATE Usuario
-        SET """
+    query = "UPDATE Usuario SET "
     if dni is not None:
         query += f" dni = '{dni}',"
     if nombre is not None:
