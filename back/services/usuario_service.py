@@ -277,7 +277,7 @@ def editar_perfil_usuario_service(
 def modificar_contraseña_service(
     usuario_id: int,
     contraseña_actual: str,
-    nueva_contraseña: str
+    contraseña_nueva: str
 ):
     """Service que permite modificar la contraseña de un usuario,
         habiendo realizado previamente una comprobación de las entradas."""
@@ -292,7 +292,7 @@ def modificar_contraseña_service(
 
     # Validaciones de contraseña
 
-    if not _validar_input_contraseña(nueva_contraseña):
+    if not _validar_input_contraseña(contraseña_nueva):
         return {
             "error": "La nueva contraseña no cumple con las validaciones."
         }, 400
@@ -325,7 +325,7 @@ def modificar_contraseña_service(
 
     # Comprobar que la contraseña actual no sea igual a la nueva contraseña
     
-    if contraseña_actual == nueva_contraseña:
+    if contraseña_actual == contraseña_nueva:
         cursor.connection.close()
         return {
             "error": "La nueva contraseña no puede ser igual a la contraseña actual."
@@ -335,7 +335,7 @@ def modificar_contraseña_service(
 
     res = modificar_contraseña(
         usuario_id,
-        nueva_contraseña,
+        contraseña_nueva,
         cursor
     )
 
