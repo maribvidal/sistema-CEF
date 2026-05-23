@@ -9,6 +9,11 @@ export const EmployeesService = {
     const response = await apiClient.get('/empleados')
     return response.data
   },
+  
+  getProfessors: async () => {
+    const response = await apiClient.get('/profesores')
+    return response.data
+  },
 
   /**
    * Actualiza el rol de un empleado mediante su DNI
@@ -20,6 +25,11 @@ export const EmployeesService = {
     })
     return response.data
   },
+
+  updateEmployeeInfo: async (dni, updatedData) => {
+    const response = await apiClient.post(`/empleados/${dni}`, updatedData)
+    return response.data
+  }, // Aparentemente el endpoint es POST, aunque lo lógico sería un PUT o PATCH y falta implementar
 
   /**
    * Crea un nuevo profesor
