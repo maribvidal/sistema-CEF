@@ -51,13 +51,13 @@ def login_service(correo: str, contraseña: str) -> tuple:
         cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
-        }, 404
+        }, 400
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
         print("constraseña: ",usuario['data'][USR_CONTRASENA])
         if usuario['data'][USR_CONTRASENA] != contraseña:
             cursor.connection.close()
-            return {"error": "Contraseña incorrecta"}, 400
+            return {"error": "Contraseña incorrecta"}, 401
 
         # Generar JWT
         token = _generate_jwt({
@@ -137,7 +137,7 @@ def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fech
     return {
         "mensaje": "Usuario registrado exitosamente",
         "usuario_id": resultado['data']
-    }, 201
+    }, 200
 
 def cerrar_sesion():
     # Aca podes implementar la lógica para cerrar sesión.

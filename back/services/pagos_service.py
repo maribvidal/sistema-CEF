@@ -9,13 +9,13 @@ def obtener_pagos_service():
     cursor.connection.close()
     if pagos['status'] == 'error':
         return {
-            "error": "Error al obtener pagos",
+            "error": "Error al obtener pagos.",
             "message": pagos['message']
         }, 500
         
     if pagos['status'] == 'success' and not pagos['data']:
         return {
-            "error": "No se encontraron pagos"
-        }, 404
+            "error": "No se encontraron pagos."
+        }, 400
 
     return pagos['data'], 200
