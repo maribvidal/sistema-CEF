@@ -2,28 +2,33 @@ from db.operaciones.exception_handler import ejecutar_query
 
 def modificar_perfil_usuario(
     usuario_id: int,
-    dni,
-    nombre,
-    apellido,
-    fecha_nac,
-    correo,
-    telefono,
+    dni=None,
+    nombre=None,
+    apellido=None,
+    fecha_nac=None,
+    correo=None,
+    telefono=None,
     cursor
 ):
-    """Recibe el id de un usuario, y recibe el
-        nuevo correo y teléfono que se les quiere
-        poner, y modifica al usuario."""
+    """Recibe el id de un usuario, y recibe cualquiera
+        de los atributos de usuario que se quieran cambiar."""
 
     query = f"""
         UPDATE Usuario
-        SET dni = '{dni}', 
-            nombre = '{nombre}', 
-            apellido = '{apellido}', 
-            fecha_nac = '{fecha_nac}', 
-            correo = '{correo}', 
-            telefono = '{telefono}'
-        WHERE id = {usuario_id};
-    """
+        SET """
+    if dni is not None:
+        query += f" dni = '{dni}',"
+    if nombre is not None:
+        query += f" nombre = '{nombre}',"
+    if apellido is not None:
+        query += f" apellido = '{apellido}',"
+    if fecha_nac is not None:
+        query += f" fecha_nac = '{fecha_nac}',"
+    if correo is not None:
+        query += f" correo = '{correo}',"
+    if telefono is not None:
+        query += f" telefono = '{telefono}'"
+    query += f"WHERE id = {usuario_id};"
 
     return ejecutar_query(query,cursor)
 

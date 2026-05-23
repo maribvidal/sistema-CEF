@@ -189,36 +189,40 @@ def listar_pagos_usuario_service(usuario_id: int):
     
 def editar_perfil_usuario_service(
     usuario_id: int,
-    dni,
-    nombre,
-    apellido,
-    fecha_nac,
-    correo,
-    telefono
+    dni=None,
+    nombre=None,
+    apellido=None,
+    fecha_nac=None,
+    correo=None,
+    telefono=None
 ):
-    cursor = conectarse_db()
-    if correo is None and telefono is None:
-        cursor.connection.close()
-        return {
-            "error": "No se proporcionó ningún dato para actualizar"
-        }, 400
     
+    cursor = conectarse_db()
+
     usuario = consultar_usuario_por_id(usuario_id, cursor)
 
     if usuario['status'] == 'error':
         cursor.connection.close()
         return {
             "error": usuario['message']
-        }, 401
+        }, 400
 
     if usuario['status'] == 'success' and not usuario['data']:
         cursor.connection.close()
         return {
             "error": "Usuario no encontrado"
-        }, 402
+        }, 401
 
     datos_a_actualizar = []
     
+    if dni is not None:
+        datos_a_actualizar.append({"name": "dni", "value": dni})
+    if nombre is not None:
+        datos_a_actualizar.append({"name": "nombre", "value": nombre})
+    if apellido is not None:
+        datos_a_actualizar.append({"name": "apellido", "value": apellido})
+    if fecha_nac is not None:
+        datos_a_actualizar.append({"name": "fecha_nac", "value": fecha_nac})
     if correo is not None:
         datos_a_actualizar.append({"name": "correo", "value": correo})
     if telefono is not None:
@@ -230,26 +234,19 @@ def editar_perfil_usuario_service(
     
     if len(errores) > 0:
         cursor.connection.close()
-        return errores, 403
+        return errores, 402
 
     usuario_con_correo = consultar_usuario_por_correo(correo, cursor)
 
     if usuario_con_correo['status'] == 'error':
         cursor.connection.close()
-        return usuario_con_correo, 404
-    
-    
-    if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][0] != usuario_id:
-         cursor.connection.close()
-         return {
-            "error": "El correo electrónico ya se encuentra registrado por otro usuario"
-        }, 405
+        return usuario_con_correo, 403
         
     if usuario_con_correo['data'] and usuario_con_correo['data'][6] == correo and usuario_con_correo['data'][3] == telefono:
         cursor.connection.close()
         return {
             "error": "No se proporcionó ningún dato nuevo para actualizar"
-        }, 406
+        }, 404
     
     res = modificar_perfil_usuario(
         usuario_id,
