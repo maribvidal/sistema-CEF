@@ -42,7 +42,7 @@
 
           <v-data-table
             :headers="headers"
-            :items="empleados"
+            :items="empleados.concat(profesores)"
             :search="search"
             :loading="loading"
             loading-text="Cargando personal..."
@@ -178,17 +178,25 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- Dialogo para edicion de empleado -->
+    <v-dialog v-model="dialogEditarEmpleado" max-width="600px">
+      <EditEmployee :empleado="empleadoSeleccionado" @close="dialogEditarEmpleado = false" @updated="cargarEmpleados" />
+    </v-dialog>
   </v-container>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { EmployeesService } from '@/services/EmployeesService'
+import EditEmployee from './EditEmployee.vue'
 
 const empleados = ref([])
+const profesores = ref([])
 const search = ref('')
 const loading = ref(false)
 const dialog = ref(false)
+const dialogEditarEmpleado = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
 
@@ -224,11 +232,11 @@ const roles = [
   { id: 3, label: 'Usuario' }
 ]
 
-const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Desconocido'
+const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Profesor'
 const getRoleColor = (id) => {
   if (id === 1) return 'red-darken-1'
   if (id === 2) return 'blue-darken-1'
-  return 'grey-darken-1'
+  return 'green-darken-1' // Color para Profesor
 }
 
 const cargarEmpleados = async () => {
@@ -257,6 +265,22 @@ const cargarEmpleados = async () => {
     empleados.value = [hardcoded] // Mostramos al menos el hardcoded si la API falla
   } finally {
     loading.value = false
+  }
+}
+
+const cargarProfesores = async () => {
+  try {
+    const resp = await EmployeesService.getProfessors()
+    // Depending on backend returning directly an array or { status: "success", data: [...] }
+    const resData = resp.data && Array.isArray(resp.data) ? resp.data : (Array.isArray(resp) ? resp : [])
+    profesores.value = resData.map(p => ({
+      dni: p.dni,
+      nombre: p.nombre,
+      apellido: p.apellido
+    }))
+  } catch (error) {
+    console.error('Error cargando profesores:', error)
+    profesores.value = []
   }
 }
 
@@ -303,8 +327,8 @@ const guardarRecepcionista = async () => {
 }
 
 const modificarEmpleado = (empleado) => {
-  console.log('Modificando datos de:', empleado)
-  // Lógica para abrir un diálogo de edición de perfil
+  empleadoSeleccionado.value = { ...empleado }
+  dialogEditarEmpleado.value = true
 }
 
 const desactivarEmpleado = (empleado) => {
@@ -337,7 +361,10 @@ const confirmarCambioRol = async () => {
   }
 }
 
-onMounted(cargarEmpleados)
+onMounted(() => {
+  cargarEmpleados()
+  cargarProfesores()
+})
 </script>
 
 <style scoped>

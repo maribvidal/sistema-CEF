@@ -4,7 +4,7 @@ from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchon
 def listar_empleados(cursor) -> dict:
     """Lista todos los usuarios que son empleados."""
     query = """
-        SELECT id, nombre, apellido, rol_id
+        SELECT id, nombre, apellido, rol_id, dni, correo
         FROM Usuario
         WHERE rol_id IN (1, 2)
     """
