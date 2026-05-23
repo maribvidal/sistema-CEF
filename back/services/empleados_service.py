@@ -48,8 +48,12 @@ def modificar_empleado_service(
 
     print("KEYS DE LA RESPUESTA")
     print(respuesta.keys())
+    if respuesta['status'] == 'error':
+        return {
+            "error": "Error al intentar modificar empleado",
+            "message": respuesta['message']
+        }, 500
     return respuesta, 200
-
 
 def borrar_empleado_service(empleado_dni: int):
     """Service que borra un empleado"""
