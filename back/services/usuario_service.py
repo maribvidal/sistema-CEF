@@ -136,23 +136,9 @@ def obtener_perfil_usuario_service(usuario_id: int):
             "error": "Usuario no encontrado."
         }, 401
 
-    perfil = {
-        "id": usuario['data'][0],
-        "dni": usuario['data'][1],
-        "nombre": usuario['data'][2],
-        "apellido": usuario['data'][3],
-        "contraseña": usuario['data'][5],
-        "fecha_nac": usuario['data'][6],
-        "correo": usuario['data'][4],
-        "telefono": usuario['data'][7],
-        "genero": usuario['data'][8],
-        "rol_id": usuario['data'][9]
-    }
-
-    cursor.connection.commit()
     cursor.connection.close()
     return {
-        "perfil": perfil
+        "perfil": usuario['data']
     }, 200
     
 def listar_pagos_usuario_service(usuario_id: int):
