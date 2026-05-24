@@ -38,7 +38,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"dni\": 2,\r\n  \"nombre\": \"Maxi\",\r\n  \"apellido\": \"Falasca\",\r\n  \"contraseña\": \"1234\",\r\n  \"correo\": \"maxi2@gmail.com\",\r\n  \"telefono\": \"1122334455\",\r\n  \"fecha_nac\": \"2006-05-11\",\r\n  \"genero\": \"M\",\r\n  \"rol\": 1\r\n}",
+              "raw": "{\r\n  \"dni\": 2,\r\n  \"nombre\": \"Maxi\",\r\n  \"apellido\": \"Falasca\",\r\n  \"contraseña\": \"12345678\",\r\n  \"correo\": \"example@gmail.com\",\r\n  \"telefono\": \"1122334455\",\r\n  \"fecha_nac\": \"2006-05-11\",\r\n  \"genero\": \"M\",\r\n  \"rol\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -138,6 +138,103 @@
                 "usuarios",
                 "2",
                 "perfil"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RestablecerContraseña",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"correo\": \"example@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/RestablecerContrasena",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "RestablecerContrasena"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ConfirmarNuevaContrasena",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"correo\": \"example@gmail.com\",\r\n    \"nueva_contraseña\": \"123456789\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/ConfirmarNuevaContrasena",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "ConfirmarNuevaContrasena"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar_contraseña",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"contraseña_actual\" : \"12345678\",\r\n    \"contraseña_nueva\" : \"12345679\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/4/contraseña",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "4",
+                "contraseña"
               ]
             }
           },
