@@ -156,7 +156,6 @@ def obtener_clases_usuario(usuario_id):
     """Este endpoint permite obtener una lista de las clases a las que un usuario está inscrito.
         Se conecta a la base de datos, consulta la tabla de clases y devuelve la lista de clases en formato JSON."""
 
-    print("usuario id: ", usuario_id)
     respuesta, status = obtener_clases_usuario_service(usuario_id)
         
     return jsonify(respuesta), status

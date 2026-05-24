@@ -517,9 +517,7 @@ def obtener_clases_usuario_service(id_usuario: int):
             "error": "Usuario no encontrado."
         }, 401
 
-    print("respuesta usuario: ", respuesta)
     respuesta = obtener_clases_usuario(id_usuario, cursor)
-    print("respuesta servicio: ", respuesta)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
