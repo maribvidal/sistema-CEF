@@ -6,7 +6,7 @@ from db.operaciones.permisos.insertar_db import insertar_permiso
 from db.operaciones.roles.insertar_db import insertar_rol
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones import insertar_pago, insertar_clase
-from db.operaciones import insertar_pago_pagar_clase
+from db.operaciones import insertar_pago_pagar_clase, insertar_usuario_inscribir_clase
 
 def insertar_datos(cursor):  
     # Crear usuarios
@@ -41,6 +41,9 @@ def insertar_datos(cursor):
     # Crear clase
     insertar_clase('Programada', 1, 1, cursor)
     insertar_clase_ocurrir_sala(1, 1, '2024-07-01', '10:00', cursor)
+    
+    # Inscribir usuario a clase
+    insertar_usuario_inscribir_clase(1, 1, "2026-01-01", cursor)
 
     # Crear pagos
     insertar_pago(50.0, 1, cursor)

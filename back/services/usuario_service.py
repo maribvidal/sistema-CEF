@@ -1,8 +1,6 @@
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.usuarios.insertar_db import insertar_usuario
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id, listar_usuarios
+from db.operaciones.usuarios import *
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
-from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 
@@ -499,4 +497,41 @@ def listar_usuarios_service():
             "error": "No se encontraron usuarios."
         }, 404
         
+    return respuesta['data'], 200
+
+def obtener_clases_usuario_service(id_usuario: int):
+    cursor = conectarse_db()
+
+    print("id usuario: ", id_usuario)
+    respuesta = consultar_usuario_por_id(id_usuario, cursor)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": respuesta['message']
+        }, 400
+
+    if respuesta['status'] == 'success' and not respuesta['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado."
+        }, 401
+
+    print("respuesta usuario: ", respuesta)
+    respuesta = obtener_clases_usuario(id_usuario, cursor)
+    print("respuesta servicio: ", respuesta)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": respuesta['message']
+        }, 500
+
+    if respuesta['status'] == 'success' and not respuesta['data']:
+        cursor.connection.close()
+        return {
+            "error": "No se encontraron clases para este usuario."
+        }, 402
+
+    cursor.connection.close()
     return respuesta['data'], 200

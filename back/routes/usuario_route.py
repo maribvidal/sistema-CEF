@@ -8,7 +8,8 @@ from services.usuario_service import (
     editar_perfil_usuario_service,
     modificar_contraseña_service,
     restablecer_contraseña_service,
-    confirmar_nueva_contrasena_service
+    confirmar_nueva_contrasena_service,
+    obtener_clases_usuario_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -149,5 +150,17 @@ def obtener_usuarios():
     respuesta , status = listar_usuarios_service()
         
     return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/clases", methods=["GET"])
+def obtener_clases_usuario(usuario_id):
+    """Este endpoint permite obtener una lista de las clases a las que un usuario está inscrito.
+        Se conecta a la base de datos, consulta la tabla de clases y devuelve la lista de clases en formato JSON."""
+
+    print("usuario id: ", usuario_id)
+    respuesta, status = obtener_clases_usuario_service(usuario_id)
+        
+    return jsonify(respuesta), status
+
+
 
 # falta un delete
