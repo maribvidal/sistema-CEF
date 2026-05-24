@@ -1,11 +1,16 @@
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.insertar_db import insertar_usuario
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id, listar_usuarios
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 
+from dotenv import load_dotenv
+load_dotenv()
+
+import os
+import resend
 import datetime
 
 def registrar_usuario_service(
@@ -356,3 +361,129 @@ def modificar_contraseña_service(
     return {
         "mensaje": "Contraseña modificada exitosamente."
     }, 200
+
+def restablecer_contraseña_service(correo: str):
+    """Service que permite restablecer la contraseña de un usuario,
+        habiendo realizado previamente una comprobación de las entradas."""
+
+    if not correo:
+        return {
+            "error": "El correo electrónico es requerido para restablecer la contraseña."
+        }, 400
+
+    cursor = conectarse_db()
+    
+    usuario = consultar_usuario_por_correo(correo, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 401
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado con el correo proporcionado."
+        }, 402
+
+    api_key = os.getenv("RESEND_API_KEY")
+    resend.api_key = api_key
+    
+    front_url = os.getenv("FRONT_URL")
+    link = f"{front_url}/ConfirmarNuevaContrasena?correo={correo}"
+    
+    respuesta = resend.Emails.send({
+        "from": "onboarding@resend.dev",
+        "to": correo,
+        "subject": "Recuperación de contraseña",
+        "html": f"""
+            <h2>Recuperar contraseña</h2>
+
+            <p>Hacé click acá:</p>
+
+            <a href="{link}">
+                Restablecer contraseña
+            </a>
+        """
+    })
+
+    cursor.connection.close()
+    return {
+        "mensaje": "Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña."
+    }, 200
+    
+# checkeo de escenario 4 de olvidar contraseña se haria en el front no?
+# checkeo de que las nuevas contraseñas sean iguales 
+def confirmar_nueva_contrasena_service(nueva_contraseña: str, correo: str):
+    """Service que permite confirmar la nueva contraseña de un usuario después de haber solicitado el restablecimiento,
+        habiendo realizado previamente una comprobación de las entradas."""
+
+    if not nueva_contraseña:
+        return {
+            "error": "La nueva contraseña es requerida para confirmar el restablecimiento de la contraseña."
+        }, 400
+        
+    if len(nueva_contraseña) < 8:
+        return {
+            "error": "La contraseña ingresada posee menos de 8 caracteres alfanumericos."
+        }, 401
+
+    cursor = conectarse_db()
+    
+    usuario = consultar_usuario_por_correo(correo, cursor)
+    
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 401
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado con el correo proporcionado."
+        }, 402
+        
+    if usuario['data']['contraseña'] == nueva_contraseña:
+        cursor.connection.close()
+        return {
+            "error": "La nueva contraseña no puede ser igual a la contraseña actual."
+        }, 403
+
+    res = modificar_contraseña(
+        usuario['data']['id'],
+        nueva_contraseña,
+        cursor
+    )
+    
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
+
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "mensaje": "Nueva contraseña confirmada exitosamente."
+    }, 200
+    
+def listar_usuarios_service():
+    cursor = conectarse_db()
+    
+    respuesta = listar_usuarios(cursor)
+    
+    cursor.connection.close()
+    
+    if respuesta['status'] == 'error':
+        return {
+            "error": respuesta['message']
+        }, 500
+        
+    if respuesta['status'] == 'success' and respuesta['data'] is None:
+        return {
+            "error": "No se encontraron usuarios."
+        }, 404
+        
+    return respuesta['data'], 200

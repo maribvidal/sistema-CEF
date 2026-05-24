@@ -27,6 +27,7 @@ def ejecutar_fetchone(query, cursor) -> dict:
         cursor.execute(query)
         
         resultado = cursor.fetchone()
+        resultado = dict(resultado) if resultado else None
 
         print("Resultado consulta: ", resultado)
         return {
