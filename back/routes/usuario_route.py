@@ -111,7 +111,7 @@ def modificar_contraseña(usuario_id):
 
     return jsonify(respuesta), status
 
-@usuario_bp.route("/usuarios/RestablecerContrasena", methods=["GET"])
+@usuario_bp.route("/usuarios/RestablecerContrasena", methods=["POST"])
 def restablecer_contrasena():
     """Este endpoint permite que un usuario pueda restablecer su contraseña.
         Recibe el correo electrónico del usuario en formato JSON, y luego 
@@ -126,7 +126,7 @@ def restablecer_contrasena():
     return jsonify(respuesta), status
 
 
-@usuario_bp.route("/usuarios/ConfirmarNuevaContrasena", methods=["GET"])
+@usuario_bp.route("/usuarios/ConfirmarNuevaContrasena", methods=["PUT"])
 def confirmar_nueva_contrasena():
     """Este endpoint permite que un usuario confirme su nueva contraseña después de haber solicitado el restablecimiento.
         Recibe la nueva contraseña en formato JSON, y luego actualiza la contraseña del usuario en la base de datos."""

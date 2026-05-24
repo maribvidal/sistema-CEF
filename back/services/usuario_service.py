@@ -293,23 +293,32 @@ def modificar_contraseña_service(
     """Service que permite modificar la contraseña de un usuario,
         habiendo realizado previamente una comprobación de las entradas."""
 
+    """
     def _validar_input_contraseña(contraseña: str) -> bool:
-        """Se devuelve si la nueva contraseña cumple con las validaciones."""
+        ""Se devuelve si la nueva contraseña cumple con las validaciones.""
         if len(contraseña) < 8:
             return False
-        if contraseña[0].isdigit():
+        if contraseña[0].isalnum(): # se permiten caracteres alfanumericos
             return False
         return True
 
-    # Validaciones de contraseña
-
+    # Validaciones de contraseña    
     if not _validar_input_contraseña(contraseña_nueva):
         return {
             "error": "La nueva contraseña no cumple con las validaciones."
         }, 400
+    """   
+     
+    errores = checkear_inputs(
+        [
+            {"name": "contraseña", "value": contraseña_nueva}
+        ]
+    )
+    
+    if len(errores) > 0:
+        return errores, 400
 
     # Comprobar que el usuario existe
-
     cursor = conectarse_db()
     
     usuario = consultar_usuario_por_id(usuario_id, cursor)
@@ -328,7 +337,7 @@ def modificar_contraseña_service(
 
     # Comprobar que la contraseña actual coincide
 
-    if usuario['data'][5] != contraseña_actual:
+    if usuario['data']["contraseña"] != contraseña_actual:
         cursor.connection.close()
         return {
             "error": "La contraseña actual es incorrecta."
@@ -424,10 +433,14 @@ def confirmar_nueva_contrasena_service(nueva_contraseña: str, correo: str):
             "error": "La nueva contraseña es requerida para confirmar el restablecimiento de la contraseña."
         }, 400
         
-    if len(nueva_contraseña) < 8:
-        return {
-            "error": "La contraseña ingresada posee menos de 8 caracteres alfanumericos."
-        }, 401
+    errores = checkear_inputs(
+        [
+            {"name": "contraseña", "value": nueva_contraseña}
+        ]
+    )
+    
+    if len(errores) > 0:
+        return errores, 400
 
     cursor = conectarse_db()
     
