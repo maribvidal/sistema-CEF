@@ -9,7 +9,8 @@ from services.usuario_service import (
     modificar_contraseña_service,
     restablecer_contraseña_service,
     confirmar_nueva_contrasena_service,
-    obtener_clases_usuario_service
+    obtener_clases_usuario_service,
+    inscribir_usuario_en_clase_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -160,6 +161,13 @@ def obtener_clases_usuario(usuario_id):
         
     return jsonify(respuesta), status
 
+@usuario_bp.route("/usuarios/<int:usuario_id>/clases/<int:clase_id>", methods=["POST"])
+def inscribir_clase_usuario(usuario_id, clase_id):
+    """Este endpoint permite inscribir a un usuario en una clase específica.
+        Se conecta a la base de datos y registra la inscripción del usuario en la clase."""
 
+    respuesta, status = inscribir_usuario_en_clase_service(usuario_id, clase_id)
+
+    return jsonify(respuesta), status
 
 # falta un delete

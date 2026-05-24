@@ -79,6 +79,7 @@ Usuarios
 | /usuarios/ConfirmarNuevaContrasena | PUT | correo, nueva_contraseña | 400: Error en el checkeo de inputs <br> 402: Error interno de consulta <br> 403: Usuario no encontrado <br> 404: La nueva contraseña no puede ser igual a la contraseña actual <br> 200: Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña |
 | /usuarios/ObtenerListaUsuarios | GET | 400: Error en el checkeo de inputs <br> 500: Error interno de consulta <br> 404: No se encontraron usuarios <br> 200: Se devuelve lista con usuarios registrados |
 | /usuarios/(usuario_id)/clases | GET | 400: Error en el checkeo de inputs <br> 401: Usuario no encontrado <br> 500: Error interno de consulta <br> 402: No se encontraron clases para este usuario <br> 200: Se devuelve lista con las clases inscriptas por el usuario |
+| /usuarios/(usuario_id)/clases/(clase_id) | POST | 400: El usuario ya s eencuentra inscripto en la clase <br> 404: Usuario no encontrado / clase no encontrada <br> 500: Error interno de consulta <br> 200: Usuario inscripto exitosamente |
 
 ## Modelo lógico de la Base de Datos
 

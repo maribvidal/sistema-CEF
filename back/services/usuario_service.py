@@ -1,3 +1,6 @@
+from back.db.operaciones.clases.consultar_db import consultar_clase_por_id
+from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id
+from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios import *
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
@@ -10,6 +13,8 @@ load_dotenv()
 import os
 import resend
 import datetime
+
+# FALTA PENSAR DONDE ES NECESARIO CHECKEAR QUE EL ROL SEA = 3
 
 def registrar_usuario_service(
     dni: int,
@@ -88,7 +93,6 @@ def registrar_usuario_service(
             "error": "La fecha de nacimiento no es válida."
         }, 405
     
-    print("cantidad años: ", _obtener_años_hasta_2026(fecha_nac))
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         cursor.connection.close()
         return {
@@ -155,7 +159,6 @@ def listar_pagos_usuario_service(usuario_id: int):
             "error": "Usuario no encontrado."
         }, 401
     
-    ## aca hay un tema y es que me tira que no hay pagos para usuarios que si los tienen
     pagos = consultar_pagos_de_usuario(usuario_id, cursor)
 
     if pagos['status'] == 'error':
@@ -170,7 +173,6 @@ def listar_pagos_usuario_service(usuario_id: int):
             "error": "No se encontraron pagos para este usuario."
         }, 402
 
-    cursor.connection.commit()
     cursor.connection.close()
     return pagos['data'], 200
     
@@ -519,3 +521,62 @@ def obtener_clases_usuario_service(id_usuario: int):
 
     cursor.connection.close()
     return respuesta['data'], 200
+
+def inscribir_usuario_en_clase_service(usuario_id: int, clase_id: int):
+    cursor = conectarse_db()
+
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 500
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado."
+        }, 404
+        
+    clase = consultar_clase_por_id(clase_id, cursor)
+    
+    if clase['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": clase['message']
+        }, 500
+        
+    if clase['status'] == 'success' and not clase['data']:
+        cursor.connection.close()
+        return {
+            "error": "Clase no encontrada."
+        }, 404
+        
+    res = consultar_usuario_inscribir_clase_por_usuario_id(usuario_id, clase_id, cursor)
+    
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
+        
+    if res['status'] == 'success' and res['data'] is not None:
+        cursor.connection.close()
+        return {
+            "error": "El usuario ya se encuentra inscrito en esta clase."
+        }, 400
+
+    res = insertar_usuario_inscribir_clase(usuario_id, clase_id, cursor)
+
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
+
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "mensaje": "Usuario inscrito en la clase exitosamente."
+    }, 200

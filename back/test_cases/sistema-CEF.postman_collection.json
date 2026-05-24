@@ -239,6 +239,55 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "obtenerClasesUsuario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/3/clases",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "3",
+                "clases"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "InscripcionClase",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/3/clases/2",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "3",
+                "clases",
+                "2"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -301,7 +350,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"estado\" : \"Programada\",\r\n    \"id_actividad\" : 1,\r\n    \"id_profesor\" : 1\r\n}",
+              "raw": "{\r\n    \"estado\" : \"Programada\",\r\n    \"id_actividad\" : 1,\r\n    \"id_profesor\" : 2,\r\n    \"sala\": 1,\r\n    \"fecha\": \"2024-07-01\",\r\n    \"hora\": \"12:00\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"

@@ -36,9 +36,10 @@ def publicar_clase_service(
     sala: int
 ):
     """Service que publica una clase"""
+    """
     def _revisar_ocupacion_sala(sala, fecha, hora, cursor) -> dict:
-        """Función auxiliar que revisa si la sala está ocupada en la 
-            fecha y hora dadas"""
+        ""Función auxiliar que revisa si la sala está ocupada en la 
+            fecha y hora dadas""
         tupla_consulta = consultar_clase_ocurrir_sala_por_fecha_hora_sala(sala, fecha, hora, cursor)
 
         if tupla_consulta['status'] == 'error':
@@ -55,16 +56,26 @@ def publicar_clase_service(
             }, 401
 
         return tupla_consulta
+    """
 
     cursor = conectarse_db()
 
     # Comprobar que la sala no se encuentre ocupada en la fecha y hora dadas
 
-    respuesta = _revisar_ocupacion_sala(sala, fecha, hora, cursor)
+    respuesta = consultar_clase_ocurrir_sala_por_fecha_hora_sala(sala, fecha, hora, cursor)
 
     if respuesta['status'] == 'error':
-        cursor.connection.close()
-        return respuesta, 402
+        return {
+            "status": "error",
+            "message": respuesta['message']
+        }, 400
+
+    # Si no tiró antes, todo debería estar bien
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+            return {
+            "status": "error",
+            "message": "La sala ya está ocupada en la fecha y hora dadas."
+        }, 401
 
     # Intentar insertar la clase
 
