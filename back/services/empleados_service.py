@@ -78,7 +78,6 @@ def borrar_empleado_service(empleado_dni: int):
 
 def desactivar_empleado_service(empleado_dni: int):
    """Service que desactiva un empleado""" 
-   print("desactivar_empleado_service: Iniciando servicio para desactivar empleado")
 
    cursor = conectarse_db()
    respuesta = desactivar_empleado(empleado_dni, cursor)
@@ -98,7 +97,6 @@ def desactivar_empleado_service(empleado_dni: int):
    return respuesta['data'], 200
 
 def listar_empleados_desactivados_service():
-    print("listar_empleados_desactivados_service: Iniciando servicio para listar empleados desactivados")
     """Service que lista los empleados desactivados"""
     cursor = conectarse_db()
     respuesta = listar_empleados_desactivados(cursor)
