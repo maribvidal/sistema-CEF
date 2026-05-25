@@ -609,7 +609,6 @@ def subir_avatar_usuario_service(usuario_id, avatar):
             "error": "No se pudo insertar la imagen."
         }, 404
 
-    cursor.connection.commit()
     imagen_id = res['data']
 
     # Asociar la imagen al usuario
@@ -622,10 +621,10 @@ def subir_avatar_usuario_service(usuario_id, avatar):
             "error": res2['message']
         }, 500
     
-    if res2['status'] == 'success' and res2['data'] is None:
+    if res2['status'] == 'success' and res2['data'] is not None:
         cursor.connection.close()
         return {
-            "error": "No se pudo asociar la imagen al usuario."
+            "error": "Ocurrió un error al intentar asociar la imagen al usuario."
         }, 405
     
     cursor.connection.commit()
