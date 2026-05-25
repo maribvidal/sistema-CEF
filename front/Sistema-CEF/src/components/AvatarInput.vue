@@ -1,7 +1,9 @@
+
 <script setup>
 import { ref } from 'vue'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
+
 
 const props = defineProps({
   currentAvatar: {
@@ -25,6 +27,10 @@ const handleFileChange = (event) => {
   const file = event.target.files[0]
   if (file) {
     // Validate file type if needed
+    if (file.size > 3 * 1024 * 1024) { // 5MB limit
+      alert('El archivo es demasiado grande. Por favor selecciona una imagen menor a 5MB.')
+      return
+    }
     if (!file.type.startsWith('image/')) {
       alert('Por favor selecciona un archivo de imagen.')
       return
@@ -63,13 +69,10 @@ const cancelCrop = () => {
 <template>
   <div class="avatar-input-wrapper">
     <!-- Avatar Preview with Click to Upload -->
-    <div class="avatar-preview" @click="triggerFileInput" title="Click para cambiar imagen">
+    <div class="avatar-preview"  title="Click para cambiar imagen">
       <img :src="currentAvatar" alt="Avatar" class="avatar-img" />
-      <div class="avatar-overlay">
-        <span class="camera-icon">📷</span>
-      </div>
     </div>
-
+    <button class="btn btn-secondary change-avatar-btn " @click="triggerFileInput" type="button">Cambiar Avatar</button>
     <input
       type="file"
       ref="fileInput"
@@ -208,5 +211,6 @@ const cancelCrop = () => {
 .btn-secondary {
   background-color: #6c757d;
   color: white;
+
 }
 </style>

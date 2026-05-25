@@ -11,7 +11,6 @@
             </v-col>
 
             <v-col cols="12" md="8">
-
               <div class="text-h5">{{ userName }} {{ lastName }}</div>
               <div class="text-subtitle-1 text--secondary">{{ userEmail }}</div>
               <div class="text-subtitle-1 text--secondary">Fecha de nacimiento: <strong>{{ userBirthDate }}</strong></div>
@@ -37,8 +36,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/services/UsuariosServices.js'
-import defaultLogo from '@/assets/logoLargo.png'
 import DateFormatterService from '@/services/DateFormatterService.js'
+// 1. Importamos la nueva función unificada
+import { getValidImageSrc } from '@/services/ImageFormatterService.js' 
+import defaultLogo from '@/assets/logoLargo.png'
 
 const router = useRouter()
 const route = useRoute()
@@ -46,11 +47,19 @@ const { logout, fetchUserProfileById, userProfile: currentUser } = useAuth()
 const { formatSpanishDate } = DateFormatterService
 
 const profileData = ref(null)
+// 2. avatarSrc ahora es un ref, inicializado con el logo por defecto
+const avatarSrc = ref(defaultLogo) 
 
 const getProfile = async () => {
   try {
     const profile = await fetchUserProfileById(route.params.id)
     profileData.value = profile
+    
+    // 3. Procesamos la imagen de forma asíncrona usando nuestro servicio inteligente
+    if (profile?.avatarUrl) {
+      const srcProcessado = await getValidImageSrc(profile.avatarUrl)
+      if (srcProcessado) avatarSrc.value = srcProcessado
+    }
   } catch (error) {
     console.error('Error fetching profile:', error)
   }
@@ -76,11 +85,8 @@ const rolUser = computed(() => {
 const userName = computed(() => profileData.value?.nombre || 'Usuario')
 const lastName = computed(() => profileData.value?.apellido || '')
 const userEmail = computed(() => profileData.value?.correo || '')
-//const userRole = computed(() => profileData.value?.rol_id || profileData.value?.tipo || 'Visitante')
 const userBirthDate = computed(() => formatSpanishDate(profileData.value?.fecha_nac))
-const avatarSrc = computed(() => profileData.value?.avatarUrl || defaultLogo)
 
-// Mostrar botones solo si el perfil que estamos viendo es el nuestro
 const isOwnProfile = computed(() => currentUser.value?.id == route.params.id)
 
 const onLogout = async () => {
@@ -89,7 +95,6 @@ const onLogout = async () => {
 }
 
 const goToEdit = () => {
-  // Ruta de ejemplo; modificar según rutas reales de la app
   router.push(`/editarPerfil/${route.params.id}`)
 }
 
