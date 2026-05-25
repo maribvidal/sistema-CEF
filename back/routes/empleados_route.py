@@ -3,6 +3,7 @@ from services.empleados_service import modificar_empleado_service
 from services.empleados_service import listar_empleados_service
 from services.empleados_service import borrar_empleado_service
 from services.empleados_service import desactivar_empleado_service
+from services.empleados_service import listar_empleados_desactivados_service
 
 empleados_bp = Blueprint('empleados', __name__)
 
@@ -62,4 +63,12 @@ def borrar_empleado(empleado_dni):
 @empleados_bp.route("/empleados/<int:empleado_dni>/desactivar", methods=["PATCH"])
 def desactivar_empleado(empleado_dni):
     respuesta, status = desactivar_empleado_service(empleado_dni)
+    return jsonify(respuesta), status
+
+
+@empleados_bp.route('/empleados/desactivados', methods=['GET'])
+def listar_empleados_desactivados():
+    """Endpoint para obtener la lista de empleados desactivados."""
+    respuesta, status = listar_empleados_desactivados_service()
+    
     return jsonify(respuesta), status
