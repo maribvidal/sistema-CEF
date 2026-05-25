@@ -46,3 +46,15 @@ def modificar_contraseña(
     """
 
     return ejecutar_query(query,cursor)
+
+def modificar_avatar(usuario_id: int, imagen_id: int, cursor):
+    """Recibe el id de un usuario y el id de una imagen, y lo actualiza cambiando
+        su avatar por la nueva imagen."""
+
+    query = f"""
+        UPDATE Usuario
+        SET imagen_id = {imagen_id}
+        WHERE id = {usuario_id};
+    """
+
+    return ejecutar_query(query,cursor)
