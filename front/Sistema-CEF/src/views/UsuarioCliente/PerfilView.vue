@@ -19,10 +19,10 @@
 
               <v-row class="mt-6" align="center" v-if="isOwnProfile">
                 <v-col cols="12" sm="6">
-                  <v-btn color="primary" block @click="goToEdit">Editar perfil</v-btn>
+                  <v-btn color="primary" block @click="goToEdit">Gestionar perfil</v-btn>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-btn color="error" block variant="flat" @click="onLogout">Cerrar sesión</v-btn>
+                  <v-btn color="error" block variant="flat" @click="goToChangePassword">Cambiar contraseña</v-btn>
                 </v-col>
               </v-row>
             </v-col>
@@ -91,6 +91,10 @@ const onLogout = async () => {
 const goToEdit = () => {
   // Ruta de ejemplo; modificar según rutas reales de la app
   router.push(`/editarPerfil/${route.params.id}`)
+}
+
+const goToChangePassword = () => {
+  router.push(`/cambiarContraseña/${route.params.id}`)
 }
 </script>
 

@@ -67,8 +67,11 @@ const AuthApiService = {
 
   // ChangePassword: mapea Usuarios/CambiarContrasena → No implementado en backend
   changePass: async (userId, passwords) => {
-    console.warn('changePassword no implementado en backend Python')
-    throw new Error('Funcionalidad no disponible en este momento')
+    apiClient.put(`/usuarios/${userId}/contraseña`, {
+      contraseña_actual: passwords.currentPassword,
+      nueva_contraseña: passwords.newPassword
+    }
+  )
   },
 
   // RestorePassword: mapea Usuarios/RestablecerContrasena → No implementado en backend

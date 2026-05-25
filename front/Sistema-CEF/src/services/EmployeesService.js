@@ -9,7 +9,10 @@ export const EmployeesService = {
     const response = await apiClient.get('/empleados')
     return response.data
   },
-  
+  getDisabledEmployees: async () => {
+    const response = await apiClient.get('/empleados/desactivados')
+    return response.data
+  },
   getProfessors: async () => {
     const response = await apiClient.get('/profesores')
     return response.data
