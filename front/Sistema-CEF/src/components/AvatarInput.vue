@@ -27,7 +27,7 @@ const handleFileChange = (event) => {
   const file = event.target.files[0]
   if (file) {
     // Validate file type if needed
-    if (file.size > 3 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
       alert('El archivo es demasiado grande. Por favor selecciona una imagen menor a 5MB.')
       return
     }

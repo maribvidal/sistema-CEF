@@ -1,6 +1,6 @@
 /**
  * 1. Procesa un string Base64 "crudo" y le añade el prefijo correcto.
- * (Esta es tu función original con el JSDoc corregido)
+ * 
  * * @param {string} base64String La cadena Base64, sin el prefijo "data:image...".
  * @returns {string|null} La URL de datos completa o null si la entrada es inválida.
  */
