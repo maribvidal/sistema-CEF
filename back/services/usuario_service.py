@@ -6,6 +6,7 @@ from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.imagenes.insertar_db import insertar_imagen
+from db.operaciones.imagenes.consultar_db import consultar_imagen_actual_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar
@@ -632,4 +633,46 @@ def subir_avatar_usuario_service(usuario_id, avatar):
 
     return {
         "mensaje": "Avatar subido y asociado al usuario exitosamente."
+    }, 200
+
+def obtener_avatar_usuario_service(usuario_id):
+    """Service que permite obtener el avatar de un usuario dado."""
+
+    cursor = conectarse_db()
+
+    # Validar si el usuario existe
+
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 400
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado."
+        }, 401
+
+    # Obtener el avatar asociado al usuario
+
+    res = consultar_imagen_actual_usuario(usuario_id, cursor)
+
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 402
+    
+    if res['status'] == 'success' and res['data'] is None:
+        cursor.connection.close()
+        return {
+            "error": "El usuario no tiene un avatar asociado."
+        }, 403
+
+    cursor.connection.close()
+    return {
+        "avatar": res['data']
     }, 200
