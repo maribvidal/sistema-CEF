@@ -50,9 +50,55 @@
 #### 3. Funcionalidades NO Implementadas en Backend
 Las siguientes rutas retornan errores o son ignoradas:
 - `Usuarios/CambiarContrasena/<userId>` ⚠️ No existe
-- `Usuarios/RestablecerContrasena` ⚠️ No existe
-- `Usuarios/ConfirmarNuevaContrasena` ⚠️ No existe
-- `Usuarios/ObtenerListaUsuarios` ⚠️ No existe
+- `Usuarios/RestablecerContrasena` ✅ Implementado
+- `Usuarios/ConfirmarNuevaContrasena` ✅ Implementado
+- `Usuarios/ObtenerListaUsuarios` ✅ Implementado
+
+**Datos esperados para RestablecerContrasena perfil:**
+```json
+{
+  "correo": "existente@example.com"
+}
+```
+
+**Datos esperados para ConfirmarNuevaContrasena perfil:**
+```json
+{
+  "correo": "existente@example.com",
+  "nueva_contraseña": "12345678"
+}
+```
+
+### Flujo de recuperacion de contraseña
+
+1. **Usuario solicita restablecer contraseña**
+   ```javascript
+   restablecerContrasena({ correo: 'user@example.com' })
+   → GET /usuarios/RestablecerContrasena
+   → Se envía un correo electrónico al usuario
+   ```
+
+2. **Usuario accede al enlace recibido**
+    - http://localhost:5173/ConfirmarNuevaContrasena?correo=user@example.com
+
+3. **Frontend muestra formulario de nueva contraseña**
+
+    Usuario ingresa:
+    * nueva contraseña
+    * confirmación de contraseña
+
+    Se valida en frontend que ambas coincidan
+
+4. **Usuario confirma nueva contraseña**
+    ```javascript
+    confirmarNuevaContrasena({
+      correo: 'user@example.com',
+      nueva_contraseña: 'NuevaPassword123'
+    })
+    → GET /usuarios/ConfirmarNuevaContrasena
+    → Se actualiza la contraseña en la base de datos
+    ```
+
 
 ### Flujo de Autenticación
 

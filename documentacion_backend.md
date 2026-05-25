@@ -16,6 +16,7 @@ El servidor se va a abrir en la dirección **http://127.0.0.1:5000**
 
 Autenticación
 
+
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
 | /login | POST | correo, contraseña | 400: Usuario no encontrado <br> 401: Contraseña incorrecta <br> 500: Error interno del servidor / Error desconocido <br> 200: Inicio de sesión exitoso. Se devuelve junto con el token JWT y la información de la cuenta. |
@@ -41,7 +42,10 @@ Empleados
 
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
-| /empleados | GET | - | 404: No se encontraron empleados <br> 200: Se devuelve una lista de los empleados con su información personal y organizacional. |
+| /empleados | GET | - | 404: No se encontraron empleados <br> 500: Error al obtener empleados <br> 200: Se devuelve una lista de los empleados con su información personal y organizacional. |
+| /empleados/(dni) | PUT | nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id | 500: Error al intentar modificar empleado <br> 200: Empleado modificado exitosamente. |
+| /empleados/(dni) | DELETE | - | 404: No se encontraron empleados <br> 500: Error al intentar borrar empleado <br> 200: Empleado borrado exitosamente. |
+| /empleados/(dni)/desactivar | PUT | - | 500: Error al intentar borrar (desactivar) empleado <br> 200: Empleado desactivado exitosamente. |
 | /empleados/(dni)/rol | PUT | Id del nuevo rol | 400: El id del rol es obligatorio o el empleado ya posee dicho rol <br> 404: El empleado no fue encontrado o el rol es inexistente <br> 200: Rol actualizado correctamente. |
 
 Profesores
@@ -71,6 +75,11 @@ Usuarios
 | /usuarios/(id_usuario)/perfil | PUT | dni, nombre, apellido, fecha_nac, correo, telefono | 400: No se proporcionó ningún dato para actualizar <br> 401: Error interno de consulta <br> 402: Usuario no encontrado <br> 403: Errores de validación en los campos enviados <br> 404: Error en servidor al comprobar correos <br> 405: El correo electrónico ya se encuentra registrado por otro usuario <br> 406: No se proporcionó ningún dato nuevo/diferente para actualizar <br> 500: Error del servidor al procesar la modificación <br> 200: Perfil actualizado exitosamente. |
 | /usuarios/(id_usuario)/pagos | GET | - | 400: Error interno de consulta <br> 401: Usuario no encontrado <br> 402: No se encontraron pagos asociados a este usuario <br> 500: Error del servidor al consultar la facturación <br> 200: Se devuelven las transacciones de pago del usuario. |
 | /usuarios/(id_usuario)/contrasena | PUT | contraseña_actual, contraseña_nueva | 400: La nueva contraseña no cumple con las validaciones básicas de longitud o formato <br> 401: Error interno de consulta <br> 402: Usuario no encontrado <br> 403: La contraseña actual es incorrecta <br> 404: La nueva contraseña no puede ser igual a la contraseña actual <br> 500: Error interno al modificar el registro <br> 200: Contraseña modificada exitosamente. |
+| /usuarios/RestablecerContrasena | POST | correo | 400: El correo electrónico es requerido para restablecer la contraseña. <br> 401: Error interno de consulta <br> 402: Usuario no encontrado 200: Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña |
+| /usuarios/ConfirmarNuevaContrasena | PUT | correo, nueva_contraseña | 400: Error en el checkeo de inputs <br> 402: Error interno de consulta <br> 403: Usuario no encontrado <br> 404: La nueva contraseña no puede ser igual a la contraseña actual <br> 200: Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña |
+| /usuarios/ObtenerListaUsuarios | GET | 400: Error en el checkeo de inputs <br> 500: Error interno de consulta <br> 404: No se encontraron usuarios <br> 200: Se devuelve lista con usuarios registrados |
+| /usuarios/(usuario_id)/clases | GET | 400: Error en el checkeo de inputs <br> 401: Usuario no encontrado <br> 500: Error interno de consulta <br> 402: No se encontraron clases para este usuario <br> 200: Se devuelve lista con las clases inscriptas por el usuario |
+| /usuarios/(usuario_id)/clases/(clase_id) | POST | 400: El usuario ya s eencuentra inscripto en la clase <br> 404: Usuario no encontrado / clase no encontrada <br> 500: Error interno de consulta <br> 200: Usuario inscripto exitosamente |
 
 ## Modelo lógico de la Base de Datos
 

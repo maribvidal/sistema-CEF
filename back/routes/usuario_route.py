@@ -1,11 +1,16 @@
 from flask import Blueprint, request, jsonify
 
 from services.usuario_service import (
+    listar_usuarios_service,
     registrar_usuario_service,
     listar_pagos_usuario_service,
     obtener_perfil_usuario_service,
     editar_perfil_usuario_service,
-    modificar_contraseña_service
+    modificar_contraseña_service,
+    restablecer_contraseña_service,
+    confirmar_nueva_contrasena_service,
+    obtener_clases_usuario_service,
+    inscribir_usuario_en_clase_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -108,20 +113,61 @@ def modificar_contraseña(usuario_id):
 
     return jsonify(respuesta), status
 
-# endpoint para pruebas
+@usuario_bp.route("/usuarios/RestablecerContrasena", methods=["POST"])
+def restablecer_contrasena():
+    """Este endpoint permite que un usuario pueda restablecer su contraseña.
+        Recibe el correo electrónico del usuario en formato JSON, y luego 
+        se envía un correo con instrucciones para restablecer la contraseña."""
+    
+    data = request.get_json()
 
-from db.operaciones import listar_usuarios
-from db.operaciones import conectarse_db
+    correo = data.get("correo")
 
-@usuario_bp.route("/prueba", methods=["GET"])
+    respuesta, status = restablecer_contraseña_service(correo)
+
+    return jsonify(respuesta), status
+
+
+@usuario_bp.route("/usuarios/ConfirmarNuevaContrasena", methods=["PUT"])
+def confirmar_nueva_contrasena():
+    """Este endpoint permite que un usuario confirme su nueva contraseña después de haber solicitado el restablecimiento.
+        Recibe la nueva contraseña en formato JSON, y luego actualiza la contraseña del usuario en la base de datos."""
+    
+    data = request.get_json()
+
+    nueva_contraseña = data.get("nueva_contraseña")
+    correo = data.get("correo")
+
+    respuesta, status = confirmar_nueva_contrasena_service(nueva_contraseña, correo)
+
+    return jsonify(respuesta), status
+
+
+@usuario_bp.route("/usuarios/ObtenerListaUsuarios", methods=["GET"])
 def obtener_usuarios():
-    cursor = conectarse_db()
-    lista = listar_usuarios(cursor)
-    cursor.connection.close()
-    if lista['status'] == 'error':
-        return jsonify({"error": "Error al obtener usuarios", "message": lista['message']}), 500
-    if lista['status'] == 'success' and lista['data'] is None:
-        return jsonify({"error": "No se encontraron usuarios"}), 404
-    return jsonify(lista['data']), 200
+    """Este endpoint permite obtener una lista de todos los usuarios registrados en el sistema. 
+        Se conecta a la base de datos, consulta la tabla de usuarios y devuelve la lista de usuarios en formato JSON."""
+
+    respuesta , status = listar_usuarios_service()
+        
+    return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/clases", methods=["GET"])
+def obtener_clases_usuario(usuario_id):
+    """Este endpoint permite obtener una lista de las clases a las que un usuario está inscrito.
+        Se conecta a la base de datos, consulta la tabla de clases y devuelve la lista de clases en formato JSON."""
+
+    respuesta, status = obtener_clases_usuario_service(usuario_id)
+        
+    return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/clases/<int:clase_id>", methods=["POST"])
+def inscribir_clase_usuario(usuario_id, clase_id):
+    """Este endpoint permite inscribir a un usuario en una clase específica.
+        Se conecta a la base de datos y registra la inscripción del usuario en la clase."""
+
+    respuesta, status = inscribir_usuario_en_clase_service(usuario_id, clase_id)
+
+    return jsonify(respuesta), status
 
 # falta un delete

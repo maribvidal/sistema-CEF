@@ -38,7 +38,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"dni\": 2,\r\n  \"nombre\": \"Maxi\",\r\n  \"apellido\": \"Falasca\",\r\n  \"contraseña\": \"1234\",\r\n  \"correo\": \"maxi2@gmail.com\",\r\n  \"telefono\": \"1122334455\",\r\n  \"fecha_nac\": \"2006-05-11\",\r\n  \"genero\": \"M\",\r\n  \"rol\": 1\r\n}",
+              "raw": "{\r\n  \"dni\": 2,\r\n  \"nombre\": \"Maxi\",\r\n  \"apellido\": \"Falasca\",\r\n  \"contraseña\": \"12345678\",\r\n  \"correo\": \"example@gmail.com\",\r\n  \"telefono\": \"1122334455\",\r\n  \"fecha_nac\": \"2006-05-11\",\r\n  \"genero\": \"M\",\r\n  \"rol\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -142,6 +142,152 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "RestablecerContraseña",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"correo\": \"example@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/RestablecerContrasena",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "RestablecerContrasena"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ConfirmarNuevaContrasena",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"correo\": \"example@gmail.com\",\r\n    \"nueva_contraseña\": \"123456789\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/ConfirmarNuevaContrasena",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "ConfirmarNuevaContrasena"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "modificar_contraseña",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"contraseña_actual\" : \"12345678\",\r\n    \"contraseña_nueva\" : \"12345679\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/4/contraseña",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "4",
+                "contraseña"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "obtenerClasesUsuario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/3/clases",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "3",
+                "clases"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "InscripcionClase",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:5000/usuarios/3/clases/2",
+              "protocol": "http",
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "port": "5000",
+              "path": [
+                "usuarios",
+                "3",
+                "clases",
+                "2"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -204,7 +350,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"estado\" : \"Programada\",\r\n    \"id_actividad\" : 1,\r\n    \"id_profesor\" : 1\r\n}",
+              "raw": "{\r\n    \"estado\" : \"Programada\",\r\n    \"id_actividad\" : 1,\r\n    \"id_profesor\" : 2,\r\n    \"sala\": 1,\r\n    \"fecha\": \"2024-07-01\",\r\n    \"hora\": \"12:00\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"

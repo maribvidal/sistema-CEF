@@ -54,18 +54,17 @@ def login_service(correo: str, contraseña: str) -> tuple:
         }, 400
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
-        print("constraseña: ",usuario['data'][USR_CONTRASENA])
-        if usuario['data'][USR_CONTRASENA] != contraseña:
+        if usuario['data']['contraseña'] != contraseña:
             cursor.connection.close()
             return {"error": "Contraseña incorrecta"}, 401
 
         # Generar JWT
         token = _generate_jwt({
-            "id": usuario['data'][USR_ID],
-            "dni": usuario['data'][USR_DNI],
-            "nombre": usuario['data'][USR_NOMBRE],
-            "tipo": "CLIENTE" if usuario['data'][USR_ROL] == 3 else "STAFF",
-            "rol": usuario['data'][USR_ROL]
+            "id": usuario['data']['id'],
+            "dni": usuario['data']['dni'],
+            "nombre": usuario['data']['nombre'],
+            "tipo": "CLIENTE" if usuario['data']['rol_id'] == 3 else "STAFF",
+            "rol": usuario['data']['rol_id']
         })
 
         cursor.connection.commit()
@@ -74,11 +73,11 @@ def login_service(correo: str, contraseña: str) -> tuple:
             "mensaje": "Inicio de sesión exitoso",
             "token": token,
             "usuario": {
-                "id": usuario['data'][USR_ID],
-                "dni": usuario['data'][USR_DNI],
-                "nombre": usuario['data'][USR_NOMBRE],
-                "tipo": "CLIENTE" if usuario['data'][USR_ROL] == 3 else "STAFF",
-                "rol": usuario['data'][USR_ROL]
+                "id": usuario['data']['id'],
+                "dni": usuario['data']['dni'],
+                "nombre": usuario['data']['nombre'],
+                "tipo": "CLIENTE" if usuario['data']['rol_id'] == 3 else "STAFF",
+                "rol": usuario['data']['rol_id']
             }
         }, 200
     

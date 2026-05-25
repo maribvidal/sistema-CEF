@@ -1,12 +1,20 @@
+from back.db.operaciones.clases.consultar_db import consultar_clase_por_id
+from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id
+from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.usuarios.insertar_db import insertar_usuario
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo, consultar_usuario_por_dni, consultar_usuario_por_id
+from db.operaciones.usuarios import *
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
-from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 
+from dotenv import load_dotenv
+load_dotenv()
+
+import os
+import resend
 import datetime
+
+# FALTA PENSAR DONDE ES NECESARIO CHECKEAR QUE EL ROL SEA = 3
 
 def registrar_usuario_service(
     dni: int,
@@ -85,7 +93,6 @@ def registrar_usuario_service(
             "error": "La fecha de nacimiento no es válida."
         }, 405
     
-    print("cantidad años: ", _obtener_años_hasta_2026(fecha_nac))
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         cursor.connection.close()
         return {
@@ -133,23 +140,9 @@ def obtener_perfil_usuario_service(usuario_id: int):
             "error": "Usuario no encontrado."
         }, 401
 
-    perfil = {
-        "id": usuario['data'][0],
-        "dni": usuario['data'][1],
-        "nombre": usuario['data'][2],
-        "apellido": usuario['data'][3],
-        "contraseña": usuario['data'][5],
-        "fecha_nac": usuario['data'][6],
-        "correo": usuario['data'][4],
-        "telefono": usuario['data'][7],
-        "genero": usuario['data'][8],
-        "rol_id": usuario['data'][9]
-    }
-
-    cursor.connection.commit()
     cursor.connection.close()
     return {
-        "perfil": perfil
+        "perfil": usuario['data']
     }, 200
     
 def listar_pagos_usuario_service(usuario_id: int):
@@ -166,7 +159,6 @@ def listar_pagos_usuario_service(usuario_id: int):
             "error": "Usuario no encontrado."
         }, 401
     
-    ## aca hay un tema y es que me tira que no hay pagos para usuarios que si los tienen
     pagos = consultar_pagos_de_usuario(usuario_id, cursor)
 
     if pagos['status'] == 'error':
@@ -181,7 +173,6 @@ def listar_pagos_usuario_service(usuario_id: int):
             "error": "No se encontraron pagos para este usuario."
         }, 402
 
-    cursor.connection.commit()
     cursor.connection.close()
     return pagos['data'], 200
     
@@ -288,23 +279,32 @@ def modificar_contraseña_service(
     """Service que permite modificar la contraseña de un usuario,
         habiendo realizado previamente una comprobación de las entradas."""
 
+    """
     def _validar_input_contraseña(contraseña: str) -> bool:
-        """Se devuelve si la nueva contraseña cumple con las validaciones."""
+        ""Se devuelve si la nueva contraseña cumple con las validaciones.""
         if len(contraseña) < 8:
             return False
-        if contraseña[0].isdigit():
+        if contraseña[0].isalnum(): # se permiten caracteres alfanumericos
             return False
         return True
 
-    # Validaciones de contraseña
-
+    # Validaciones de contraseña    
     if not _validar_input_contraseña(contraseña_nueva):
         return {
             "error": "La nueva contraseña no cumple con las validaciones."
         }, 400
+    """   
+     
+    errores = checkear_inputs(
+        [
+            {"name": "contraseña", "value": contraseña_nueva}
+        ]
+    )
+    
+    if len(errores) > 0:
+        return errores, 400
 
     # Comprobar que el usuario existe
-
     cursor = conectarse_db()
     
     usuario = consultar_usuario_por_id(usuario_id, cursor)
@@ -323,7 +323,7 @@ def modificar_contraseña_service(
 
     # Comprobar que la contraseña actual coincide
 
-    if usuario['data'][5] != contraseña_actual:
+    if usuario['data']["contraseña"] != contraseña_actual:
         cursor.connection.close()
         return {
             "error": "La contraseña actual es incorrecta."
@@ -355,4 +355,228 @@ def modificar_contraseña_service(
     cursor.connection.close()
     return {
         "mensaje": "Contraseña modificada exitosamente."
+    }, 200
+
+def restablecer_contraseña_service(correo: str):
+    """Service que permite restablecer la contraseña de un usuario,
+        habiendo realizado previamente una comprobación de las entradas."""
+
+    if not correo:
+        return {
+            "error": "El correo electrónico es requerido para restablecer la contraseña."
+        }, 400
+
+    cursor = conectarse_db()
+    
+    usuario = consultar_usuario_por_correo(correo, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 401
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado con el correo proporcionado."
+        }, 402
+
+    api_key = os.getenv("RESEND_API_KEY")
+    resend.api_key = api_key
+    
+    front_url = os.getenv("FRONT_URL")
+    link = f"{front_url}/ConfirmarNuevaContrasena?correo={correo}"
+    
+    respuesta = resend.Emails.send({
+        "from": "onboarding@resend.dev",
+        "to": correo,
+        "subject": "Recuperación de contraseña",
+        "html": f"""
+            <h2>Recuperar contraseña</h2>
+
+            <p>Hacé click acá:</p>
+
+            <a href="{link}">
+                Restablecer contraseña
+            </a>
+        """
+    })
+
+    cursor.connection.close()
+    return {
+        "mensaje": "Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña."
+    }, 200
+    
+# checkeo de escenario 4 de olvidar contraseña se haria en el front no?
+# checkeo de que las nuevas contraseñas sean iguales 
+def confirmar_nueva_contrasena_service(nueva_contraseña: str, correo: str):
+    """Service que permite confirmar la nueva contraseña de un usuario después de haber solicitado el restablecimiento,
+        habiendo realizado previamente una comprobación de las entradas."""
+
+    if not nueva_contraseña:
+        return {
+            "error": "La nueva contraseña es requerida para confirmar el restablecimiento de la contraseña."
+        }, 400
+        
+    errores = checkear_inputs(
+        [
+            {"name": "contraseña", "value": nueva_contraseña}
+        ]
+    )
+    
+    if len(errores) > 0:
+        return errores, 400
+
+    cursor = conectarse_db()
+    
+    usuario = consultar_usuario_por_correo(correo, cursor)
+    
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 401
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado con el correo proporcionado."
+        }, 402
+        
+    if usuario['data']['contraseña'] == nueva_contraseña:
+        cursor.connection.close()
+        return {
+            "error": "La nueva contraseña no puede ser igual a la contraseña actual."
+        }, 403
+
+    res = modificar_contraseña(
+        usuario['data']['id'],
+        nueva_contraseña,
+        cursor
+    )
+    
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
+
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "mensaje": "Nueva contraseña confirmada exitosamente."
+    }, 200
+    
+def listar_usuarios_service():
+    cursor = conectarse_db()
+    
+    respuesta = listar_usuarios(cursor)
+    
+    cursor.connection.close()
+    
+    if respuesta['status'] == 'error':
+        return {
+            "error": respuesta['message']
+        }, 500
+        
+    if respuesta['status'] == 'success' and respuesta['data'] is None:
+        return {
+            "error": "No se encontraron usuarios."
+        }, 404
+        
+    return respuesta['data'], 200
+
+def obtener_clases_usuario_service(id_usuario: int):
+    cursor = conectarse_db()
+
+    print("id usuario: ", id_usuario)
+    respuesta = consultar_usuario_por_id(id_usuario, cursor)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": respuesta['message']
+        }, 400
+
+    if respuesta['status'] == 'success' and not respuesta['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado."
+        }, 401
+
+    respuesta = obtener_clases_usuario(id_usuario, cursor)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": respuesta['message']
+        }, 500
+
+    if respuesta['status'] == 'success' and not respuesta['data']:
+        cursor.connection.close()
+        return {
+            "error": "No se encontraron clases para este usuario."
+        }, 402
+
+    cursor.connection.close()
+    return respuesta['data'], 200
+
+def inscribir_usuario_en_clase_service(usuario_id: int, clase_id: int):
+    cursor = conectarse_db()
+
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 500
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado."
+        }, 404
+        
+    clase = consultar_clase_por_id(clase_id, cursor)
+    
+    if clase['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": clase['message']
+        }, 500
+        
+    if clase['status'] == 'success' and not clase['data']:
+        cursor.connection.close()
+        return {
+            "error": "Clase no encontrada."
+        }, 404
+        
+    res = consultar_usuario_inscribir_clase_por_usuario_id(usuario_id, clase_id, cursor)
+    
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
+        
+    if res['status'] == 'success' and res['data'] is not None:
+        cursor.connection.close()
+        return {
+            "error": "El usuario ya se encuentra inscrito en esta clase."
+        }, 400
+
+    res = insertar_usuario_inscribir_clase(usuario_id, clase_id, cursor)
+
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
+
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "mensaje": "Usuario inscrito en la clase exitosamente."
     }, 200
