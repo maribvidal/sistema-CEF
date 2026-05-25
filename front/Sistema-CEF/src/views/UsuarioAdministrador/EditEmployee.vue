@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-
+import { EmployeesService }  from '@/services/EmployeesService' // Asegúrate de tener este servicio para manejar las llamadas a la API
 const props = defineProps({
   empleado: {
     type: Object,
@@ -71,9 +71,9 @@ const updateEmployee = async () => {
   loading.value = true
   try {
     // Cuando integrés tu API puedes llamar a:
-    // await EmployeesService.updateEmployee(employee.value.dni, employee.value)
+    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value)
     
-    alert('Empleado actualizado exitosamente (Simulación exitosa).')
+    alert('Empleado actualizado exitosamente')
     emit('updated')
     emit('close')
   } catch (error) {

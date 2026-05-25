@@ -331,10 +331,24 @@ const modificarEmpleado = (empleado) => {
   dialogEditarEmpleado.value = true
 }
 
-const desactivarEmpleado = (empleado) => {
-  if (confirm(`¿Estás seguro de que deseas desactivar la cuenta de ${empleado.nombre}?`)) {
-    console.log('Desactivando empleado DNI:', empleado.dni)
-    // Llamada al servicio para cambiar estado a 'Inactivo'
+const desactivarEmpleado = async (empleado) => {
+  if (!confirm(`¿Estás seguro de que deseas desactivar la cuenta de ${empleado.nombre}?`)) {
+    return
+  }
+
+  const dni = empleado?.dni ?? empleado?.raw?.dni
+  if (!dni) {
+    alert('No se pudo identificar el DNI del empleado')
+    return
+  }
+
+  try {
+    await EmployeesService.deactivateEmployee(dni)
+    await cargarEmpleados()
+    alert('Empleado desactivado exitosamente')
+  } catch (error) {
+    console.error('Error al desactivar empleado:', error)
+    alert('No se pudo desactivar el empleado')
   }
 }
 

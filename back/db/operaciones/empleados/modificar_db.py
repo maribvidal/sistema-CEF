@@ -18,7 +18,7 @@ def modificar_empleado(
         Devuelve un diccionario con el resultado de la operación."""
 
     query_verificacion = f"""
-        SELECT rol_id
+        SELECT nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id
         FROM Usuario
         WHERE dni = {empleado_dni}
     """
@@ -35,17 +35,27 @@ def modificar_empleado(
             "status": "error",
             "message": "El usuario no es un empleado"
         }
+
+    datos_actuales = usuario["data"]
+    nombre_final = nombre if nombre is not None else datos_actuales["nombre"]
+    apellido_final = apellido if apellido is not None else datos_actuales["apellido"]
+    correo_final = correo if correo is not None else datos_actuales["correo"]
+    contraseña_final = contraseña if contraseña is not None else datos_actuales["contraseña"]
+    fecha_nac_final = fecha_nac if fecha_nac is not None else datos_actuales["fecha_nac"]
+    telefono_final = telefono if telefono is not None else datos_actuales["telefono"]
+    genero_final = genero if genero is not None else datos_actuales["genero"]
+    rol_id_final = rol_id if rol_id is not None else datos_actuales["rol_id"]
     
     query_update = f"""
         UPDATE Usuario
-        SET nombre = '{nombre}',
-            apellido = '{apellido}',
-            correo = '{correo}',
-            contraseña = '{contraseña}',
-            fecha_nac = '{fecha_nac}',
-            telefono = '{telefono}',
-            genero = '{genero}',
-            rol_id = {rol_id}
+        SET nombre = '{nombre_final}',
+            apellido = '{apellido_final}',
+            correo = '{correo_final}',
+            contraseña = '{contraseña_final}',
+            fecha_nac = '{fecha_nac_final}',
+            telefono = '{telefono_final}',
+            genero = '{genero_final}',
+            rol_id = {rol_id_final}
         WHERE dni = {empleado_dni}
     """
 
