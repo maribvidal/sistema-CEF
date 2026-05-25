@@ -22,13 +22,13 @@ def consultar_pagos_de_usuario(usuario_id: int, cursor) -> dict:
        y devuelve una lista de tuplas."""
     query = f"""
         SELECT
-            Pago.id,
-            Pago.monto,
-            Clase.id AS clase_id
-        FROM Pago
-        INNER JOIN Pago_Pagar_Clase ON Pago.id = Pago_Pagar_Clase.pago_id
-        INNER JOIN Clase ON Pago_Pagar_Clase.clase_id = Clase.id
-        WHERE Pago.usuario_id = {usuario_id};
+            p.id,
+            p.monto,
+            c.id
+        FROM Pago p
+        INNER JOIN Pago_Pagar_Clase ppc ON p.id = ppc.pago_id
+        INNER JOIN Clase c ON ppc.clase_id = c.id
+        WHERE p.usuario_id = {usuario_id};
     """
     return ejecutar_fetchall(query, cursor)
 

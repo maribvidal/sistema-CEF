@@ -1,4 +1,4 @@
-from back.db.operaciones.clases.consultar_db import consultar_clase_por_id
+from db.operaciones.clases.consultar_db import consultar_clase_por_id
 from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id
 from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase
 from db.operaciones.conectar_db import conectarse_db
