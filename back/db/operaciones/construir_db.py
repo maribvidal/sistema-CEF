@@ -65,6 +65,7 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_clase(cursor)    # necesita Actividad y Profesor
     construir_tabla_pago(cursor)     # necesita Usuario
     construir_tabla_mensualidad(cursor) # necesita Usuario
+    construir_tabla_imagenes(cursor)
 
     # Construir tablas para las relaciones
     construir_tabla_rol_tener_permiso(cursor)
@@ -93,6 +94,13 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
                             telefono    VARCHAR({LONG_TEL}),
                             genero      CHAR(1) CHECK(length(genero) <= 1),
                             rol_id      INTEGER NOT NULL
+                        )""")
+
+def construir_tabla_imagenes(cursor: sqlite.Cursor):
+    """Construye la tabla Imagenes"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Usuario (
+                            id          INTEGER PRIMARY KEY,
+                            contenido   BLOB NOT NULL
                         )""")
 
 def construir_tabla_permiso(cursor: sqlite.Cursor):
@@ -128,7 +136,7 @@ def construir_tabla_actividad(cursor: sqlite.Cursor):
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Actividad (
                             id              INTEGER PRIMARY KEY,
                             nombre          VARCHAR({LONG_NOM}),
-                            precio_mensual  REAL
+                            precio_mensual  REAL NOT NULL
                         )""")
 
 def construir_tabla_profesor(cursor: sqlite.Cursor):
@@ -206,7 +214,7 @@ def construir_tabla_usuario_inscribir_clase(cursor: sqlite.Cursor):
                             id         INTEGER PRIMARY KEY,
                             usuario_id INTEGER NOT NULL,
                             clase_id   INTEGER NOT NULL,
-                            fecha      DATE,
+                            fecha      DATE NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
