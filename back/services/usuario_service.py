@@ -8,7 +8,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.imagenes.insertar_db import insertar_imagen
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario
 from db.operaciones.usuarios.insertar_db import insertar_usuario
-from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña
+from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -585,14 +585,52 @@ def subir_avatar_usuario_service(usuario_id, avatar):
         cursor.connection.close()
         return {
             "error": usuario['message']
-        }, 500
+        }, 401
 
     if usuario['status'] == 'success' and not usuario['data']:
         cursor.connection.close()
         return {
             "error": "Usuario no encontrado."
-        }, 404
+        }, 402
 
     # Insertar la imagen en la base de datos
 
     res = insertar_imagen(avatar, cursor)
+
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 403
+
+    if res['status'] == 'success' and res['data'] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se pudo insertar la imagen."
+        }, 404
+
+    cursor.connection.commit()
+    imagen_id = res['data']
+
+    # Asociar la imagen al usuario
+
+    res2 = modificar_avatar(usuario_id, imagen_id, cursor)
+
+    if res2['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res2['message']
+        }, 500
+    
+    if res2['status'] == 'success' and res2['data'] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se pudo asociar la imagen al usuario."
+        }, 405
+    
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return {
+        "mensaje": "Avatar subido y asociado al usuario exitosamente."
+    }, 200
