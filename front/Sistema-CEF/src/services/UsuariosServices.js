@@ -44,8 +44,8 @@ const AuthApiService = {
 
   // GetAvatar: mapea Usuarios/ObtenerAvatar → No implementado en backend
   getAvatar: async (userId) => {
-    // El backend no tiene endpoint de avatar, retornar null
-    return { data: { base64: null }, status: 200 }
+    const response = await apiClient.get(`/usuarios/${userId}/avatar`)
+    return response.data
   },
 
   // UpdateProfile: mapea Usuarios/EditarUsuario → /usuarios/<id>/perfil PUT
@@ -60,15 +60,20 @@ const AuthApiService = {
     }),
 
   // UploadAvatar: mapea Usuarios/SubirAvatar → No implementado en backend
-  uploadAvatar: async (userId, avatarData) => {
-    console.warn('uploadAvatar no implementado en backend Python')
-    return { data: { mensaje: 'No implementado' }, status: 200 }
+  uploadAvatar: (userId, avatarData) => {
+    return apiClient.post(`/usuarios/${userId}/avatar`, {
+      avatar: avatarData.avatar || avatarData.base64 || avatarData
+    })
+
   },
 
   // ChangePassword: mapea Usuarios/CambiarContrasena → No implementado en backend
   changePass: async (userId, passwords) => {
-    console.warn('changePassword no implementado en backend Python')
-    throw new Error('Funcionalidad no disponible en este momento')
+    apiClient.put(`/usuarios/${userId}/contraseña`, {
+      contraseña_actual: passwords.currentPassword,
+      nueva_contraseña: passwords.newPassword
+    }
+  )
   },
 
   // RestorePassword: mapea Usuarios/RestablecerContrasena → No implementado en backend
@@ -161,8 +166,9 @@ const fetchAndFormatProfileData = async (userId) => {
   const profileData = profileResponse.data.perfil || profileResponse.data
 
   const avatarResponse = await AuthApiService.getAvatar(userId).catch(() => null)
-  const avatarUrl = avatarResponse?.data?.base64
-    ? createImageSrcFromBase64(avatarResponse.data.base64)
+  const avatarBase64 = avatarResponse?.avatar || avatarResponse?.data?.avatar || avatarResponse?.data?.base64
+  const avatarUrl = avatarBase64
+    ? createImageSrcFromBase64(avatarBase64)
     : null
 
   return { ...profileData, avatarUrl }

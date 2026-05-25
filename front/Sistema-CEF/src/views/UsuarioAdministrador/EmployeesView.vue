@@ -42,21 +42,21 @@
 
           <v-data-table
             :headers="headers"
-            :items="empleados.concat(profesores)"
+            :items="empleados.concat(profesores).concat(empleadosDesactivados)"
             :search="search"
             :loading="loading"
             loading-text="Cargando personal..."
             no-data-text="No se encontraron empleados"
           >
-            <template v-slot:item.rol_id="{ item }">
+            <template v-slot:[`item.rol_id`]='{ item }'>
               <v-chip :color="getRoleColor(item.rol_id)" size="small" class="font-weight-bold">
                 {{ getRoleName(item.rol_id) }}
               </v-chip>
             </template>
 
-            <template v-slot:item.acciones="{ item }">
+            <template v-slot:[`item.acciones`]='{ item }'>
               <div class="d-flex justify-end">
-                <v-btn
+                <v-btn v-if="!isDisabled"
                   icon="mdi-pencil"
                   variant="text"
                   color="blue-darken-1"
@@ -64,7 +64,7 @@
                   @click="modificarEmpleado(item)"
                   title="Modificar Datos"
                 ></v-btn>
-                <v-btn
+                <v-btn v-if="!isDisabled"
                   icon="mdi-shield-key"
                   variant="text"
                   color="orange-darken-2"
@@ -72,7 +72,7 @@
                   @click="abrirEditorRol(item)"
                   title="Cambiar Permisos/Rol"
                 ></v-btn>
-                <v-btn
+                <v-btn v-if="!isDiabled"
                   icon="mdi-account-off"
                   variant="text"
                   color="grey-darken-1"
@@ -80,13 +80,21 @@
                   @click="desactivarEmpleado(item)"
                   title="Desactivar"
                 ></v-btn>
-                <v-btn
+                <v-btn v-if="!isDisabled"
                   icon="mdi-delete"
                   variant="text"
                   color="red-darken-1"
                   size="small"
                   @click="eliminarEmpleado(item)"
                   title="Eliminar"
+                ></v-btn>
+                <v-btn v-if="isDisabled"
+                  icon="mdi-account-off-outline"
+                  variant="text"
+                  color="green-darken-1"
+                  size="small"
+                  @click="activarEmpleado(item)"
+                  title="Reactivar Empleado"
                 ></v-btn>
               </div>
             </template>
@@ -193,12 +201,14 @@ import EditEmployee from './EditEmployee.vue'
 
 const empleados = ref([])
 const profesores = ref([])
+const empleadosDesactivados = ref([])
 const search = ref('')
 const loading = ref(false)
 const dialog = ref(false)
 const dialogEditarEmpleado = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
+const isDisabled = ref(false) // Para manejar el estado de desactivación de empleados
 
 // Estados para creación de personal
 const dialogProfesor = ref(false)
@@ -227,6 +237,7 @@ const headers = [
 ]
 
 const roles = [
+  { id: 0, label: 'Desactivado' },
   { id: 1, label: 'Administrador' },
   { id: 2, label: 'Recepcionista' },
   { id: 3, label: 'Usuario' }
@@ -234,6 +245,7 @@ const roles = [
 
 const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Profesor'
 const getRoleColor = (id) => {
+  if (id === 0) return 'grey-darken-1' // Empleado desactivado
   if (id === 1) return 'red-darken-1'
   if (id === 2) return 'blue-darken-1'
   return 'green-darken-1' // Color para Profesor
@@ -265,6 +277,23 @@ const cargarEmpleados = async () => {
     empleados.value = [hardcoded] // Mostramos al menos el hardcoded si la API falla
   } finally {
     loading.value = false
+  }
+}
+
+const cargarEmpleadosDesactivados = async () => {
+  try {
+    const data = await EmployeesService.getDisabledEmployees()
+    const fetched = (data || []).map(e => ({
+      dni: e.dni ?? e[1],
+      nombre: e.nombre ?? e[2],
+      apellido: e.apellido ?? e[3],
+      correo: e.correo ?? e[5],
+      rol_id: e.rol_id ?? e[4]
+    }))
+    empleadosDesactivados.value = fetched
+  } catch (error) {
+    console.error('Error cargando empleados desactivados:', error)
+    empleadosDesactivados.value = []
   }
 }
 
@@ -352,6 +381,8 @@ const desactivarEmpleado = async (empleado) => {
   }
 }
 
+
+
 const eliminarEmpleado = (empleado) => {
   if (confirm(`¿ELIMINAR PERMANENTEMENTE a ${empleado.nombre} ${empleado.apellido}?`)) {
     console.log('Eliminando empleado DNI:', empleado.dni)
@@ -378,6 +409,7 @@ const confirmarCambioRol = async () => {
 onMounted(() => {
   cargarEmpleados()
   cargarProfesores()
+  cargarEmpleadosDesactivados()
 })
 </script>
 
