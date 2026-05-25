@@ -11,6 +11,7 @@ from services.usuario_service import (
     confirmar_nueva_contrasena_service,
     obtener_clases_usuario_service,
     inscribir_usuario_en_clase_service
+    subir_avatar_usuario_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -171,3 +172,19 @@ def inscribir_clase_usuario(usuario_id, clase_id):
     return jsonify(respuesta), status
 
 # falta un delete
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/avatar", methods=["POST"])
+def subir_avatar_usuario(usuario_id):
+    """Este endpoint permite subirle un avatar a un usuario dado.
+        Recibe el ID del usuario a través de la URL, y el archivo de imagen
+        por medio de parámetro en el JSON. Luego, inserta la imágen en la
+        base de datos, y al final asocia el ID de la imagen al usuario."""
+
+    # Recibimos la imagen como un string codificado en base64
+    # por medio de un parámetro en el JSON
+    data = request.get_json()
+    avatar = data.get("avatar")
+
+    respuesta, status = subir_avatar_usuario_service(usuario_id, avatar)
+
+    return jsonify(respuesta), status
