@@ -2,10 +2,13 @@ from db.operaciones.clases.consultar_db import consultar_clase_por_id
 from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id
 from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.usuarios import *
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.imagenes.insertar_db import insertar_imagen
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario
+from db.operaciones.usuarios.insertar_db import insertar_usuario
+from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -224,27 +227,6 @@ def editar_perfil_usuario_service(
     if len(errores) > 0:
         cursor.connection.close()
         return errores, 403
-
-    """
-    usuario_con_correo = consultar_usuario_por_correo(correo, cursor)
-
-    if usuario_con_correo['status'] == 'error':
-        cursor.connection.close()
-        return usuario_con_correo, 404
-    
-    if usuario_con_correo['status'] == 'success' and usuario_con_correo['data'] and usuario_con_correo['data'][0] != usuario_id:
-         cursor.connection.close()
-         return {
-            "error": "El correo electrónico ya se encuentra registrado por otro usuario"
-        }, 405
-        
-    if usuario_con_correo['data'] and usuario_con_correo['data'][6] == correo and usuario_con_correo['data'][3] == telefono:
-        cursor.connection.close()
-        return {
-            "error": "No se proporcionó ningún dato nuevo para actualizar"
-        }, 406
-    ¿Un usuario no puede tener el correo de otro usuario?
-    """
     
     res = modificar_perfil_usuario(
         cursor,
@@ -580,3 +562,37 @@ def inscribir_usuario_en_clase_service(usuario_id: int, clase_id: int):
     return {
         "mensaje": "Usuario inscrito en la clase exitosamente."
     }, 200
+
+def subir_avatar_usuario_service(usuario_id, avatar):
+    """Service que permite subir el avatar de un usuario."""
+
+    # Validar si el parámetro recibido no está vacío
+
+    if not avatar:
+        return {
+            "error": "El parámetro 'avatar' está vacío."
+        }, 400
+
+    # TODO: ¿Valido que el parámetro sea una imagen codificada?
+
+    cursor = conectarse_db()
+
+    # Validar si el usuario existe
+
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 500
+
+    if usuario['status'] == 'success' and not usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado."
+        }, 404
+
+    # Insertar la imagen en la base de datos
+
+    res = insertar_imagen(avatar, cursor)
