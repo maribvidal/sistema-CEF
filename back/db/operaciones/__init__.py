@@ -18,3 +18,4 @@ from .usuarios import *
 from .construir_db import *
 from .conectar_db import *
 from .seed_db import *
+from .imagenes import *
