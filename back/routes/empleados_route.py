@@ -15,7 +15,7 @@ def listar_empleados():
     return jsonify(respuesta), status
 
 
-@empleados_bp.route("/empleados/<int:empleado_dni>", methods=["POST"])
+@empleados_bp.route("/empleados/<int:empleado_dni>", methods=["PUT"])
 def modificar_empleado(empleado_dni):
     """Endpoint para modificar un empleado específico. 
         Recibe el ID del empleado a modificar y los nuevos datos en formato JSON."""
@@ -60,7 +60,7 @@ def borrar_empleado(empleado_dni):
     return jsonify(respuesta), status
 
 
-@empleados_bp.route("/empleados/<int:empleado_dni>", methods=["PUT"])
+@empleados_bp.route("/empleados/<int:empleado_dni>/desactivar", methods=["PATCH"])
 def desactivar_empleado(empleado_dni):
     respuesta, status = desactivar_empleado_service(empleado_dni)
     return jsonify(respuesta), status
