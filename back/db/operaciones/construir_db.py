@@ -95,7 +95,7 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
                             genero      CHAR(1) CHECK(length(genero) <= 1),
                             rol_id      INTEGER NOT NULL,
                             imagen_id   INTEGER,
-                            FOREIGN KEY imagen_id REFERENCES Imagen(id)
+                            FOREIGN KEY (imagen_id) REFERENCES Imagen(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
