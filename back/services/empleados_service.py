@@ -3,6 +3,7 @@ from db.operaciones.empleados.consultar_db import listar_empleados
 from db.operaciones.empleados.modificar_db import modificar_empleado
 from db.operaciones.empleados.modificar_db import borrar_empleado
 from db.operaciones.empleados.modificar_db import desactivar_empleado
+from db.operaciones.empleados.consultar_db import listar_empleados_desactivados
 
 def listar_empleados_service():
     print("listar_empleados_service: Iniciando servicio para listar empleados")
@@ -95,3 +96,23 @@ def desactivar_empleado_service(empleado_dni: int):
 #            "error": "No se encontraron empleados"
 #        }, 404
    return respuesta['data'], 200
+
+def listar_empleados_desactivados_service():
+    print("listar_empleados_desactivados_service: Iniciando servicio para listar empleados desactivados")
+    """Service que lista los empleados desactivados"""
+    cursor = conectarse_db()
+    respuesta = listar_empleados_desactivados(cursor)
+    print("empleados desactivados: ", respuesta)
+    cursor.connection.close()
+
+    if respuesta['status'] == 'error':
+        return {
+            "error": "Error al obtener empleados desactivados",
+            "message": respuesta['message']
+        }, 500
+    elif respuesta['status'] == 'success' and not respuesta['data']:
+        return {
+            "error": "No se encontraron empleados desactivados"
+        }, 404
+
+    return respuesta['data'], 200
