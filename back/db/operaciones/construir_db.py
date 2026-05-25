@@ -98,7 +98,7 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
 
 def construir_tabla_imagenes(cursor: sqlite.Cursor):
     """Construye la tabla Imagenes"""
-    cursor.execute("""CREATE TABLE IF NOT EXISTS Usuario (
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Imagen (
                             id          INTEGER PRIMARY KEY,
                             contenido   BLOB NOT NULL
                         )""")
