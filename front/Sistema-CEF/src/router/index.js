@@ -50,6 +50,11 @@ const router = createRouter({
       name: 'cambiarContraseña',
       component: () => import('../views/UsuarioCliente/ChangePass.vue'),
       props: true,
+    },
+    {
+      path: '/cambiarContraseñaOlvidada/:id',
+      name: 'cambiarContraeñaOlvidada',
+      component: () => import('../views/UsuarioVisitante/ChangeForgottenPass.vue')
     }
   ],
 })

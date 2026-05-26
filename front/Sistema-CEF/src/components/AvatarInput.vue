@@ -213,4 +213,10 @@ const cancelCrop = () => {
   color: white;
 
 }
+
+.btn.change-avatar-btn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  padding-left: 20px;
+}
 </style>
