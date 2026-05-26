@@ -3,7 +3,7 @@ from services.permisos_service import cambiar_permiso_service
 
 permisos_bp = Blueprint('permisos', __name__)
 
-@permisos_bp.route('/usuario/<int:usuario_id>/permisos', methods=['POST'])
+@permisos_bp.route('/usuarios/<int:usuario_id>/permisos', methods=['POST'])
 def cambiar_permiso(usuario_id):
     """Endpoint para cambiar el permiso de un usuario. 
         Recibe el DNI del usuario y el nuevo permiso en formato JSON."""
