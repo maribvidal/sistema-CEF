@@ -77,6 +77,7 @@ Usuarios
 | /usuarios/(id_usuario)/contrasena | PUT | contraseña_actual, contraseña_nueva | 400: La nueva contraseña no cumple con las validaciones básicas de longitud o formato <br> 401: Error interno de consulta <br> 402: Usuario no encontrado <br> 403: La contraseña actual es incorrecta <br> 404: La nueva contraseña no puede ser igual a la contraseña actual <br> 500: Error interno al modificar el registro <br> 200: Contraseña modificada exitosamente. |
 | /usuarios/(id_usuario)/avatar | POST | avatar | 400: El parámetro 'avatar' está vacío <br> 401: Error interno de consulta de usuario <br> 402: Usuario no encontrado <br> 403: Error de servidor al intentar insertar la imagen <br> 404: No se pudo insertar la imagen <br> 405: Error al intentar asociar la imagen al usuario <br> 500: Error interno de actualización <br> 200: Avatar subido y asociado al usuario exitosamente. |
 | /usuarios/(id_usuario)/avatar | GET | - | 400: Error interno de consulta de usuario <br> 401: Usuario no encontrado <br> 402: Error de servidor al consultar la imagen <br> 403: El usuario no tiene un avatar asociado <br> 200: Se devuelve el string/data del avatar del usuario. |
+| /usuarios/(id_usuario)/permisos | POST | rol_id | 400: Error interno de consulta de usuario <br> 401: Usuario no encontrado <br> 500: Error al intentar modificar permiso <br> 200: Permiso modificado correctamente. |
 
 ## Modelo lógico de la Base de Datos
 
