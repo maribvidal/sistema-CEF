@@ -160,6 +160,7 @@ def construir_tabla_clase(cursor: sqlite.Cursor):
                             estado       VARCHAR({LONG_NOM}),
                             actividad_id INTEGER NOT NULL,
                             profesor_id  INTEGER NOT NULL,
+                            cupo_maximo INTEGER NOT NULL,
                             FOREIGN KEY (actividad_id) REFERENCES Actividad(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
@@ -172,7 +173,8 @@ def construir_tabla_sala(cursor: sqlite.Cursor):
     """Construye la tabla Sala"""
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Sala (
                             id          INTEGER PRIMARY KEY,
-                            nombre      VARCHAR({LONG_NOM})
+                            nombre      VARCHAR({LONG_NOM}),
+                            capacidad  INTEGER NOT NULL
                         )""")
 
 def construir_tabla_clase_ocurrir_sala(cursor: sqlite.Cursor):
