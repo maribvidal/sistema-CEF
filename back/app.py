@@ -22,6 +22,7 @@ app.register_blueprint(salas_bp)
 app.register_blueprint(actividades_bp)
 app.register_blueprint(profesores_bp)
 app.register_blueprint(empleados_bp)
+app.register_blueprint(permisos_bp)
 
 # --- REALIZAR TESTS ---
 cursor = conectarse_db()
