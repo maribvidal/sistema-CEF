@@ -43,6 +43,7 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/services/UsuariosServices.js'
+import { useNotificationStore } from '@/stores/notificationStore.js'
 const router = useRouter()
 const route = useRoute()
 const { changePassword } = useAuth()
@@ -50,6 +51,7 @@ const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
+const notificationStore = useNotificationStore()
 /* 400: La nueva contraseña no cumple con las validaciones básicas de longitud o formato
 401: Error interno de consulta
 402: Usuario no encontrado
@@ -59,7 +61,7 @@ const loading = ref(false)
 200: Contraseña modificada exitosamente. */
 const changePasswordHandler = async () => {
   if (newPassword.value !== confirmPassword.value) {
-    alert('Las nuevas contraseñas no coinciden')
+    notificationStore.showNotification('Las nuevas contraseñas no coinciden', 'danger')
     return
   }
   loading.value = true
@@ -69,34 +71,34 @@ const changePasswordHandler = async () => {
       newPassword: newPassword.value
     })
     if(response.status === 400){
-      alert('La nueva contraseña no cumple con las validaciones básicas de longitud o formato')
+      notificationStore.showNotification('La nueva contraseña no cumple con las validaciones básicas de longitud o formato', 'danger')
       return
     }
     if(response.status === 401){
-      alert('Error interno de consulta')
+      notificationStore.showNotification('Error interno de consulta', 'danger')
       return
     }
     if(response.status === 402){
-      alert('Usuario no encontrado')
+      notificationStore.showNotification('Usuario no encontrado', 'danger')
       return
     }
     if(response.status === 403){
-      alert('La contraseña actual es incorrecta')
+      notificationStore.showNotification('La contraseña actual es incorrecta', 'danger')
       return
     }
     if(response.status === 404){
-      alert('La nueva contraseña no puede ser igual a la contraseña actual')
+      notificationStore.showNotification('La nueva contraseña no puede ser igual a la contraseña actual', 'danger')
       return
     }
     if(response.status === 500){
-      alert('Error interno al modificar el registro')
+      notificationStore.showNotification('Error interno al modificar el registro', 'danger')
       return
     }
-    alert('Contraseña cambiada exitosamente')
+    notificationStore.showNotification('Contraseña cambiada exitosamente', 'success')
     router.push(`/perfil/${route.params.id}`)
   } catch (error) {
     console.error('Error al cambiar contraseña:', error)
-    alert('Error al cambiar contraseña: ' + error.message)
+    notificationStore.showNotification('Error al cambiar contraseña: ' + error.message, 'danger')
   } finally {
     loading.value = false
   }

@@ -52,6 +52,7 @@ import { mdiAccountPlus } from '@mdi/js'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import DateFormatterService from '@/services/DateFormatterService.js'
+import { useNotificationStore } from '@/stores/notificationStore.js'
 
 const router = useRouter()
 const name = ref('')
@@ -64,6 +65,7 @@ const age = ref('')
 const cellphone = ref('')
 const gender = ref('')
 const errorMessage = ref('')
+const notificationStore = useNotificationStore()
 
 const register = async () => {
   errorMessage.value = ''
@@ -104,6 +106,7 @@ const register = async () => {
     }
 
     // Si el registro es exitoso, redirigir a la página de inicio de sesión
+	notificationStore.showNotification('Usuario registrado con éxito.', 'success')
     router.push({ name: 'inicioSesion' })
   } catch (error) {
     console.error('Error en el registro:', error)

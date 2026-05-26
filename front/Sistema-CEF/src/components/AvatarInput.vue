@@ -3,7 +3,9 @@
 import { ref } from 'vue'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
+import { useNotificationStore } from '@/stores/notificationStore.js'
 
+const notificationStore = useNotificationStore()
 
 const props = defineProps({
   currentAvatar: {
@@ -28,11 +30,11 @@ const handleFileChange = (event) => {
   if (file) {
     // Validate file type if needed
     if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      alert('El archivo es demasiado grande. Por favor selecciona una imagen menor a 5MB.')
+      notificationStore.showNotification('El archivo es demasiado grande. Por favor selecciona una imagen menor a 5MB.', 'warning')
       return
     }
     if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona un archivo de imagen.')
+      notificationStore.showNotification('Por favor selecciona un archivo de imagen.', 'warning')
       return
     }
 

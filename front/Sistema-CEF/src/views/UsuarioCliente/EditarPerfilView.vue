@@ -32,11 +32,13 @@ import DateFormatterService from '@/services/DateFormatterService.js'
 import AvatarInput from '@/components/AvatarInput.vue'
 // 1. Importamos nuestra función principal unificada
 import { getValidImageSrc } from '@/services/ImageFormatterService.js'
+import { useNotificationStore } from '@/stores/notificationStore.js'
 
 const router = useRouter()
 const route = useRoute()
 const { fetchUserProfileById, userProfile, fetchUserProfile, updateProfile: authUpdateProfile, uploadAvatar: authUploadAvatar } = useAuth()
 const { formatDateForBackend } = DateFormatterService
+const notificationStore = useNotificationStore()
 
 const profileData = ref(null)
 const getProfile = async () => {
@@ -107,8 +109,10 @@ const updateProfile = async () => {
       fecha_nac: userBirthDate.value
     })
     router.push(`/perfil/${routerParamsId.value}`)
+    notificationStore.showNotification('Perfil actualizado con éxito.', 'success')
   } catch (error) {
     console.error('Error updating profile:', error)
+    notificationStore.showNotification(`Error al actualizar el perfil: ${error.message}`, 'error')
   } finally {
     isUpdatingProfile.value = false
   }
@@ -124,7 +128,7 @@ const handleAvatarCropped = async (file) => {
 
 const uploadAvatar = async () => {
   if (!userProfile.value?.id || !newImage.value) {
-    alert('Por favor, selecciona un archivo de imagen.')
+    notificationStore.showNotification('Por favor, selecciona un archivo de imagen.', 'warning')
     return
   }
   isUploadingAvatar.value = true
@@ -163,7 +167,7 @@ const uploadAvatar = async () => {
       router.push('/inicioSesion')
       return
     }
-    console.error('Error al actualizar el avatar:', error)
+    notificationStore.showNotification(`Error al actualizar el avatar: ${error.message}`, 'error')
   } finally {
     isUploadingAvatar.value = false
   }

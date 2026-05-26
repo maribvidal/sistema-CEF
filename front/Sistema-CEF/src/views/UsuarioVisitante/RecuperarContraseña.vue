@@ -23,27 +23,29 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/services/UsuariosServices.js'
+import { useNotificationStore } from '@/stores/notificationStore.js'
 const router = useRouter()
 const route = useRoute()
 const { restorePassword } = useAuth()
 const userEmail = ref('')
+const notificationStore = useNotificationStore()
 
 const restorePassButton = async () => {
     if(userEmail.value === ''){
-        alert('El campo está vacio')
+        notificationStore.showNotification('Por favor, ingresa tu correo electrónico', 'warning')
         return
     }
     try{
         const response = await restorePassword(userEmail.value)
         if(response && response.status === 200){
-            alert('Se han enviado las instrucciones a tu correo electrónico')
+            notificationStore.showNotification('Se han enviado las instrucciones a tu correo electrónico', 'success')
             router.push('/inicioSesion')
         } else {
-            alert('Error al enviar las instrucciones, por favor intenta nuevamente')
+            notificationStore.showNotification('Error al enviar las instrucciones, por favor intenta nuevamente', 'danger')
         }
     }
     catch(error){
-        alert('Error al enviar las instrucciones ',error.message)
+        notificationStore.showNotification('Error al enviar las instrucciones ', 'danger')
     }
 }
 </script>
