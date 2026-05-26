@@ -7,7 +7,7 @@
             <v-card-text class="pt-4">
                 <v-form>
                     <v-text-field label="Correo electrónico" prepend-inner-icon="mdi-email" variant="outlined" />
-                    <v-btn block color="red" size="large" class="mt-2">Enviar instrucciones</v-btn>
+                    <v-btn block color="red" size="large" class="mt-2">Recuperar Contraseña</v-btn>
                 </v-form>
             </v-card-text>
             <v-card-text class="pt-0 mt-2" align="center">

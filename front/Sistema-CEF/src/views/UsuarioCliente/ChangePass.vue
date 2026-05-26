@@ -61,7 +61,13 @@ const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
-
+/* 400: La nueva contraseña no cumple con las validaciones básicas de longitud o formato
+401: Error interno de consulta
+402: Usuario no encontrado
+403: La contraseña actual es incorrecta
+404: La nueva contraseña no puede ser igual a la contraseña actual
+500: Error interno al modificar el registro
+200: Contraseña modificada exitosamente. */
 const changePasswordHandler = async () => {
   if (newPassword.value !== confirmPassword.value) {
     alert('Las nuevas contraseñas no coinciden')
@@ -69,15 +75,39 @@ const changePasswordHandler = async () => {
   }
   loading.value = true
   try {
-    await changePassword(route.params.id, {
+    const response = await changePassword(route.params.id, {
       currentPassword: currentPassword.value,
       newPassword: newPassword.value
     })
+    if(response.status === 400){
+      alert('La nueva contraseña no cumple con las validaciones básicas de longitud o formato')
+      return
+    }
+    if(response.status === 401){
+      alert('Error interno de consulta')
+      return
+    }
+    if(response.status === 402){
+      alert('Usuario no encontrado')
+      return
+    }
+    if(response.status === 403){
+      alert('La contraseña actual es incorrecta')
+      return
+    }
+    if(response.status === 404){
+      alert('La nueva contraseña no puede ser igual a la contraseña actual')
+      return
+    }
+    if(response.status === 500){
+      alert('Error interno al modificar el registro')
+      return
+    }
     alert('Contraseña cambiada exitosamente')
     router.push(`/perfil/${route.params.id}`)
   } catch (error) {
     console.error('Error al cambiar contraseña:', error)
-    alert('Error al cambiar contraseña. Por favor, verifica tu contraseña actual e intenta nuevamente.')
+    alert('Error al cambiar contraseña: ' + error.message)
   } finally {
     loading.value = false
   }

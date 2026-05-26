@@ -69,9 +69,9 @@ const AuthApiService = {
 
   // ChangePassword: mapea Usuarios/CambiarContrasena → No implementado en backend
   changePass: async (userId, passwords) => {
-    apiClient.put(`/usuarios/${userId}/contraseña`, {
+    return apiClient.put(`/usuarios/${userId}/contraseña`, {
       contraseña_actual: passwords.currentPassword,
-      nueva_contraseña: passwords.newPassword
+      contraseña_nueva: passwords.newPassword
     }
   )
   },
@@ -269,7 +269,7 @@ export const useAuth = () => {
   }
 
   const changePassword = async (userId, passwords) => {
-    await AuthApiService.changePass(userId, passwords)
+    return await AuthApiService.changePass(userId, passwords)
   }
 
   const restorePassword = async (token, newPassword) => {

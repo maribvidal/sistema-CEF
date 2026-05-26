@@ -4,7 +4,7 @@
         
 			<v-card-title class="text-h5"><svg-icon type="mdi" :path="mdiAccountPlus" /> Registro</v-card-title>
 			<v-card-subtitle>Introduce tus datos para registrarte</v-card-subtitle>
-
+			<v-card-subtitle>Se debe ingresar todos los campos</v-card-subtitle>
 			<v-card-text class="pt-4">
 				<v-form @submit.prevent="register">
 					<v-text-field v-model="dni" label="DNI" variant="outlined" />
