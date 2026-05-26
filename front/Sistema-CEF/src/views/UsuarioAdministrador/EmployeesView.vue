@@ -265,6 +265,7 @@ const cargarEmpleados = async () => {
   try {
     const data = await EmployeesService.getEmployees()
     const fetched = (data || []).map(e => ({
+      id: e.id ?? e[0],
       dni: e.dni ?? e[1],
       nombre: e.nombre ?? e[2],
       apellido: e.apellido ?? e[3],
@@ -398,7 +399,7 @@ const abrirEditorRol = (empleado) => {
 
 const confirmarCambioRol = async () => {
   try {
-    await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.dni, nuevoRolId.value)
+    await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.id, nuevoRolId.value)
     await cargarEmpleados()
     dialog.value = false
   } catch (error) {

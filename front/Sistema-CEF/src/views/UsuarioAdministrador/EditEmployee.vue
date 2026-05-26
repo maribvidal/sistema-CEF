@@ -71,7 +71,7 @@ const updateEmployee = async () => {
   loading.value = true
   try {
     // Cuando integrés tu API puedes llamar a:
-    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value)
+    await EmployeesService.updateEmployeeInfo(employee.value.id, employee.value)
     
     alert('Empleado actualizado exitosamente')
     emit('updated')
