@@ -1,4 +1,4 @@
-from db.operaciones.exception_handler import ejecutar_fetchone
+from db.operaciones.exception_handler import ejecutar_fetchone, ejecutar_fetchall
 
 def consultar_clase_ocurrir_sala_por_fecha_hora_sala(sala_id, fecha, hora, cursor):
     """Función que consulta la clase_ocurrir_sala por fecha, hora y sala"""

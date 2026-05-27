@@ -1,7 +1,7 @@
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.modificar_db import modificar_clase_ocurrir_sala
-from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_fecha_hora_sala, consultar_clase_ocurrir_sala_por_claseid_fecha_hora
+from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_fecha_hora_sala, consultar_clase_ocurrir_sala_por_claseid_fecha_hora, consultar_usuarios_inscriptos_clase_ocurrir_sala
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
@@ -234,6 +234,8 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
             "error": "Clase no encontrada."
         }, 401
 
+    cupo_clase = int(res_clase['data']['cupo_maximo'])
+
     # Comprobar que exista el clase_ocurrir_sala
 
     res_clase_ocu_sala = consultar_clase_ocurrir_sala_por_claseid_fecha_hora(clase_id, fecha, hora, cursor)
@@ -281,6 +283,20 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         }, 407
 
     # Comprobar el cupo de la clase
+
+    res_inscriptos = consultar_usuarios_inscriptos_clase_ocurrir_sala(id_clase_ocu_sala, cursor)
+
+    if res_inscriptos['status'] == 'error':
+        cursor.connection.close()
+        return res_inscriptos['message'], 408
+
+    cant_inscriptos = len(res_inscriptos['data']) + 1
+
+    if (cant_inscriptos > cupo_clase):
+        cursor.connection.close()
+        return {
+            "error": "La clase no tiene mas cupos disponibles."
+        }, 409
 
     # Insertar el usuario en la clase
 
