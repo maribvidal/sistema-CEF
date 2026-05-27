@@ -16,13 +16,22 @@ def consultar_usuario_por_correo(correo: str, cursor) -> dict:
         """
     return ejecutar_fetchone(query, cursor)
 
-def consultar_usuario_por_id(id: int, cursor) -> dict:
+def consultar_cliente_por_id(id: int, cursor) -> dict:
     """Hace una consulta por un Usuario con un id pasado por parámetro,
         y devuelve una tupla"""
     query = f"""
         SELECT * 
         FROM Usuario
         WHERE id = {id} and rol_id = 3"""
+    return ejecutar_fetchone(query, cursor)
+
+def consultar_usuario_por_id(id: int, cursor) -> dict:
+    """Hace una consulta por un Usuario con un id pasado por parámetro,
+        y devuelve una tupla"""
+    query = f"""
+        SELECT * 
+        FROM Usuario
+        WHERE id = {id}"""
     return ejecutar_fetchone(query, cursor)
 
 def listar_usuarios(cursor) -> dict:
