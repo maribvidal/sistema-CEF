@@ -42,8 +42,6 @@ def registro():
     genero = data.get("genero")
     rol_id = data.get("rol_id")
     
-    print("Datos recibidos para registro - DNI: ", dni, " Nombre: ", nombre, " Apellido: ", apellido, " Contraseña: ", contraseña, " Fecha de Nacimiento: ", fecha_nac, " Correo: ", correo, " Teléfono: ", telefono, " Género: ", genero, " Rol ID: ", rol_id)
-
     respuesta, status = registrar_usuario_service(
         dni,
         nombre,

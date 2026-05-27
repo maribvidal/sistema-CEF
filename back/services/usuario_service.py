@@ -112,27 +112,30 @@ def registrar_usuario_service(
                 "error": "Error al obtener los DNIs de los usuarios."
             }, 404
 
-        if (str(dni) in str(res_dnis['data'])):
-            cursor.connection.close()
-            return {
-                "error": "El DNI ya se encuentra registrado para un usuario."
-            }, 405
+        for res in res_dnis['data']:
+            if (dni == res['dni']):
+                cursor.connection.close()
+                return {
+                    "error": "El DNI ya se encuentra registrado para un usuario."
+                }, 405
     else:
     ## Si se trata de un usuario empleado
         res_dnis = listar_dnis_empleados(cursor)
+        print("res dnis empleados: ", res_dnis)
 
         if res_dnis['status'] == 'error':
             cursor.connection.close()
             return {
                 "error": "Error al obtener los DNIs de los empleados."
             }, 406
+            
+        for res in res_dnis['data']:
+            if (dni == res['dni']):
+                cursor.connection.close()
+                return {
+                    "error": "El DNI ya se encuentra registrado para un empleado."
+                }, 407
 
-        if (str(dni) in str(res_dnis['data'])):
-            cursor.connection.close()
-            return {
-                "error": "El DNI ya se encuentra registrado para un empleado."
-            }, 407
-    
     respuesta = consultar_usuario_por_correo(correo, cursor)
     if respuesta['status'] == 'error':
         cursor.connection.close()

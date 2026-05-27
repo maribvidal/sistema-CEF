@@ -34,7 +34,7 @@ def registrar_usuario():
     correo = data.get("correo")
     telefono = data.get("telefono")
     genero = data.get("genero")
-    rol = data.get("rol")
+    rol_id = data.get("rol_id")
 
     respuesta, status = registrar_usuario_service(
         dni,
@@ -45,7 +45,7 @@ def registrar_usuario():
         correo,
         telefono,
         genero,
-        rol
+        rol_id
     )
 
     return jsonify(respuesta), status
