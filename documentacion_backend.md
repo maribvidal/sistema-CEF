@@ -45,7 +45,7 @@ Empleados
 | /empleados/desactivados | GET | - | 404: No se encontraron empleados desactivados <br> 500: Error al obtener empleados desactivados <br> 200: Se devuelve una lista de los empleados desactivados. |
 | /empleados/(dni) | PUT | nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id | 500: Error al intentar modificar empleado <br> 200: Empleado modificado exitosamente. |
 | /empleados/(dni) | DELETE | - | 404: No se encontraron empleados <br> 500: Error al intentar borrar empleado <br> 200: Empleado borrado exitosamente. |
-| /empleados/(dni)/desactivar | PUT | - | 500: Error al intentar borrar (desactivar) empleado <br> 200: Empleado desactivado exitosamente. |
+| /empleados/(dni)/desactivar | PATCH | - | 500: Error al intentar borrar (desactivar) empleado <br> 200: Empleado desactivado exitosamente. |
 | /empleados/(dni)/rol | PUT | Id del nuevo rol | 400: El id del rol es obligatorio o el empleado ya posee dicho rol <br> 404: El empleado no fue encontrado o el rol es inexistente <br> 200: Rol actualizado correctamente. |
 
 Profesores
@@ -77,6 +77,7 @@ Usuarios
 | /usuarios/(id_usuario)/contrasena | PUT | contraseña_actual, contraseña_nueva | 400: La nueva contraseña no cumple con las validaciones básicas de longitud o formato <br> 401: Error interno de consulta <br> 402: Usuario no encontrado <br> 403: La contraseña actual es incorrecta <br> 404: La nueva contraseña no puede ser igual a la contraseña actual <br> 500: Error interno al modificar el registro <br> 200: Contraseña modificada exitosamente. |
 | /usuarios/(id_usuario)/avatar | POST | avatar | 400: El parámetro 'avatar' está vacío <br> 401: Error interno de consulta de usuario <br> 402: Usuario no encontrado <br> 403: Error de servidor al intentar insertar la imagen <br> 404: No se pudo insertar la imagen <br> 405: Error al intentar asociar la imagen al usuario <br> 500: Error interno de actualización <br> 200: Avatar subido y asociado al usuario exitosamente. |
 | /usuarios/(id_usuario)/avatar | GET | - | 400: Error interno de consulta de usuario <br> 401: Usuario no encontrado <br> 402: Error de servidor al consultar la imagen <br> 403: El usuario no tiene un avatar asociado <br> 200: Se devuelve el string/data del avatar del usuario. |
+| /usuarios/(id_usuario)/permisos | POST | rol_id | 400: Error interno de consulta de usuario <br> 401: Usuario no encontrado <br> 500: Error al intentar modificar permiso <br> 200: Permiso modificado correctamente. |
 
 ## Modelo lógico de la Base de Datos
 

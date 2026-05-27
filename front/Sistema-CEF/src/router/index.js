@@ -44,6 +44,17 @@ const router = createRouter({
       name: 'editarPerfil',
       component: () => import('../views/UsuarioCliente/EditarPerfilView.vue'),
       props: true,
+    },
+    {
+      path: '/cambiarContraseña/:id',
+      name: 'cambiarContraseña',
+      component: () => import('../views/UsuarioCliente/ChangePass.vue'),
+      props: true,
+    },
+    {
+      path: '/cambiarContraseñaOlvidada/:id',
+      name: 'cambiarContraeñaOlvidada',
+      component: () => import('../views/UsuarioVisitante/ChangeForgottenPass.vue')
     }
   ],
 })

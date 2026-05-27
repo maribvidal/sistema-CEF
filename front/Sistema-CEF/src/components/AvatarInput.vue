@@ -1,7 +1,11 @@
+
 <script setup>
 import { ref } from 'vue'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
+import { useNotificationStore } from '@/stores/notificationStore.js'
+
+const notificationStore = useNotificationStore()
 
 const props = defineProps({
   currentAvatar: {
@@ -25,8 +29,12 @@ const handleFileChange = (event) => {
   const file = event.target.files[0]
   if (file) {
     // Validate file type if needed
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      notificationStore.showNotification('El archivo es demasiado grande. Por favor selecciona una imagen menor a 5MB.', 'warning')
+      return
+    }
     if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona un archivo de imagen.')
+      notificationStore.showNotification('Por favor selecciona un archivo de imagen.', 'warning')
       return
     }
 
@@ -63,13 +71,10 @@ const cancelCrop = () => {
 <template>
   <div class="avatar-input-wrapper">
     <!-- Avatar Preview with Click to Upload -->
-    <div class="avatar-preview" @click="triggerFileInput" title="Click para cambiar imagen">
+    <div class="avatar-preview"  title="Click para cambiar imagen">
       <img :src="currentAvatar" alt="Avatar" class="avatar-img" />
-      <div class="avatar-overlay">
-        <span class="camera-icon">📷</span>
-      </div>
     </div>
-
+    <button class="btn btn-secondary change-avatar-btn " @click="triggerFileInput" type="button">Cambiar Avatar</button>
     <input
       type="file"
       ref="fileInput"
@@ -208,5 +213,12 @@ const cancelCrop = () => {
 .btn-secondary {
   background-color: #6c757d;
   color: white;
+
+}
+
+.btn.change-avatar-btn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  padding-left: 20px;
 }
 </style>
