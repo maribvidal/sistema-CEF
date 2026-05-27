@@ -22,7 +22,7 @@ def consultar_usuario_por_id(id: int, cursor) -> dict:
     query = f"""
         SELECT * 
         FROM Usuario
-        WHERE id = {id} and rol_id = 3"""
+        WHERE id = {id}"""
     return ejecutar_fetchone(query, cursor)
 
 def listar_usuarios(cursor) -> dict:
