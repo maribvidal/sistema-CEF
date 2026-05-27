@@ -81,7 +81,7 @@ def registrar_usuario_service(
     if len(errores) > 0:
         return errores, 400
 
-    if _es_un_rol_valido(rol_id):
+    if (not _es_un_rol_valido(rol_id)):
         return {
             "error": "El rol_id pasado no es válido."
         }, 401
@@ -112,7 +112,7 @@ def registrar_usuario_service(
                 "error": "Error al obtener los DNIs de los usuarios."
             }, 404
 
-        if (empleado_dni in str(res_dnis['data'])):
+        if (str(dni) in str(res_dnis['data'])):
             cursor.connection.close()
             return {
                 "error": "El DNI ya se encuentra registrado para un usuario."
@@ -127,7 +127,7 @@ def registrar_usuario_service(
                 "error": "Error al obtener los DNIs de los empleados."
             }, 406
 
-        if (empleado_dni in str(res_dnis['data'])):
+        if (str(dni) in str(res_dnis['data'])):
             cursor.connection.close()
             return {
                 "error": "El DNI ya se encuentra registrado para un empleado."

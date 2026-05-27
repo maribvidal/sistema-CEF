@@ -44,7 +44,7 @@ def cambiar_permiso_service(id, permiso):
                 "error": "Error al obtener los DNIs de los usuarios."
             }, 403
 
-        if (dni_usu in str(res_dnis['data'])):
+        if (str(dni_usu) in str(res_dnis['data'])):
             cursor.connection.close()
             return {
                 "error": "El DNI ya se encuentra registrado para un usuario."
@@ -59,7 +59,7 @@ def cambiar_permiso_service(id, permiso):
                 "error": "Error al obtener los DNIs de los empleados."
             }, 405
 
-        if (dni_usu in str(res_dnis['data'])):
+        if (str(dni_usu) in str(res_dnis['data'])):
             cursor.connection.close()
             return {
                 "error": "El DNI ya se encuentra registrado para un empleado."
