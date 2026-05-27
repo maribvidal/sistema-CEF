@@ -408,7 +408,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"estado\" : \"Programada\",\r\n    \"id_actividad\" : 2,\r\n    \"id_profesor\" : 2\r\n}",
+              "raw": "{\r\n    \"estado\" : \"Programada\",\r\n    \"id_actividad\" : 1,\r\n    \"id_profesor\" : 1,\r\n    \"sala\": 1,\r\n    \"fecha\": \"2024-07-01\",\r\n    \"hora\": \"10:00\",\r\n    \"cupo_maximo\": 20\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -416,7 +416,7 @@
               }
             },
             "url": {
-              "raw": "http://127.0.0.1:5000/clases/18",
+              "raw": "http://127.0.0.1:5000/clases/1",
               "protocol": "http",
               "host": [
                 "127",
@@ -427,7 +427,7 @@
               "port": "5000",
               "path": [
                 "clases",
-                "18"
+                "1"
               ]
             }
           },

@@ -29,7 +29,7 @@ def modificar_empleado(
             "status": "error",
             "message": "Empleado no encontrado"
         }
-    elif usuario["data"]["rol_id"] not in (1, 2): # o sea si el usuario no es ni gerente ni administrador
+    elif usuario["data"]["rol_id"] not in (0, 1, 2): # o sea si el usuario no es ni gerente ni administrador
         print("EL USUARIO NO ES UN EMPLEADO, O ES UN EMPLEADO DESACTIVADO, SI QUIEREN MODIFICAR ESTO AGREGUEN AL RANGO DE ROL_ID EL 0, O SEA: if usuario['data']['rol_id'] not in (0, 1, 2) al db/operaciones/empleados/modificar_db.py")
         return {
             "status": "error",
@@ -89,11 +89,10 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
     
     print("Se encontró el usuario creo")
     
-    # Cambia esto por un borrado lógico: o sea en nombre y apellido le pones "Eliminado"
+    # Borrado lógico: se modifica el rol a 0 (desactivado) conservando los datos personales
     query_update = f"""
         UPDATE Usuario
-        SET nombre = 'Eliminado',
-            apellido = 'Eliminado'
+        SET rol_id = 0
         WHERE dni = {empleado_dni}
     """
 

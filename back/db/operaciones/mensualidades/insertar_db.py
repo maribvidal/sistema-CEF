@@ -17,6 +17,7 @@ def formattear_fecha(fecha):
         fecha = parse(fecha, dayfirst=False)
         return fecha.date().strftime("%Y-%m-%d")
 
+# HABRIA QUE MODIFICAR ESTO, ES 1 MES. NO SE TENDRIAN QUE PODER PASAR CUALQUIER FECHA DE INICIO Y FIN
 def insertar_mensualidad(fecha_ini, fecha_fin, usuario_id: int, cursor):
     """Permite insertar una fila para la tabla Mensualidad"""
     query = f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)

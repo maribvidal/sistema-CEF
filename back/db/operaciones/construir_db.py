@@ -160,6 +160,7 @@ def construir_tabla_clase(cursor: sqlite.Cursor):
                             estado       VARCHAR({LONG_NOM}),
                             actividad_id INTEGER NOT NULL,
                             profesor_id  INTEGER NOT NULL,
+                            cupo_maximo INTEGER NOT NULL,
                             FOREIGN KEY (actividad_id) REFERENCES Actividad(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
@@ -172,7 +173,8 @@ def construir_tabla_sala(cursor: sqlite.Cursor):
     """Construye la tabla Sala"""
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Sala (
                             id          INTEGER PRIMARY KEY,
-                            nombre      VARCHAR({LONG_NOM})
+                            nombre      VARCHAR({LONG_NOM}),
+                            capacidad  INTEGER NOT NULL
                         )""")
 
 def construir_tabla_clase_ocurrir_sala(cursor: sqlite.Cursor):
@@ -202,7 +204,7 @@ def construir_tabla_usuario_tener_descuento(cursor: sqlite.Cursor):
     """Construye la tabla Usuario_Tener_Descuento"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Usuario_Tener_Descuento (
                             id           INTEGER PRIMARY KEY,
-                            usuario_id   INTEGER NOT NULL,
+                            usuario_id   I  NTEGER NOT NULL,
                             descuento_id INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
@@ -218,14 +220,10 @@ def construir_tabla_usuario_inscribir_clase(cursor: sqlite.Cursor):
                             id         INTEGER PRIMARY KEY,
                             usuario_id INTEGER NOT NULL,
                             clase_id   INTEGER NOT NULL,
-                            clase_ocurrir_sala_id INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
                             FOREIGN KEY (clase_id) REFERENCES Clase(id)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL,
-                            FOREIGN KEY (clase_ocurrir_sala_id) REFERENCES Clase_Ocurrir_Sala(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")

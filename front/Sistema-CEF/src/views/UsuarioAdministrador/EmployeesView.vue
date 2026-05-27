@@ -72,7 +72,7 @@
                   @click="abrirEditorRol(item)"
                   title="Cambiar Permisos/Rol"
                 ></v-btn>
-                <v-btn v-if="!isDiabled"
+                <v-btn v-if="!isDisabled"
                   icon="mdi-account-off"
                   variant="text"
                   color="grey-darken-1"
@@ -255,15 +255,6 @@ const getRoleColor = (id) => {
 
 const cargarEmpleados = async () => {
   loading.value = true
-  // Empleado hardcodeado para pruebas
-  const hardcoded = {
-    dni: 45678901,
-    nombre: 'Carlos',
-    apellido: 'Admin',
-    correo: 'carlos.admin@cef.com',
-    rol_id: 1
-  }
-
   try {
     const data = await EmployeesService.getEmployees()
     const fetched = (data || []).map(e => ({
@@ -271,13 +262,16 @@ const cargarEmpleados = async () => {
       dni: e.dni ?? e[1],
       nombre: e.nombre ?? e[2],
       apellido: e.apellido ?? e[3],
+      fecha_nac: e.fecha_nac ?? e[4],
+      telefono: e.telefono ?? e[5],
       correo: e.correo ?? e[6],
+      genero: e.genero ?? e[8],
       rol_id: e.rol_id ?? e[9]
     }))
-    empleados.value = [hardcoded, ...fetched]
+    empleados.value = fetched
   } catch (error) {
     console.error('Error cargando empleados:', error)
-    empleados.value = [hardcoded] // Mostramos al menos el hardcoded si la API falla
+    empleados.value = []
   } finally {
     loading.value = false
   }
@@ -388,14 +382,26 @@ const desactivarEmpleado = (empleado) => {
 }
 
 const eliminarEmpleado = (empleado) => {
+  const dni = empleado?.dni
+  if (!dni) {
+    notificationStore.showNotification('No se pudo identificar el DNI del empleado', 'danger')
+    return
+  }
+
   notificationStore.showNotification(
-    `¿ELIMINAR PERMANENTEMENTE a ${empleado.nombre} ${empleado.apellido}?`,
+    `Eliminar a ${empleado.nombre} ${empleado.apellido}?`,
     'danger',
     0,
-    () => {
-      console.log('Eliminando empleado DNI:', empleado.dni)
-      notificationStore.showNotification('Empleado eliminado exitosamente', 'success')
-      // Llamada al servicio de borrado
+    async () => {
+      try {
+        await EmployeesService.deleteEmployee(dni)
+        await cargarEmpleados() // Refresca la tabla
+        notificationStore.showNotification('Empleado eliminado exitosamente', 'success')
+      } catch (error) {
+        console.error('Error al eliminar empleado:', error)
+        const errorMsg = error.data?.error || 'No se pudo eliminar el empleado'
+        notificationStore.showNotification(errorMsg, 'danger')
+      }
     }
   )
 }
@@ -408,7 +414,7 @@ const abrirEditorRol = (empleado) => {
 
 const confirmarCambioRol = async () => {
   try {
-    await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.id, nuevoRolId.value)
+    await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.dni, nuevoRolId.value)
     await cargarEmpleados()
     dialog.value = false
     notificationStore.showNotification('Rol actualizado exitosamente', 'success')

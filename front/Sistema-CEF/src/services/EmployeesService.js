@@ -20,11 +20,17 @@ export const EmployeesService = {
 
   /**
    * Actualiza el rol de un empleado mediante su DNI
-   * Endpoint: PUT /empleados/(dni)/rol
+   * Nota: Se ajusta para usar el endpoint existente en el backend
    */
-  updateEmployeeRole: async (id, roleId) => {
-    const response = await apiClient.post(`/usuarios/${id}/permisos`, { 
-      rol_id: roleId 
+  updateEmployeeRole: async (dni, roleId) => {
+    if (!dni) {
+      console.error("Error: El DNI del empleado es undefined. Revisa el componente llamador.");
+      throw new Error("DNI no proporcionado");
+    }
+    // El backend (empleados_route.py) maneja la actualización de rol 
+    // Según documentación_backend.md: PUT /empleados/(dni)/rol
+    const response = await apiClient.put(`/empleados/${dni}/${roleId}`, {     
+    rol_id: parseInt(roleId) 
     })
     return response.data
   },
@@ -32,7 +38,16 @@ export const EmployeesService = {
   updateEmployeeInfo: async (dni, updatedData) => {
     const response = await apiClient.put(`/empleados/${dni}`, updatedData)
     return response.data
-  }, // Aparentemente el endpoint es POST, aunque lo lógico sería un PUT o PATCH y falta implementar
+  },
+
+  /**
+   * Elimina un empleado de forma logica mediante su DNI
+   * Endpoint: DELETE /empleados/(dni)
+   */
+  deleteEmployee: async (dni) => {
+    const response = await apiClient.delete(`/empleados/${dni}`)
+    return response.data
+  },
 
   /**
    * Desactiva un empleado mediante su DNI
@@ -55,7 +70,7 @@ export const EmployeesService = {
    * Crea un nuevo recepcionista (Usuario con rol 2)
    */
   createReceptionist: async (receptionistData) => {
-    const response = await apiClient.post('/empleados', { ...receptionistData, rol: 2 })
+    const response = await apiClient.post('/empleados', { ...receptionistData, rol_id: 2 })
     return response.data
   }
 }
