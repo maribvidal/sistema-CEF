@@ -86,3 +86,18 @@ def cancelar_clase(id_clase):
     respuesta, status = cancelar_clase_service(id_clase)
 
     return jsonify(respuesta), status
+
+## No estoy seguro de como implementar esto. Mañana lo voy
+## a ver mejor, porque también podríamos implementar un
+## endpoint que reciba simplemente la id del 
+## clase_ocurrir_sala en vez de esto.
+
+@clases_bp.route("/clases/<int:id_clase>/reservar", methods)
+def reservar_clase(id_clase):
+    """Este endpoint permite inscribir a un usuario a
+        una clase específica. Esto se hace pidiendo el
+        id del usuario, la fecha, y la hora de la clase."""
+
+    # Por implementar
+
+    pass
