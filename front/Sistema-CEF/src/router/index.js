@@ -14,6 +14,11 @@ const router = createRouter({
       component: () => import('../views/UsuarioVisitante/InicioSesionView.vue'),
     },
     {
+      path: '/sobre-nosotros',
+      name: 'sobreNosotros',
+      component: () => import('../views/SobreNosotrosView.vue'),
+    },
+    {
       path: '/recuperar-contraseña',
       name: 'recuperarContraseña',
       component: () => import('../views/UsuarioVisitante/RecuperarContraseña.vue'),
