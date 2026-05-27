@@ -17,6 +17,10 @@ load_dotenv()
 
 import os
 import resend
+
+import smtplib
+from email.mime.text import MIMEText
+
 import datetime
 
 # FALTA PENSAR DONDE ES NECESARIO CHECKEAR QUE EL ROL SEA = 3
@@ -378,6 +382,7 @@ def restablecer_contraseña_service(correo: str):
             "error": "Usuario no encontrado con el correo proporcionado."
         }, 402
 
+    """
     api_key = os.getenv("RESEND_API_KEY")
     resend.api_key = api_key
     
@@ -388,7 +393,7 @@ def restablecer_contraseña_service(correo: str):
         "from": "onboarding@resend.dev",
         "to": correo,
         "subject": "Recuperación de contraseña",
-        "html": f"""
+        "html": f""
             <h2>Recuperar contraseña</h2>
 
             <p>Hacé click acá:</p>
@@ -396,9 +401,41 @@ def restablecer_contraseña_service(correo: str):
             <a href="{link}">
                 Restablecer contraseña
             </a>
-        """
+        ""
     })
+    """
+    
+    # Configuración del servidor
+    servidor_smtp = "smtp.gmail.com"
+    puerto = 587
+    remitente = os.getenv("remitente")
+    password = os.getenv("password")
+    
+    
+    # Crear el mensaje    
+    front_url = os.getenv("FRONT_URL")
+    link = f"{front_url}/ConfirmarNuevaContrasena?correo={correo}"
 
+    msg = MIMEText(f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}")
+    msg['Subject'] = "Restablecer contraseña"
+    msg['From'] = remitente
+    msg['To'] = correo
+
+    try:
+        # Conexión al servidor
+        server = smtplib.SMTP(servidor_smtp, puerto)
+        server.starttls() # Inicia conexión segura
+        server.login(remitente, password)
+        
+        # Enviar a varios remitentes (puedes usar un bucle)
+        server.send_message(msg)
+    except Exception as e:
+        return {
+            "error": str(e)
+        }, 403
+    finally:
+        server.quit()
+    
     cursor.connection.close()
     return {
         "mensaje": "Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña."
