@@ -1,3 +1,4 @@
+from db.operaciones.mensualidades.insertar_db import insertar_mensualidad
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.profesores.insertar_db import insertar_profesor
 from db.operaciones.actividades.insertar_db import insertar_actividad
@@ -8,6 +9,7 @@ from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir
 from db.operaciones import insertar_pago, insertar_clase
 from db.operaciones import insertar_pago_pagar_clase, insertar_usuario_inscribir_clase
 
+# necesito insertarle mensualidades con actividades a los usuarios
 def insertar_datos(cursor):  
     # Crear usuarios
     insertar_usuario(12345678, 'Juan', 'Pérez', '123333333', '2004-10-10', 'juan.perez@example.com', "1234",'M', 1, cursor)
@@ -23,8 +25,8 @@ def insertar_datos(cursor):
     insertar_actividad('Pilates', 60.0, cursor)
     insertar_actividad('Funcional', 70.0, cursor)
 
-    #insertar_mensualidad('2024-01-01', '2024-31-01', 1)
-    #insertar_mensualidad('2024-02-02', '2024-29-02', 2)
+    insertar_mensualidad('2026-01-01', '2026-12-01', 1, cursor)
+    insertar_mensualidad('2026-02-02', '2026-12-02', 2, cursor)
 
     # Crear permisos
     insertar_permiso('Metricas', cursor)
@@ -34,16 +36,16 @@ def insertar_datos(cursor):
     insertar_rol('Recepcionista', cursor)
     
     # Crear salas
-    insertar_sala('Sala 1', cursor)
-    insertar_sala('Sala 2', cursor)
-    insertar_sala('Sala 3', cursor)
+    insertar_sala('Sala 1', 30, cursor)
+    insertar_sala('Sala 2', 25, cursor)
+    insertar_sala('Sala 3', 20, cursor)
 
     # Crear clase
-    insertar_clase('Programada', 1, 1, cursor)
-    insertar_clase_ocurrir_sala(1, 1, '2024-07-01', '10:00', cursor)
+    insertar_clase('Programada', 1, 1, 30, cursor)
+    insertar_clase_ocurrir_sala(1, 1, '2026-05-29', '10:00', cursor)
     
     # Inscribir usuario a clase
-    insertar_usuario_inscribir_clase(1, 1, "2026-01-01", cursor)
+    insertar_usuario_inscribir_clase(1, 1, cursor)
 
     # Crear pagos
     insertar_pago(50.0, 1, cursor)

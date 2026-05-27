@@ -1,5 +1,5 @@
 from db.operaciones.clases.consultar_db import consultar_clase_por_id, consultar_disponibilidad_clase
-from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id
+from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id, consultar_superposicion_horaria_clase_usuario
 from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
@@ -578,9 +578,10 @@ def inscribir_usuario_en_clase_service(usuario_id: int, clase_id: int):
             "error": "No hay cupos disponibles para esta clase."
         }, 401
         
-    # -------------  ESTO ESTA MAL  -------------
+    # -------------  CHECKEAR  -------------
     res = consultar_mensualidad_cubre_clase(usuario_id, clase_id, cursor)
-
+    print("respuesta mensualidad cubre clase: ", res)
+    
     if res['status'] == 'error':
         cursor.connection.close()
         return {
@@ -593,7 +594,9 @@ def inscribir_usuario_en_clase_service(usuario_id: int, clase_id: int):
             "error": "Debe regularizar su pago para poder reservar clases."
         }, 401
 
+    # -------------  CHECKEAR  -------------
     res = consultar_superposicion_horaria_clase_usuario(usuario_id, clase_id, cursor)
+    print("Respuesta superposicion horaria: ", res)
     
     if res['status'] == 'error':
         cursor.connection.close()
@@ -601,7 +604,7 @@ def inscribir_usuario_en_clase_service(usuario_id: int, clase_id: int):
             "error": res['message']
         }, 500
     
-    if res['status'] == 'success' and not res['data']:
+    if res['status'] == 'success' and res['data']:
         cursor.connection.close()
         return {
             "error": "Ya posee una clase reservada en ese horario."

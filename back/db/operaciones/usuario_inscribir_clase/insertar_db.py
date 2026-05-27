@@ -17,12 +17,13 @@ def formattear_fecha(fecha):
         fecha = parse(fecha, dayfirst=False)
         return fecha.date().strftime("%Y-%m-%d")
 
-def insertar_usuario_inscribir_clase(usuario_id: int, clase_id: int, cursor, fecha=None):
+def insertar_usuario_inscribir_clase(usuario_id: int, clase_id: int, cursor):
+    print("insertar_usuario_inscribir_clase: ", usuario_id, clase_id)
     """Permite insertar una fila para la tabla Usuario_Inscribir_Clase"""
-    if fecha is None:
-        fecha = datetime.date.today()
-    query = f"""INSERT INTO Usuario_Inscribir_Clase (usuario_id, clase_id, fecha)
-                VALUES ({usuario_id}, {clase_id}, '{formattear_fecha(fecha)}');"""
+    query = f"""
+        INSERT INTO Usuario_Inscribir_Clase (usuario_id, clase_id)
+        VALUES ({usuario_id}, {clase_id});
+    """
     return ejecutar_insertar(query, cursor)
     
         

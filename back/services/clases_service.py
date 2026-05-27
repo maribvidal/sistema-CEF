@@ -33,7 +33,8 @@ def publicar_clase_service(
     id_profesor: int,
     fecha,
     hora: str,
-    sala: int
+    sala: int,
+    cupo_maximo: int
 ):
     """Service que publica una clase"""
     """
@@ -79,7 +80,7 @@ def publicar_clase_service(
 
     # Intentar insertar la clase
 
-    respuesta2 = insertar_clase(estado, id_actividad, id_profesor, cursor)
+    respuesta2 = insertar_clase(estado, id_actividad, id_profesor, cupo_maximo, cursor)
 
     if respuesta2['status'] == 'error':
         cursor.connection.close()
@@ -107,13 +108,15 @@ def modificar_clase_service(
     id_profesor: int,
     fecha,
     hora: str,
-    sala: int
+    sala: int,
+    cupo_maximo: int
 ):
     """Service que modifica una clase"""
 
     cursor = conectarse_db()
 
     respuesta_consulta = consultar_clase_por_id(clase_id, cursor)
+    print("Respuesta consulta clase por id: ", respuesta_consulta)
 
     if respuesta_consulta['status'] == 'error':
         cursor.connection.close()
@@ -125,13 +128,17 @@ def modificar_clase_service(
             "error": "Clase no encontrada."
         }, 401
 
-    respuesta = modificar_clase(clase_id, estado, id_actividad, id_profesor, cursor)
+    respuesta = modificar_clase(clase_id, estado, id_actividad, id_profesor, cupo_maximo, cursor)
+    print("Respuesta modificar clase: ", respuesta)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
         return respuesta, 402
 
+    print("Intentando modificar clase_ocurrir_sala...")
+    print("Datos para modificar clase_ocurrir_sala: clase_id: ", clase_id, " sala: ", sala, " fecha: ", fecha, " hora: ", hora)
     respuesta2 = modificar_clase_ocurrir_sala(clase_id, sala, fecha, hora, cursor)
+    print("Respuesta modificar clase_ocurrir_sala: ", respuesta2)
 
     if respuesta2['status'] == 'error':
         cursor.connection.close()

@@ -28,6 +28,7 @@ def publicar_clase():
     fecha = data.get("fecha")
     hora = data.get("hora")
     sala = data.get("sala")
+    cupo_maximo = data.get("cupo_maximo")
 
     respuesta, status = publicar_clase_service(
         estado,
@@ -35,7 +36,8 @@ def publicar_clase():
         id_profesor,
         fecha,
         hora,
-        sala
+        sala,
+        cupo_maximo
     )
 
     return jsonify(respuesta), status
@@ -62,6 +64,7 @@ def modificar_clase(id_clase):
     fecha = data.get("fecha")
     hora = data.get("hora")
     sala = data.get("sala")
+    cupo_maximo = data.get("cupo_maximo")
 
     respuesta, status = modificar_clase_service(
         id_clase,
@@ -70,7 +73,8 @@ def modificar_clase(id_clase):
         id_profesor,
         fecha,
         hora,
-        sala
+        sala,
+        cupo_maximo
     )
 
     return jsonify(respuesta), status
