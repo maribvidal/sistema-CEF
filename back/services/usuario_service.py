@@ -1,16 +1,16 @@
-from db.operaciones.clases.consultar_db import consultar_clase_por_id, consultar_disponibilidad_clase
-from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id, consultar_superposicion_horaria_clase_usuario
-from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase
+from db.operaciones.clases.consultar_db import consultar_clase_por_id
+from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.imagenes.insertar_db import insertar_imagen
 from db.operaciones.imagenes.consultar_db import consultar_imagen_actual_usuario
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario, listar_dnis_usuarios
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar
 from db.operaciones.mensualidades.consultar_db import consultar_mensualidad_cubre_clase
+from db.operaciones.empleados.consultar_db import listar_dnis_empleados
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -42,6 +42,12 @@ def registrar_usuario_service(
 
     cursor = conectarse_db()
 
+    def _es_un_rol_valido(rol: int) -> bool:
+        """Se devuelve si el rol es válido o no"""
+        if (rol >= 0 and rol <= 3):
+            return True
+        return False
+
     def _es_fecha_valida(fecha: str) -> bool:
         """Se devuelve si la fecha es válida o no"""
         try:
@@ -70,43 +76,73 @@ def registrar_usuario_service(
         ]
     )
     
+    # Comprobaciones de las entradas
+
     if len(errores) > 0:
         return errores, 400
 
-    cursor = conectarse_db()
-    respuesta = consultar_usuario_por_dni(dni, cursor)
-    if respuesta['status'] == 'error':
-        cursor.connection.close()
-        return respuesta, 401
-    
-    if respuesta['status'] == 'success' and respuesta['data'] is not None:
-        cursor.connection.close()
+    if (not _es_un_rol_valido(rol_id)):
         return {
-            "error": "El DNI ya se encuentra registrado."
-        }, 402
-    
-    respuesta = consultar_usuario_por_correo(correo, cursor)
-    if respuesta['status'] == 'error':
-        cursor.connection.close()
-        return respuesta, 403
+            "error": "El rol_id pasado no es válido."
+        }, 401
 
-    if respuesta['status'] == 'success' and respuesta['data'] is not None:
-        cursor.connection.close()
-        return {
-            "error": "El correo electrónico ya se encuentra registrado."
-        }, 404
-    
     if (_es_fecha_valida(fecha_nac) is False):
         cursor.connection.close()
         return {
             "error": "La fecha de nacimiento no es válida."
-        }, 405
+        }, 402
     
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         cursor.connection.close()
         return {
             "error": "El usuario debe ser mayor de 14 años"
-        }, 406
+        }, 403
+
+    cursor = conectarse_db()
+
+    # Comprobaciónes del DNI
+    
+    ## Si se trata de un usuario común
+    if (rol_id == 3):
+        res_dnis = listar_dnis_usuarios(cursor)
+
+        if res_dnis['status'] == 'error':
+            cursor.connection.close()
+            return {
+                "error": "Error al obtener los DNIs de los usuarios."
+            }, 404
+
+        if (str(dni) in str(res_dnis['data'])):
+            cursor.connection.close()
+            return {
+                "error": "El DNI ya se encuentra registrado para un usuario."
+            }, 405
+    else:
+    ## Si se trata de un usuario empleado
+        res_dnis = listar_dnis_empleados(cursor)
+
+        if res_dnis['status'] == 'error':
+            cursor.connection.close()
+            return {
+                "error": "Error al obtener los DNIs de los empleados."
+            }, 406
+
+        if (str(dni) in str(res_dnis['data'])):
+            cursor.connection.close()
+            return {
+                "error": "El DNI ya se encuentra registrado para un empleado."
+            }, 407
+    
+    respuesta = consultar_usuario_por_correo(correo, cursor)
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return respuesta, 408
+
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+        cursor.connection.close()
+        return {
+            "error": "El correo electrónico ya se encuentra registrado."
+        }, 409
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
@@ -554,112 +590,6 @@ def obtener_clases_usuario_service(id_usuario: int):
 
     cursor.connection.close()
     return respuesta['data'], 200
-
-def inscribir_usuario_en_clase_service(usuario_id: int, clase_id: int):
-    cursor = conectarse_db()
-
-    usuario = consultar_usuario_por_id(usuario_id, cursor)
-
-    if usuario['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": usuario['message']
-        }, 500
-
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 404
-        
-    clase = consultar_clase_por_id(clase_id, cursor)
-    
-    if clase['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": clase['message']
-        }, 500
-        
-    if clase['status'] == 'success' and not clase['data']:
-        cursor.connection.close()
-        return {
-            "error": "Clase no encontrada."
-        }, 404
-        
-    res = consultar_usuario_inscribir_clase_por_usuario_id(usuario_id, clase_id, cursor)
-    
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-        
-    if res['status'] == 'success' and res['data'] is not None:
-        cursor.connection.close()
-        return {
-            "error": "El usuario ya se encuentra inscrito en esta clase."
-        }, 400
-        
-    res = consultar_disponibilidad_clase(clase_id, cursor)
-    
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-        
-    # en el front informa que no hay cupos y le da opcion de inscribirse a la lista de espera
-    if res['status'] == 'success' and not res['data']:
-        cursor.connection.close()
-        return {
-            "error": "No hay cupos disponibles para esta clase."
-        }, 401
-        
-    # -------------  CHECKEAR  -------------
-    res = consultar_mensualidad_cubre_clase(usuario_id, clase_id, cursor)
-    print("respuesta mensualidad cubre clase: ", res)
-    
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-        
-    if res['status'] == 'success' and not res['data']:
-        cursor.connection.close()
-        return {
-            "error": "Debe regularizar su pago para poder reservar clases."
-        }, 401
-
-    # -------------  CHECKEAR  -------------
-    res = consultar_superposicion_horaria_clase_usuario(usuario_id, clase_id, cursor)
-    print("Respuesta superposicion horaria: ", res)
-    
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-    
-    if res['status'] == 'success' and res['data']:
-        cursor.connection.close()
-        return {
-            "error": "Ya posee una clase reservada en ese horario."
-        }, 402
-
-    res = insertar_usuario_inscribir_clase(usuario_id, clase_id, cursor)
-
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-
-    cursor.connection.commit()
-    cursor.connection.close()
-    return {
-        "mensaje": "Usuario inscrito en la clase exitosamente."
-    }, 200
 
 def subir_avatar_usuario_service(usuario_id, avatar):
     """Service que permite subir el avatar de un usuario."""

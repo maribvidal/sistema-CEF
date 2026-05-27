@@ -85,7 +85,7 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
     """Construye la tabla Usuario"""
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Usuario (
                             id          INTEGER PRIMARY KEY,
-                            dni         INTEGER UNIQUE NOT NULL,
+                            dni         INTEGER NOT NULL,
                             nombre      VARCHAR({LONG_NOM}) NOT NULL,
                             apellido    VARCHAR({LONG_APE}) NOT NULL,
                             correo      VARCHAR({LONG_CORREO}) NOT NULL,
@@ -220,10 +220,14 @@ def construir_tabla_usuario_inscribir_clase(cursor: sqlite.Cursor):
                             id         INTEGER PRIMARY KEY,
                             usuario_id INTEGER NOT NULL,
                             clase_id   INTEGER NOT NULL,
+                            clase_ocurrir_sala_id INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
                             FOREIGN KEY (clase_id) REFERENCES Clase(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL,
+                            FOREIGN KEY (clase_ocurrir_sala_id) REFERENCES Clase_Ocurrir_Sala(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")

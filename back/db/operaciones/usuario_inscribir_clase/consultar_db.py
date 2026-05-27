@@ -25,3 +25,9 @@ def consultar_superposicion_horaria_clase_usuario(usuario_id: int, clase_id: int
           )
     """
     return ejecutar_fetchall(query, cursor)
+
+def consultar_usuario_inscribir_clase_por_clase_ocurrir_sala_id(clase_ocurrir_sala_id: int, cursor):
+    """Permite obtener las filas de una clase en particular
+        a partir del clase_ocurrir_sala_id."""
+    query = f"""SELECT * FROM Usuario_Inscribir_Clase WHERE clase_ocurrir_sala_id = {clase_ocurrir_sala_id}"""
+    return ejecutar_fetchall(query, cursor)

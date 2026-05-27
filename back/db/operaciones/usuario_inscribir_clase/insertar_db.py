@@ -17,13 +17,9 @@ def formattear_fecha(fecha):
         fecha = parse(fecha, dayfirst=False)
         return fecha.date().strftime("%Y-%m-%d")
 
-def insertar_usuario_inscribir_clase(usuario_id: int, clase_id: int, cursor):
-    print("insertar_usuario_inscribir_clase: ", usuario_id, clase_id)
-    """Permite insertar una fila para la tabla Usuario_Inscribir_Clase"""
-    query = f"""
-        INSERT INTO Usuario_Inscribir_Clase (usuario_id, clase_id)
-        VALUES ({usuario_id}, {clase_id});
-    """
+def insertar_usuario_inscribir_clase_por_id(usuario_id: int, clase_id: int, clase_ocurrir_sala_id: int, cursor):
+    """Permite insertar una fila para la tabla Usuario_Inscribir_Clase
+        pero sabiendo el id de la Clase_Ocurrir_Sala buscada."""
+    query = f"""INSERT INTO Usuario_Inscribir_Clase (usuario_id, clase_id, clase_ocurrir_sala_id)
+                VALUES ({usuario_id}, {clase_id}, {clase_ocurrir_sala_id});"""
     return ejecutar_insertar(query, cursor)
-    
-        

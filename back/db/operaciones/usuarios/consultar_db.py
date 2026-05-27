@@ -58,3 +58,25 @@ def obtener_clases_usuario(id_usuario: int, cursor) -> dict:
         WHERE i.usuario_id = {id_usuario}
     """
     return ejecutar_fetchall(query, cursor)
+
+def obtener_clase_usuario_fecha_hora(id_usuario: int, fecha, hora, cursor) -> dict:
+    """Hace una consulta para obtener la clase a la que está inscripto
+        un usuario en una fecha y hora determinada, si es que el 
+        usuario está inscripto a una clase en esa fecha y hora."""
+    # Utilizo ejecutar_fetchall por si el usuario llega a estar metido
+    # en más de una clase en la misma fecha y hora (lo cual sería un error)
+    query = f"""
+            SELECT
+                cos.id
+            FROM Usuario u
+                INNER JOIN Usuario_Inscribir_Clase uic ON (u.id = uic.usuario_id)
+                INNER JOIN Clase_Ocurrir_Sala cos ON (uic.clase_ocurrir_sala_id = cos.id)
+            WHERE u.id = {id_usuario} AND cos.fecha = '{fecha}' AND cos.hora = '{hora}'
+            """
+    return ejecutar_fetchall(query, cursor)
+
+def listar_dnis_usuarios(cursor) -> dict:
+    """Hace una consulta para retornar todos los dnis registrados
+        de los usuarios."""
+    query = "SELECT dni FROM Usuario WHERE rol_id = 3"
+    return ejecutar_fetchall(query, cursor)
