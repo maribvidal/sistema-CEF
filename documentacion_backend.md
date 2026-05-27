@@ -44,9 +44,10 @@ Empleados
 | --- | --- | --- | --- |
 | /empleados | GET | - | 404: No se encontraron empleados <br> 500: Error al obtener empleados <br> 200: Se devuelve una lista de los empleados con su información personal y organizacional. |
 | /empleados/desactivados | GET | - | 404: No se encontraron empleados desactivados <br> 500: Error al obtener empleados desactivados <br> 200: Se devuelve una lista de los empleados desactivados. |
-| /empleados/(dni) | PUT | nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id | 500: Error al intentar modificar empleado <br> 200: Empleado modificado exitosamente. |
-| /empleados/(dni) | DELETE | - | 404: No se encontraron empleados <br> 500: Error al intentar borrar empleado <br> 200: Empleado borrado exitosamente. |
-| /empleados/(dni)/desactivar | PATCH | - | 500: Error al intentar borrar (desactivar) empleado <br> 200: Empleado desactivado exitosamente. |
+| /empleados/recepcionistas | POST | dni, nombre, apellido, correo, contraseña, genero | 400: Error al obtener la lista de validación de correos <br> 401: El correo electrónico ya se encuentra registrado para otro empleado <br> 402: Error interno de base de datos al insertar el registro <br> 403: El DNI ya se encuentra registrado para un empleado <br> 200: El recepcionista ha sido creado con éxito. |
+| /empleados/(empleado_dni) | PUT | nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id | 500: Error al intentar modificar empleado <br> 200: Empleado modificado exitosamente. |
+| /empleados/(empleado_dni) | DELETE | - | 404: No se encontraron empleados <br> 500: Error al intentar borrar empleado <br> 200: Empleado borrado exitosamente. |
+| /empleados/(empleado_dni)/desactivar | PATCH | - | 500: Error al intentar borrar/desactivar empleado <br> 200: Empleado desactivado exitosamente. |
 | /empleados/(dni)/rol | PUT | Id del nuevo rol | 400: El id del rol es obligatorio o el empleado ya posee dicho rol <br> 404: El empleado no fue encontrado o el rol es inexistente <br> 200: Rol actualizado correctamente. |
 
 Profesores
