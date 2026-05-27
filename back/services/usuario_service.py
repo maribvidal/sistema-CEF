@@ -450,18 +450,18 @@ def restablecer_contraseña_service(correo: str):
     
     # Crear el mensaje    
     front_url = os.getenv("FRONT_URL")
-    link = f"{front_url}/ConfirmarNuevaContrasena?correo={correo}"
+    link = f"http://localhost:5173/ConfirmarNuevaContrasena?correo={correo}"
 
     msg = MIMEText(f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}")
     msg['Subject'] = "Restablecer contraseña"
-    msg['From'] = remitente
+    msg['From'] = "sistemacef@gmail.com"
     msg['To'] = correo
 
     try:
         # Conexión al servidor
         server = smtplib.SMTP(servidor_smtp, puerto)
         server.starttls() # Inicia conexión segura
-        server.login(remitente, password)
+        server.login("sistemacef@gmail.com", "saal ixel tbum pohe")
         
         # Enviar a varios remitentes (puedes usar un bucle)
         server.send_message(msg)
