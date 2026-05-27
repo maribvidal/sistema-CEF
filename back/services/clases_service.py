@@ -235,13 +235,13 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         cursor.connection.close()
         return res_clase_ocu_sala, 402
     
-    if res_clase_ocu_sala['staus'] == 'sucess' and not res_clase_ocu_sala['data']:
+    if res_clase_ocu_sala['status'] == 'sucess' and not res_clase_ocu_sala['data']:
         cursor.connection.close()
         return {
             "error": "Clase_ocurrir_sala no encontrada."
         }, 403
 
-    id_clase_ocu_sala = res_clase_ocu_sala['data']
+    id_clase_ocu_sala = res_clase_ocu_sala['data']['id']
 
     # Comprobar que exista el usuario
 
@@ -251,7 +251,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         cursor.connection.close()
         return res_usuario, 404
 
-    if res_usuario['staus'] == 'sucess' and not res_usuario['data']:
+    if res_usuario['status'] == 'sucess' and not res_usuario['data']:
         cursor.connection.close()
         return {
             "error": "Usuario no encontrado."
@@ -266,7 +266,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
     if res_usu_ins_cla['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": res['message']
+            "error": res_usu_ins_cla['message']
         }, 500
 
     cursor.connection.commit()
