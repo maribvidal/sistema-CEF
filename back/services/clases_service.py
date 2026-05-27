@@ -1,11 +1,13 @@
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.modificar_db import modificar_clase_ocurrir_sala
-from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_fecha_hora_sala
+from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_fecha_hora_sala, consultar_clase_ocurrir_sala_por_claseid_fecha_hora
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id
+from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase_por_id
 
 def listar_clases_service():
     """Service que lista las clases"""
@@ -203,4 +205,72 @@ def cancelar_clase_service(clase_id: int):
     cursor.connection.close()
     return {
         "mensaje": "Clase cancelada exitosamente."
+    }, 200
+
+def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
+    """Service que, dado un usuario, lo intenta inscribir
+        en una clase con una fecha y hora dada."""
+
+    cursor = conectarse_db()
+
+    # Comprobar que exista la clase
+
+    res_clase = consultar_clase_por_id(clase_id, cursor)
+
+    if res_clase['status'] == 'error':
+        cursor.connection.close()
+        return res_clase, 400
+
+    if res_clase['status'] == 'success' and not res_clase['data']:
+        cursor.connection.close()
+        return {
+            "error": "Clase no encontrada."
+        }, 401
+
+    # Comprobar que exista el clase_ocurrir_sala
+
+    res_clase_ocu_sala = consultar_clase_ocurrir_sala_por_claseid_fecha_hora(clase_id, fecha, hora, cursor)
+
+    if res_clase_ocu_sala['status'] == 'error':
+        cursor.connection.close()
+        return res_clase_ocu_sala, 402
+    
+    if res_clase_ocu_sala['staus'] == 'sucess' and not res_clase_ocu_sala['data']:
+        cursor.connection.close()
+        return {
+            "error": "Clase_ocurrir_sala no encontrada."
+        }, 403
+
+    id_clase_ocu_sala = res_clase_ocu_sala['data']
+
+    # Comprobar que exista el usuario
+
+    res_usuario = consultar_usuario_por_id(id_usuario, cursor)
+
+    if res_usuario['status'] == 'error':
+        cursor.connection.close()
+        return res_usuario, 404
+
+    if res_usuario['staus'] == 'sucess' and not res_usuario['data']:
+        cursor.connection.close()
+        return {
+            "error": "Usuario no encontrado."
+        }, 405
+
+    # Comprobar el cupo de la clase
+
+    # Insertar el usuario en la clase
+
+    res_usu_ins_cla = insertar_usuario_inscribir_clase_por_id(id_usuario, clase_id, id_clase_ocu_sala, cursor)
+
+    if res_usu_ins_cla['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res['message']
+        }, 500
+
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "mensaje": "Reserva realizada exitosamente."
     }, 200
