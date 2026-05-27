@@ -26,3 +26,12 @@ def listar_correos_empleados(cursor) -> dict:
         WHERE rol_id = 2
     """
     return ejecutar_fetchall(query, cursor)
+
+def listar_dnis_empleados(cursor) -> dict:
+    """Lista todos los dnis de los empleados."""
+    query = """
+        SELECT dni
+        FROM Usuario
+        WHERE rol_id = 0 OR rol_id = 1 OR rol_id = 2
+    """
+    return ejecutar_fetchall(query, cursor)
