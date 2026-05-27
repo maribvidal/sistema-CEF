@@ -5,7 +5,9 @@
       <NavBar />
       <HamburgerButton class="app-menu-button d-flex d-md-none" @toggle="menuOpen = !menuOpen" />
       <MenuBar v-model="menuOpen" :appMenuIcons="appMenuIcons" />
-      
+      <FloatingNotification />
+      <ConfirmNotificacion />
+
       <router-view />
       
 
@@ -25,6 +27,8 @@ import { useAuth } from '@/services/UsuariosServices.js'
 import HamburgerButton from './components/HamburgerButton.vue'
 import MenuBar from './components/MenuBar.vue'
 import NavBar from './components/NavBar.vue'
+import FloatingNotification from './components/FloatingNotificacion.vue'
+import ConfirmNotificacion from './components/ConfirmNotificacion.vue'
 
 const menuOpen = ref(false)
 

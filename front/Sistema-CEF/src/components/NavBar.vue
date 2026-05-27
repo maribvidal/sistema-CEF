@@ -29,7 +29,7 @@
             <!-- Mostrar nombre de usuario si está autenticado -->
             <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" :to="{ name: 'perfil', params: { id: userProfile?.id } }" v-if="isLoggedIn">
                 <v-avatar size="32" class="mr-2" v-if="userProfile?.avatarUrl">
-                    <v-img :src="userProfile?.avatarUrl" alt="Foto de perfil" cover></v-img>
+                    <v-img :src="userProfile.avatarUrl" alt="Foto de perfil" cover></v-img>
                 </v-avatar>
                 <v-icon size="32" class="mr-2" v-else>mdi-account-circle</v-icon>
                 Mi Perfil: {{ userProfile?.nombre || 'Usuario' }}
@@ -53,23 +53,21 @@ import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { ref, onMounted } from 'vue'
 const router = useRouter()
-const { isLoggedIn, userProfile, logout } = useAuth()
+const { isLoggedIn, userProfile, logout, fetchUserProfile } = useAuth()
 const profileData = ref(null)
 
-const getProfile = async () => {
-  try {
-    const profile = await fetchUserProfileById(route.params.id)
-    profileData.value = profile
-  } catch (error) {
-    console.error('Error fetching profile:', error)
-  }
-}
-const userRole = computed(() => profileData.value?.rol_id)
+const userRole = computed(() => userProfile.value?.rol || profileData.value?.rol_id)
 
 const handleLogout = async () => {
     await logout()
     router.push('/inicioSesion')
 }
+
+onMounted(() => {
+  if (isLoggedIn.value && (!userProfile.value?.avatarUrl)) {
+    fetchUserProfile()
+  }
+})
 </script>
 
 <style scoped>

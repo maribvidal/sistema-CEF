@@ -46,6 +46,10 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { EmployeesService }  from '@/services/EmployeesService' // Asegúrate de tener este servicio para manejar las llamadas a la API
+import { useNotificationStore } from '@/stores/notificationStore.js'
+
+const notificationStore = useNotificationStore()
+
 const props = defineProps({
   empleado: {
     type: Object,
@@ -64,21 +68,21 @@ watch(() => props.empleado, (newVal) => {
 
 const updateEmployee = async () => {
   if (!employee.value.nombre || !employee.value.apellido || !employee.value.correo) {
-    alert('Por favor, complete todos los campos obligatorios.')
+    notificationStore.showNotification('Por favor, complete todos los campos obligatorios.', 'warning')
     return
   }
 
   loading.value = true
   try {
     // Cuando integrés tu API puedes llamar a:
-    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value)
+    await EmployeesService.updateEmployeeInfo(employee.value.id, employee.value)
     
-    alert('Empleado actualizado exitosamente')
+    notificationStore.showNotification('Empleado actualizado exitosamente.', 'success')
     emit('updated')
     emit('close')
   } catch (error) {
     console.error('Error al actualizar empleado:', error)
-    alert('Hubo un error al actualizar los datos.')
+    notificationStore.showNotification('Hubo un error al actualizar los datos.', 'danger')
   } finally {
     loading.value = false
   }
