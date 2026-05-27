@@ -25,11 +25,12 @@ Clases
 
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
-| /clases | GET | - | 400: Error de base de datos <br> 401: No se encontraron clases <br> 200: Se devuelve una lista de tuplas que representan las clases disponibles. |
-| /clases | POST | estado, id_actividad, id_profesor, fecha, hora, sala | 400/402: Error interno en la consulta o verificación de sala <br> 401: La sala ya está ocupada en la fecha y hora dadas <br> 403: Error de servidor al intentar insertar la clase <br> 404: Error al insertar la relación de ocurrencia en sala <br> 200: Clase publicada exitosamente. |
-| /clases/(clase_id) | PUT | estado, id_actividad, id_profesor, fecha, hora, sala | 400: Error interno de consulta <br> 401: Clase no encontrada <br> 402: Error al modificar los datos base de la clase <br> 403: Error al modificar la asignación de sala y horarios <br> 200: Clase modificada exitosamente. |
-| /clases/(clase_id) | DELETE | - | 400: Error interno de consulta <br> 401: Clase no encontrada <br> 402: Error al cambiar el estado a 'Borrado' <br> 200: Clase eliminada exitosamente. |
-| /clases/(clase_id)/cancelar | PUT | - | 400: Error interno de consulta <br> 401: Clase no encontrada <br> 402: Error al cambiar el estado a 'Cancelada' <br> 200: Clase cancelada exitosamente. |
+| /clases | GET | - | 400: Error interno de consulta <br> 401: No se encontraron clases <br> 200: Se devuelve la lista de clases disponibles. |
+| /clases | POST | estado, id_actividad, id_profesor, fecha, hora, sala, cupo_maximo | 400: Error en la consulta de disponibilidad de la sala <br> 401: La sala ya está ocupada en la fecha y hora dadas <br> 403: Error de servidor al insertar la clase <br> 404: Error al insertar la relación en clase_ocurrir_sala <br> 200: Clase publicada exitosamente. |
+| /clases/(id_clase) | PUT | estado, id_actividad, id_profesor, fecha, hora, sala, cupo_maximo | 400: Error interno de consulta <br> 401: Clase no encontrada <br> 402: Error al modificar la clase <br> 403: Error al modificar la relación clase_ocurrir_sala <br> 200: Clase modificada exitosamente. |
+| /clases/(id_clase) | DELETE | - | 400: Error interno de consulta <br> 401: Clase no encontrada <br> 402: Error al actualizar el estado a 'Borrado' <br> 200: Clase eliminada exitosamente. |
+| /clases/(id_clase) | PATCH | - | 400: Error interno de consulta <br> 401: Clase no encontrada <br> 402: Error al actualizar el estado a 'Cancelada' <br> 200: Clase cancelada exitosamente. |
+| /clases/(id_clase)/reservar | PUT | id_usuario, fecha, hora | 400: Error al consultar la clase <br> 401: Clase no encontrada <br> 402: Error al consultar clase_ocurrir_sala <br> 403: Clase_ocurrir_sala no encontrada <br> 404: Error al consultar el usuario <br> 405: Usuario no encontrado <br> 406: Error al verificar agendas del usuario <br> 407: El usuario ya se encuentra inscripto en esa clase (u otra en el mismo horario) <br> 408: Error al procesar el conteo de inscriptos <br> 409: La clase no tiene más cupos disponibles <br> 500: Error de servidor al registrar la inscripción <br> 200: Reserva realizada exitosamente. |
 
 Actividades
 
