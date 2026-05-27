@@ -92,7 +92,7 @@ def cancelar_clase(id_clase):
 ## endpoint que reciba simplemente la id del 
 ## clase_ocurrir_sala en vez de esto.
 
-@clases_bp.route("/clases/<int:id_clase>/reservar", methods)
+@clases_bp.route("/clases/<int:id_clase>/reservar", methods=["GET"])
 def reservar_clase(id_clase):
     """Este endpoint permite inscribir a un usuario a
         una clase específica. Esto se hace pidiendo el
