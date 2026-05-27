@@ -6,8 +6,8 @@
         <v-row>
           <v-col cols="12" sm="6" class="py-1">
             <v-text-field
-                id="newPassword"
-              v-model="newPassword"
+                id="nueva_contraseña"
+              v-model="nueva_contraseña"
               label="Nueva Contraseña"
               type="password"
               variant="outlined"
@@ -32,7 +32,7 @@
     <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn variant="text" @click="router.back()">Cancelar</v-btn>
-        <v-btn color="primary" variant="elevated" @click="changePasswordHandler" :loading="loading">Cambiar Contraseña</v-btn>
+          <v-btn color="primary" variant="elevated" @click="changePasswordHandler" :loading="loading">Cambiar Contraseña</v-btn>
     </v-card-actions>
 
     </v-card>
@@ -46,9 +46,9 @@ import { useAuth } from '@/services/UsuariosServices.js'
 import { useNotificationStore } from '@/stores/notificationStore.js'
 const router = useRouter()
 const route = useRoute()
-const { changePassword } = useAuth()
+const { confirmNewPassword } = useAuth()
 const currentPassword = ref('')
-const newPassword = ref('')
+const nueva_contraseña = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
 const notificationStore = useNotificationStore()
@@ -60,45 +60,41 @@ const notificationStore = useNotificationStore()
 500: Error interno al modificar el registro
 200: Contraseña modificada exitosamente. */
 const changePasswordHandler = async () => {
-  if (newPassword.value !== confirmPassword.value) {
+  if (nueva_contraseña.value !== confirmPassword.value) {
     notificationStore.showNotification('Las nuevas contraseñas no coinciden', 'danger')
     return
   }
   loading.value = true
   try {
-    const response = await changePassword(route.params.id, {
-      currentPassword: currentPassword.value,
-      newPassword: newPassword.value
-    })
-    if(response.status === 400){
-      notificationStore.showNotification('La nueva contraseña no cumple con las validaciones básicas de longitud o formato', 'danger')
+    const response = await confirmNewPassword(nueva_contraseña.value, route.query.correo)
+    
+    notificationStore.showNotification('Contraseña cambiada exitosamente', 'success')
+    router.push('/inicioSesion')
+  } catch (error) {
+    if(error.status === 400){
+      notificationStore.showNotification('La nueva contraseña debe contener al menos 8 caracteres alfanumericos, ingrese una nueva contraseña', 'danger')
       return
     }
-    if(response.status === 401){
+    if(error.status === 401){
       notificationStore.showNotification('Error interno de consulta', 'danger')
       return
     }
-    if(response.status === 402){
+    if(error.status === 402){
       notificationStore.showNotification('Usuario no encontrado', 'danger')
       return
     }
-    if(response.status === 403){
-      notificationStore.showNotification('La contraseña actual es incorrecta', 'danger')
+    if(error.status === 403){
+      notificationStore.showNotification('La contraseña introducida es la actual', 'danger')
       return
     }
-    if(response.status === 404){
+    if(error.status === 404){
       notificationStore.showNotification('La nueva contraseña no puede ser igual a la contraseña actual', 'danger')
       return
     }
-    if(response.status === 500){
+    if(error.status === 500){
       notificationStore.showNotification('Error interno al modificar el registro', 'danger')
       return
     }
-    notificationStore.showNotification('Contraseña cambiada exitosamente', 'success')
-    router.push(`/perfil/${route.params.id}`)
-  } catch (error) {
-    console.error('Error al cambiar contraseña:', error)
-    notificationStore.showNotification('Error al cambiar contraseña: ' + error.message, 'danger')
   } finally {
     loading.value = false
   }

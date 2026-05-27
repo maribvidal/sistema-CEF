@@ -40,12 +40,22 @@ const restorePassButton = async () => {
         if(response && response.status === 200){
             notificationStore.showNotification('Se han enviado las instrucciones a tu correo electrónico', 'success')
             router.push('/inicioSesion')
-        } else {
-            notificationStore.showNotification('Error al enviar las instrucciones, por favor intenta nuevamente', 'danger')
+        } else if(response && response.status === 402) {
+            notificationStore.showNotification('El mail introducido no está registrado', 'danger')
         }
     }
     catch(error){
-        notificationStore.showNotification('Error al enviar las instrucciones ', 'danger')
+        console.error('Error al recuperar contraseña:', error)
+        let serverMessage = 'Error al recuperar contraseña. Por favor, inténtalo de nuevo.'
+        const status = error?.response?.status || error?.status
+        if (status === 402) {
+            serverMessage = 'El mail introducido no está registrado.'
+        } else if (status === 400) {
+            serverMessage = 'Solicitud inválida. Por favor, verifica el correo electrónico ingresado.'
+         } else if (error.message) {
+            serverMessage = error.message
+        }
+        notificationStore.showNotification(serverMessage, 'danger')
     }
 }
 </script>
