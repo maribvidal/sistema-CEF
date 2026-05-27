@@ -74,3 +74,9 @@ def obtener_clase_usuario_fecha_hora(id_usuario: int, fecha, hora, cursor) -> di
             WHERE u.id = {id_usuario} AND cos.fecha = '{fecha}' AND cos.hora = '{hora}'
             """
     return ejecutar_fetchall(query, cursor)
+
+def listar_dnis_usuarios(cursor) -> dict:
+    """Hace una consulta para retornar todos los dnis registrados
+        de los usuarios."""
+    query = "SELECT dni FROM Usuario WHERE rol_id = 3"
+    return ejecutar_fetchall(query, cursor)
