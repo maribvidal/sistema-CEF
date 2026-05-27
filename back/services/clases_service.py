@@ -6,7 +6,7 @@ from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_po
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, obtener_clase_usuario_fecha_hora
 from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase_por_id
 
 def listar_clases_service():
@@ -256,6 +256,22 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         return {
             "error": "Usuario no encontrado."
         }, 405
+
+    # Comprobar que el usuario no se haya inscrito ya a otra clase en esa hora
+
+    res_usuario_clase = obtener_clase_usuario_fecha_hora(id_usuario, fecha, hora, cursor)
+
+    if res_usuario_clase['status'] == 'error':
+        cursor.connection.close()
+        return res_usuario, 406
+
+    ## Se compara si es mayor a 0 puesto que, si el dict no tiene tuplas, entonces
+    ## va a devolver una cantidad de 0 el len().
+    if len(res_usuario_clase['data']) > 0:
+        cursor.connection.close()
+        return {
+            "error": "El usuario ya se encuentra inscripto en esa clase."
+        }, 407
 
     # Comprobar el cupo de la clase
 
