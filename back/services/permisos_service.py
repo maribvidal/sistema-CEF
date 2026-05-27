@@ -22,6 +22,13 @@ def cambiar_permiso_service(id, permiso):
             "error": "Usuario no encontrado."
         }, 401
 
+    # Si el rol_id del usuario es el mismo que se le intenta poner ahora...
+    if usuario['data']['rol_id'] == permiso:
+        cursor.connection.close()
+        return {
+            "error": "El usuario ya contaba con ese permiso."
+        }, 402
+
     respuesta = cambiar_permiso(id, permiso, cursor)
     cursor.connection.close()
 
