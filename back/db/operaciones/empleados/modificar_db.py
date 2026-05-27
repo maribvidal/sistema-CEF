@@ -63,7 +63,6 @@ def modificar_empleado(
 
     return ejecutar_query(query_update, cursor)
 
-
 def borrar_empleado(empleado_dni: int, cursor) -> dict:
     """Borra un empleado específico de la base de datos, utilizando su DNI como referencia.
         Recibe el DNI del empleado a borrar.
