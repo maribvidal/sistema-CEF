@@ -108,6 +108,8 @@ def listar_empleados_desactivados_service():
 def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, genero):
     """Service que crea un recepcionista."""
 
+    # ¿Comprobar los valores enviados?
+
     cursor = conectarse_db()
 
     # Comprobar que el correo tampoco se haya utilizado
@@ -120,7 +122,9 @@ def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, gene
             "error": "Error al obtener los correos de los empleados."
         }, 400
 
-    if (correo in res_correos['data']):
+    print(res_correos['data'])
+
+    if (correo in str(res_correos['data'])):
         cursor.connection.close()
         return {
             "error": "El correo ya se encuentra registrado para un empleado."
@@ -128,7 +132,7 @@ def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, gene
 
     # Comprobar que el dni no se haya utilizado (esto se hace en la operación de inserción misma)
 
-    res_insertar = insertar_recepcionista(dni, nombre, apellido, correo, contraseña, genero)
+    res_insertar = insertar_recepcionista(dni, nombre, apellido, correo, contraseña, genero, cursor)
 
     if res_insertar['status'] == 'error':
         cursor.connection.close()
