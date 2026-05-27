@@ -54,6 +54,7 @@ Profesores
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
 | /profesores | GET | - | 200: Se devuelve una lista completa de los profesores registrados en el gimnasio. |
+| /profesores | POST | dni, nombre, apellido, genero | 400: Error de base de datos o fallo al intentar insertar el profesor <br> 200: Profesor creado con éxito de manera correcta. |
 
 Salas
 

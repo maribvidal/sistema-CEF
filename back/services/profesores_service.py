@@ -21,7 +21,7 @@ def crear_profesor_service(dni, nombre, apellido, genero):
     if res_insertar['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": usuario['message']
+            "error": res_insertar['message']
         }, 400
 
     cursor.connection.commit()
