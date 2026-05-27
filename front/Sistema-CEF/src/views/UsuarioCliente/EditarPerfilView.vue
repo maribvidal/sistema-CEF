@@ -104,7 +104,7 @@ const updateProfile = async () => {
     await authUpdateProfile({
       nombre: userName.value,
       apellido: lastName.value,
-      correo: userEmail.value,
+      correo: userEmail.value !== profileData.value.correo ? userEmail.value : undefined, // Solo enviar si cambió
       telefono: userPhone.value,
       fecha_nac: userBirthDate.value
     })
@@ -112,7 +112,7 @@ const updateProfile = async () => {
     notificationStore.showNotification('Perfil actualizado con éxito.', 'success')
   } catch (error) {
     console.error('Error updating profile:', error)
-    notificationStore.showNotification(`Error al actualizar el perfil: ${error.message}`, 'error')
+    notificationStore.showNotification(`Error al actualizar el perfil: ${error.message}`, 'danger')
   } finally {
     isUpdatingProfile.value = false
   }
@@ -163,11 +163,11 @@ const uploadAvatar = async () => {
     }
 
   } catch (error) {
-    if(error.response && error.response.status === 401) {
+    if ((error.response && error.response.status === 401) || error.status === 401) {
       router.push('/inicioSesion')
       return
     }
-    notificationStore.showNotification(`Error al actualizar el avatar: ${error.message}`, 'error')
+    notificationStore.showNotification(`Error al actualizar el avatar: ${error.message}`, 'danger')
   } finally {
     isUploadingAvatar.value = false
   }
