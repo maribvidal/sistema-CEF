@@ -20,3 +20,15 @@ def consultar_clase_ocurrir_sala_por_claseid_fecha_hora(clase_id, fecha, hora, c
     """
 
     return ejecutar_fetchone(query, cursor)
+
+def consultar_usuarios_inscriptos_clase_ocurrir_sala(clase_ocu_sala_id, cursor):
+    """Función que, dado un id de clase_ocurrir_sala, retorna todas
+        las tuplas que encuentre de gente inscripta en dicha clase."""
+    query = f"""
+        SELECT *
+        FROM Usuario_Inscribir_Clase uic
+            INNER JOIN Clase_Ocurrir_Sala cos ON (uic.clase_ocurrir_sala_id = cos.id)
+        WHERE cos.id = {clase_ocu_sala_id}
+    """
+    
+    return ejecutar_fetchall(query, cursor)
