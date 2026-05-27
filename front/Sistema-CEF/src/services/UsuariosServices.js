@@ -84,11 +84,21 @@ const AuthApiService = {
   },
 
   // ConfirmNewPassword: mapea Usuarios/ConfirmarNuevaContrasena → No implementado en backend
-  confirmNewPass: async (token, newPassword) => {
-    console.warn('confirmNewPass no implementado en backend Python')
-    throw new Error('Funcionalidad no disponible en este momento')
+  // ConfirmNewPassword
+  confirmNewPass: async (nueva_contraseña, correo) => {
+    
+    // 1. ELIMINAMOS EL TOKEN FANTASMA
+    // Así forzamos a que api.js envíe la petición completamente limpia, igual que Postman
+    localStorage.removeItem('token');
+
+    // 2. CORREGIMOS EL NOMBRE DE LA VARIABLE
+    return apiClient.put(`/usuarios/ConfirmarNuevaContrasena`, {
+      nueva_contraseña: nueva_contraseña, // <-- Ahora es exactamente igual a Postman
+      correo: correo
+    })
   },
 }
+
 
 export const AdminApiService = {
   userList: async () => {
@@ -277,8 +287,8 @@ export const useAuth = () => {
     return await AuthApiService.restorePass({ correo: email })
   }
 
-  const confirmNewPassword = async (token, newPassword) => {
-    await AuthApiService.confirmNewPass(token, newPassword)
+  const confirmNewPassword = async (nueva_contraseña, correo) => {
+    return await AuthApiService.confirmNewPass(nueva_contraseña, correo)
   }
 
 

@@ -46,9 +46,10 @@ import logoImg from '@/assets/logoLargo.png'
 import { useAuth } from '@/services/UsuariosServices.js'
 import { ref } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
+import { useNotificationStore } from '@/stores/notificationStore.js'
 
 const { login: authLogin } = useAuth()
-
+const notificationStore = useNotificationStore()
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
@@ -62,29 +63,19 @@ const login = async () => {
 			password: password.value,
 		})
 		if (userInfo) {
+			notificationStore.showNotification('Usuario iniciado sesión con éxito, Bienvenido ' + userInfo.nombre + '.', 'success')
 			router.push('/')
-		} else {
-			errorMessage.value = 'Credenciales incorrectas. Por favor, inténtalo de nuevo.'
 		}
 	} catch (error) {
-		let serverMessage = 'Error al iniciar sesión. Por favor, inténtalo de nuevo.'
-		if (error.respose){
-			const { status, data } = error.response
-			if (status === 401) {
-				serverMessage = 'No autorizado.'
-			}
-			else if (status === 400) {
-				serverMessage = 'Datos de inicio de sesión inválidos.'
-			}
-			else if (data && typeof data === 'string' && data.trim()) {
-				serverMessage = data
-			}
-			else serverMessage = `Error ${status}: ${error.message}`
+		console.error('Error en el inicio de sesión:', error)
+		const status = error?.response?.status || error?.status
+		if (status === 400) {
+			errorMessage.value = 'Usuario no registrado'
+		} else if (status === 401) {
+			errorMessage.value = 'Contraseña incorrecta'
+		} else {
+			errorMessage.value = error?.message || 'Ocurrió un error al iniciar sesión'
 		}
-		else if (error.message) {
-			serverMessage = error.message
-		}
-		errorMessage.value = serverMessage
 	}
 }
 </script>

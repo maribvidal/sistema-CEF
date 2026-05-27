@@ -58,6 +58,17 @@ const router = useRouter()
 const name = ref('')
 const lastname = ref('')
 const email = ref('')
+/* 400: Errores lógicos de validación de inputs generales
+401: El rol_id proporcionado no es válido
+402: La fecha de nacimiento no cuenta con un formato válido (%Y-%m-%d)
+403: El usuario debe ser mayor de 14 años
+404/406: Error interno de base de datos al validar el documento
+405: El DNI ya se encuentra registrado para un usuario común
+407: El DNI ya se encuentra registrado para un empleado
+408: Error de servidor al validar el correo electrónico
+409: El correo electrónico ya se encuentra registrado
+500: Error del lado del servidor al intentar insertar
+201: Usuario registrado exitosamente. */
 
 const password = ref('')
 const dni = ref('')
@@ -101,8 +112,24 @@ const register = async () => {
     })
 
     if (!response.ok) {
-      const errorData = await response.text()
-      throw new Error(errorData || 'Error al registrar el usuario.')
+      if (response.status === 400) {
+		const errorData = await response.json()
+		errorMessage.value = errorData.message || 'Error de validación. Por favor, revisa tus datos.'
+	  } else if (response.status === 409) {
+		errorMessage.value = 'El correo electrónico ya se encuentra registrado.'
+	  } else if (response.status === 405) {
+		errorMessage.value = 'El DNI ya se encuentra registrado.'
+	  } else if (response.status === 407) {
+		errorMessage.value = 'El DNI ya se encuentra registrado para un empleado.'
+	  } 
+	  else if (response.status === 403){
+		errorMessage.value = 'El usuario debe ser mayor de 14 años.'
+	  }
+		else {
+		errorMessage.value = 'Error al registrar el usuario. Por favor, intenta nuevamente.'
+	  }
+	  return
+      
     }
 
     // Si el registro es exitoso, redirigir a la página de inicio de sesión
