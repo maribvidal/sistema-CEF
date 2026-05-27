@@ -43,7 +43,7 @@ def insertar_datos(cursor):
     insertar_sala('Sala 3', 20, cursor)
 
     # Crear clase
-    insertar_clase('Programada', 1, 1, cursor)
+    insertar_clase('Programada', 1, 1, 30, cursor)
     res_clase_ocu_sala = insertar_clase_ocurrir_sala(1, 1, '2024-07-01', '10:00', cursor)
     
     # Inscribir usuario a clase

@@ -270,7 +270,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()
-        return res_usuario, 406
+        return res_usuario_clase['message'], 406
 
     ## Se compara si es mayor a 0 puesto que, si el dict no tiene tuplas, entonces
     ## va a devolver una cantidad de 0 el len().
