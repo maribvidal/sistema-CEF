@@ -92,12 +92,17 @@ def cancelar_clase(id_clase):
 ## endpoint que reciba simplemente la id del 
 ## clase_ocurrir_sala en vez de esto.
 
-@clases_bp.route("/clases/<int:id_clase>/reservar", methods=["GET"])
+@clases_bp.route("/clases/<int:id_clase>/reservar", methods=["PUT"])
 def reservar_clase(id_clase):
     """Este endpoint permite inscribir a un usuario a
         una clase específica. Esto se hace pidiendo el
         id del usuario, la fecha, y la hora de la clase."""
 
-    # Por implementar
+    data = request.get_json()
+    id_usuario = data.get("id_usuario")
+    fecha = data.get("fecha")
+    hora = data.get("hora")
 
-    pass
+    respuesta, status = reservar_clase_service(id_clase, id_usuario, fecha, hora)
+
+    return jsonify(respuesta), status
