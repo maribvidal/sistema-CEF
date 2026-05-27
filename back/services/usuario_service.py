@@ -1,6 +1,5 @@
-from db.operaciones.clases.consultar_db import consultar_clase_por_id, consultar_disponibilidad_clase
-from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id, consultar_superposicion_horaria_clase_usuario
-from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase
+from db.operaciones.clases.consultar_db import consultar_clase_por_id
+from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
@@ -554,112 +553,6 @@ def obtener_clases_usuario_service(id_usuario: int):
 
     cursor.connection.close()
     return respuesta['data'], 200
-
-def inscribir_usuario_en_clase_service(usuario_id: int, clase_id: int):
-    cursor = conectarse_db()
-
-    usuario = consultar_usuario_por_id(usuario_id, cursor)
-
-    if usuario['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": usuario['message']
-        }, 500
-
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 404
-        
-    clase = consultar_clase_por_id(clase_id, cursor)
-    
-    if clase['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": clase['message']
-        }, 500
-        
-    if clase['status'] == 'success' and not clase['data']:
-        cursor.connection.close()
-        return {
-            "error": "Clase no encontrada."
-        }, 404
-        
-    res = consultar_usuario_inscribir_clase_por_usuario_id(usuario_id, clase_id, cursor)
-    
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-        
-    if res['status'] == 'success' and res['data'] is not None:
-        cursor.connection.close()
-        return {
-            "error": "El usuario ya se encuentra inscrito en esta clase."
-        }, 400
-        
-    res = consultar_disponibilidad_clase(clase_id, cursor)
-    
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-        
-    # en el front informa que no hay cupos y le da opcion de inscribirse a la lista de espera
-    if res['status'] == 'success' and not res['data']:
-        cursor.connection.close()
-        return {
-            "error": "No hay cupos disponibles para esta clase."
-        }, 401
-        
-    # -------------  CHECKEAR  -------------
-    res = consultar_mensualidad_cubre_clase(usuario_id, clase_id, cursor)
-    print("respuesta mensualidad cubre clase: ", res)
-    
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-        
-    if res['status'] == 'success' and not res['data']:
-        cursor.connection.close()
-        return {
-            "error": "Debe regularizar su pago para poder reservar clases."
-        }, 401
-
-    # -------------  CHECKEAR  -------------
-    res = consultar_superposicion_horaria_clase_usuario(usuario_id, clase_id, cursor)
-    print("Respuesta superposicion horaria: ", res)
-    
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-    
-    if res['status'] == 'success' and res['data']:
-        cursor.connection.close()
-        return {
-            "error": "Ya posee una clase reservada en ese horario."
-        }, 402
-
-    res = insertar_usuario_inscribir_clase(usuario_id, clase_id, cursor)
-
-    if res['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res['message']
-        }, 500
-
-    cursor.connection.commit()
-    cursor.connection.close()
-    return {
-        "mensaje": "Usuario inscrito en la clase exitosamente."
-    }, 200
 
 def subir_avatar_usuario_service(usuario_id, avatar):
     """Service que permite subir el avatar de un usuario."""

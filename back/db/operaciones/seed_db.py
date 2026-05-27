@@ -7,7 +7,7 @@ from db.operaciones.permisos.insertar_db import insertar_permiso
 from db.operaciones.roles.insertar_db import insertar_rol
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones import insertar_pago, insertar_clase
-from db.operaciones import insertar_pago_pagar_clase, insertar_usuario_inscribir_clase
+from db.operaciones import insertar_pago_pagar_clase, insertar_usuario_inscribir_clase_por_id
 
 # necesito insertarle mensualidades con actividades a los usuarios
 def insertar_datos(cursor):  
@@ -43,11 +43,12 @@ def insertar_datos(cursor):
     insertar_sala('Sala 3', 20, cursor)
 
     # Crear clase
-    insertar_clase('Programada', 1, 1, 30, cursor)
-    insertar_clase_ocurrir_sala(1, 1, '2026-05-29', '10:00', cursor)
+    insertar_clase('Programada', 1, 1, cursor)
+    res_clase_ocu_sala = insertar_clase_ocurrir_sala(1, 1, '2024-07-01', '10:00', cursor)
     
     # Inscribir usuario a clase
-    insertar_usuario_inscribir_clase(1, 1, cursor)
+    id_clase_ocu_sala = res_clase_ocu_sala['data']
+    insertar_usuario_inscribir_clase_por_id(1, 1, id_clase_ocu_sala, cursor)
 
     # Crear pagos
     insertar_pago(50.0, 1, cursor)

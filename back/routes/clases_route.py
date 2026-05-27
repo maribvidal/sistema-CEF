@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from services.clases_service import (
     listar_clases_service, publicar_clase_service, 
     modificar_clase_service, eliminar_clase_service,
-    cancelar_clase_service
+    cancelar_clase_service, reservar_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -88,5 +88,25 @@ def cancelar_clase(id_clase):
         Recibe el ID de la clase a cancelar en formato JSON."""
 
     respuesta, status = cancelar_clase_service(id_clase)
+
+    return jsonify(respuesta), status
+
+## No estoy seguro de como implementar esto. Mañana lo voy
+## a ver mejor, porque también podríamos implementar un
+## endpoint que reciba simplemente la id del 
+## clase_ocurrir_sala en vez de esto.
+
+@clases_bp.route("/clases/<int:id_clase>/reservar", methods=["PUT"])
+def reservar_clase(id_clase):
+    """Este endpoint permite inscribir a un usuario a
+        una clase específica. Esto se hace pidiendo el
+        id del usuario, la fecha, y la hora de la clase."""
+
+    data = request.get_json()
+    id_usuario = data.get("id_usuario")
+    fecha = data.get("fecha")
+    hora = data.get("hora")
+
+    respuesta, status = reservar_clase_service(id_clase, id_usuario, fecha, hora)
 
     return jsonify(respuesta), status
