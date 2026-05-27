@@ -85,7 +85,7 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
     """Construye la tabla Usuario"""
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Usuario (
                             id          INTEGER PRIMARY KEY,
-                            dni         INTEGER UNIQUE NOT NULL,
+                            dni         INTEGER NOT NULL,
                             nombre      VARCHAR({LONG_NOM}) NOT NULL,
                             apellido    VARCHAR({LONG_APE}) NOT NULL,
                             correo      VARCHAR({LONG_CORREO}) NOT NULL,
