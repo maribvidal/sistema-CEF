@@ -75,7 +75,7 @@ const updateEmployee = async () => {
   loading.value = true
   try {
     // Cuando integrés tu API puedes llamar a:
-    await EmployeesService.updateEmployeeInfo(employee.value.id, employee.value)
+    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value)
     
     notificationStore.showNotification('Empleado actualizado exitosamente.', 'success')
     emit('updated')
