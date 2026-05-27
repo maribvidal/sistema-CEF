@@ -204,7 +204,7 @@ def construir_tabla_usuario_tener_descuento(cursor: sqlite.Cursor):
     """Construye la tabla Usuario_Tener_Descuento"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Usuario_Tener_Descuento (
                             id           INTEGER PRIMARY KEY,
-                            usuario_id   I  NTEGER NOT NULL,
+                            usuario_id   INTEGER NOT NULL,
                             descuento_id INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
