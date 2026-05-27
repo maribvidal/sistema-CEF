@@ -49,7 +49,7 @@ def cambiar_permiso_service(id, permiso):
             return {
                 "error": "El DNI ya se encuentra registrado para un usuario."
             }, 404
-    else if (rol_viejo == 3 and permiso != 3):
+    elif (rol_viejo == 3 and permiso != 3):
         # El usuario común pasará a ser un empleado
         res_dnis = listar_dnis_empleados(cursor)
 
