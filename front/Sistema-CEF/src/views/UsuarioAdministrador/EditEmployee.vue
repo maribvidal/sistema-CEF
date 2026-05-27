@@ -32,6 +32,16 @@
               required
             ></v-text-field>
           </v-col>
+          <v-col cols="12" sm="6" class="py-1">
+            <v-text-field
+              v-model="employee.dni"
+              label="DNI"
+              variant="outlined"
+              density="comfortable"
+              prepend-inner-icon="mdi-card-account-details"
+              required
+            ></v-text-field>
+          </v-col>
         </v-row>
       </v-form>
     </v-card-text>
@@ -67,7 +77,7 @@ watch(() => props.empleado, (newVal) => {
 }, { deep: true, immediate: true })
 
 const updateEmployee = async () => {
-  if (!employee.value.nombre || !employee.value.apellido || !employee.value.correo) {
+  if (!employee.value.nombre || !employee.value.apellido || !employee.value.correo || !employee.value.dni) {
     notificationStore.showNotification('Por favor, complete todos los campos obligatorios.', 'warning')
     return
   }
