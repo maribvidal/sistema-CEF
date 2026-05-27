@@ -2,7 +2,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.empleados.consultar_db import listar_empleados
 from db.operaciones.empleados.insertar_db import insertar_recepcionista
 from db.operaciones.empleados.modificar_db import modificar_empleado, borrar_empleado, desactivar_empleado
-from db.operaciones.empleados.consultar_db import listar_empleados_desactivados, listar_correos_empleados
+from db.operaciones.empleados.consultar_db import listar_empleados_desactivados, listar_correos_empleados, listar_dnis_empleados
 
 def listar_empleados_service():
     """Service que lista los empleados."""
@@ -22,8 +22,6 @@ def listar_empleados_service():
 
     return respuesta['data'], 200
 
-
-# falta implementar
 def modificar_empleado_service(
     empleado_dni: int, 
     nombre: str, 
@@ -37,6 +35,7 @@ def modificar_empleado_service(
     ):
     """Service que modifica un empleado."""
     cursor = conectarse_db()
+
     respuesta = modificar_empleado(empleado_dni, nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id, cursor)
 
     # Con esto guardo los cambios en la base de datos
@@ -112,6 +111,22 @@ def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, gene
 
     cursor = conectarse_db()
 
+    # Comprobar que el DNI no se haya utilizado
+
+    res_dnis = listar_dnis_empleados(cursor)
+
+    if res_dnis['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al obtener los DNIs de los empleados."
+        }, 400
+
+    if (dni in str(res_dnis['data'])):
+        cursor.connection.close()
+        return {
+            "error": "El DNI ya se encuentra registrado para un empleado."
+        }, 401
+
     # Comprobar que el correo tampoco se haya utilizado
 
     res_correos = listar_correos_empleados(cursor)
@@ -120,17 +135,15 @@ def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, gene
         cursor.connection.close()
         return {
             "error": "Error al obtener los correos de los empleados."
-        }, 400
-
-    print(res_correos['data'])
+        }, 402
 
     if (correo in str(res_correos['data'])):
         cursor.connection.close()
         return {
             "error": "El correo ya se encuentra registrado para un empleado."
-        }, 401
+        }, 403
 
-    # Comprobar que el dni no se haya utilizado (esto se hace en la operación de inserción misma)
+    # Intentar insertar al recepcionista
 
     res_insertar = insertar_recepcionista(dni, nombre, apellido, correo, contraseña, genero, cursor)
 
@@ -138,13 +151,13 @@ def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, gene
         cursor.connection.close()
         return {
             "error": res_insertar['message']
-        }, 402
+        }, 404
 
     if res_insertar['status'] == 'success' and (not res_insertar['data']):
         cursor.connection.close()
         return {
-            "error": "El DNI ya se encuentra registrado para un empleado."
-        }, 403
+            "error": "El recepcionista no se pudo crear por alguna razón desconocida."
+        }, 405
 
     cursor.connection.commit()
     cursor.connection.close()
