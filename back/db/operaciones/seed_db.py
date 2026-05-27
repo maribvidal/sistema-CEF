@@ -38,12 +38,12 @@ def insertar_datos(cursor):
     insertar_rol('Recepcionista', cursor)
     
     # Crear salas
-    insertar_sala('Sala 1', 30, cursor)
+    insertar_sala('Sala 1', 10, cursor)
     insertar_sala('Sala 2', 25, cursor)
     insertar_sala('Sala 3', 20, cursor)
 
     # Crear clase
-    insertar_clase('Programada', 1, 1, 30, cursor)
+    insertar_clase('Programada', 1, 1, 5, cursor)
     res_clase_ocu_sala = insertar_clase_ocurrir_sala(1, 1, '2024-07-01', '10:00', cursor)
     
     # Inscribir usuario a clase
