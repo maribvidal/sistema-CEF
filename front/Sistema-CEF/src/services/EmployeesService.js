@@ -22,8 +22,8 @@ export const EmployeesService = {
    * Actualiza el rol de un empleado mediante su DNI
    * Endpoint: PUT /empleados/(dni)/rol
    */
-  updateEmployeeRole: async (dni, roleId) => {
-    const response = await apiClient.put(`/empleados/${dni}/rol`, { 
+  updateEmployeeRole: async (id, roleId) => {
+    const response = await apiClient.post(`/usuarios/${id}/permisos`, { 
       rol_id: roleId 
     })
     return response.data

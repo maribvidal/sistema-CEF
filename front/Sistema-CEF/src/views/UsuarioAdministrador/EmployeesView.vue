@@ -198,6 +198,7 @@
 import { ref, onMounted } from 'vue'
 import { EmployeesService } from '@/services/EmployeesService'
 import EditEmployee from './EditEmployee.vue'
+import { useNotificationStore } from '@/stores/notificationStore.js'
 
 const empleados = ref([])
 const profesores = ref([])
@@ -209,6 +210,7 @@ const dialogEditarEmpleado = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
 const isDisabled = ref(false) // Para manejar el estado de desactivación de empleados
+const notificationStore = useNotificationStore()
 
 // Estados para creación de personal
 const dialogProfesor = ref(false)
@@ -265,6 +267,7 @@ const cargarEmpleados = async () => {
   try {
     const data = await EmployeesService.getEmployees()
     const fetched = (data || []).map(e => ({
+      id: e.id ?? e[0],
       dni: e.dni ?? e[1],
       nombre: e.nombre ?? e[2],
       apellido: e.apellido ?? e[3],
@@ -321,16 +324,16 @@ const crearProfesor = () => {
 const guardarProfesor = async () => {
   try {
     if (!nuevoProfesor.value.nombre || !nuevoProfesor.value.dni) {
-      alert('Por favor complete los campos obligatorios')
+      notificationStore.showNotification('Por favor complete los campos obligatorios', 'warning')
       return
     }
     await EmployeesService.createProfessor(nuevoProfesor.value)
-    alert('Profesor creado exitosamente')
+    notificationStore.showNotification('Profesor creado exitosamente', 'success')
     dialogProfesor.value = false
     await cargarEmpleados()
   } catch (error) {
     console.error('Error al crear profesor:', error)
-    alert('No se pudo crear el profesor')
+    notificationStore.showNotification('No se pudo crear el profesor', 'danger')
   }
 }
 
@@ -342,16 +345,16 @@ const crearRecepcionista = () => {
 const guardarRecepcionista = async () => {
   try {
     if (!nuevoRecepcionista.value.correo || !nuevoRecepcionista.value.contraseña) {
-      alert('Por favor complete los campos de acceso (correo y contraseña)')
+      notificationStore.showNotification('Por favor complete los campos de acceso (correo y contraseña)', 'warning')
       return
     }
     await EmployeesService.createReceptionist(nuevoRecepcionista.value)
-    alert('Recepcionista creado exitosamente')
+    notificationStore.showNotification('Recepcionista creado exitosamente', 'success')
     dialogRecepcionista.value = false
     await cargarEmpleados()
   } catch (error) {
     console.error('Error al crear recepcionista:', error)
-    alert('No se pudo crear el recepcionista: ' + (error.response?.data?.error || ''))
+    notificationStore.showNotification('No se pudo crear el recepcionista: ' + (error.response?.data?.error || ''), 'danger')
   }
 }
 
@@ -360,34 +363,41 @@ const modificarEmpleado = (empleado) => {
   dialogEditarEmpleado.value = true
 }
 
-const desactivarEmpleado = async (empleado) => {
-  if (!confirm(`¿Estás seguro de que deseas desactivar la cuenta de ${empleado.nombre}?`)) {
-    return
-  }
-
+const desactivarEmpleado = (empleado) => {
   const dni = empleado?.dni ?? empleado?.raw?.dni
   if (!dni) {
-    alert('No se pudo identificar el DNI del empleado')
+    notificationStore.showNotification('No se pudo identificar el DNI del empleado', 'danger')
     return
   }
 
-  try {
-    await EmployeesService.deactivateEmployee(dni)
-    await cargarEmpleados()
-    alert('Empleado desactivado exitosamente')
-  } catch (error) {
-    console.error('Error al desactivar empleado:', error)
-    alert('No se pudo desactivar el empleado')
-  }
+  notificationStore.showNotification(
+    `¿Desactivar a ${empleado.nombre} ${empleado.apellido}?`,
+    'warning',
+    0, // timeout 0 para que no desaparezca
+    async () => {
+      try {
+        await EmployeesService.deactivateEmployee(dni)
+        await cargarEmpleados()
+        notificationStore.showNotification('Empleado desactivado exitosamente', 'success')
+      } catch (error) {
+        console.error('Error al desactivar empleado:', error)
+        notificationStore.showNotification('No se pudo desactivar el empleado', 'danger')
+      }
+    }
+  )
 }
 
-
-
 const eliminarEmpleado = (empleado) => {
-  if (confirm(`¿ELIMINAR PERMANENTEMENTE a ${empleado.nombre} ${empleado.apellido}?`)) {
-    console.log('Eliminando empleado DNI:', empleado.dni)
-    // Llamada al servicio de borrado
-  }
+  notificationStore.showNotification(
+    `¿ELIMINAR PERMANENTEMENTE a ${empleado.nombre} ${empleado.apellido}?`,
+    'danger',
+    0,
+    () => {
+      console.log('Eliminando empleado DNI:', empleado.dni)
+      notificationStore.showNotification('Empleado eliminado exitosamente', 'success')
+      // Llamada al servicio de borrado
+    }
+  )
 }
 
 const abrirEditorRol = (empleado) => {
@@ -398,11 +408,12 @@ const abrirEditorRol = (empleado) => {
 
 const confirmarCambioRol = async () => {
   try {
-    await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.dni, nuevoRolId.value)
+    await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.id, nuevoRolId.value)
     await cargarEmpleados()
     dialog.value = false
+    notificationStore.showNotification('Rol actualizado exitosamente', 'success')
   } catch (error) {
-    alert('Error al actualizar el rol: ' + (error.response?.data?.error || 'Error desconocido'))
+    notificationStore.showNotification('Error al actualizar el rol: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
   }
 }
 

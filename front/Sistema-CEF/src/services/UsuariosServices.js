@@ -69,17 +69,18 @@ const AuthApiService = {
 
   // ChangePassword: mapea Usuarios/CambiarContrasena → No implementado en backend
   changePass: async (userId, passwords) => {
-    apiClient.put(`/usuarios/${userId}/contraseña`, {
+    return apiClient.put(`/usuarios/${userId}/contraseña`, {
       contraseña_actual: passwords.currentPassword,
-      nueva_contraseña: passwords.newPassword
+      contraseña_nueva: passwords.newPassword
     }
   )
   },
 
   // RestorePassword: mapea Usuarios/RestablecerContrasena → No implementado en backend
   restorePass: async (requestData) => {
-    console.warn('restorePass no implementado en backend Python')
-    throw new Error('Funcionalidad no disponible en este momento')
+    return apiClient.post(`/usuarios/RestablecerContrasena`, {
+      correo: requestData.correo
+    })
   },
 
   // ConfirmNewPassword: mapea Usuarios/ConfirmarNuevaContrasena → No implementado en backend
@@ -269,11 +270,11 @@ export const useAuth = () => {
   }
 
   const changePassword = async (userId, passwords) => {
-    await AuthApiService.changePass(userId, passwords)
+    return await AuthApiService.changePass(userId, passwords)
   }
 
-  const restorePassword = async (token, newPassword) => {
-    await AuthApiService.restorePass(token, newPassword)
+  const restorePassword = async (email) => {
+    return await AuthApiService.restorePass({ correo: email })
   }
 
   const confirmNewPassword = async (token, newPassword) => {

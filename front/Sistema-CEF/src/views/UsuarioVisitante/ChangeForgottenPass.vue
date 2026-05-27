@@ -6,17 +6,6 @@
         <v-row>
           <v-col cols="12" sm="6" class="py-1">
             <v-text-field
-                id="currentPassword"
-              v-model="currentPassword"
-              label="Contraseña Actual"
-              type="password"
-              variant="outlined"
-              density="comfortable" 
-                required
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" class="py-1">
-            <v-text-field
                 id="newPassword"
               v-model="newPassword"
               label="Nueva Contraseña"
