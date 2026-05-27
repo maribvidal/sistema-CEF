@@ -20,8 +20,6 @@ def formattear_fecha(fecha):
 def insertar_usuario_inscribir_clase_por_id(usuario_id: int, clase_id: int, clase_ocurrir_sala_id: int, cursor):
     """Permite insertar una fila para la tabla Usuario_Inscribir_Clase
         pero sabiendo el id de la Clase_Ocurrir_Sala buscada."""
-    if fecha is None:
-        fecha = datetime.date.today()
     query = f"""INSERT INTO Usuario_Inscribir_Clase (usuario_id, clase_id, clase_ocurrir_sala_id)
                 VALUES ({usuario_id}, {clase_id}, '{clase_ocurrir_sala_id}');"""
     return ejecutar_insertar(query, cursor)

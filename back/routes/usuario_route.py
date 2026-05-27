@@ -10,7 +10,6 @@ from services.usuario_service import (
     restablecer_contraseña_service,
     confirmar_nueva_contrasena_service,
     obtener_clases_usuario_service,
-    inscribir_usuario_en_clase_service,
     subir_avatar_usuario_service,
     obtener_avatar_usuario_service
 )
