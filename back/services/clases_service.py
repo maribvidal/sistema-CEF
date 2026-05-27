@@ -235,7 +235,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         cursor.connection.close()
         return res_clase_ocu_sala, 402
     
-    if res_clase_ocu_sala['status'] == 'sucess' and not res_clase_ocu_sala['data']:
+    if res_clase_ocu_sala['data'] is None:
         cursor.connection.close()
         return {
             "error": "Clase_ocurrir_sala no encontrada."
