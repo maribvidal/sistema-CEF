@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, request, jsonify
 from services.profesores_service import listar_profesores_service, crear_profesor_service
 
 profesores_bp = Blueprint('profesores', __name__)
