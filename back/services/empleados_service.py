@@ -26,12 +26,7 @@ def modificar_empleado_service(
     empleado_dni: int,
     dni_nuevo: int, 
     nombre: str, 
-    apellido: str, 
-    correo: str, 
-    contraseña: str, 
-    fecha_nac: str, 
-    telefono: str, 
-    genero: str, 
+    apellido: str,
     rol_id: int
     ):
     """Service que modifica un empleado."""
@@ -54,7 +49,7 @@ def modificar_empleado_service(
             "error": "El DNI ya se encuentra registrado para un empleado."
         }, 401
 
-    respuesta = modificar_empleado_con_dni(empleado_dni, dni_nuevo, nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id, cursor)
+    respuesta = modificar_empleado_con_dni(empleado_dni, dni_nuevo, nombre, apellido, rol_id, cursor)
 
     # Con esto guardo los cambios en la base de datos
     cursor.connection.commit()

@@ -67,12 +67,7 @@ def modificar_empleado_con_dni(
         empleado_dni: int,
         nuevo_dni: int,
         nombre: str, 
-        apellido, 
-        correo, 
-        contraseña, 
-        fecha_nac, 
-        telefono, 
-        genero, 
+        apellido,
         rol_id, 
         cursor
     ) -> dict:
@@ -84,11 +79,6 @@ def modificar_empleado_con_dni(
         SET dni = {nuevo_dni},
             nombre = '{nombre}',
             apellido = '{apellido}',
-            correo = '{correo}',
-            contraseña = '{contraseña}',
-            fecha_nac = '{fecha_nac}',
-            telefono = '{telefono}',
-            genero = '{genero}',
             rol_id = {rol_id}
         WHERE dni = {empleado_dni}
     """
