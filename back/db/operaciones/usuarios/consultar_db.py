@@ -52,7 +52,7 @@ def obtener_clases_usuario(id_usuario: int, cursor) -> dict:
         FROM Clase c
         INNER JOIN Usuario_Inscribir_Clase i ON (c.id = i.clase_id)
         INNER JOIN Actividad a ON (c.actividad_id = a.id)
-        INNER JOIN Profesor p ON (c.profesor_id = p.id)
+        INNER JOIN Usuario p ON (c.profesor_id = p.id)
         INNER JOIN Clase_Ocurrir_Sala cos ON (c.id = cos.clase_id)
         INNER JOIN Sala s ON (cos.sala_id = s.id)
         WHERE i.usuario_id = {id_usuario}

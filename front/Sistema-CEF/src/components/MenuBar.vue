@@ -11,12 +11,7 @@
     expand-on-hover
   >
     <v-list nav density="compact" class="menu-content">
-      <v-list-item class="theme-item">
-
-      <v-btn density="comfortable" rounded="circle" class="theme-btn" color="blue-darken-3" variant="flat">
-                <v-icon>mdi-moon-waning-crescent</v-icon>
-            </v-btn>
-      </v-list-item>
+      
       <v-list-item class="menu-link-item" to="/">
         <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
           <v-icon start>{{ appMenuIcons.home }}</v-icon>
@@ -47,6 +42,13 @@
         <v-icon start>mdi-account-plus</v-icon>
         Registrarse
       </v-btn>
+      <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/clases">
+        <v-icon start>{{ appMenuIcons.classes }}</v-icon>
+        Clases
+      </v-btn>
+      <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/administracionEmpleados" v-if="userProfile?.rol === 1 || userRole === 1">Administracion de empleados</v-btn>
+      
+
       <!-- Mostrar nombre de usuario si está autenticado -->
             <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3"  :to="{ name: 'perfil', params: { id: userProfile?.id } }" v-if="isLoggedIn">
                 <v-avatar size="32" class="mr-2" v-if="userProfile?.avatarUrl">
@@ -55,6 +57,7 @@
                 <v-icon size="32" class="mr-2" v-else>mdi-account-circle</v-icon>
                 Mi Perfil: {{ userProfile?.nombre || 'Usuario' }}
             </v-btn>
+
       <v-btn variant="flat" color="red-darken-2" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" @click="handleLogout" v-if="isLoggedIn">
         <v-icon start>mdi-logout</v-icon>
         Cerrar Sesión
