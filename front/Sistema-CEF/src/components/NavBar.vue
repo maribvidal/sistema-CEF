@@ -6,7 +6,7 @@
         </router-link>
 
         <v-spacer></v-spacer>
-        <v-btn density="comfortable" rounded="circle" class="theme-btn" color="blue-darken-3" variant="flat">
+        <!--<v-btn density="comfortable" rounded="circle" class="theme-btn" color="blue-darken-3" variant="flat" hidden>
                 <v-icon>mdi-moon-waning-crescent</v-icon>
             </v-btn>
         <!-- Use d-none d-md-flex to hide links on smaller screens if needed -->
