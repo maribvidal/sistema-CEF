@@ -210,3 +210,4 @@ __marimo__/
 database.db
 poetry.lock
 __pycache__
+package-lock.json
