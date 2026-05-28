@@ -100,7 +100,7 @@ const register = async () => {
 		telefono: cellphone.value,
 		genero: gender.value ? gender.value.charAt(0) : 'O',
       // El rol se asignará por defecto en el backend, usualmente.
-        rol: 3
+        rol_id: 3
     }
 
 	const response = await fetch('http://127.0.0.1:5000/usuarios', {
