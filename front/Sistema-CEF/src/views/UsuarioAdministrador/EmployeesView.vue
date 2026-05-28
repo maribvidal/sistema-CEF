@@ -137,6 +137,14 @@
             <v-text-field v-model="nuevoProfesor.nombre" label="Nombre" variant="outlined" density="comfortable" class="mb-2"></v-text-field>
             <v-text-field v-model="nuevoProfesor.apellido" label="Apellido" variant="outlined" density="comfortable" class="mb-2"></v-text-field>
             <v-text-field v-model="nuevoProfesor.dni" label="DNI" variant="outlined" density="comfortable" type="number"></v-text-field>
+            <v-select
+              v-model="nuevoProfesor.genero"
+              :items="opcionesGenero"
+              label="Género"
+              variant="outlined"
+              density="comfortable"
+              class="mt-2"
+            ></v-select>
           </v-form>
         </v-card-text>
         <v-card-actions class="pa-4">
@@ -160,8 +168,17 @@
               <v-col cols="12" sm="6" class="py-1">
                 <v-text-field v-model="nuevoRecepcionista.apellido" label="Apellido" variant="outlined" density="comfortable"></v-text-field>
               </v-col>
-              <v-col cols="12" class="py-1">
+              <v-col cols="12" sm="6" class="py-1">
                 <v-text-field v-model="nuevoRecepcionista.dni" label="DNI" variant="outlined" density="comfortable" type="number"></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" class="py-1">
+                <v-select
+                  v-model="nuevoRecepcionista.genero"
+                  :items="opcionesGenero"
+                  label="Género"
+                  variant="outlined"
+                  density="comfortable"
+                ></v-select>
               </v-col>
               <v-col cols="12" class="py-1">
                 <v-text-field v-model="nuevoRecepcionista.correo" label="Correo Electrónico" variant="outlined" density="comfortable" prepend-inner-icon="mdi-email"></v-text-field>
@@ -216,17 +233,21 @@ const notificationStore = useNotificationStore()
 const dialogProfesor = ref(false)
 const dialogRecepcionista = ref(false)
 
+const opcionesGenero = ['M', 'F', 'O']
+
 const nuevoProfesor = ref({
   nombre: '',
   apellido: '',
-  dni: ''
+  dni: '',
+  genero: ''
 })
 const nuevoRecepcionista = ref({
   nombre: '',
   apellido: '',
   dni: '',
   correo: '',
-  contraseña: ''
+  contraseña: '',
+  genero: ''
 })
 
 const headers = [
@@ -243,6 +264,7 @@ const roles = [
   { id: 1, label: 'Administrador' },
   { id: 2, label: 'Recepcionista' },
   { id: 3, label: 'Usuario' }
+  
 ]
 
 const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Profesor'
@@ -311,13 +333,13 @@ const cargarProfesores = async () => {
 }
 
 const crearProfesor = () => {
-  nuevoProfesor.value = { nombre: '', apellido: '', dni: '' }
+  nuevoProfesor.value = { nombre: '', apellido: '', dni: '', genero: '' }
   dialogProfesor.value = true
 }
 
 const guardarProfesor = async () => {
   try {
-    if (!nuevoProfesor.value.nombre || !nuevoProfesor.value.dni) {
+    if (!nuevoProfesor.value.nombre || !nuevoProfesor.value.dni || !nuevoProfesor.value.genero) {
       notificationStore.showNotification('Por favor complete los campos obligatorios', 'warning')
       return
     }
@@ -332,14 +354,14 @@ const guardarProfesor = async () => {
 }
 
 const crearRecepcionista = () => {
-  nuevoRecepcionista.value = { nombre: '', apellido: '', dni: '', correo: '', contraseña: '' }
+  nuevoRecepcionista.value = { nombre: '', apellido: '', dni: '', correo: '', contraseña: '', genero: '' }
   dialogRecepcionista.value = true
 }
 
 const guardarRecepcionista = async () => {
   try {
-    if (!nuevoRecepcionista.value.correo || !nuevoRecepcionista.value.contraseña) {
-      notificationStore.showNotification('Por favor complete los campos de acceso (correo y contraseña)', 'warning')
+    if (!nuevoRecepcionista.value.correo || !nuevoRecepcionista.value.contraseña || !nuevoRecepcionista.value.genero) {
+      notificationStore.showNotification('Por favor complete todos los campos obligatorios', 'warning')
       return
     }
     await EmployeesService.createReceptionist(nuevoRecepcionista.value)

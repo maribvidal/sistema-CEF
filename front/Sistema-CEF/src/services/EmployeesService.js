@@ -27,16 +27,24 @@ export const EmployeesService = {
       console.error("Error: El DNI del empleado es undefined. Revisa el componente llamador.");
       throw new Error("DNI no proporcionado");
     }
-    // El backend (empleados_route.py) maneja la actualización de rol 
-    // Según documentación_backend.md: PUT /empleados/(dni)/rol
-    const response = await apiClient.put(`/empleados/${dni}/${roleId}`, {     
-    rol_id: parseInt(roleId) 
+    // El backend maneja la actualización a través del endpoint general de empleados
+    const response = await apiClient.put(`/empleados/${dni}`, {     
+      rol_id: parseInt(roleId) 
     })
     return response.data
   },
 
-  updateEmployeeInfo: async (dni, updatedData) => {
-    const response = await apiClient.put(`/empleados/${dni}`, updatedData)
+  updateEmployeeInfo: async (dni, data) => {
+    const response = await apiClient.put(`/empleados/${dni}`, {
+      nombre: data.nombre,
+      apellido: data.apellido,
+      correo: data.correo,
+      contraseña: data.contraseña,
+      fecha_nac: data.fecha_nac,
+      telefono: data.telefono,
+      genero: data.genero,
+      rol_id: data.rol_id
+    })
     return response.data
   },
 
@@ -61,16 +69,28 @@ export const EmployeesService = {
   /**
    * Crea un nuevo profesor
    */
-  createProfessor: async (professorData) => {
-    const response = await apiClient.post('/empleados', professorData)
+  createProfessor: async (data) => {
+    const response = await apiClient.post('/profesores', {
+      dni: data.dni,
+      nombre: data.nombre,
+      apellido: data.apellido,
+      genero: data.genero
+    })
     return response.data
   },
 
   /**
    * Crea un nuevo recepcionista (Usuario con rol 2)
    */
-  createReceptionist: async (receptionistData) => {
-    const response = await apiClient.post('/empleados', { ...receptionistData, rol_id: 2 })
+  createReceptionist: async (data) => {
+    const response = await apiClient.post('/empleados/recepcionistas', {
+      dni: data.dni,
+      nombre: data.nombre,
+      apellido: data.apellido,
+      correo: data.correo,
+      contraseña: data.contraseña,
+      genero: data.genero
+    })
     return response.data
   }
 }
