@@ -70,10 +70,16 @@
                     <span class="text-body-1 ml-2">{{ clase.hora }}</span>
                   </div>
 
-                  <div class="d-flex align-center">
+                  <div class="d-flex align-center mb-1">
                     <v-icon size="small" class="mr-2" color="red-darken-2">mdi-map-marker-outline</v-icon>
                     <span class="text-body-1 font-weight-bold">Sala:</span>
                     <span class="text-body-1 ml-2">{{ clase.sala_nombre }}</span>
+                  </div>
+
+                  <div class="d-flex align-center">
+                    <v-icon size="small" class="mr-2" color="red-darken-2">mdi-account-multiple</v-icon>
+                    <span class="text-body-1 font-weight-bold">Cupo Máximo:</span>
+                    <span class="text-body-1 ml-2">{{ clase.cupo_maximo }} personas</span>
                   </div>
                 </v-col>
 
@@ -280,7 +286,8 @@ const nuevaClase = ref({
   id_profesor: null,  // Usar id_profesor para el v-select
   fecha: '',
   hora: '',
-  sala: ''
+  sala: '',
+  cupo_maximo: ''
 })
 
 const clases = ref([])
@@ -329,6 +336,7 @@ const fetchClases = async () => {
         hora: (c.hora ?? c[5]) ?? '--:--',
         id_profesor: c.profesor_id ?? c[3],
         sala: c.sala_id ?? c[6],
+        cupo_maximo: c.cupo_maximo ?? c[7],
         categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
                    || `ID Act: ${c.actividad_id ?? c[2]}`,
         profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
@@ -378,12 +386,14 @@ const guardarClase = async () => {
       id_profesor: nuevaClase.value.id_profesor,
       fecha: DateFormatterService.formatDateForBackend(nuevaClase.value.dia),
       hora: nuevaClase.value.hora,
-      sala: nuevaClase.value.sala
+      sala: nuevaClase.value.sala,
+      cupo_maximo: 30
     }
 
     if (isEditing.value) {
       await ClasesService.modificarClase(nuevaClase.value.id, payload)
     } else {
+      console.log(payload)
       await ClasesService.publicarClase(payload)
     }
     
