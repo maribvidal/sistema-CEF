@@ -100,7 +100,7 @@ const register = async () => {
 		telefono: cellphone.value,
 		genero: gender.value ? gender.value.charAt(0) : 'O',
       // El rol se asignará por defecto en el backend, usualmente.
-        rol: 3
+        rol_id: 3
     }
 
 	const response = await fetch('http://127.0.0.1:5000/usuarios', {
@@ -115,14 +115,11 @@ const register = async () => {
       if (response.status === 400) {
 		const errorData = await response.json()
 		errorMessage.value = errorData.message || 'Error de validación. Por favor, revisa tus datos.'
-	  } else if (response.status === 409) {
+	  } else if (response.status === 406 || response.status === 407) {
 		errorMessage.value = 'El correo electrónico ya se encuentra registrado.'
 	  } else if (response.status === 405) {
 		errorMessage.value = 'El DNI ya se encuentra registrado.'
-	  } else if (response.status === 407) {
-		errorMessage.value = 'El DNI ya se encuentra registrado para un empleado.'
-	  } 
-	  else if (response.status === 403){
+	  } else if (response.status === 403){
 		errorMessage.value = 'El usuario debe ser mayor de 14 años.'
 	  }
 		else {

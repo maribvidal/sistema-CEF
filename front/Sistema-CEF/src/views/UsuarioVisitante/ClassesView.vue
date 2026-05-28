@@ -70,10 +70,16 @@
                     <span class="text-body-1 ml-2">{{ clase.hora }}</span>
                   </div>
 
-                  <div class="d-flex align-center">
+                  <div class="d-flex align-center mb-1">
                     <v-icon size="small" class="mr-2" color="red-darken-2">mdi-map-marker-outline</v-icon>
                     <span class="text-body-1 font-weight-bold">Sala:</span>
                     <span class="text-body-1 ml-2">{{ clase.sala_nombre }}</span>
+                  </div>
+
+                  <div class="d-flex align-center">
+                    <v-icon size="small" class="mr-2" color="red-darken-2">mdi-account-multiple</v-icon>
+                    <span class="text-body-1 font-weight-bold">Cupo Máximo:</span>
+                    <span class="text-body-1 ml-2">{{ clase.cupo_maximo }} personas</span>
                   </div>
                 </v-col>
 
@@ -89,8 +95,8 @@
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
-                    v-if="userRole === 3 && !clase.yaReservada"
-                    @click="reservarClase(clase.id)"
+                    v-if="userRole === 3"
+                    @click="reservarClase(clase)"
                   >
                     Reservar Clase
                   </v-btn>
@@ -103,7 +109,7 @@
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
-                    v-if="userRole === 3 && clase.yaReservada"
+                    v-if="userRole === 3"
                     @click="cancelarReserva(clase.id)"
                   >
                     Cancelar Reserva
@@ -280,7 +286,8 @@ const nuevaClase = ref({
   id_profesor: null,  // Usar id_profesor para el v-select
   fecha: '',
   hora: '',
-  sala: ''
+  sala: '',
+  cupo_maximo: ''
 })
 
 const clases = ref([])
@@ -329,6 +336,7 @@ const fetchClases = async () => {
         hora: (c.hora ?? c[5]) ?? '--:--',
         id_profesor: c.profesor_id ?? c[3],
         sala: c.sala_id ?? c[6],
+        cupo_maximo: c.cupo_maximo ?? c[7],
         categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
                    || `ID Act: ${c.actividad_id ?? c[2]}`,
         profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
@@ -378,12 +386,14 @@ const guardarClase = async () => {
       id_profesor: nuevaClase.value.id_profesor,
       fecha: DateFormatterService.formatDateForBackend(nuevaClase.value.dia),
       hora: nuevaClase.value.hora,
-      sala: nuevaClase.value.sala
+      sala: nuevaClase.value.sala,
+      cupo_maximo: 30
     }
 
     if (isEditing.value) {
       await ClasesService.modificarClase(nuevaClase.value.id, payload)
     } else {
+      console.log(payload)
       await ClasesService.publicarClase(payload)
     }
     
@@ -396,7 +406,6 @@ const guardarClase = async () => {
 }
 
 const editarClase = (clase) => {
-  console.log('Editando clase:', clase)
   isEditing.value = true
   nuevaClase.value = { ...clase }
 
@@ -410,7 +419,6 @@ const editarClase = (clase) => {
 }
 
 const eliminarClase = async (clase) => {
-  console.log('Objeto de la clase a eliminar:', clase)
   if (confirm(`¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`)) {
     try {
       await ClasesService.eliminarClase(clase.id)
@@ -435,8 +443,20 @@ const cancelarClase = async (clase) => {
   }
 }
 
-const reservarClase = (id) => {
-  console.log('Reservando clase con ID:', id)
+const reservarClase = async (clase) => {
+  try {
+    const payload = {
+      id_usuario: userProfile.value.id,
+      fecha: clase.dia,
+      hora: clase.hora,
+    }
+    console.log(payload)
+    await ClasesService.reservarClase(clase.id, payload)
+    await fetchClases()
+  } catch (error) {
+    console.error('Error al cancelar clase:', error)
+    alert('No se pudo cancelar la clase.')
+  }
 }
 
 const cancelarReserva = (id) => {

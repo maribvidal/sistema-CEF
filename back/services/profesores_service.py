@@ -14,6 +14,24 @@ def crear_profesor_service(dni, nombre, apellido, genero):
 
     cursor = conectarse_db()
 
+    # Comprobar que el DNI no se encuentre registrado
+
+    res_dnis = listar_dnis_profesores(cursor)
+
+    if res_dnis['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Hubo un error tratando de listar los DNIs de los profesores.",
+            "message": res_dnis['message']
+        }, 400
+
+        for res_dni in res_dnis['data']:
+            if (str(dni) == res_dni['dni']):
+                cursor.connection.close()
+                return {
+                    "error": "El DNI ya se encuentra registrado para un profesor."
+                }, 401
+
     # Intentar insertar el nuevo profesor
 
     res_insertar = insertar_profesor(nombre, apellido, genero, dni, cursor)
@@ -22,11 +40,11 @@ def crear_profesor_service(dni, nombre, apellido, genero):
         cursor.connection.close()
         return {
             "error": res_insertar['message']
-        }, 400
+        }, 402
 
     cursor.connection.commit()
     cursor.connection.close()
 
     return {
-        "mensaje": f"El profesor con id {res_insertar['data']} ha sido creado con éxito."
+        "message": f"El profesor con id {res_insertar['data']} ha sido creado con éxito."
     }, 200

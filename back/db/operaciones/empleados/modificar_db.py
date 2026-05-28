@@ -67,12 +67,7 @@ def modificar_empleado_con_dni(
         empleado_dni: int,
         nuevo_dni: int,
         nombre: str, 
-        apellido, 
-        correo, 
-        contraseña, 
-        fecha_nac, 
-        telefono, 
-        genero, 
+        apellido,
         rol_id, 
         cursor
     ) -> dict:
@@ -84,11 +79,6 @@ def modificar_empleado_con_dni(
         SET dni = {nuevo_dni},
             nombre = '{nombre}',
             apellido = '{apellido}',
-            correo = '{correo}',
-            contraseña = '{contraseña}',
-            fecha_nac = '{fecha_nac}',
-            telefono = '{telefono}',
-            genero = '{genero}',
             rol_id = {rol_id}
         WHERE dni = {empleado_dni}
     """
@@ -114,22 +104,18 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
             "status": "error",
             "message": "Empleado no encontrado"
         }
-    elif usuario["data"]["rol_id"] not in (1, 2): # o sea si el usuario no es ni gerente ni administrador
+    elif usuario["data"]["rol_id"] not in (0, 1, 2): # o sea si el usuario no es ni gerente ni administrador
         return {
             "status": "error",
             "message": "El usuario no es un empleado"
         }
     
-    print("Se encontró el usuario creo")
-    
-    # Borrado lógico: se modifica el rol a 0 (desactivado) conservando los datos personales
+    # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
     query_update = f"""
         UPDATE Usuario
-        SET rol_id = 0
+        SET rol_id = 4
         WHERE dni = {empleado_dni}
     """
-
-    print(query_update)
 
     return ejecutar_query(query_update, cursor)
 
