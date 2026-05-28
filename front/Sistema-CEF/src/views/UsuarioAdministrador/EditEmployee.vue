@@ -42,6 +42,15 @@
               required
             ></v-text-field>
           </v-col>
+          <v-col cols="12" sm="6" class="py-1">
+            <v-select
+              v-model="employee.genero"
+              :items="opcionesGenero"
+              label="Género"
+              variant="outlined"
+              density="comfortable"
+            ></v-select>
+          </v-col>
         </v-row>
       </v-form>
     </v-card-text>
@@ -69,6 +78,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'updated'])
 
+const opcionesGenero = ['M', 'F', 'O']
+
 const employee = ref({ ...props.empleado })
 const loading = ref(false)
 
@@ -77,7 +88,7 @@ watch(() => props.empleado, (newVal) => {
 }, { deep: true, immediate: true })
 
 const updateEmployee = async () => {
-  if (!employee.value.nombre || !employee.value.apellido || !employee.value.correo || !employee.value.dni) {
+  if (!employee.value.nombre || !employee.value.apellido || !employee.value.correo || !employee.value.dni || !employee.value.genero) {
     notificationStore.showNotification('Por favor, complete todos los campos obligatorios.', 'warning')
     return
   }

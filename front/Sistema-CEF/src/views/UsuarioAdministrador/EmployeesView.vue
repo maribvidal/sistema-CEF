@@ -118,6 +118,7 @@
             item-value="id"
             label="Seleccionar Nuevo Rol"
             variant="outlined"
+            class="mb-4"
           ></v-select>
         </v-card-text>
         <v-card-actions>
@@ -226,6 +227,7 @@ const dialog = ref(false)
 const dialogEditarEmpleado = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
+const nuevoGenero = ref(null)
 const isDisabled = ref(false) // Para manejar el estado de desactivación de empleados
 const notificationStore = useNotificationStore()
 
@@ -255,6 +257,7 @@ const headers = [
   { title: 'Nombre', key: 'nombre' },
   { title: 'Apellido', key: 'apellido' },
   { title: 'Correo', key: 'correo' },
+  { title: 'Género', key: 'genero', align: 'center' },
   { title: 'Rol Actual', key: 'rol_id', align: 'center' },
   { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
 ]
@@ -302,12 +305,14 @@ const cargarEmpleados = async () => {
 const cargarEmpleadosDesactivados = async () => {
   try {
     const data = await EmployeesService.getDisabledEmployees()
+    console.log(data[0])
     const fetched = (data || []).map(e => ({
       dni: e.dni ?? e[1],
       nombre: e.nombre ?? e[2],
       apellido: e.apellido ?? e[3],
       correo: e.correo ?? e[5],
-      rol_id: e.rol_id ?? e[4]
+      rol_id: e.rol_id ?? e[4],
+      genero: e.genero
     }))
     empleadosDesactivados.value = fetched
   } catch (error) {
@@ -324,7 +329,8 @@ const cargarProfesores = async () => {
     profesores.value = resData.map(p => ({
       dni: p.dni,
       nombre: p.nombre,
-      apellido: p.apellido
+      apellido: p.apellido,
+      genero: p.genero || 'N/A'
     }))
   } catch (error) {
     console.error('Error cargando profesores:', error)
@@ -431,11 +437,13 @@ const eliminarEmpleado = (empleado) => {
 const abrirEditorRol = (empleado) => {
   empleadoSeleccionado.value = empleado
   nuevoRolId.value = empleado.rol_id
+  nuevoGenero.value = empleado.genero
   dialog.value = true
 }
 
 const confirmarCambioRol = async () => {
   try {
+    // Nota: Por ahora solo se envía el rol al backend; el género se actualiza solo en el estado local del front.
     await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.dni, nuevoRolId.value)
     await cargarEmpleados()
     dialog.value = false
