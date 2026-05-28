@@ -58,7 +58,6 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_permiso(cursor)
     construir_tabla_rol(cursor)
     construir_tabla_actividad(cursor)
-    construir_tabla_profesor(cursor)
     construir_tabla_sala(cursor)
     construir_tabla_descuento(cursor)
     construir_tabla_usuario(cursor)
@@ -88,8 +87,8 @@ def construir_tabla_usuario(cursor: sqlite.Cursor):
                             dni         INTEGER NOT NULL,
                             nombre      VARCHAR({LONG_NOM}) NOT NULL,
                             apellido    VARCHAR({LONG_APE}) NOT NULL,
-                            correo      VARCHAR({LONG_CORREO}) NOT NULL,
-                            contraseña  VARCHAR({LONG_CONTRA}) NOT NULL,
+                            correo      VARCHAR({LONG_CORREO}),
+                            contraseña  VARCHAR({LONG_CONTRA}),
                             fecha_nac   DATE,
                             telefono    VARCHAR({LONG_TEL}),
                             genero      CHAR(1) CHECK(length(genero) <= 1),
@@ -141,16 +140,6 @@ def construir_tabla_actividad(cursor: sqlite.Cursor):
                             id              INTEGER PRIMARY KEY,
                             nombre          VARCHAR({LONG_NOM}),
                             precio_mensual  REAL NOT NULL
-                        )""")
-
-def construir_tabla_profesor(cursor: sqlite.Cursor):
-    """Construye la tabla Profesor"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Profesor (
-                            id          INTEGER PRIMARY KEY,
-                            nombre      VARCHAR({LONG_NOM}),
-                            apellido    VARCHAR({LONG_APE}),
-                            genero      CHAR(1) CHECK(length(genero) <= 1),
-                            dni         INTEGER UNIQUE NOT NULL
                         )""")
 
 def construir_tabla_clase(cursor: sqlite.Cursor):

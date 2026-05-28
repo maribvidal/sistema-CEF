@@ -7,6 +7,7 @@
 - 2: Recepcionista
 - 3: Usuario
 - 4: Eliminado
+- 5: Profesor
 
 ## API
 
