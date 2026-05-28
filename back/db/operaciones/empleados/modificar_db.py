@@ -63,6 +63,40 @@ def modificar_empleado(
 
     return ejecutar_query(query_update, cursor)
 
+def modificar_empleado_con_dni(
+        empleado_dni: int,
+        nuevo_dni: int,
+        nombre: str, 
+        apellido, 
+        correo, 
+        contraseña, 
+        fecha_nac, 
+        telefono, 
+        genero, 
+        rol_id, 
+        cursor
+    ) -> dict:
+    """Hace lo mismo que la función de arriba, pero además permite
+        modificar el dni mismo del empleado."""
+    
+    query_update = f"""
+        UPDATE Usuario
+        SET dni = {nuevo_dni},
+            nombre = '{nombre}',
+            apellido = '{apellido}',
+            correo = '{correo}',
+            contraseña = '{contraseña}',
+            fecha_nac = '{fecha_nac}',
+            telefono = '{telefono}',
+            genero = '{genero}',
+            rol_id = {rol_id}
+        WHERE dni = {empleado_dni}
+    """
+
+    print(query_update)
+
+    return ejecutar_query(query_update, cursor)
+
 def borrar_empleado(empleado_dni: int, cursor) -> dict:
     """Borra un empleado específico de la base de datos, utilizando su DNI como referencia.
         Recibe el DNI del empleado a borrar.

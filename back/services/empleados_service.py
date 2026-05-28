@@ -1,7 +1,7 @@
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.empleados.consultar_db import listar_empleados
 from db.operaciones.empleados.insertar_db import insertar_recepcionista
-from db.operaciones.empleados.modificar_db import modificar_empleado, borrar_empleado, desactivar_empleado
+from db.operaciones.empleados.modificar_db import modificar_empleado, borrar_empleado, desactivar_empleado, modificar_empleado_con_dni
 from db.operaciones.empleados.consultar_db import listar_empleados_desactivados, listar_correos_empleados, listar_dnis_empleados
 
 def listar_empleados_service():
@@ -23,7 +23,8 @@ def listar_empleados_service():
     return respuesta['data'], 200
 
 def modificar_empleado_service(
-    empleado_dni: int, 
+    empleado_dni: int,
+    dni_nuevo: int, 
     nombre: str, 
     apellido: str, 
     correo: str, 
@@ -36,7 +37,24 @@ def modificar_empleado_service(
     """Service que modifica un empleado."""
     cursor = conectarse_db()
 
-    respuesta = modificar_empleado(empleado_dni, nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id, cursor)
+    # Comprobar que el dni al que se quiere cambiar no esté siendo
+    # utilizado por otro empleado
+
+    res_dnis = listar_dnis_empleados(cursor)
+
+    if res_dnis['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al obtener los DNIs de los empleados."
+        }, 400
+
+    if (str(dni_nuevo) in str(res_dnis['data'])):
+        cursor.connection.close()
+        return {
+            "error": "El DNI ya se encuentra registrado para un empleado."
+        }, 401
+
+    respuesta = modificar_empleado_con_dni(empleado_dni, dni_nuevo, nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id, cursor)
 
     # Con esto guardo los cambios en la base de datos
     cursor.connection.commit()

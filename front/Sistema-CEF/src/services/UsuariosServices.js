@@ -55,6 +55,7 @@ const AuthApiService = {
       telefono: profileData.telefono || profileData.phone,
       fecha_nac: profileData.fecha_nac || profileData.birthDate,
       // Incluir otros campos que el backend pueda esperar, como nombre, apellido, etc.
+      genero: profileData.genero || profileData.gender,
       nombre: profileData.nombre || profileData.name,
       apellido: profileData.apellido || profileData.lastName,
     }),

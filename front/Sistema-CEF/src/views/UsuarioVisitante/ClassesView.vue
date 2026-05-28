@@ -4,7 +4,10 @@
       <v-col cols="12" md="10">
         <h1 class="text-h4 mb-6 text-center font-weight-bold">Nuestras Clases</h1>
 
-        <div class="d-flex justify-center justify-md-end mb-6">
+        <div 
+          v-if="userRole === 1 || userRole === 2" 
+          class="d-flex justify-center justify-md-end mb-6"
+        >
           <v-btn
             color="blue-darken-1"
             prepend-icon="mdi-plus"
@@ -86,6 +89,7 @@
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
+                    v-if="userRole === 3 && !clase.yaReservada"
                     @click="reservarClase(clase.id)"
                   >
                     Reservar Clase
@@ -99,6 +103,7 @@
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
+                    v-if="userRole === 3 && clase.yaReservada"
                     @click="cancelarReserva(clase.id)"
                   >
                     Cancelar Reserva
@@ -113,7 +118,7 @@
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="editarClase(clase)"
-                    v-if="userProfile?.rol === 2 || userRole === 2 || userProfile?.rol === 1 || userRole === 1"
+                    v-if="userRole === 1 || userRole === 2"
                   >
                     Editar Clase
                   </v-btn>
@@ -127,7 +132,7 @@
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="cancelarClase(clase)"
-                    v-if="userProfile?.rol === 2 || userRole === 2 || userProfile?.rol === 1 || userRole === 1"
+                    v-if="userRole === 1 || userRole === 2"
                   >
                     Cancelar Clase
                   </v-btn>
@@ -141,7 +146,7 @@
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     @click="eliminarClase(clase)"
-                    v-if="userProfile?.rol === 2 || userRole === 2 || userProfile?.rol === 1 || userRole === 1"
+                    v-if="userRole === 1 || userRole === 2"
                   >
                     Eliminar Clase
                   </v-btn>
@@ -330,6 +335,7 @@ const fetchClases = async () => {
                   || `ID Prof: ${c.profesor_id ?? c[3]}`,
         sala_nombre: salas.value.find(s => s.id == (c.sala_id ?? c[6]))?.nombre 
                   || `Sala ID: ${c.sala_id ?? c[6]}`,
+        yaReservada: c.ya_reservada || false, // Asume que el backend devuelve si el usuario ya está inscripto
         imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
       }))
   } catch (error) {

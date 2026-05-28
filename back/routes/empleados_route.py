@@ -25,6 +25,7 @@ def modificar_empleado(empleado_dni):
     
     data = request.get_json()
 
+    dni_nuevo = data.get("nuevo_dni")
     nombre = data.get("nombre")
     apellido = data.get("apellido")
     correo = data.get("correo")
@@ -36,6 +37,7 @@ def modificar_empleado(empleado_dni):
 
     respuesta, status = modificar_empleado_service(
         empleado_dni,
+        dni_nuevo,
         nombre,
         apellido,
         correo,
@@ -43,7 +45,7 @@ def modificar_empleado(empleado_dni):
         fecha_nac,
         telefono,
         genero,
-        rol_id,
+        rol_id
     )
 
     return jsonify(respuesta), status

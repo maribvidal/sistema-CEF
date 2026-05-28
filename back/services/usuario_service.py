@@ -112,27 +112,30 @@ def registrar_usuario_service(
                 "error": "Error al obtener los DNIs de los usuarios."
             }, 404
 
-        if (str(dni) in str(res_dnis['data'])):
-            cursor.connection.close()
-            return {
-                "error": "El DNI ya se encuentra registrado para un usuario."
-            }, 405
+        for res in res_dnis['data']:
+            if (dni == res['dni']):
+                cursor.connection.close()
+                return {
+                    "error": "El DNI ya se encuentra registrado para un usuario."
+                }, 405
     else:
     ## Si se trata de un usuario empleado
         res_dnis = listar_dnis_empleados(cursor)
+        print("res dnis empleados: ", res_dnis)
 
         if res_dnis['status'] == 'error':
             cursor.connection.close()
             return {
                 "error": "Error al obtener los DNIs de los empleados."
             }, 406
+            
+        for res in res_dnis['data']:
+            if (dni == res['dni']):
+                cursor.connection.close()
+                return {
+                    "error": "El DNI ya se encuentra registrado para un empleado."
+                }, 407
 
-        if (str(dni) in str(res_dnis['data'])):
-            cursor.connection.close()
-            return {
-                "error": "El DNI ya se encuentra registrado para un empleado."
-            }, 407
-    
     respuesta = consultar_usuario_por_correo(correo, cursor)
     if respuesta['status'] == 'error':
         cursor.connection.close()
@@ -450,18 +453,18 @@ def restablecer_contraseña_service(correo: str):
     
     # Crear el mensaje    
     front_url = os.getenv("FRONT_URL")
-    link = f"{front_url}/ConfirmarNuevaContrasena?correo={correo}"
+    link = f"http://localhost:5173/ConfirmarNuevaContrasena?correo={correo}"
 
     msg = MIMEText(f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}")
     msg['Subject'] = "Restablecer contraseña"
-    msg['From'] = remitente
+    msg['From'] = "sistemacef@gmail.com"
     msg['To'] = correo
 
     try:
         # Conexión al servidor
         server = smtplib.SMTP(servidor_smtp, puerto)
         server.starttls() # Inicia conexión segura
-        server.login(remitente, password)
+        server.login("sistemacef@gmail.com", "saal ixel tbum pohe")
         
         # Enviar a varios remitentes (puedes usar un bucle)
         server.send_message(msg)
