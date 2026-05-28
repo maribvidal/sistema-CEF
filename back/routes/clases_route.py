@@ -2,7 +2,8 @@ from flask import Blueprint, request, jsonify
 from services.clases_service import (
     listar_clases_service, publicar_clase_service, 
     modificar_clase_service, eliminar_clase_service,
-    cancelar_clase_service, reservar_clase_service
+    cancelar_clase_service, reservar_clase_service,
+    verificar_inscripcion_usuario_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -108,5 +109,15 @@ def reservar_clase(id_clase):
     hora = data.get("hora")
 
     respuesta, status = reservar_clase_service(id_clase, id_usuario, fecha, hora)
+
+    return jsonify(respuesta), status
+
+@clases_bp.route("/clases/<int:id_clase>/<int:id_usuario>/<str:fecha>/<str:hora>", methods=["GET"])
+def verificar_inscripcion_usuario_clase(id_clase, id_usuario, fecha, hora):
+    """Este endpoint permite verificar si un usuario
+        tiene una inscripción a una clase específica,
+        en una fecha y hora dada."""
+    
+    respuesta, status = verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hora)
 
     return jsonify(respuesta), status
