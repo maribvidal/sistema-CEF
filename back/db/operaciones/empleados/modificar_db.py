@@ -68,6 +68,8 @@ def modificar_empleado_con_dni(
         nuevo_dni: int,
         nombre: str, 
         apellido,
+        correo,
+        genero,
         rol_id, 
         cursor
     ) -> dict:
@@ -79,6 +81,8 @@ def modificar_empleado_con_dni(
         SET dni = {nuevo_dni},
             nombre = '{nombre}',
             apellido = '{apellido}',
+            correo = '{correo}',
+            genero = '{genero}',
             rol_id = {rol_id}
         WHERE dni = {empleado_dni}
     """

@@ -26,6 +26,8 @@ def modificar_empleado(empleado_dni):
     dni_nuevo = data.get("nuevo_dni")
     nombre = data.get("nombre")
     apellido = data.get("apellido")
+    correo = data.get("correo")
+    genero = data.get("genero")
     rol_id = data.get("rol_id")
 
     respuesta, status = modificar_empleado_service(
@@ -33,6 +35,8 @@ def modificar_empleado(empleado_dni):
         dni_nuevo,
         nombre,
         apellido,
+        correo,
+        genero,
         rol_id
     )
 
