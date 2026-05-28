@@ -50,6 +50,7 @@ Empleados
 | /empleados/(empleado_dni) | PUT | nuevo_dni, nombre, apellido, rol_id | 400: Error al obtener los DNIs de los empleados <br> 401: El DNI ya se encuentra registrado para un empleado <br> 500: Error al intentar modificar empleado <br> 200: Empleado modificado exitosamente. |
 | /empleados/(empleado_dni) | DELETE | - | 500: Error al intentar borrar empleado <br> 200: Empleado borrado exitosamente. |
 | /empleados/(empleado_dni)/desactivar | PATCH | - | 500: Error al intentar borrar/desactivar empleado <br> 200: Empleado desactivado exitosamente. |
+| /empleados/(empleado_dni)/permisos | POST | rol_id | 400: Error interno de consulta de usuario <br> 401: Empleado no encontrado <br> 402: El empleado ya contaba con ese permiso 500: Error al intentar modificar permiso <br> 200: Permiso modificado correctamente. |
 
 Profesores
 
@@ -85,7 +86,6 @@ Usuarios
 | /usuarios/(usuario_id)/clases | GET | - | 400: Error interno de consulta <br> 401: Usuario no encontrado <br> 402: No se encontraron clases para este usuario <br> 500: Error de servidor al obtener las asignaciones <br> 200: Se devuelve la lista de clases a las que el usuario está inscrito. |
 | /usuarios/(usuario_id)/avatar | POST | avatar | 400: El parámetro 'avatar' está vacío <br> 401: Error interno de consulta de usuario <br> 402: Usuario no encontrado <br> 403: Error de servidor al intentar insertar la imagen <br> 404: No se pudo insertar la imagen <br> 405: Error al intentar asociar la imagen al usuario <br> 500: Error interno de actualización <br> 200: Avatar subido y asociado al usuario exitosamente. |
 | /usuarios/(usuario_id)/avatar | GET | - | 400: Error interno de consulta de usuario <br> 401: Usuario no encontrado <br> 402: Error de servidor al consultar la imagen <br> 403: El usuario no tiene un avatar asociado <br> 200: Se devuelve el string/data del avatar del usuario. |
-| /usuarios/(id_usuario)/permisos | POST | rol_id | 400: Error interno de consulta de usuario <br> 401: Usuario no encontrado <br> 402: El usuario ya contaba con ese permiso <br> 403: Error al obtener los de DNIs de los usuarios comunes <br> 404: El DNI ya se encuentra registrado para un usuario común <br> 405: Error al obtener los DNIs de los empleados <br> 406: El DNI ya se encuentra registrado para un empleado <br> 500: Error al intentar modificar permiso <br> 200: Permiso modificado correctamente. |
 
 ## Modelo lógico de la Base de Datos
 

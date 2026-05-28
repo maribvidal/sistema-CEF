@@ -1,6 +1,6 @@
 from db.operaciones.exception_handler import ejecutar_query
 
-def cambiar_permiso(id, permiso, cursor):
+def cambiar_permiso(dni, permiso, cursor):
     """Función para cambiar el permiso (rol) de un usuario.
        Recibe el id del usuario y el nuevo `rol_id` y lo actualiza
        en la tabla `Usuario`.
@@ -9,7 +9,7 @@ def cambiar_permiso(id, permiso, cursor):
     query = f"""
         UPDATE Usuario
         SET rol_id = {permiso}
-        WHERE id = {id};
+        WHERE dni = {dni};
     """
 
     return ejecutar_query(query, cursor)
