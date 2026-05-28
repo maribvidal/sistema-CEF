@@ -4,7 +4,6 @@ from services.empleados_service import (
     listar_empleados_service,
     borrar_empleado_service,
     desactivar_empleado_service,
-    listar_empleados_desactivados_service,
     crear_recepcionista_service
 )
 
@@ -16,7 +15,6 @@ def listar_empleados():
     respuesta, status = listar_empleados_service()
     
     return jsonify(respuesta), status
-
 
 @empleados_bp.route("/empleados/<int:empleado_dni>", methods=["PUT"])
 def modificar_empleado(empleado_dni):
@@ -47,18 +45,9 @@ def borrar_empleado(empleado_dni):
 
     return jsonify(respuesta), status
 
-
 @empleados_bp.route("/empleados/<int:empleado_dni>/desactivar", methods=["PATCH"])
 def desactivar_empleado(empleado_dni):
     respuesta, status = desactivar_empleado_service(empleado_dni)
-    return jsonify(respuesta), status
-
-
-@empleados_bp.route('/empleados/desactivados', methods=['GET'])
-def listar_empleados_desactivados():
-    """Endpoint para obtener la lista de empleados desactivados."""
-    respuesta, status = listar_empleados_desactivados_service()
-    
     return jsonify(respuesta), status
 
 @empleados_bp.route('/empleados/recepcionistas', methods=['POST'])
