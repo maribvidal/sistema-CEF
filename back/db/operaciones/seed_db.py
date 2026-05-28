@@ -75,12 +75,12 @@ def generar_mas_datos_db_operaciones(cursor):
                 dni=10000000 + i,
                 nombre=f"Socio{i}",
                 apellido="Prueba",
-                contrasena="pass123",
+                contraseña="pass12345",
                 fecha_nac="1995-01-01",
                 correo=f"socio{i}@gym.com",
                 telefono=f"22100000{i:02d}",
                 genero="M" if i % 2 == 0 else "F",
-                rol_id=3,
+                rol=3,
                 cursor=cursor
             )
             
@@ -95,8 +95,8 @@ def generar_mas_datos_db_operaciones(cursor):
         print("Insertando la clase...")
         res_clase = insertar_clase(
             estado="Publicada",
-            id_actividad=1,
-            id_profesor=1,
+            actividad_id=1,
+            profesor_id=1,
             cupo_maximo=25,
             cursor=cursor
         )
