@@ -18,6 +18,8 @@ def insertar_datos(cursor):
     insertar_usuario(32031512, 'Lourdes', 'Gonzales', '6543713241', '1992-07-05', 'lourdes.gonzales@example.com', "5678",'F', 2, cursor)
     insertar_usuario(34673342, 'Gaspar', 'Solari', '7325466314', '2008-07-10', 'gaspar.solari@example.com', "5678",'M', 1, cursor)
    
+    # Crear solo usuarios comunes
+
     # Crear profesores
     id_prof1 = insertar_profesor('Carlos', 'López', 'M', 11223344, cursor)
     insertar_profesor('Ana', 'Martínez', 'F', 44332211, cursor)
@@ -59,3 +61,91 @@ def insertar_datos(cursor):
 
     # Crear pagos pagar clase
     insertar_pago_pagar_clase(1, 1, cursor)
+
+    generar_mas_datos_db_operaciones()
+
+def generar_mas_datos_db_operaciones(cursor):
+    try:
+        # 1. Crear 30 usuarios comunes (rol_id = 3)
+        ids_usuarios_creados = []
+        print("Insertando 30 usuarios comunes...")
+        
+        for i in range(1, 31):
+            res_usuario = insertar_usuario(
+                dni=10000000 + i,
+                nombre=f"Socio{i}",
+                apellido="Prueba",
+                contrasena="pass123",
+                fecha_nac="1995-01-01",
+                correo=f"socio{i}@gym.com",
+                telefono=f"22100000{i:02d}",
+                genero="M" if i % 2 == 0 else "F",
+                rol_id=3,
+                cursor=cursor
+            )
+            
+            # Guardamos el ID autogenerado para usarlo en la inscripción
+            if res_usuario['status'] == 'success':
+                ids_usuarios_creados.append(res_usuario['data'])
+            else:
+                print(f"Fallo al insertar usuario {i}: {res_usuario['message']}")
+
+        # 2. Insertar la clase con 25 cupos
+        # Asumimos que la actividad con id=1 y el profesor con id=1 ya existen en la DB
+        print("Insertando la clase...")
+        res_clase = insertar_clase(
+            estado="Publicada",
+            id_actividad=1,
+            id_profesor=1,
+            cupo_maximo=25,
+            cursor=cursor
+        )
+
+        if res_clase['status'] == 'success':
+            clase_id = res_clase['data']
+            
+            # 3. Insertar la relación Clase_Ocurrir_Sala
+            # Asumimos que la sala con id=1 ya existe en la DB
+            print("Asignando sala y horario a la clase...")
+            res_ocurrencia = insertar_clase_ocurrir_sala(
+                clase_id,  # respuesta2['data'] en tu código
+                1,         # sala_id
+                "2026-06-01", # fecha
+                "18:00",      # hora
+                cursor
+            )
+
+            if res_ocurrencia['status'] == 'success':
+                id_clase_ocu_sala = res_ocurrencia['data']
+                
+                # 4. Inscribir a los primeros 20 usuarios en la clase
+                print("Inscribiendo 20 usuarios en la clase...")
+                usuarios_a_inscribir = ids_usuarios_creados[:20]
+                
+                for id_usuario in usuarios_a_inscribir:
+                    res_inscripcion = insertar_usuario_inscribir_clase_por_id(
+                        id_usuario,
+                        clase_id,
+                        id_clase_ocu_sala,
+                        cursor
+                    )
+                    
+                    if res_inscripcion['status'] != 'success':
+                        print(f"Error al inscribir usuario {id_usuario}: {res_inscripcion['message']}")
+                        
+                print("Las 20 inscripciones se insertaron correctamente.")
+            else:
+                print(f"Error al asignar sala: {res_ocurrencia['message']}")
+        else:
+            print(f"Error al insertar la clase: {res_clase['message']}")
+
+        # Confirmar todos los `INSERT` en la base de datos
+        cursor.connection.commit()
+        print("Operación completada: Todos los datos han sido guardados.")
+
+    except Exception as e:
+        cursor.connection.rollback()
+        print(f"Ocurrió un error inesperado, revirtiendo cambios: {str(e)}")
+
+    finally:
+        cursor.connection.close()
