@@ -102,50 +102,33 @@ def registrar_usuario_service(
 
     # Comprobaciónes del DNI
     
-    ## Si se trata de un usuario común
-    if (rol_id == 3):
-        res_dnis = listar_dnis_usuarios(cursor)
+    res_dnis = listar_dnis_usuarios(cursor)
 
-        if res_dnis['status'] == 'error':
+    if res_dnis['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al obtener los DNIs de los usuarios."
+        }, 404
+
+    for res_dni in res_dnis['data']:
+        if dni == res_dni['dni']:
             cursor.connection.close()
             return {
-                "error": "Error al obtener los DNIs de los usuarios."
-            }, 404
+                "error": "El DNI ya se encuentra registrado para un usuario."
+            }, 405
 
-        for res in res_dnis['data']:
-            if (dni == res['dni']):
-                cursor.connection.close()
-                return {
-                    "error": "El DNI ya se encuentra registrado para un usuario."
-                }, 405
-    else:
-    ## Si se trata de un usuario empleado
-        res_dnis = listar_dnis_empleados(cursor)
-        print("res dnis empleados: ", res_dnis)
-
-        if res_dnis['status'] == 'error':
-            cursor.connection.close()
-            return {
-                "error": "Error al obtener los DNIs de los empleados."
-            }, 406
-            
-        for res in res_dnis['data']:
-            if (dni == res['dni']):
-                cursor.connection.close()
-                return {
-                    "error": "El DNI ya se encuentra registrado para un empleado."
-                }, 407
+    # Comprobar que el correo no se haya utilizado
 
     respuesta = consultar_usuario_por_correo(correo, cursor)
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta, 408
+        return respuesta, 406
 
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
         cursor.connection.close()
         return {
             "error": "El correo electrónico ya se encuentra registrado."
-        }, 409
+        }, 407
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
