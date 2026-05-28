@@ -95,8 +95,8 @@
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
-                    v-if="userRole === 3 && !clase.yaReservada"
-                    @click="reservarClase(clase.id)"
+                    v-if="userRole === 3"
+                    @click="reservarClase(clase)"
                   >
                     Reservar Clase
                   </v-btn>
@@ -109,7 +109,7 @@
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
-                    v-if="userRole === 3 && clase.yaReservada"
+                    v-if="userRole === 3"
                     @click="cancelarReserva(clase.id)"
                   >
                     Cancelar Reserva
@@ -406,7 +406,6 @@ const guardarClase = async () => {
 }
 
 const editarClase = (clase) => {
-  console.log('Editando clase:', clase)
   isEditing.value = true
   nuevaClase.value = { ...clase }
 
@@ -420,7 +419,6 @@ const editarClase = (clase) => {
 }
 
 const eliminarClase = async (clase) => {
-  console.log('Objeto de la clase a eliminar:', clase)
   if (confirm(`¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`)) {
     try {
       await ClasesService.eliminarClase(clase.id)
@@ -445,8 +443,20 @@ const cancelarClase = async (clase) => {
   }
 }
 
-const reservarClase = (id) => {
-  console.log('Reservando clase con ID:', id)
+const reservarClase = async (clase) => {
+  try {
+    const payload = {
+      id_usuario: userProfile.value.id,
+      fecha: clase.dia,
+      hora: clase.hora,
+    }
+    console.log(payload)
+    await ClasesService.reservarClase(clase.id, payload)
+    await fetchClases()
+  } catch (error) {
+    console.error('Error al cancelar clase:', error)
+    alert('No se pudo cancelar la clase.')
+  }
 }
 
 const cancelarReserva = (id) => {
