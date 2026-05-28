@@ -118,7 +118,6 @@ def modificar_clase_service(
     cursor = conectarse_db()
 
     respuesta_consulta = consultar_clase_por_id(clase_id, cursor)
-    print("Respuesta consulta clase por id: ", respuesta_consulta)
 
     if respuesta_consulta['status'] == 'error':
         cursor.connection.close()
@@ -131,16 +130,12 @@ def modificar_clase_service(
         }, 401
 
     respuesta = modificar_clase(clase_id, estado, id_actividad, id_profesor, cupo_maximo, cursor)
-    print("Respuesta modificar clase: ", respuesta)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
         return respuesta, 402
 
-    print("Intentando modificar clase_ocurrir_sala...")
-    print("Datos para modificar clase_ocurrir_sala: clase_id: ", clase_id, " sala: ", sala, " fecha: ", fecha, " hora: ", hora)
     respuesta2 = modificar_clase_ocurrir_sala(clase_id, sala, fecha, hora, cursor)
-    print("Respuesta modificar clase_ocurrir_sala: ", respuesta2)
 
     if respuesta2['status'] == 'error':
         cursor.connection.close()
@@ -319,17 +314,33 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hor
 
     cursor = conectarse_db()
 
+    # Comprobar si clase existe
+
+    respuesta_consulta = consultar_clase_por_id(id_clase, cursor)
+
+    if respuesta_consulta['status'] == 'error':
+        cursor.connection.close()
+        return respuesta_consulta, 400
+
+    if respuesta_consulta['status'] == 'success' and not respuesta_consulta['data']:
+        cursor.connection.close()
+        return {
+            "error": "Clase no encontrada."
+        }, 401
+
+    # Comprobar si el usuario está inscripto
+
     res_usuario_clase = obtener_clase_usuario_fecha_hora(id_usuario, fecha, hora, cursor)
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()
-        return res_usuario_clase['message'], 400
+        return res_usuario_clase['message'], 402
 
-    if len(res_usuario_clase['data']) == 0:
+    if str(res_usuario_clase['data']) == "[]":
         cursor.connection.close()
         return {
             "error": "El usuario no se encuentra inscripto en la clase."
-        }, 401
+        }, 403
 
     cursor.connection.close()
     return {
