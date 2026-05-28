@@ -312,3 +312,26 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
     return {
         "mensaje": "Reserva realizada exitosamente."
     }, 200
+
+def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hora):
+    """Service que devuelve si un usuario se encuentra
+        inscripto o no en una clase a una fecha y hora dada."""
+
+    cursor = conectarse_db()
+
+    res_usuario_clase = obtener_clase_usuario_fecha_hora(id_usuario, fecha, hora, cursor)
+
+    if res_usuario_clase['status'] == 'error':
+        cursor.connection.close()
+        return res_usuario_clase['message'], 400
+
+    if len(res_usuario_clase['data']) == 0:
+        cursor.connection.close()
+        return {
+            "error": "El usuario no se encuentra inscripto en la clase."
+        }, 401
+
+    cursor.connection.close()
+    return {
+        "mensaje": "El usuario se encuentra inscripto."
+    }, 200

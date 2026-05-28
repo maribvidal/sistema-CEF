@@ -112,11 +112,17 @@ def reservar_clase(id_clase):
 
     return jsonify(respuesta), status
 
-@clases_bp.route("/clases/<int:id_clase>/<int:id_usuario>/<str:fecha>/<str:hora>", methods=["GET"])
+@clases_bp.route("/clases/<int:id_clase>", methods=["GET"])
 def verificar_inscripcion_usuario_clase(id_clase, id_usuario, fecha, hora):
     """Este endpoint permite verificar si un usuario
         tiene una inscripción a una clase específica,
         en una fecha y hora dada."""
+
+    data = request.get_json()
+
+    id_usuario = data.get("id_usuario")
+    fecha = data.get("fecha")
+    hora = data.get("hora")
     
     respuesta, status = verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hora)
 
