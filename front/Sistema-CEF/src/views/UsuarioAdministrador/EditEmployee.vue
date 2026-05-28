@@ -34,7 +34,7 @@
           </v-col>
           <v-col cols="12" sm="6" class="py-1">
             <v-text-field
-              v-model="employee.dni"
+              v-model="employee.nuevo_dni"
               label="DNI"
               variant="outlined"
               density="comfortable"
@@ -82,6 +82,7 @@ const opcionesGenero = ['M', 'F', 'O']
 
 const employee = ref({ ...props.empleado })
 const loading = ref(false)
+const dni_viejo = ref('')
 
 watch(() => props.empleado, (newVal) => {
   employee.value = { ...newVal }
@@ -96,7 +97,7 @@ const updateEmployee = async () => {
   loading.value = true
   try {
     // Cuando integrés tu API puedes llamar a:
-    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value)
+    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value.nuevo_dni, employee.value)
     
     notificationStore.showNotification('Empleado actualizado exitosamente.', 'success')
     emit('updated')

@@ -42,7 +42,7 @@
 
           <v-data-table
             :headers="headers"
-            :items="empleados.concat(profesores).concat(empleadosDesactivados)"
+            :items="empleados.concat(profesores)"
             :search="search"
             :loading="loading"
             loading-text="Cargando personal..."
@@ -220,7 +220,6 @@ import { useNotificationStore } from '@/stores/notificationStore.js'
 
 const empleados = ref([])
 const profesores = ref([])
-const empleadosDesactivados = ref([])
 const search = ref('')
 const loading = ref(false)
 const dialog = ref(false)
@@ -273,26 +272,25 @@ const roles = [
 const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Profesor'
 const getRoleColor = (id) => {
   if (id === 0) return 'grey-darken-1' // Empleado desactivado
-  if (id === 1) return 'red-darken-1'
-  if (id === 2) return 'blue-darken-1'
-  if (id === 4) return 'blue-grey-lighten-1' // Empleado eliminado
-  return 'green-darken-1' // Color para Profesor
+  if (id === 1) return 'green-darken-1'
+  if (id === 2) return 'purple-darken-1'
+  if (id === 4) return 'red-darken-1' // Empleado eliminado
+  return 'light-blue-darken-1' // Color para Profesor
 }
 
 const cargarEmpleados = async () => {
   loading.value = true
   try {
     const data = await EmployeesService.getEmployees()
-    const fetched = (data || []).map(e => ({
-      id: e.id ?? e[0],
-      dni: e.dni ?? e[1],
-      nombre: e.nombre ?? e[2],
-      apellido: e.apellido ?? e[3],
-      fecha_nac: e.fecha_nac ?? e[4],
-      telefono: e.telefono ?? e[5],
-      correo: e.correo ?? e[6],
-      genero: e.genero ?? e[8],
-      rol_id: e.rol_id ?? e[9]
+    console.log(data)
+    const fetched = (data.data).map(e => ({
+      apellido: e.apellido ?? e[0],
+      correo: e.correo ?? e[1],
+      dni: e.dni ?? e[2],
+      genero: e.genero ?? e[3],
+      id: e.id ?? e[4],
+      nombre: e.nombre ?? e[5],
+      rol_id: e.rol_id ?? e[6]
     }))
     empleados.value = fetched
   } catch (error) {
@@ -303,24 +301,6 @@ const cargarEmpleados = async () => {
   }
 }
 
-const cargarEmpleadosDesactivados = async () => {
-  try {
-    const data = await EmployeesService.getDisabledEmployees()
-    console.log(data[0])
-    const fetched = (data || []).map(e => ({
-      dni: e.dni ?? e[1],
-      nombre: e.nombre ?? e[2],
-      apellido: e.apellido ?? e[3],
-      correo: e.correo ?? e[5],
-      rol_id: e.rol_id ?? e[4],
-      genero: e.genero
-    }))
-    empleadosDesactivados.value = fetched
-  } catch (error) {
-    console.error('Error cargando empleados desactivados:', error)
-    empleadosDesactivados.value = []
-  }
-}
 
 const cargarProfesores = async () => {
   try {
@@ -439,7 +419,6 @@ const eliminarEmpleado = (empleado) => {
 const abrirEditorRol = (empleado) => {
   empleadoSeleccionado.value = empleado
   nuevoRolId.value = empleado.rol_id
-  nuevoGenero.value = empleado.genero
   dialog.value = true
 }
 
@@ -458,7 +437,6 @@ const confirmarCambioRol = async () => {
 onMounted(() => {
   cargarEmpleados()
   cargarProfesores()
-  cargarEmpleadosDesactivados()
 })
 </script>
 
