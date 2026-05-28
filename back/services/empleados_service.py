@@ -71,17 +71,15 @@ def borrar_empleado_service(empleado_dni: int):
     """Service que borra un empleado."""
     cursor = conectarse_db()
     respuesta = borrar_empleado(empleado_dni, cursor)
-    cursor.connection.close()
 
     if respuesta['status'] == 'error':
         return {
             "error": "Error al intentar borrar empleado.",
             "message": respuesta['message']
         }, 500
-    elif respuesta['status'] == 'success' and not respuesta['data']:
-        return {
-            "error": "No se encontraron empleados."
-        }, 404
+
+    cursor.connection.commit()
+    cursor.connection.close()
 
     return respuesta['data'], 200
 

@@ -120,16 +120,12 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
             "message": "El usuario no es un empleado"
         }
     
-    print("Se encontró el usuario creo")
-    
     # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
     query_update = f"""
         UPDATE Usuario
         SET rol_id = 4
         WHERE dni = {empleado_dni}
     """
-
-    print(query_update)
 
     return ejecutar_query(query_update, cursor)
 
