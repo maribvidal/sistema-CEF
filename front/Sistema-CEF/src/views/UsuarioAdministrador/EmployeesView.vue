@@ -266,8 +266,8 @@ const roles = [
   { id: 0, label: 'Desactivado' },
   { id: 1, label: 'Administrador' },
   { id: 2, label: 'Recepcionista' },
-  { id: 3, label: 'Usuario' }
-  
+  { id: 3, label: 'Usuario' },
+  { id: 4, label: 'Eliminado' }
 ]
 
 const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Profesor'
@@ -275,6 +275,7 @@ const getRoleColor = (id) => {
   if (id === 0) return 'grey-darken-1' // Empleado desactivado
   if (id === 1) return 'red-darken-1'
   if (id === 2) return 'blue-darken-1'
+  if (id === 4) return 'blue-grey-lighten-1' // Empleado eliminado
   return 'green-darken-1' // Color para Profesor
 }
 
@@ -410,6 +411,7 @@ const desactivarEmpleado = (empleado) => {
 }
 
 const eliminarEmpleado = (empleado) => {
+  console.log(empleado)
   const dni = empleado?.dni
   if (!dni) {
     notificationStore.showNotification('No se pudo identificar el DNI del empleado', 'danger')

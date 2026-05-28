@@ -35,13 +35,11 @@ export const EmployeesService = {
   },
 
   updateEmployeeInfo: async (dni, data) => {
+    console.log(data)
     const response = await apiClient.put(`/empleados/${dni}`, {
       nombre: data.nombre,
       apellido: data.apellido,
       correo: data.correo,
-      contraseña: data.contraseña,
-      fecha_nac: data.fecha_nac,
-      telefono: data.telefono,
       genero: data.genero,
       rol_id: data.rol_id
     })
