@@ -62,7 +62,7 @@ def insertar_datos(cursor):
     # Crear pagos pagar clase
     insertar_pago_pagar_clase(1, 1, cursor)
 
-    generar_mas_datos_db_operaciones()
+    generar_mas_datos_db_operaciones(cursor)
 
 def generar_mas_datos_db_operaciones(cursor):
     try:
