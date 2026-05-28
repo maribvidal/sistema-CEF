@@ -9,10 +9,6 @@ export const EmployeesService = {
     const response = await apiClient.get('/empleados')
     return response.data
   },
-  getDisabledEmployees: async () => {
-    const response = await apiClient.get('/empleados/desactivados')
-    return response.data
-  },
   getProfessors: async () => {
     const response = await apiClient.get('/profesores')
     return response.data
@@ -28,20 +24,19 @@ export const EmployeesService = {
       throw new Error("DNI no proporcionado");
     }
     // El backend maneja la actualización a través del endpoint general de empleados
-    const response = await apiClient.put(`/empleados/${dni}`, {     
+    const response = await apiClient.post(`/empleados/${dni}/permisos`, {     
       rol_id: parseInt(roleId) 
     })
     return response.data
   },
 
-  updateEmployeeInfo: async (dni, data) => {
-    const response = await apiClient.put(`/empleados/${dni}`, {
+  updateEmployeeInfo: async (dni_viejo, dni_nuevo, data) => {
+    console.log(data)
+    const response = await apiClient.put(`/empleados/${dni_viejo}`, {
+      nuevo_dni: dni_nuevo,
       nombre: data.nombre,
       apellido: data.apellido,
       correo: data.correo,
-      contraseña: data.contraseña,
-      fecha_nac: data.fecha_nac,
-      telefono: data.telefono,
       genero: data.genero,
       rol_id: data.rol_id
     })

@@ -34,13 +34,22 @@
           </v-col>
           <v-col cols="12" sm="6" class="py-1">
             <v-text-field
-              v-model="employee.dni"
+              v-model="employee.nuevo_dni"
               label="DNI"
               variant="outlined"
               density="comfortable"
               prepend-inner-icon="mdi-card-account-details"
               required
             ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6" class="py-1">
+            <v-select
+              v-model="employee.genero"
+              :items="opcionesGenero"
+              label="Género"
+              variant="outlined"
+              density="comfortable"
+            ></v-select>
           </v-col>
         </v-row>
       </v-form>
@@ -69,15 +78,18 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'updated'])
 
+const opcionesGenero = ['M', 'F', 'O']
+
 const employee = ref({ ...props.empleado })
 const loading = ref(false)
+const dni_viejo = ref('')
 
 watch(() => props.empleado, (newVal) => {
   employee.value = { ...newVal }
 }, { deep: true, immediate: true })
 
 const updateEmployee = async () => {
-  if (!employee.value.nombre || !employee.value.apellido || !employee.value.correo || !employee.value.dni) {
+  if (!employee.value.nombre || !employee.value.apellido || !employee.value.correo || !employee.value.dni || !employee.value.genero) {
     notificationStore.showNotification('Por favor, complete todos los campos obligatorios.', 'warning')
     return
   }
@@ -85,7 +97,7 @@ const updateEmployee = async () => {
   loading.value = true
   try {
     // Cuando integrés tu API puedes llamar a:
-    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value)
+    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value.nuevo_dni, employee.value)
     
     notificationStore.showNotification('Empleado actualizado exitosamente.', 'success')
     emit('updated')
