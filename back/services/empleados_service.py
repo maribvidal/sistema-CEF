@@ -1,8 +1,7 @@
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.empleados.consultar_db import listar_empleados
 from db.operaciones.empleados.insertar_db import insertar_recepcionista
 from db.operaciones.empleados.modificar_db import modificar_empleado, borrar_empleado, desactivar_empleado, modificar_empleado_con_dni
-from db.operaciones.empleados.consultar_db import listar_empleados_desactivados, listar_correos_empleados, listar_dnis_empleados
+from db.operaciones.empleados.consultar_db import listar_empleados, listar_correos_empleados, listar_dnis_empleados
 
 def listar_empleados_service():
     """Service que lista los empleados."""
@@ -20,18 +19,13 @@ def listar_empleados_service():
             "error": "No se encontraron empleados."
         }, 404
 
-    return respuesta['data'], 200
+    return respuesta, 200
 
 def modificar_empleado_service(
     empleado_dni: int,
     dni_nuevo: int, 
     nombre: str, 
-    apellido: str, 
-    correo: str, 
-    contraseña: str, 
-    fecha_nac: str, 
-    telefono: str, 
-    genero: str, 
+    apellido: str,
     rol_id: int
     ):
     """Service que modifica un empleado."""
@@ -54,7 +48,7 @@ def modificar_empleado_service(
             "error": "El DNI ya se encuentra registrado para un empleado."
         }, 401
 
-    respuesta = modificar_empleado_con_dni(empleado_dni, dni_nuevo, nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id, cursor)
+    respuesta = modificar_empleado_con_dni(empleado_dni, dni_nuevo, nombre, apellido, rol_id, cursor)
 
     # Con esto guardo los cambios en la base de datos
     cursor.connection.commit()
@@ -101,24 +95,6 @@ def desactivar_empleado_service(empleado_dni: int):
 #            "error": "No se encontraron empleados"
 #        }, 404
    return respuesta['data'], 200
-
-def listar_empleados_desactivados_service():
-    """Service que lista los empleados desactivados."""
-    cursor = conectarse_db()
-    respuesta = listar_empleados_desactivados(cursor)
-    cursor.connection.close()
-
-    if respuesta['status'] == 'error':
-        return {
-            "error": "Error al obtener empleados desactivados.",
-            "message": respuesta['message']
-        }, 500
-    elif respuesta['status'] == 'success' and not respuesta['data']:
-        return {
-            "error": "No se encontraron empleados desactivados."
-        }, 404
-
-    return respuesta['data'], 200
 
 def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, genero):
     """Service que crea un recepcionista."""

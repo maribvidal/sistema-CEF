@@ -4,7 +4,6 @@ from services.empleados_service import (
     listar_empleados_service,
     borrar_empleado_service,
     desactivar_empleado_service,
-    listar_empleados_desactivados_service,
     crear_recepcionista_service
 )
 
@@ -17,7 +16,6 @@ def listar_empleados():
     
     return jsonify(respuesta), status
 
-
 @empleados_bp.route("/empleados/<int:empleado_dni>", methods=["PUT"])
 def modificar_empleado(empleado_dni):
     """Endpoint para modificar un empleado específico. 
@@ -28,11 +26,6 @@ def modificar_empleado(empleado_dni):
     dni_nuevo = data.get("nuevo_dni")
     nombre = data.get("nombre")
     apellido = data.get("apellido")
-    correo = data.get("correo")
-    contraseña = data.get("contraseña")
-    fecha_nac = data.get("fecha_nac")
-    telefono = data.get("telefono")
-    genero = data.get("genero")
     rol_id = data.get("rol_id")
 
     respuesta, status = modificar_empleado_service(
@@ -40,11 +33,6 @@ def modificar_empleado(empleado_dni):
         dni_nuevo,
         nombre,
         apellido,
-        correo,
-        contraseña,
-        fecha_nac,
-        telefono,
-        genero,
         rol_id
     )
 
@@ -57,18 +45,9 @@ def borrar_empleado(empleado_dni):
 
     return jsonify(respuesta), status
 
-
 @empleados_bp.route("/empleados/<int:empleado_dni>/desactivar", methods=["PATCH"])
 def desactivar_empleado(empleado_dni):
     respuesta, status = desactivar_empleado_service(empleado_dni)
-    return jsonify(respuesta), status
-
-
-@empleados_bp.route('/empleados/desactivados', methods=['GET'])
-def listar_empleados_desactivados():
-    """Endpoint para obtener la lista de empleados desactivados."""
-    respuesta, status = listar_empleados_desactivados_service()
-    
     return jsonify(respuesta), status
 
 @empleados_bp.route('/empleados/recepcionistas', methods=['POST'])
