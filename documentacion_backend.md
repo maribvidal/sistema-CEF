@@ -2,9 +2,11 @@
 
 ## Roles
 
+- 0: Desactivado
 - 1: Administrador
 - 2: Recepcionista
 - 3: Usuario
+- 4: Eliminado
 
 ## API
 

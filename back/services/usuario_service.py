@@ -44,7 +44,7 @@ def registrar_usuario_service(
 
     def _es_un_rol_valido(rol: int) -> bool:
         """Se devuelve si el rol es válido o no"""
-        if (rol >= 0 and rol <= 3):
+        if (rol >= 0 and rol <= 4):
             return True
         return False
 
