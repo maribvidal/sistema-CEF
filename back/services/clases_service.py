@@ -221,7 +221,6 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
     cursor = conectarse_db()
 
     # Comprobar que exista la clase
-
     res_clase = consultar_clase_por_id(clase_id, cursor)
 
     if res_clase['status'] == 'error':
