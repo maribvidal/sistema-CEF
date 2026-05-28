@@ -14,7 +14,7 @@ def cambiar_permiso_service(dni, permiso):
     if empleado['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": usuario['message']
+            "error": empleado['message']
         }, 400
 
     if empleado['status'] == 'success' and not empleado['data']:
@@ -23,7 +23,7 @@ def cambiar_permiso_service(dni, permiso):
             "error": "Empleado no encontrado."
         }, 401
 
-    # Si el rol_id del usuario es el mismo que se le intenta poner ahora...
+    # Si el rol_id del empleado es el mismo que se le intenta poner ahora...
 
     rol_viejo = empleado['data']['rol_id']
     if rol_viejo == permiso:
