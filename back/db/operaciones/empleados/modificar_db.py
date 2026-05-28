@@ -104,7 +104,7 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
             "status": "error",
             "message": "Empleado no encontrado"
         }
-    elif usuario["data"]["rol_id"] not in (1, 2): # o sea si el usuario no es ni gerente ni administrador
+    elif usuario["data"]["rol_id"] not in (0, 1, 2): # o sea si el usuario no es ni gerente ni administrador
         return {
             "status": "error",
             "message": "El usuario no es un empleado"
