@@ -26,7 +26,6 @@ app.register_blueprint(permisos_bp)
 
 # --- REALIZAR TESTS ---
 cursor = conectarse_db()
-
 insertar_datos(cursor)
 #intentar_consultar_esqueleto(cursor)
 

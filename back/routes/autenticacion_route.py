@@ -40,7 +40,7 @@ def registro():
     correo = data.get("correo")
     telefono = data.get("telefono")
     genero = data.get("genero")
-    rol_id = data.get("rol_id")
+    rol_id = data.get("rol")
     
     respuesta, status = registrar_usuario_service(
         dni,

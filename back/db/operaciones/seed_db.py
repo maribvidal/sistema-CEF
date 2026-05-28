@@ -19,8 +19,10 @@ def insertar_datos(cursor):
     insertar_usuario(34673342, 'Gaspar', 'Solari', '7325466314', '2008-07-10', 'gaspar.solari@example.com', "5678",'M', 1, cursor)
    
     # Crear profesores
-    insertar_profesor('Carlos', 'López', 'M', 11223344, cursor)
+    id_prof1 = insertar_profesor('Carlos', 'López', 'M', 11223344, cursor)
     insertar_profesor('Ana', 'Martínez', 'F', 44332211, cursor)
+
+    id_prof1 = id_prof1['data']
 
     # Crear actividades
     insertar_actividad('Yoga', 50.0, cursor)
@@ -43,12 +45,13 @@ def insertar_datos(cursor):
     insertar_sala('Sala 3', 20, cursor)
 
     # Crear clase
-    insertar_clase('Programada', 1, 1, 5, cursor)
-    res_clase_ocu_sala = insertar_clase_ocurrir_sala(1, 1, '2024-07-01', '10:00', cursor)
+    id_clas = insertar_clase('Programada', 1, id_prof1, 5, cursor)
+    id_clas = id_clas['data']
+    res_clase_ocu_sala = insertar_clase_ocurrir_sala(id_clas, 1, '2024-07-01', '10:00', cursor)
     
     # Inscribir usuario a clase
     id_clase_ocu_sala = res_clase_ocu_sala['data']
-    insertar_usuario_inscribir_clase_por_id(1, 1, id_clase_ocu_sala, cursor)
+    insertar_usuario_inscribir_clase_por_id(1, id_clas, id_clase_ocu_sala, cursor)
 
     # Crear pagos
     insertar_pago(50.0, 1, cursor)

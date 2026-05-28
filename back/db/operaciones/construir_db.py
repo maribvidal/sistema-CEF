@@ -153,7 +153,7 @@ def construir_tabla_clase(cursor: sqlite.Cursor):
                             FOREIGN KEY (actividad_id) REFERENCES Actividad(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
-                            FOREIGN KEY (profesor_id) REFERENCES Profesor(id)
+                            FOREIGN KEY (profesor_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
