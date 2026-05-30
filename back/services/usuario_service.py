@@ -154,7 +154,7 @@ def registrar_usuario_service(
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Usuario registrado exitosamente."
+        "message": "Usuario registrado exitosamente."
     }, 201
     
 def obtener_perfil_usuario_service(usuario_id: int):
@@ -288,7 +288,7 @@ def editar_perfil_usuario_service(
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Perfil actualizado exitosamente."
+        "message": "Perfil actualizado exitosamente."
     }, 200
 
 # Servicios para las HUs de contraseñas
@@ -376,7 +376,7 @@ def modificar_contraseña_service(
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Contraseña modificada exitosamente."
+        "message": "Contraseña modificada exitosamente."
     }, 200
 
 def restablecer_contraseña_service(correo: str):
@@ -460,7 +460,7 @@ def restablecer_contraseña_service(correo: str):
     
     cursor.connection.close()
     return {
-        "mensaje": "Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña."
+        "message": "Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña."
     }, 200
     
 # checkeo de escenario 4 de olvidar contraseña se haria en el front no?
@@ -520,7 +520,7 @@ def confirmar_nueva_contrasena_service(nueva_contraseña: str, correo: str):
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Nueva contraseña confirmada exitosamente."
+        "message": "Nueva contraseña confirmada exitosamente."
     }, 200
     
 def listar_usuarios_service():
@@ -645,7 +645,7 @@ def subir_avatar_usuario_service(usuario_id, avatar):
     cursor.connection.close()
 
     return {
-        "mensaje": "Avatar subido y asociado al usuario exitosamente."
+        "message": "Avatar subido y asociado al usuario exitosamente."
     }, 200
 
 def obtener_avatar_usuario_service(usuario_id):
