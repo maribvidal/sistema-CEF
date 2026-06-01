@@ -100,7 +100,7 @@ def publicar_clase_service(
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Clase publicada exitosamente."
+        "message": "Clase publicada exitosamente."
     }, 200
 
 def modificar_clase_service(
@@ -145,7 +145,7 @@ def modificar_clase_service(
     cursor.connection.close()
 
     return {
-        "mensaje": "Clase modificada exitosamente."
+        "message": "Clase modificada exitosamente."
     }, 200
 
 def eliminar_clase_service(clase_id: int):
@@ -177,7 +177,7 @@ def eliminar_clase_service(clase_id: int):
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Clase eliminada exitosamente."
+        "message": "Clase eliminada exitosamente."
     }, 200
 
 def cancelar_clase_service(clase_id: int):
@@ -206,7 +206,7 @@ def cancelar_clase_service(clase_id: int):
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Clase cancelada exitosamente."
+        "message": "Clase cancelada exitosamente."
     }, 200
 
 def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
@@ -305,7 +305,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Reserva realizada exitosamente."
+        "message": "Reserva realizada exitosamente."
     }, 200
 
 def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hora):
@@ -344,5 +344,5 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hor
 
     cursor.connection.close()
     return {
-        "mensaje": "El usuario se encuentra inscripto."
+        "message": "El usuario se encuentra inscripto."
     }, 200

@@ -70,7 +70,7 @@ def login_service(correo: str, contraseña: str) -> tuple:
         cursor.connection.commit()
         cursor.connection.close()
         return {
-            "mensaje": "Inicio de sesión exitoso",
+            "message": "Inicio de sesión exitoso",
             "token": token,
             "usuario": {
                 "id": usuario['data']['id'],
@@ -134,7 +134,7 @@ def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fech
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Usuario registrado exitosamente",
+        "message": "Usuario registrado exitosamente",
         "usuario_id": resultado['data']
     }, 200
 
