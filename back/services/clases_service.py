@@ -2,7 +2,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.modificar_db import modificar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_fecha_hora_sala, consultar_clase_ocurrir_sala_por_claseid_fecha_hora, consultar_usuarios_inscriptos_clase_ocurrir_sala
-from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id
+from db.operaciones.clases.consultar_db import listar_clases_ocurriendo, consultar_clase_por_id
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
@@ -14,7 +14,7 @@ def listar_clases_service():
 
     cursor = conectarse_db()
 
-    respuesta = listar_clases(cursor)
+    respuesta = listar_clases_ocurriendo(cursor)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
