@@ -43,20 +43,18 @@ def login_service(correo: str, contraseña: str) -> tuple:
     print(" resultado consulta usuario: ", dict(usuario['data']) if usuario['data'] else None)
     if usuario["status"] == "error":
         cursor.connection.close()
-        return {
-            "error": usuario["message"]
-        }, 500
+        return {"message": usuario["message"]}, 500
+
     
     if usuario["status"] == 'success' and usuario["data"] is None:
         cursor.connection.close()
-        return {
-            "error": "Datos incorrectos"
-        }, 400
+        return {"message": "Datos incorrectos"}, 400
+
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
         if usuario['data']['contraseña'] != contraseña:
             cursor.connection.close()
-            return {"error": "Datos incorrectos"}, 401
+            return {"message": "Datos incorrectos"}, 401
 
         # Generar JWT
         token = _generate_jwt({
