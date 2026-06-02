@@ -237,12 +237,6 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
     if res_clase_ocu_sala['status'] == 'error':
         cursor.connection.close()
         return res_clase_ocu_sala, 402
-    
-    if res_clase_ocu_sala['data'] is None:
-        cursor.connection.close()
-        return {
-            "error": "Clase_ocurrir_sala no encontrada."
-        }, 403
 
     id_clase_ocu_sala = res_clase_ocu_sala['data']['id']
 
@@ -252,13 +246,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     if res_usuario['status'] == 'error':
         cursor.connection.close()
-        return res_usuario, 404
-
-    if res_usuario['status'] == 'sucess' and not res_usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 405
+        return res_usuario, 403
 
     # Comprobar que el usuario no se haya inscrito ya a otra clase en esa hora
 
@@ -266,7 +254,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()
-        return res_usuario_clase['message'], 406
+        return res_usuario_clase['message'], 404
 
     ## Se compara si es mayor a 0 puesto que, si el dict no tiene tuplas, entonces
     ## va a devolver una cantidad de 0 el len().
@@ -274,7 +262,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         cursor.connection.close()
         return {
             "error": "El usuario ya se encuentra inscripto en esa clase."
-        }, 407
+        }, 405
 
     # Comprobar el cupo de la clase
 
@@ -282,7 +270,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     if res_inscriptos['status'] == 'error':
         cursor.connection.close()
-        return res_inscriptos['message'], 408
+        return res_inscriptos['message'], 406
 
     cant_inscriptos = len(res_inscriptos['data']) + 1
 
@@ -290,7 +278,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         cursor.connection.close()
         return {
             "error": "La clase no tiene mas cupos disponibles."
-        }, 409
+        }, 407
 
     # Insertar el usuario en la clase
 

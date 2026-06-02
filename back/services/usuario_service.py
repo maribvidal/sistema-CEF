@@ -587,12 +587,6 @@ def obtener_avatar_usuario_service(usuario_id):
         return {
             "error": res['message']
         }, 401
-    
-    if res['status'] == 'success' and res['data'] is None:
-        cursor.connection.close()
-        return {
-            "error": "El usuario no tiene un avatar asociado."
-        }, 402
 
     cursor.connection.close()
     return {
