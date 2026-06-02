@@ -23,13 +23,14 @@ def ejecutar_fetchall(query, cursor):
 
 def ejecutar_fetchone(query, cursor) -> dict:
     try:
-        print("Ejecutando query de consulta: ", query)
         cursor.execute(query)
         
         resultado = cursor.fetchone()
-        resultado = dict(resultado) if resultado else None
+        if resultado is None:
+            raise ValueError("No se encontraron resultados para la consulta.")
 
-        print("Resultado consulta: ", resultado)
+        resultado = dict(resultado)
+
         return {
             "status": "success",
             "data": resultado
@@ -72,9 +73,6 @@ def ejecutar_query(query, cursor):
             "data": None
         }
     except Exception as e:
-        print("ERROR SQL:")
-        print(e)
-
         return {
             "status": "error",
             "message": str(e)
