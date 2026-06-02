@@ -2,6 +2,12 @@ from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchon
 
 def listar_clases(cursor) -> dict:
     """Hace una consulta para listar todas las clases, y devuelve una lista de tuplas"""
+    return ejecutar_fetchall("""SELECT *
+                                FROM Clase c""", cursor)
+
+def listar_clases_ocurriendo(cursor) -> dict:
+    """Hace una consulta para listar todas las clases, junto con la información obtenida
+        de la tabla Clase_Ocurrir_Sala, y devuelve una lista de tuplas."""
     return ejecutar_fetchall("""SELECT c.id, c.estado, c.actividad_id, c.profesor_id, cos.fecha, cos.hora, cos.sala_id, c.cupo_maximo
                                 FROM Clase c INNER JOIN Clase_Ocurrir_Sala cos ON c.id = cos.clase_id""", cursor)
 
