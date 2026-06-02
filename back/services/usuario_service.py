@@ -149,7 +149,7 @@ def registrar_usuario_service(
     cursor.connection.close()
     return {
         "message": "Usuario registrado exitosamente."
-    }, 201
+    }, 200
     
 def obtener_perfil_usuario_service(usuario_id: int):
     cursor = conectarse_db()
