@@ -60,7 +60,7 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_sala(cursor)
     construir_tabla_descuento(cursor)
     construir_tabla_usuario(cursor)
-    construir_tabla_clase(cursor)    # necesita Actividad y Profesor
+    construir_tabla_clase(cursor)    # necesita Actividad
     construir_tabla_pago(cursor)     # necesita Usuario
     construir_tabla_mensualidad(cursor) # necesita Usuario
     construir_tabla_imagenes(cursor)
@@ -102,13 +102,6 @@ def construir_tabla_imagenes(cursor: sqlite.Cursor):
     cursor.execute("""CREATE TABLE IF NOT EXISTS Imagen (
                             id          INTEGER PRIMARY KEY,
                             contenido   BLOB NOT NULL
-                        )""")
-
-def construir_tabla_rol(cursor: sqlite.Cursor):
-    """Construye la tabla Recepcionista"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Rol (
-                            id          INTEGER PRIMARY KEY,
-                            nombre      VARCHAR({LONG_NOM})
                         )""")
 
 def construir_tabla_actividad(cursor: sqlite.Cursor):
