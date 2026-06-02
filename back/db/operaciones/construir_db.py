@@ -55,7 +55,6 @@ def construir_db():
 def construir_tablas(cursor: sqlite.Cursor):
     """Construye todas las tablas de la BD"""
     # Construir tablas para las entidades
-    construir_tabla_permiso(cursor)
     construir_tabla_rol(cursor)
     construir_tabla_actividad(cursor)
     construir_tabla_sala(cursor)
@@ -67,7 +66,6 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_imagenes(cursor)
 
     # Construir tablas para las relaciones
-    construir_tabla_rol_tener_permiso(cursor)
     construir_tabla_clase_ocurrir_sala(cursor)
     construir_tabla_usuario_tener_descuento(cursor)
     construir_tabla_usuario_inscribir_clase(cursor)
@@ -106,32 +104,11 @@ def construir_tabla_imagenes(cursor: sqlite.Cursor):
                             contenido   BLOB NOT NULL
                         )""")
 
-def construir_tabla_permiso(cursor: sqlite.Cursor):
-    """Construye la tabla Permiso"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Permiso (
-                            id          INTEGER PRIMARY KEY,
-                            nombre      VARCHAR({LONG_NOM})
-                        )""")
-
 def construir_tabla_rol(cursor: sqlite.Cursor):
     """Construye la tabla Recepcionista"""
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Rol (
                             id          INTEGER PRIMARY KEY,
                             nombre      VARCHAR({LONG_NOM})
-                        )""")
-
-def construir_tabla_rol_tener_permiso(cursor: sqlite.Cursor):
-    """Construye la tabla Permiso"""
-    cursor.execute("""CREATE TABLE IF NOT EXISTS Rol_Tener_Permiso (
-                            id          INTEGER PRIMARY KEY,
-                            rol_id      INTEGER NOT NULL,
-                            permiso_id  INTEGER NOT NULL,
-                            FOREIGN KEY (rol_id) REFERENCES Rol(id)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL,
-                            FOREIGN KEY (permiso_id) REFERENCES Permiso(id)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL
                         )""")
 
 def construir_tabla_actividad(cursor: sqlite.Cursor):
