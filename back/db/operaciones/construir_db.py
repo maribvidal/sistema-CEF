@@ -1,23 +1,8 @@
 import sqlite3 as sqlite
 import os
 
-# CONSTANTES
-
-# LONG_NOM = 20
-# LONG_APE = 30
-# LONG_CORREO = 30
-# LONG_CONTRA = 12
-# LONG_TEL = 15
-# NOM_DB = "database.db"
-
-### TO-DO:
-### - ¿Cambiamos las opciones del ON DELETE y del ON UPDATE?
 from db import LONG_TEL, NOM_DB, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA, LONG_TEL
 
-
-import os
-
-# MODIFICADA ESTA FUNCIÓN PARA ERROR HANDLING
 def reconstruir_db():
     """Destruye la BD y luego la vuelve a construir"""
     ruta_completa = os.path.join(os.getcwd(), NOM_DB)
@@ -269,4 +254,11 @@ def construir_tabla_pago_pagar_mensualidad(cursor: sqlite.Cursor):
                             FOREIGN KEY (mensualidad_id) REFERENCES Mensualidad(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
+                        )""")
+
+def construir_tabla_rol(cursor: sqlite.Cursor):
+    """Construye la tabla Recepcionista"""
+    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Rol (
+                            id          INTEGER PRIMARY KEY,
+                            nombre      VARCHAR({LONG_NOM})
                         )""")
