@@ -50,13 +50,13 @@ def login_service(correo: str, contraseña: str) -> tuple:
     if usuario["status"] == 'success' and usuario["data"] is None:
         cursor.connection.close()
         return {
-            "error": "Usuario no encontrado"
+            "error": "Datos incorrectos"
         }, 400
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
         if usuario['data']['contraseña'] != contraseña:
             cursor.connection.close()
-            return {"error": "Contraseña incorrecta"}, 401
+            return {"error": "Datos incorrectos"}, 401
 
         # Generar JWT
         token = _generate_jwt({
@@ -82,7 +82,9 @@ def login_service(correo: str, contraseña: str) -> tuple:
         }, 200
     
     cursor.connection.close()
-    return {"error": "Error desconocido"}, 500
+    # Si por alguna razón no se cumplió ninguna de las condiciones, pues me hago el boludo y devuelvo datos incorrectos, ya que no se contempla en la HU otro escenario
+    # Cambio 500 por error 400, solo en caso de que pase algo falopa
+    return {"error": "Datos Incorrectos"}, 400
     
 
 

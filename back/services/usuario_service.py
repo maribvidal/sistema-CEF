@@ -77,25 +77,24 @@ def registrar_usuario_service(
     )
     
     # Comprobaciones de las entradas
-
     if len(errores) > 0:
         return errores, 400
 
     if (not _es_un_rol_valido(rol_id)):
         return {
-            "error": "El rol_id pasado no es válido."
+            "message": "El rol_id pasado no es válido."
         }, 401
 
     if (_es_fecha_valida(fecha_nac) is False):
         cursor.connection.close()
         return {
-            "error": "La fecha de nacimiento no es válida."
+            "message": "La fecha de nacimiento no es válida."
         }, 402
     
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         cursor.connection.close()
         return {
-            "error": "El usuario debe ser mayor de 14 años"
+            "message": "El usuario debe ser mayor de 14 años"
         }, 403
 
     cursor = conectarse_db()
@@ -107,14 +106,14 @@ def registrar_usuario_service(
     if res_dnis['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": "Error al obtener los DNIs de los usuarios."
+            "message": "Error al obtener los DNIs de los usuarios."
         }, 404
 
     for res_dni in res_dnis['data']:
         if dni == res_dni['dni']:
             cursor.connection.close()
             return {
-                "error": "El DNI ya se encuentra registrado para un usuario."
+                "message": "El DNI ya se encuentra registrado para un usuario."
             }, 405
 
     # Comprobar que el correo no se haya utilizado
@@ -127,8 +126,8 @@ def registrar_usuario_service(
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
         cursor.connection.close()
         return {
-            "error": "El correo electrónico ya se encuentra registrado."
-        }, 407
+            "message": "El correo electrónico ya se encuentra registrado."
+        }, 409 # lo cambié porque si era 407 entonces me tiraba "failed to fetch..."
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
@@ -148,13 +147,13 @@ def registrar_usuario_service(
     if res['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": res['message']
+            "message": res['message']
         }, 500
 
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Usuario registrado exitosamente."
+        "message": "Usuario registrado exitosamente."
     }, 201
     
 def obtener_perfil_usuario_service(usuario_id: int):
@@ -215,23 +214,26 @@ def editar_perfil_usuario_service(
     fecha_nac=None,
     correo=None,
     telefono=None
-):
-    
+): 
+    def _obtener_años_hasta_2026(fecha) -> int:
+        """Se devuelve la cantidad de años que faltan hasta
+            el año actual, si la fecha es válida"""
+        fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d")
+        return 2026 - fecha.year
+
     cursor = conectarse_db()
     
     usuario = consultar_usuario_por_id(usuario_id, cursor)
 
     if usuario['status'] == 'error':
         cursor.connection.close()
-        return {
-            "error": usuario['message']
-        }, 400
+        return {"message": usuario['message']}, 400
+
 
     if usuario['status'] == 'success' and not usuario['data']:
         cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado"
-        }, 402
+        return {"message": "Usuario no encontrado"}, 404
+ 
 
     datos_a_actualizar = []
     
@@ -249,13 +251,13 @@ def editar_perfil_usuario_service(
         respuesta = consultar_usuario_por_correo(correo, cursor)
         if respuesta['status'] == 'error':
             cursor.connection.close()
-            return respuesta, 403
+            return {"message": respuesta['message']}, 500
+
 
         if respuesta['status'] == 'success' and respuesta['data'] is not None:
             cursor.connection.close()
-            return {
-                "error": "El correo electrónico ya se encuentra registrado."
-            }, 404
+            return {"message": "El correo electrónico ya se encuentra registrado"}, 409
+
     
     if telefono is not None:
         datos_a_actualizar.append({"name": "telefono", "value": telefono})
@@ -266,8 +268,14 @@ def editar_perfil_usuario_service(
     
     if len(errores) > 0:
         cursor.connection.close()
-        return errores, 403
+        return {"message": "Errores de validación en los datos"}, 400
+
     
+    if fecha_nac is not None and _obtener_años_hasta_2026(fecha_nac) < 14:
+        cursor.connection.close()
+        return {"message": "El usuario debe ser mayor de 14 años"}, 403
+
+    print("COMIENZO MODIFICACION DE PERFIL DE USUARIOOOOOOOO")
     res = modificar_perfil_usuario(
         cursor,
         usuario_id,
@@ -282,13 +290,13 @@ def editar_perfil_usuario_service(
     if res['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": "Se produjo un error desde el lado del servidor al modificar el perfil del usuario."
+            "message": "Se produjo un error desde el lado del servidor al modificar el perfil del usuario."
         }, 500
 
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Perfil actualizado exitosamente."
+        "message": "Perfil actualizado exitosamente."
     }, 200
 
 # Servicios para las HUs de contraseñas

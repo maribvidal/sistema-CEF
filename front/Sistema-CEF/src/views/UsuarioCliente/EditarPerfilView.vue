@@ -112,8 +112,18 @@ const updateProfile = async () => {
     notificationStore.showNotification('Perfil actualizado con éxito.', 'success')
   } catch (error) {
     console.error('Error updating profile:', error)
-    notificationStore.showNotification(`Error al actualizar el perfil: ${error.message}`, 'danger')
+    console.log("FULL ERROR:", error)
+    console.log("BACKEND RESPONSE:", error?.response?.data)
+
+    const backendMessage =
+      error?.data?.message ||
+      error?.data?.error ||
+      error?.message ||
+      'Error al actualizar el perfil'
+
+    notificationStore.showNotification(backendMessage, 'danger')
   } finally {
+    console.log("FINAL BLOCK EJECUTADO")
     isUpdatingProfile.value = false
   }
 }
