@@ -89,12 +89,6 @@ def publicar_clase_service(
 
     respuesta = consultar_clase_ocurrir_sala_por_dia_hora_sala(sala, dia, hora, cursor)
 
-    if respuesta['status'] == 'error':
-        return {
-            "status": "error",
-            "message": respuesta['message']
-        }, 400
-
     # Si no tiró antes, todo debería estar bien
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
             return {
