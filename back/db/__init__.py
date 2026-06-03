@@ -1,6 +1,7 @@
 from db.checkeos.restricciones_objeto import Restriccion
+import os
 
-NOM_DB = "database.db"
+NOM_DB = os.getenv("NOM_DB", "database.db")
 
 LONG_NOM = 20
 LONG_APE = 30

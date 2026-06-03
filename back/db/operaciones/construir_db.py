@@ -1,11 +1,11 @@
 import sqlite3 as sqlite
 import os
 
-from db import LONG_TEL, NOM_DB, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA, LONG_TEL
+from db import LONG_TEL, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA
 
 def reconstruir_db():
     """Destruye la BD y luego la vuelve a construir"""
-    ruta_completa = os.path.join(os.getcwd(), NOM_DB)
+    ruta_completa = os.path.join(os.getcwd(), os.getenv("NOM_DB"))
     
     try:
         os.remove(ruta_completa)
@@ -18,7 +18,7 @@ def reconstruir_db():
 
 def construir_db():
     """Construye la BD si no existía antes"""
-    conexion = sqlite.connect(NOM_DB)
+    conexion = sqlite.connect(os.getenv("NOM_DB"))
 
     # Y con este podemos ejecutar y obtener resultados de
     # sentencias SQL de la BD
