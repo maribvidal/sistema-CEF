@@ -2,7 +2,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.modificar_db import modificar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_fecha_hora_sala, consultar_clase_ocurrir_sala_por_claseid_fecha_hora, consultar_usuarios_inscriptos_clase_ocurrir_sala
-from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id
+from db.operaciones.clases.consultar_db import listar_clases, listar_clases_ocurriendo, consultar_clase_por_id
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
@@ -11,6 +11,27 @@ from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_
 
 def listar_clases_service():
     """Service que lista las clases"""
+
+    cursor = conectarse_db()
+
+    respuesta = listar_clases_ocurriendo(cursor)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return respuesta, 400
+
+    if respuesta['status'] == 'success' and not respuesta['data']:
+        cursor.connection.close()
+        return {
+            "error": "No se encontraron clases."
+        }, 401
+
+    cursor.connection.close()
+    return respuesta, 200
+
+def listar_clases_solas_service():
+    """Service que lista las clases sin la información de las que
+        están ocurriendo."""
 
     cursor = conectarse_db()
 
@@ -100,7 +121,7 @@ def publicar_clase_service(
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Clase publicada exitosamente."
+        "message": "Clase publicada exitosamente."
     }, 200
 
 def modificar_clase_service(
@@ -145,7 +166,7 @@ def modificar_clase_service(
     cursor.connection.close()
 
     return {
-        "mensaje": "Clase modificada exitosamente."
+        "message": "Clase modificada exitosamente."
     }, 200
 
 def eliminar_clase_service(clase_id: int):
@@ -177,7 +198,7 @@ def eliminar_clase_service(clase_id: int):
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Clase eliminada exitosamente."
+        "message": "Clase eliminada exitosamente."
     }, 200
 
 def cancelar_clase_service(clase_id: int):
@@ -206,7 +227,7 @@ def cancelar_clase_service(clase_id: int):
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Clase cancelada exitosamente."
+        "message": "Clase cancelada exitosamente."
     }, 200
 
 def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
@@ -237,12 +258,6 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
     if res_clase_ocu_sala['status'] == 'error':
         cursor.connection.close()
         return res_clase_ocu_sala, 402
-    
-    if res_clase_ocu_sala['data'] is None:
-        cursor.connection.close()
-        return {
-            "error": "Clase_ocurrir_sala no encontrada."
-        }, 403
 
     id_clase_ocu_sala = res_clase_ocu_sala['data']['id']
 
@@ -252,13 +267,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     if res_usuario['status'] == 'error':
         cursor.connection.close()
-        return res_usuario, 404
-
-    if res_usuario['status'] == 'sucess' and not res_usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 405
+        return res_usuario, 403
 
     # Comprobar que el usuario no se haya inscrito ya a otra clase en esa hora
 
@@ -266,7 +275,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()
-        return res_usuario_clase['message'], 406
+        return res_usuario_clase['message'], 404
 
     ## Se compara si es mayor a 0 puesto que, si el dict no tiene tuplas, entonces
     ## va a devolver una cantidad de 0 el len().
@@ -274,7 +283,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         cursor.connection.close()
         return {
             "error": "El usuario ya se encuentra inscripto en esa clase."
-        }, 407
+        }, 405
 
     # Comprobar el cupo de la clase
 
@@ -282,7 +291,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     if res_inscriptos['status'] == 'error':
         cursor.connection.close()
-        return res_inscriptos['message'], 408
+        return res_inscriptos['message'], 406
 
     cant_inscriptos = len(res_inscriptos['data']) + 1
 
@@ -290,7 +299,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         cursor.connection.close()
         return {
             "error": "La clase no tiene mas cupos disponibles."
-        }, 409
+        }, 407
 
     # Insertar el usuario en la clase
 
@@ -305,7 +314,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Reserva realizada exitosamente."
+        "message": "Reserva realizada exitosamente."
     }, 200
 
 def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hora):
@@ -344,5 +353,5 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hor
 
     cursor.connection.close()
     return {
-        "mensaje": "El usuario se encuentra inscripto."
+        "message": "El usuario se encuentra inscripto."
     }, 200

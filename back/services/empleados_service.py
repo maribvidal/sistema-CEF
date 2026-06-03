@@ -181,5 +181,5 @@ def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, gene
     cursor.connection.close()
 
     return {
-        "mensaje": "El recepcionista ha sido creado con éxito."
+        "message": "El recepcionista ha sido creado con éxito."
     }, 200

@@ -53,7 +53,7 @@ def test_consultar_usuario_por_correo(cursor):
 
 def test_listar_clases(cursor):
     print("---------------TEST LISTAR CLASES---------------")
-    res = procesar_consulta(listar_clases(cursor))
+    res = procesar_consulta(listar_clases_ocurriendo(cursor))
     print(res)
     print("\n")
 

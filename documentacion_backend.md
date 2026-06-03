@@ -11,6 +11,22 @@
 
 ## API
 
+### ¿Qué devuelven los endpoints?
+
+Cualquier query que se haga a la Base de Datos devuelve lo siguiente, en caso de éxito o de error:
+
+| **Query** | **Primer campo objeto** | **Segundo campo objeto** | **Código** |
+| --- | --- | --- | --- |
+| **Éxito** | *status* | *data* | 200 |
+| **Error** | *status* | *message* | 40X, 500 |
+- El campo *status* puede devolver dos valores: “success” o “error”
+- Si *status* es “success”, entonces el segundo campo es *data*, por el cual se devuelve un resultado
+    - Si la query es una **consulta de una tupla**, se devuelve un objeto **dict** con la información.
+    - Si la query son múltiples consultas de tuplas, se devuelve un objeto dict con toda la información.
+    - Si la query es de **inserción**, se devuelve un valor tipo entero que representa el **id insertado**.
+    - Si la query es de **otro tipo**, se devuelve **None**.
+- Si *status* es “error”, entonces el segundo campo es *message*, por el cual se devuelve el mensaje de error que emitió el programa.
+
 ### Servidor
 
 El servidor se va a abrir en la dirección **http://127.0.0.1:5000**
@@ -94,6 +110,27 @@ Usuarios
 
 ## Testing
 
-Para el testing se recomienda hacer archivos de Unit Test con la librería unittest de Python, y que estos archivos se guarden dentro de la carpeta **back/test_clases**. Esta librería provee una manera y un montón de funciones que permiten hacer el testing de la forma que lo haciamos en Java.
+Para el testing se recomienda hacer archivos de Unit Test con la librería unittest de Python, y que estos archivos se guarden dentro de la carpeta **'/back/test_clases/'**. Esta librería provee una manera y un montón de funciones que permiten hacer el testing de la forma que lo haciamos en Java.
 - Para ejecutar estos archivos, hay que correr en la terminal el siguiente comando: *python -m unittest <nombre_del_módulo_a_probar>*
-- Se recomienda hacer los test cases por función.
+
+### Testing de Endpoints
+
+Para poder probar los endpoints de la aplicación, se creó la clase _EndpointTestCase_ que se encuentra en **'/back/test_clases'**.
+Esta clase a su vez es una subclase de _TestCase_, que es una clase que provee la librería _unittest_ para poder construir
+clases de pruebas. La clase _EndpointTestCase_ contiene todo lo esencial para poder realizar pruebas de endpoints, incluyendo:
+- Una instancia de la aplicación en modo Testing
+- Una conexión a una base de datos de prueba llamada 'test_database.db'
+- Un método para decodificar respuestas codificadas en bytes: **decodificarRespByte(resp)**
+- Un método para borrar todo lo que se creó para la prueba una vez que estas terminaron.
+
+### Crear un TestCase para un Endpoint en específico
+
+Para crear un TestCase para un Endpoint en específico tienen que crear un archivo en la carpeta **'/back/test_clases/endpoints/'** que lleve el nombre del Endpoint (por ejemplo: _usuarios_services_testcase.py_), y dentro de ese archivo tienen que crear una clase TestCase que herede de _EndpointTestCase_. Si quieren ver como, fijense cómo está implementado en el archivo clases_service_testcase.py.
+
+<br>
+
+La idea es que se cree un método de prueba por cada HU perteneciente a un Endpoint, y que en cada método de prueba se controlen que lo escenarios de esa HU devuelvan el resultado esperado.
+
+### Correr un TestCase
+
+Para correr un TestCase situénse en la carpeta **'/sistema-CEF/back'** y ejecuten el siguiente comando: `python -m unittest test_cases.endpoints.{nombre_testcase}`

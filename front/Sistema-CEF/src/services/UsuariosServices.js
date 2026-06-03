@@ -36,7 +36,7 @@ const AuthApiService = {
   logout: async () => {
     // El backend no tiene endpoint de logout, solo limpiamos token localmente
     localStorage.removeItem('token')
-    return { data: { mensaje: 'Sesión cerrada' }, status: 200 }
+    return { data: { message: 'Sesión cerrada' }, status: 200 }
   },
 
   // GetProfile: mapea Usuarios/VerPerfil → /usuarios/<id>/perfil

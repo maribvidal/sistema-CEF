@@ -1,26 +1,11 @@
 import sqlite3 as sqlite
 import os
 
-# CONSTANTES
+from db import LONG_TEL, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA
 
-# LONG_NOM = 20
-# LONG_APE = 30
-# LONG_CORREO = 30
-# LONG_CONTRA = 12
-# LONG_TEL = 15
-# NOM_DB = "database.db"
-
-### TO-DO:
-### - ¿Cambiamos las opciones del ON DELETE y del ON UPDATE?
-from db import LONG_TEL, NOM_DB, LONG_NOM, LONG_APE, LONG_CORREO, LONG_CONTRA, LONG_TEL
-
-
-import os
-
-# MODIFICADA ESTA FUNCIÓN PARA ERROR HANDLING
 def reconstruir_db():
     """Destruye la BD y luego la vuelve a construir"""
-    ruta_completa = os.path.join(os.getcwd(), NOM_DB)
+    ruta_completa = os.path.join(os.getcwd(), os.getenv("NOM_DB"))
     
     try:
         os.remove(ruta_completa)
@@ -33,7 +18,7 @@ def reconstruir_db():
 
 def construir_db():
     """Construye la BD si no existía antes"""
-    conexion = sqlite.connect(NOM_DB)
+    conexion = sqlite.connect(os.getenv("NOM_DB"))
 
     # Y con este podemos ejecutar y obtener resultados de
     # sentencias SQL de la BD
@@ -55,19 +40,17 @@ def construir_db():
 def construir_tablas(cursor: sqlite.Cursor):
     """Construye todas las tablas de la BD"""
     # Construir tablas para las entidades
-    construir_tabla_permiso(cursor)
     construir_tabla_rol(cursor)
     construir_tabla_actividad(cursor)
     construir_tabla_sala(cursor)
     construir_tabla_descuento(cursor)
     construir_tabla_usuario(cursor)
-    construir_tabla_clase(cursor)    # necesita Actividad y Profesor
+    construir_tabla_clase(cursor)    # necesita Actividad
     construir_tabla_pago(cursor)     # necesita Usuario
     construir_tabla_mensualidad(cursor) # necesita Usuario
     construir_tabla_imagenes(cursor)
 
     # Construir tablas para las relaciones
-    construir_tabla_rol_tener_permiso(cursor)
     construir_tabla_clase_ocurrir_sala(cursor)
     construir_tabla_usuario_tener_descuento(cursor)
     construir_tabla_usuario_inscribir_clase(cursor)
@@ -106,34 +89,6 @@ def construir_tabla_imagenes(cursor: sqlite.Cursor):
                             contenido   BLOB NOT NULL
                         )""")
 
-def construir_tabla_permiso(cursor: sqlite.Cursor):
-    """Construye la tabla Permiso"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Permiso (
-                            id          INTEGER PRIMARY KEY,
-                            nombre      VARCHAR({LONG_NOM})
-                        )""")
-
-def construir_tabla_rol(cursor: sqlite.Cursor):
-    """Construye la tabla Recepcionista"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Rol (
-                            id          INTEGER PRIMARY KEY,
-                            nombre      VARCHAR({LONG_NOM})
-                        )""")
-
-def construir_tabla_rol_tener_permiso(cursor: sqlite.Cursor):
-    """Construye la tabla Permiso"""
-    cursor.execute("""CREATE TABLE IF NOT EXISTS Rol_Tener_Permiso (
-                            id          INTEGER PRIMARY KEY,
-                            rol_id      INTEGER NOT NULL,
-                            permiso_id  INTEGER NOT NULL,
-                            FOREIGN KEY (rol_id) REFERENCES Rol(id)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL,
-                            FOREIGN KEY (permiso_id) REFERENCES Permiso(id)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL
-                        )""")
-
 def construir_tabla_actividad(cursor: sqlite.Cursor):
     """Construye la tabla Actividad"""
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Actividad (
@@ -163,7 +118,7 @@ def construir_tabla_sala(cursor: sqlite.Cursor):
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Sala (
                             id          INTEGER PRIMARY KEY,
                             nombre      VARCHAR({LONG_NOM}),
-                            capacidad  INTEGER NOT NULL
+                            capacidad   INTEGER NOT NULL
                         )""")
 
 def construir_tabla_clase_ocurrir_sala(cursor: sqlite.Cursor):
@@ -299,4 +254,11 @@ def construir_tabla_pago_pagar_mensualidad(cursor: sqlite.Cursor):
                             FOREIGN KEY (mensualidad_id) REFERENCES Mensualidad(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
+                        )""")
+
+def construir_tabla_rol(cursor: sqlite.Cursor):
+    """Construye la tabla Recepcionista"""
+    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Rol (
+                            id          INTEGER PRIMARY KEY,
+                            nombre      VARCHAR({LONG_NOM})
                         )""")

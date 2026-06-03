@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
-    listar_clases_service, publicar_clase_service, 
+    listar_clases_service, listar_clases_solas_service, publicar_clase_service, 
     modificar_clase_service, eliminar_clase_service,
     cancelar_clase_service, reservar_clase_service,
     verificar_inscripcion_usuario_clase_service
@@ -13,6 +13,15 @@ def listar_clases():
     """Este endpoint permite listar todas las clases disponibles 
         en el sistema."""
     respuesta, status = listar_clases_service()
+    
+    return jsonify(respuesta), status
+
+@clases_bp.route('/clase', methods=['GET'])
+def listar_clases_sin_info_extra():
+    """Este endpoint permite listar todas las clases disponibles 
+        en el sistema, pero sin la información de si están
+        ocurriendo o no."""
+    respuesta, status = listar_clases_solas_service()
     
     return jsonify(respuesta), status
 

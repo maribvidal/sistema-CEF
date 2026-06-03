@@ -46,17 +46,11 @@ def login_service(correo: str, contraseña: str) -> tuple:
         return {
             "error": usuario["message"]
         }, 500
-    
-    if usuario["status"] == 'success' and usuario["data"] is None:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado"
-        }, 400
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
         if usuario['data']['contraseña'] != contraseña:
             cursor.connection.close()
-            return {"error": "Contraseña incorrecta"}, 401
+            return {"error": "Contraseña incorrecta"}, 400
 
         # Generar JWT
         token = _generate_jwt({
@@ -70,7 +64,7 @@ def login_service(correo: str, contraseña: str) -> tuple:
         cursor.connection.commit()
         cursor.connection.close()
         return {
-            "mensaje": "Inicio de sesión exitoso",
+            "message": "Inicio de sesión exitoso",
             "token": token,
             "usuario": {
                 "id": usuario['data']['id'],
@@ -134,7 +128,7 @@ def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fech
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Usuario registrado exitosamente",
+        "message": "Usuario registrado exitosamente",
         "usuario_id": resultado['data']
     }, 200
 
