@@ -8,7 +8,7 @@ from db.operaciones.clases.modificar_db import modificar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, obtener_clase_usuario_dia_hora
 from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase_por_id
-from ..enum.dias import Dias
+from enums.dias import Dias
 
 def listar_clases_service():
     """Service que lista las clases"""

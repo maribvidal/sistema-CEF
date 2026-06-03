@@ -1,5 +1,5 @@
 from db.checkeos.restricciones_objeto import Restriccion
-from ..enum.dias import Dias
+from enums.dias import Dias
 
 import os
 import datetime
