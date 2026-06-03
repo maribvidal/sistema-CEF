@@ -35,7 +35,6 @@ def validar_contraseña(contraseña: str):
         return {"error": "La contraseña debe ser alfanumérica"}
     return {}
 
-
 ## Habria que modificar lo de la restriccion porque se manda el Long con la longitud maxima pero no la minima en el caso de la contraseña
 ## esta se valida en la funcion aparte
 
