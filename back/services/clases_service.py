@@ -1,13 +1,14 @@
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clase_ocurrir_sala.insertar_db import insertar_clase_ocurrir_sala
 from db.operaciones.clase_ocurrir_sala.modificar_db import modificar_clase_ocurrir_sala
-from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_fecha_hora_sala, consultar_clase_ocurrir_sala_por_claseid_fecha_hora, consultar_usuarios_inscriptos_clase_ocurrir_sala
+from db.operaciones.clase_ocurrir_sala.consultar_db import consultar_clase_ocurrir_sala_por_dia_hora_sala, consultar_clase_ocurrir_sala_por_claseid_dia_hora, consultar_usuarios_inscriptos_clase_ocurrir_sala
 from db.operaciones.clases.consultar_db import listar_clases, listar_clases_ocurriendo, consultar_clase_por_id
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.modificar_db import modificar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, obtener_clase_usuario_fecha_hora
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, obtener_clase_usuario_dia_hora
 from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase_por_id
+from ..enum.dias import Dias
 
 def listar_clases_service():
     """Service que lista las clases"""
@@ -54,7 +55,7 @@ def publicar_clase_service(
     estado: str,
     id_actividad: int,
     id_profesor: int,
-    fecha,
+    dia: Dias,
     hora: str,
     sala: int,
     cupo_maximo: int
@@ -86,7 +87,7 @@ def publicar_clase_service(
 
     # Comprobar que la sala no se encuentre ocupada en la fecha y hora dadas
 
-    respuesta = consultar_clase_ocurrir_sala_por_fecha_hora_sala(sala, fecha, hora, cursor)
+    respuesta = consultar_clase_ocurrir_sala_por_dia_hora_sala(sala, dia, hora, cursor)
 
     if respuesta['status'] == 'error':
         return {
@@ -230,7 +231,7 @@ def cancelar_clase_service(clase_id: int):
         "message": "Clase cancelada exitosamente."
     }, 200
 
-def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
+def reservar_clase_service(clase_id: int, id_usuario: int, dia: Dias, hora):
     """Service que, dado un usuario, lo intenta inscribir
         en una clase con una fecha y hora dada."""
 
@@ -253,7 +254,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     # Comprobar que exista el clase_ocurrir_sala
 
-    res_clase_ocu_sala = consultar_clase_ocurrir_sala_por_claseid_fecha_hora(clase_id, fecha, hora, cursor)
+    res_clase_ocu_sala = consultar_clase_ocurrir_sala_por_claseid_dia_hora(clase_id, dia, hora, cursor)
 
     if res_clase_ocu_sala['status'] == 'error':
         cursor.connection.close()
@@ -271,7 +272,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
 
     # Comprobar que el usuario no se haya inscrito ya a otra clase en esa hora
 
-    res_usuario_clase = obtener_clase_usuario_fecha_hora(id_usuario, fecha, hora, cursor)
+    res_usuario_clase = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()
@@ -317,7 +318,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, fecha, hora):
         "message": "Reserva realizada exitosamente."
     }, 200
 
-def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hora):
+def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia: Dias, hora):
     """Service que devuelve si un usuario se encuentra
         inscripto o no en una clase a una fecha y hora dada."""
 
@@ -339,7 +340,7 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hor
 
     # Comprobar si el usuario está inscripto
 
-    res_usuario_clase = obtener_clase_usuario_fecha_hora(id_usuario, fecha, hora, cursor)
+    res_usuario_clase = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()

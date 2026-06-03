@@ -13,8 +13,8 @@ def consultar_superposicion_horaria_clase_usuario(usuario_id: int, clase_id: int
         INNER JOIN Clase_Ocurrir_Sala cos 
             ON cos.clase_id = uic.clase_id
         WHERE uic.usuario_id = {usuario_id}
-          AND cos.fecha = (
-              SELECT cos2.fecha
+          AND cos.dia = (
+              SELECT cos2.dia
               FROM Clase_Ocurrir_Sala cos2
               WHERE cos2.clase_id = {clase_id}
           )
