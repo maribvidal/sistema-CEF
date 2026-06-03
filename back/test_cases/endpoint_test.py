@@ -2,7 +2,6 @@ from db.operaciones.construir_db import construir_tablas
 from flask import Flask
 from flask_cors import CORS
 from unittest import TestCase, main
-from routes import salas_bp
 from app import create_app
 
 import json
