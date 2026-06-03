@@ -11,6 +11,22 @@
 
 ## API
 
+### ¿Qué devuelven los endpoints?
+
+Cualquier query que se haga a la Base de Datos devuelve lo siguiente, en caso de éxito o de error:
+
+| **Query** | **Primer campo objeto** | **Segundo campo objeto** | **Código** |
+| --- | --- | --- | --- |
+| **Éxito** | *status* | *data* | 200 |
+| **Error** | *status* | *message* | 40X, 500 |
+- El campo *status* puede devolver dos valores: “success” o “error”
+- Si *status* es “success”, entonces el segundo campo es *data*, por el cual se devuelve un resultado
+    - Si la query es una **consulta de una tupla**, se devuelve un objeto **dict** con la información.
+    - Si la query son múltiples consultas de tuplas, se devuelve un objeto dict con toda la información.
+    - Si la query es de **inserción**, se devuelve un valor tipo entero que representa el **id insertado**.
+    - Si la query es de **otro tipo**, se devuelve **None**.
+- Si *status* es “error”, entonces el segundo campo es *message*, por el cual se devuelve el mensaje de error que emitió el programa.
+
 ### Servidor
 
 El servidor se va a abrir en la dirección **http://127.0.0.1:5000**
