@@ -112,7 +112,7 @@ def publicar_clase_service(
 
     # Intentar insertar la relación clase_ocurrir_sala
 
-    respuesta3 = insertar_clase_ocurrir_sala(respuesta2['data'], sala, fecha, hora, cursor)
+    respuesta3 = insertar_clase_ocurrir_sala(respuesta2['data'], sala, dia, hora, cursor)
 
     if respuesta3['status'] == 'error':
         print(respuesta3['message'])

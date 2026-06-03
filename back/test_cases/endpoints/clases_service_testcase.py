@@ -83,8 +83,8 @@ class ClasesServiceTestCase(EndpointTestCase):
         id_sala2 = insertar_sala("Sala 2", 10, self.cursor)["data"]
 
         # Crear clase_ocurrir_sala
-        id_cos1 = insertar_clase_ocurrir_sala(id_cla1, id_sala1, "2026-12-07", "10:00", self.cursor)["data"]
-        id_cos2 = insertar_clase_ocurrir_sala(id_cla2, id_sala2, "2026-12-07", "12:00", self.cursor)["data"]
+        id_cos1 = insertar_clase_ocurrir_sala(id_cla1, id_sala1, "Lunes", "10:00", self.cursor)["data"]
+        id_cos2 = insertar_clase_ocurrir_sala(id_cla2, id_sala2, "Martes", "12:00", self.cursor)["data"]
 
         self.cursor.connection.commit()
 
