@@ -1,5 +1,8 @@
 from db.checkeos.restricciones_objeto import Restriccion
+from enums.dias import Dias
+
 import os
+import datetime
 
 NOM_DB = os.getenv("NOM_DB", "database.db")
 
@@ -8,8 +11,6 @@ LONG_APE = 30
 LONG_CORREO = 30
 LONG_CONTRA = 12
 LONG_TEL = 15
-
-import datetime
 
 def _validar_fecha(fecha: datetime.date):
         try:
@@ -20,6 +21,12 @@ def _validar_fecha(fecha: datetime.date):
         except:
             return {"error": f"La fecha {fecha} no es válida"}
 
+def _validar_dia_semana(dia_sem: str) -> Dias:
+    valores = [dia.name for dia in Dias]
+    if dia_sem in valores:
+        return {}
+    return {"error": f"El día {dia_sem} no es válido"}
+
 def validar_contraseña(contraseña: str):
     """Función que valida que la contraseña cumpla con los requisitos de seguridad."""
     if len(contraseña) < 8:
@@ -27,7 +34,6 @@ def validar_contraseña(contraseña: str):
     if not contraseña.isalnum():
         return {"error": "La contraseña debe ser alfanumérica"}
     return {}
-
 
 ## Habria que modificar lo de la restriccion porque se manda el Long con la longitud maxima pero no la minima en el caso de la contraseña
 ## esta se valida en la funcion aparte
@@ -41,5 +47,5 @@ restricciones = {
     Restriccion("fecha_ini", funcion_checkeo = _validar_fecha),
     Restriccion("fecha_fin", funcion_checkeo = _validar_fecha),
     Restriccion("fecha_nac", funcion_checkeo = _validar_fecha),
-    Restriccion("fecha", funcion_checkeo = _validar_fecha)
+    Restriccion("fecha", funcion_checkeo = _validar_dia_semana)
 }

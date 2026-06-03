@@ -43,7 +43,7 @@ def obtener_clases_usuario(id_usuario: int, cursor) -> dict:
         y devuelve una lista de tuplas"""
     query = f"""
         SELECT 
-            cos.fecha,
+            cos.dia,
             cos.hora,
             c.estado,
             a.nombre AS nombre_actividad,
@@ -59,10 +59,10 @@ def obtener_clases_usuario(id_usuario: int, cursor) -> dict:
     """
     return ejecutar_fetchall(query, cursor)
 
-def obtener_clase_usuario_fecha_hora(id_usuario: int, fecha, hora, cursor) -> dict:
+def obtener_clase_usuario_dia_hora(id_usuario: int, dia, hora, cursor) -> dict:
     """Hace una consulta para obtener la clase a la que está inscripto
         un usuario en una fecha y hora determinada, si es que el 
-        usuario está inscripto a una clase en esa fecha y hora."""
+        usuario está inscripto a una clase en ese día y hora."""
     # Utilizo ejecutar_fetchall por si el usuario llega a estar metido
     # en más de una clase en la misma fecha y hora (lo cual sería un error)
     query = f"""
@@ -71,7 +71,7 @@ def obtener_clase_usuario_fecha_hora(id_usuario: int, fecha, hora, cursor) -> di
             FROM Usuario u
                 INNER JOIN Usuario_Inscribir_Clase uic ON (u.id = uic.usuario_id)
                 INNER JOIN Clase_Ocurrir_Sala cos ON (uic.clase_ocurrir_sala_id = cos.id)
-            WHERE u.id = {id_usuario} AND cos.fecha = '{fecha}' AND cos.hora = '{hora}'
+            WHERE u.id = {id_usuario} AND cos.dia = '{dia}' AND cos.hora = '{hora}'
             """
     return ejecutar_fetchall(query, cursor)
 

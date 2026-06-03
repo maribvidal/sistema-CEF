@@ -35,7 +35,7 @@ def publicar_clase():
     estado = data.get("estado")
     id_actividad = data.get("id_actividad")
     id_profesor = data.get("id_profesor")
-    fecha = data.get("fecha")
+    dia = data.get("dia")
     hora = data.get("hora")
     sala = data.get("sala")
     cupo_maximo = data.get("cupo_maximo")
@@ -44,7 +44,7 @@ def publicar_clase():
         estado,
         id_actividad,
         id_profesor,
-        fecha,
+        dia,
         hora,
         sala,
         cupo_maximo
@@ -71,7 +71,7 @@ def modificar_clase(id_clase):
     estado = data.get("estado")
     id_actividad = data.get("id_actividad")
     id_profesor = data.get("id_profesor")
-    fecha = data.get("fecha")
+    dia = data.get("dia")
     hora = data.get("hora")
     sala = data.get("sala")
     cupo_maximo = data.get("cupo_maximo")
@@ -81,7 +81,7 @@ def modificar_clase(id_clase):
         estado,
         id_actividad,
         id_profesor,
-        fecha,
+        dia,
         hora,
         sala,
         cupo_maximo
@@ -114,10 +114,10 @@ def reservar_clase(id_clase):
 
     data = request.get_json()
     id_usuario = data.get("id_usuario")
-    fecha = data.get("fecha")
+    dia = data.get("dia")
     hora = data.get("hora")
 
-    respuesta, status = reservar_clase_service(id_clase, id_usuario, fecha, hora)
+    respuesta, status = reservar_clase_service(id_clase, id_usuario, dia, hora)
 
     return jsonify(respuesta), status
 
@@ -125,14 +125,14 @@ def reservar_clase(id_clase):
 def verificar_inscripcion_usuario_clase(id_clase):
     """Este endpoint permite verificar si un usuario
         tiene una inscripción a una clase específica,
-        en una fecha y hora dada."""
+        en un día y hora dado."""
 
     data = request.get_json()
 
     id_usuario = data.get("id_usuario")
-    fecha = data.get("fecha")
+    dia = data.get("dia")
     hora = data.get("hora")
     
-    respuesta, status = verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hora)
+    respuesta, status = verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia, hora)
 
     return jsonify(respuesta), status
