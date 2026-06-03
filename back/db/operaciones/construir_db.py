@@ -118,7 +118,7 @@ def construir_tabla_sala(cursor: sqlite.Cursor):
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Sala (
                             id          INTEGER PRIMARY KEY,
                             nombre      VARCHAR({LONG_NOM}),
-                            capacidad  INTEGER NOT NULL
+                            capacidad   INTEGER NOT NULL
                         )""")
 
 def construir_tabla_clase_ocurrir_sala(cursor: sqlite.Cursor):
