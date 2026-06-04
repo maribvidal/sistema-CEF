@@ -76,7 +76,9 @@ def login_service(correo: str, contraseña: str) -> tuple:
         }, 200
     
     cursor.connection.close()
-    return {"error": "Error desconocido"}, 500
+    # Si por alguna razón no se cumplió ninguna de las condiciones, pues me hago el boludo y devuelvo datos incorrectos, ya que no se contempla en la HU otro escenario
+    # Cambio 500 por error 400, solo en caso de que pase algo falopa
+    return {"error": "Datos Incorrectos"}, 400
     
 
 

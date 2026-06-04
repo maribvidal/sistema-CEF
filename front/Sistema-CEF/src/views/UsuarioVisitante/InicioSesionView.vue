@@ -68,15 +68,13 @@ const login = async () => {
 		}
 	} catch (error) {
 		console.error('Error en el inicio de sesión:', error)
-		const status = error?.response?.status || error?.status
-		if (status === 400) {
-			errorMessage.value = 'Usuario no registrado'
-		} else if (status === 401) {
-			errorMessage.value = 'Contraseña incorrecta'
-		} else {
-			errorMessage.value = error?.message || 'Ocurrió un error al iniciar sesión'
+		// Lozi: Para los del front, lo que estoy haciendo acá es simplemente agarrar el mensaje de error que viene del backend y mostrarlo en la alerta. En el backend devuelvo "Datos Incorrectos" tanto para el caso 400 como con el 401. Con esto les facilito la implementacion y no tienen que meterse en el back tantas veces
+		errorMessage.value =
+			error?.data?.message ||
+			error?.data?.error ||
+			error?.message ||
+			'Datos incorrectos'
 		}
-	}
 }
 </script>
 <style scoped>

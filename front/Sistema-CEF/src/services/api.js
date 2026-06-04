@@ -45,9 +45,16 @@ async function request(endpoint, method = 'GET', data = null) {
 
     // Si la respuesta no es 2xx, lanzar error
     if (!response.ok) {
-      const error = new Error(jsonData?.error || `HTTP ${response.status}`)
+      const error = new Error(
+        jsonData?.message ||
+        jsonData?.error ||
+        (Array.isArray(jsonData) ? 'Errores de validación en los datos' : null) ||
+        `HTTP ${response.status}`
+      )
+
       error.status = response.status
       error.data = jsonData
+
       throw error
     }
 
