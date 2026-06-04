@@ -102,6 +102,7 @@ const register = async () => {
       // El rol se asignará por defecto en el backend, usualmente.
         rol_id: 3
     }
+	console.log("DATA ENVIADA:", usuario)
 
 	const response = await fetch('http://127.0.0.1:5000/usuarios', {
       method: 'POST',
@@ -112,20 +113,34 @@ const register = async () => {
     })
 
     if (!response.ok) {
-      if (response.status === 400) {
+	// MIRA LO QUE TE AHORRAS HERMANO. VAMOOOOOOOOOS
+    //   if (response.status === 400) {
+	// 	const errorData = await response.json()
+	// 	errorMessage.value = errorData.message || 'Error de validación. Por favor, revisa tus datos.'
+	//   } else if (response.status === 406 || response.status === 407) {
+	// 	errorMessage.value = 'El correo electrónico ya se encuentra registrado.'
+	//   } else if (response.status === 405) {
+	// 	errorMessage.value = 'El DNI ya se encuentra registrado.'
+	//   } else if (response.status === 403){
+	// 	errorMessage.value = 'El usuario debe ser mayor de 14 años.'
+	//   }
+	// 	else {
+	// 	errorMessage.value = 'Error al registrar el usuario. Por favor, intenta nuevamente.'
+	//   }
 		const errorData = await response.json()
-		errorMessage.value = errorData.message || 'Error de validación. Por favor, revisa tus datos.'
-	  } else if (response.status === 406 || response.status === 407) {
-		errorMessage.value = 'El correo electrónico ya se encuentra registrado.'
-	  } else if (response.status === 405) {
-		errorMessage.value = 'El DNI ya se encuentra registrado.'
-	  } else if (response.status === 403){
-		errorMessage.value = 'El usuario debe ser mayor de 14 años.'
-	  }
-		else {
-		errorMessage.value = 'Error al registrar el usuario. Por favor, intenta nuevamente.'
-	  }
-	  return
+	  
+		if (Array.isArray(errorData.errors)) {
+		errorMessage.value = errorData.errors
+			.map(err => `${err.name}: ${err.message}`)
+			.join('\n')
+		} else {
+		errorMessage.value =
+			errorData.message ||
+			errorData.error ||
+			'Error desconocido'
+		}
+
+		return
       
     }
 

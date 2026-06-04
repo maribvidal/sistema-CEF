@@ -77,25 +77,24 @@ def registrar_usuario_service(
     )
     
     # Comprobaciones de las entradas
-
     if len(errores) > 0:
         return errores, 400
 
     if (not _es_un_rol_valido(rol_id)):
         return {
-            "error": "El rol_id pasado no es válido."
+            "message": "El rol_id pasado no es válido."
         }, 401
 
     if (_es_fecha_valida(fecha_nac) is False):
         cursor.connection.close()
         return {
-            "error": "La fecha de nacimiento no es válida."
+            "message": "La fecha de nacimiento no es válida."
         }, 402
     
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         cursor.connection.close()
         return {
-            "error": "El usuario debe ser mayor de 14 años"
+            "message": "El usuario debe ser mayor de 14 años"
         }, 403
 
     cursor = conectarse_db()
@@ -107,14 +106,14 @@ def registrar_usuario_service(
     if res_dnis['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": "Error al obtener los DNIs de los usuarios."
+            "message": "Error al obtener los DNIs de los usuarios."
         }, 404
 
     for res_dni in res_dnis['data']:
         if dni == res_dni['dni']:
             cursor.connection.close()
             return {
-                "error": "El DNI ya se encuentra registrado para un usuario."
+                "message": "El DNI ya se encuentra registrado para un usuario."
             }, 405
 
     # Comprobar que el correo no se haya utilizado
@@ -142,7 +141,7 @@ def registrar_usuario_service(
     if res['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": res['message']
+            "message": res['message']
         }, 500
 
     cursor.connection.commit()
@@ -191,17 +190,21 @@ def editar_perfil_usuario_service(
     fecha_nac=None,
     correo=None,
     telefono=None
-):
-    
+): 
+    def _obtener_años_hasta_2026(fecha) -> int:
+        """Se devuelve la cantidad de años que faltan hasta
+            el año actual, si la fecha es válida"""
+        fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d")
+        return 2026 - fecha.year
+
     cursor = conectarse_db()
     
     usuario = consultar_usuario_por_id(usuario_id, cursor)
 
     if usuario['status'] == 'error':
         cursor.connection.close()
-        return {
-            "error": usuario['message']
-        }, 400
+        return {"message": usuario['message']}, 400
+
 
     datos_a_actualizar = []
     
@@ -230,8 +233,14 @@ def editar_perfil_usuario_service(
     
     if len(errores) > 0:
         cursor.connection.close()
-        return errores, 403
+        return {"message": "Errores de validación en los datos"}, 400
+
     
+    if fecha_nac is not None and _obtener_años_hasta_2026(fecha_nac) < 14:
+        cursor.connection.close()
+        return {"message": "El usuario debe ser mayor de 14 años"}, 403
+
+    print("COMIENZO MODIFICACION DE PERFIL DE USUARIOOOOOOOO")
     res = modificar_perfil_usuario(
         cursor,
         usuario_id,
@@ -246,7 +255,7 @@ def editar_perfil_usuario_service(
     if res['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": "Se produjo un error desde el lado del servidor al modificar el perfil del usuario."
+            "message": "Se produjo un error desde el lado del servidor al modificar el perfil del usuario."
         }, 500
 
     cursor.connection.commit()

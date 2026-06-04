@@ -1,4 +1,5 @@
 from db.operaciones.exception_handler import ejecutar_query 
+import datetime
 
 def modificar_perfil_usuario(
     cursor,
@@ -12,6 +13,7 @@ def modificar_perfil_usuario(
 ):
     """Recibe el id de un usuario, y recibe cualquiera
         de los atributos de usuario que se quieran cambiar."""
+
 
     query = "UPDATE Usuario SET"
     if dni is not None:
