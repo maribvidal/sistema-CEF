@@ -68,7 +68,7 @@ const email = ref('')
 408: Error de servidor al validar el correo electrónico
 409: El correo electrónico ya se encuentra registrado
 500: Error del lado del servidor al intentar insertar
-201: Usuario registrado exitosamente. */
+200: Usuario registrado exitosamente. */
 
 const password = ref('')
 const dni = ref('')

@@ -1,22 +1,22 @@
 from db.operaciones.exception_handler import ejecutar_fetchone, ejecutar_fetchall
 
-def consultar_clase_ocurrir_sala_por_fecha_hora_sala(sala_id, fecha, hora, cursor):
-    """Función que consulta la clase_ocurrir_sala por fecha, hora y sala"""
+def consultar_clase_ocurrir_sala_por_dia_hora_sala(sala_id, dia, hora, cursor):
+    """Función que consulta la clase_ocurrir_sala por dia, hora y sala"""
     query = f"""
-        SELECT clase_id, sala_id, fecha, hora
+        SELECT clase_id, sala_id, dia, hora
         FROM Clase_Ocurrir_Sala
-        WHERE sala_id = {sala_id} AND fecha = '{fecha}' AND hora = '{hora}'
+        WHERE sala_id = {sala_id} AND dia = '{dia}' AND hora = '{hora}'
     """
 
     return ejecutar_fetchone(query, cursor)
 
-def consultar_clase_ocurrir_sala_por_claseid_fecha_hora(clase_id, fecha, hora, cursor):
-    """Función que consulta la clase_ocurrir_sala por el id de la clase, la fecha
+def consultar_clase_ocurrir_sala_por_claseid_dia_hora(clase_id, dia, hora, cursor):
+    """Función que consulta la clase_ocurrir_sala por el id de la clase, el día
         y la hora."""
     query = f"""
-        SELECT id, clase_id, sala_id, fecha, hora
+        SELECT id, clase_id, sala_id, dia, hora
         FROM Clase_Ocurrir_Sala
-        WHERE clase_id = {clase_id} AND fecha = '{fecha}' AND hora = '{hora}'
+        WHERE clase_id = {clase_id} AND dia = '{dia}' AND hora = '{hora}'
     """
 
     return ejecutar_fetchone(query, cursor)
