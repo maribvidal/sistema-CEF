@@ -6,7 +6,7 @@ from db.operaciones.salas.insertar_db import insertar_sala
 from db.operaciones.permisos.insertar_db import insertar_permiso
 from db.operaciones.roles.insertar_db import insertar_rol
 from db.operaciones import insertar_pago, insertar_clase
-from db.operaciones import insertar_pago_pagar_clase, insertar_usuario_inscribir_clase_por_id
+from db.operaciones import insertar_pago_pagar_clase
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
 from db.operaciones.reservas.insertar_db import insertar_reserva
 

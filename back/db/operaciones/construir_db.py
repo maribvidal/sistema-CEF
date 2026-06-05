@@ -117,7 +117,7 @@ def construir_tabla_clase(cursor: sqlite.Cursor):
                                          ON DELETE SET NULL,
                             FOREIGN KEY  (sala_id) REFERENCES Sala(id)
                                          ON UPDATE CASCADE
-                                         ON DELETE SET NULL,
+                                         ON DELETE SET NULL
                         )""")
 
 def construir_tabla_sala(cursor: sqlite.Cursor):
