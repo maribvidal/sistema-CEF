@@ -1,6 +1,6 @@
 from db.operaciones.exception_handler import ejecutar_insertar
 
-def insertar_instancia_clase(fecha, clase_id: int, cursor):
+def insertar_instancia_clase(clase_id: int, fecha, cursor):
     """ Permite insertar una instancia de una clase. """
     query = f"""
         INSERT INTO Instancia_Clase (fecha, clase_id)
