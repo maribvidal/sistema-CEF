@@ -1,5 +1,4 @@
 from .actividades import *
-from .clase_ocurrir_sala import *
 from .clases import *
 from .descuentos import *
 from .mensualidades import *
@@ -11,8 +10,6 @@ from .profesores import *
 from .rol_tener_permiso import *
 from .roles import *
 from .salas import *
-from .usuario_cancelar_clase import *
-from .usuario_inscribir_clase import *
 from .usuario_tener_descuento import *
 from .usuarios import *
 from .construir_db import *

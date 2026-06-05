@@ -1,9 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
-    listar_clases_service, listar_clases_solas_service, publicar_clase_service, 
-    modificar_clase_service, eliminar_clase_service,
-    cancelar_clase_service, reservar_clase_service,
-    verificar_inscripcion_usuario_clase_service
+    listar_clases_service, publicar_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -13,15 +10,6 @@ def listar_clases():
     """Este endpoint permite listar todas las clases disponibles 
         en el sistema."""
     respuesta, status = listar_clases_service()
-    
-    return jsonify(respuesta), status
-
-@clases_bp.route('/clase', methods=['GET'])
-def listar_clases_sin_info_extra():
-    """Este endpoint permite listar todas las clases disponibles 
-        en el sistema, pero sin la información de si están
-        ocurriendo o no."""
-    respuesta, status = listar_clases_solas_service()
     
     return jsonify(respuesta), status
 
@@ -57,37 +45,25 @@ def eliminar_clase(id_clase):
     """Este endpoint permite eliminar una clase específica. 
         Recibe el ID de la clase a eliminar en formato JSON."""
 
-    respuesta, status = eliminar_clase_service(id_clase)
+    ## TODO: Repensar implementación del endpoint
 
-    return jsonify(respuesta), status
+    return {
+        "status": "success",
+        "message": "En remodelación."
+    }, 200
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["PUT"])
 def modificar_clase(id_clase):
     """Este endpoint permite modificar los detalles de una 
         clase específica. Recibe el ID de la clase a modificar 
         y los nuevos datos en formato JSON."""
-    data = request.get_json()
 
-    estado = data.get("estado")
-    id_actividad = data.get("id_actividad")
-    id_profesor = data.get("id_profesor")
-    dia = data.get("dia")
-    hora = data.get("hora")
-    sala = data.get("sala")
-    cupo_maximo = data.get("cupo_maximo")
+    ## TODO: Repensar implementación del endpoint
 
-    respuesta, status = modificar_clase_service(
-        id_clase,
-        estado,
-        id_actividad,
-        id_profesor,
-        dia,
-        hora,
-        sala,
-        cupo_maximo
-    )
-
-    return jsonify(respuesta), status
+    return {
+        "status": "success",
+        "message": "En remodelación."
+    }, 200
 
 ## Habría que ver si a una clase cancelada hay que hacerle otra
 ## cosa que no sea cambiarle el estado.
@@ -97,9 +73,12 @@ def cancelar_clase(id_clase):
     """Este endpoint permite cancelar una clase específica. 
         Recibe el ID de la clase a cancelar en formato JSON."""
 
-    respuesta, status = cancelar_clase_service(id_clase)
+    ## TODO: Repensar implementación del endpoint
 
-    return jsonify(respuesta), status
+    return {
+        "status": "success",
+        "message": "En remodelación."
+    }, 200
 
 ## No estoy seguro de como implementar esto. Mañana lo voy
 ## a ver mejor, porque también podríamos implementar un
@@ -112,14 +91,12 @@ def reservar_clase(id_clase):
         una clase específica. Esto se hace pidiendo el
         id del usuario, la fecha, y la hora de la clase."""
 
-    data = request.get_json()
-    id_usuario = data.get("id_usuario")
-    dia = data.get("dia")
-    hora = data.get("hora")
+    ## TODO: Repensar implementación del endpoint
 
-    respuesta, status = reservar_clase_service(id_clase, id_usuario, dia, hora)
-
-    return jsonify(respuesta), status
+    return {
+        "status": "success",
+        "message": "En remodelación."
+    }, 200
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["GET"])
 def verificar_inscripcion_usuario_clase(id_clase):
@@ -127,12 +104,9 @@ def verificar_inscripcion_usuario_clase(id_clase):
         tiene una inscripción a una clase específica,
         en un día y hora dado."""
 
-    data = request.get_json()
+    ## TODO: Repensar implementación del endpoint
 
-    id_usuario = data.get("id_usuario")
-    dia = data.get("dia")
-    hora = data.get("hora")
-    
-    respuesta, status = verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia, hora)
-
-    return jsonify(respuesta), status
+    return {
+        "status": "success",
+        "message": "En remodelación."
+    }, 200
