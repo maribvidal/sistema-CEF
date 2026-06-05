@@ -1,5 +1,5 @@
 from db.operaciones.exception_handler import ejecutar_insertar
-from back.enums.dias import Dias
+from db import Dias
 
 def insertar_clase(estado: str, actividad_id: int, profesor_id: int, sala_id: int, dia: Dias, hora: str, cupo_maximo: int, cursor):
     """Permite insertar una fila para la tabla Clase"""
