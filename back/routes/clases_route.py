@@ -80,11 +80,6 @@ def cancelar_clase(id_clase):
         "message": "En remodelación."
     }, 200
 
-## No estoy seguro de como implementar esto. Mañana lo voy
-## a ver mejor, porque también podríamos implementar un
-## endpoint que reciba simplemente la id del 
-## clase_ocurrir_sala en vez de esto.
-
 @clases_bp.route("/clases/<int:id_clase>/reservar", methods=["PUT"])
 def reservar_clase(id_clase):
     """Este endpoint permite inscribir a un usuario a
