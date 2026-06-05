@@ -101,7 +101,9 @@ def borrar_empleado_service(empleado_dni: int):
     cursor.connection.commit()
     cursor.connection.close()
 
-    return respuesta['data'], 200
+    print("RESPUESTA DEL SERVICE DE BORRAR EMPLEADO: ", respuesta)
+
+    return {"message": "El empleado ha sido borrado con éxito."}, 200
 
 def desactivar_empleado_service(empleado_dni: int):
    """Service que desactiva un empleado.""" 
