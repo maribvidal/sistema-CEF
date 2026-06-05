@@ -6,6 +6,13 @@ from services.empleados_service import (
     desactivar_empleado_service,
     crear_recepcionista_service
 )
+from services.empleados_service import (
+    modificar_empleado_service,
+    listar_empleados_service,
+    borrar_empleado_service,
+    desactivar_empleado_service,
+    crear_recepcionista_service
+)
 
 empleados_bp = Blueprint('empleados', __name__)
 

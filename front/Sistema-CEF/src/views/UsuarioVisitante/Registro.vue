@@ -134,11 +134,12 @@ const register = async () => {
 		// 	.map(err => `${err.name}: ${err.message}`)
 		// 	.join('\n')
 		// } else {
-		errorMessage.value = errorData.message
-		// 	errorData.message ||
-		// 	errorData.error ||
-		// 	'Error desconocido'
-		// }
+
+		// Esto hay que dejarlo así porque utiliza la implementación vieja de errores del backend, la cual no posee el indice "message", para próximas implementaciones utilicen "message"
+		errorMessage.value = 
+			errorData.message ||
+			errorData.error ||
+			'Error desconocido'
 
 		return
     }
