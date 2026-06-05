@@ -23,22 +23,17 @@ def publicar_clase():
     estado = data.get("estado")
     id_actividad = data.get("id_actividad")
     id_profesor = data.get("id_profesor")
+    id_sala = data.get("id_sala")
     dia = data.get("dia")
     hora = data.get("hora")
-    sala = data.get("sala")
     cupo_maximo = data.get("cupo_maximo")
 
-    respuesta, status = publicar_clase_service(
-        estado,
-        id_actividad,
-        id_profesor,
-        dia,
-        hora,
-        sala,
-        cupo_maximo
-    )
+    ## TODO: Repensar implementación del endpoint
 
-    return jsonify(respuesta), status
+    return {
+        "status": "success",
+        "message": "En remodelación."
+    }, 200
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["DELETE"])
 def eliminar_clase(id_clase):

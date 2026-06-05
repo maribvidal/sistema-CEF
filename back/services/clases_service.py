@@ -1,35 +1,11 @@
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.clases.consultar_db import listar_clases, listar_clases_ocurriendo, consultar_clase_por_id
+from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id
 from db.operaciones.clases.insertar_db import insertar_clase
-from db.operaciones.clases.modificar_db import modificar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, obtener_clase_usuario_dia_hora
-from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase_por_id
 from enums.dias import Dias
 
 def listar_clases_service():
     """Service que lista las clases"""
-
-    cursor = conectarse_db()
-
-    respuesta = listar_clases_ocurriendo(cursor)
-
-    if respuesta['status'] == 'error':
-        cursor.connection.close()
-        return respuesta, 400
-
-    if respuesta['status'] == 'success' and not respuesta['data']:
-        cursor.connection.close()
-        return {
-            "error": "No se encontraron clases."
-        }, 401
-
-    cursor.connection.close()
-    return respuesta, 200
-
-def listar_clases_solas_service():
-    """Service que lista las clases sin la información de las que
-        están ocurriendo."""
 
     cursor = conectarse_db()
 
@@ -47,6 +23,7 @@ def listar_clases_solas_service():
 
     cursor.connection.close()
     return respuesta, 200
+
 
 def publicar_clase_service(
     estado: str,
@@ -142,7 +119,7 @@ def modificar_clase_service(
             "error": "Clase no encontrada."
         }, 401
 
-    respuesta = modificar_clase(clase_id, estado, id_actividad, id_profesor, cupo_maximo, cursor)
+    # respuesta = modificar_clase(clase_id, estado, id_actividad, id_profesor, cupo_maximo, cursor)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
@@ -245,7 +222,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, dia: Dias, hora):
 
     # Comprobar que exista el clase_ocurrir_sala
 
-    res_clase_ocu_sala = consultar_clase_ocurrir_sala_por_claseid_dia_hora(clase_id, dia, hora, cursor)
+    # res_clase_ocu_sala = consultar_clase_ocurrir_sala_por_claseid_dia_hora(clase_id, dia, hora, cursor)
 
     if res_clase_ocu_sala['status'] == 'error':
         cursor.connection.close()
@@ -263,7 +240,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, dia: Dias, hora):
 
     # Comprobar que el usuario no se haya inscrito ya a otra clase en esa hora
 
-    res_usuario_clase = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
+    # res_usuario_clase = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()
@@ -279,7 +256,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, dia: Dias, hora):
 
     # Comprobar el cupo de la clase
 
-    res_inscriptos = consultar_usuarios_inscriptos_clase_ocurrir_sala(id_clase_ocu_sala, cursor)
+    # res_inscriptos = consultar_usuarios_inscriptos_clase_ocurrir_sala(id_clase_ocu_sala, cursor)
 
     if res_inscriptos['status'] == 'error':
         cursor.connection.close()
@@ -295,7 +272,7 @@ def reservar_clase_service(clase_id: int, id_usuario: int, dia: Dias, hora):
 
     # Insertar el usuario en la clase
 
-    res_usu_ins_cla = insertar_usuario_inscribir_clase_por_id(id_usuario, clase_id, id_clase_ocu_sala, cursor)
+    # res_usu_ins_cla = insertar_usuario_inscribir_clase_por_id(id_usuario, clase_id, id_clase_ocu_sala, cursor)
 
     if res_usu_ins_cla['status'] == 'error':
         cursor.connection.close()
@@ -331,7 +308,7 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia: Dias,
 
     # Comprobar si el usuario está inscripto
 
-    res_usuario_clase = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
+    # res_usuario_clase = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()
