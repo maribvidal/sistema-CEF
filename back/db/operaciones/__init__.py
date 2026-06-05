@@ -7,7 +7,6 @@ from .pago_pagar_mensualidad import *
 from .pagos import *
 from .permisos import *
 from .profesores import *
-from .rol_tener_permiso import *
 from .roles import *
 from .salas import *
 from .usuario_tener_descuento import *
@@ -16,3 +15,6 @@ from .construir_db import *
 from .conectar_db import *
 from .seed_db import *
 from .imagenes import *
+from .cancelaciones import *
+from .reservas import *
+from .instancias_clases import *
