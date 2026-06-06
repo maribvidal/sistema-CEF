@@ -70,18 +70,17 @@ def cancelar_clase(id_clase):
         "message": "En remodelación."
     }, 200
 
-@clases_bp.route("/clases/<int:id_clase>/reservar", methods=["PUT"])
-def reservar_clase(id_clase):
+@clases_bp.route("/clases/<int:id_ins_clase>/reservar", methods=["PUT"])
+def reservar_clase(id_ins_clase):
     """Este endpoint permite inscribir a un usuario a
         una clase específica. Esto se hace pidiendo el
-        id del usuario, la fecha, y la hora de la clase."""
+        id del usuario y el id de la instancia de la clase."""
 
-    ## TODO: Repensar implementación del endpoint
+    data = request.get_json()
 
-    return {
-        "status": "success",
-        "message": "En remodelación."
-    }, 200
+    id_usuario = data.get("id_usuario")
+
+    return reservar_clase_service(id_ins_clase, id_usuario)
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["GET"])
 def verificar_inscripcion_usuario_clase(id_clase):
