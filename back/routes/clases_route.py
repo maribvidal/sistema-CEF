@@ -28,12 +28,7 @@ def publicar_clase():
     hora = data.get("hora")
     cupo_maximo = data.get("cupo_maximo")
 
-    ## TODO: Repensar implementación del endpoint
-
-    return {
-        "status": "success",
-        "message": "En remodelación."
-    }, 200
+    return publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo)
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["DELETE"])
 def eliminar_clase(id_clase):

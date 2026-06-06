@@ -1,8 +1,18 @@
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id
+from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases.modificar_db import modificar_clase_estado
+from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
+from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
+from db.operaciones.salas.consultar_db import consultar_sala_por_id
 from enums.dias import Dias
+
+def _msj_error_helper(razon: str, cursor):
+    cursor.connection.close()
+    return {
+        "status": "error",
+        "message": razon
+    }
 
 def listar_clases_service():
     """Service que lista las clases"""
@@ -16,80 +26,71 @@ def listar_clases_service():
         return respuesta, 400
 
     if respuesta['status'] == 'success' and not respuesta['data']:
-        cursor.connection.close()
-        return {
-            "error": "No se encontraron clases."
-        }, 401
+        return _msj_error_helper("No se encontraron clases.", cursor), 401
 
     cursor.connection.close()
     return respuesta, 200
-
 
 def publicar_clase_service(
     estado: str,
     id_actividad: int,
     id_profesor: int,
+    id_sala: int,
     dia: Dias,
     hora: str,
-    sala: int,
     cupo_maximo: int
 ):
     """Service que publica una clase"""
-    """
-    def _revisar_ocupacion_sala(sala, fecha, hora, cursor) -> dict:
-        ""Función auxiliar que revisa si la sala está ocupada en la 
-            fecha y hora dadas""
-        tupla_consulta = consultar_clase_ocurrir_sala_por_fecha_hora_sala(sala, fecha, hora, cursor)
-
-        if tupla_consulta['status'] == 'error':
-            return {
-                "status": "error",
-                "message": tupla_consulta['message']
-            }, 400
-
-        # Si no tiró antes, todo debería estar bien
-        if tupla_consulta['status'] == 'success' and tupla_consulta['data'] is not None:
-             return {
-                "status": "error",
-                "message": "La sala ya está ocupada en la fecha y hora dadas."
-            }, 401
-
-        return tupla_consulta
-    """
 
     cursor = conectarse_db()
 
-    # Comprobar que la sala no se encuentre ocupada en la fecha y hora dadas
+    # Comprobar que la actividad existe
 
-    respuesta = consultar_clase_ocurrir_sala_por_dia_hora_sala(sala, dia, hora, cursor)
+    resp_act = consultar_actividad_por_id(id_actividad, cursor)
+    if resp_act['status'] == 'error':
+        cursor.connection.close()
+        return resp_act, 400
 
-    # Si no tiró antes, todo debería estar bien
-    if respuesta['status'] == 'success' and respuesta['data'] is not None:
-            return {
-            "status": "error",
-            "message": "La sala ya está ocupada en la fecha y hora dadas."
-        }, 401
+    # Comprobar que el profesor existe
+
+    resp_prof = consultar_profesor_por_id(id_profesor, cursor)
+    if resp_prof['status'] == 'error':
+        cursor.connection.close()
+        return resp_prof, 401
+
+    # Comprobar que la sala existe
+
+    resp_sala = consultar_sala_por_id(id_sala, cursor)
+    if resp_sala['status'] == 'error':
+        cursor.connection.close()
+        return resp_sala, 402
+
+    # Comprobar que la sala no esté ocupada en ese día y hora
+
+    resp_clas = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
+    if resp_clas['status'] == 'success':
+        return _msj_error_helper("La sala ya se encuentra ocupada en ese día y hora.", cursor), 403
+
+    # Comprobar que la sala escogida tenga la capacidad suficiente
+
+    capacidad_sala = resp_sala["data"]["capacidad"]
+
+    if (capacidad_sala < cupo_maximo):
+        return _msj_error_helper("El cupo máximo ingresado supera la capacidad de la sala.", cursor), 404
 
     # Intentar insertar la clase
 
-    respuesta2 = insertar_clase(estado, id_actividad, id_profesor, cupo_maximo, cursor)
+    resp_inser_clas = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, cursor)
 
-    if respuesta2['status'] == 'error':
+    if resp_inser_clas['status'] == 'error':
         cursor.connection.close()
-        return respuesta2['message'], 403
-
-    # Intentar insertar la relación clase_ocurrir_sala
-
-    respuesta3 = insertar_clase_ocurrir_sala(respuesta2['data'], sala, dia, hora, cursor)
-
-    if respuesta3['status'] == 'error':
-        print(respuesta3['message'])
-        cursor.connection.close()
-        return respuesta3, 404
+        return resp_inser_clas['message'], 405
 
     cursor.connection.commit()
     cursor.connection.close()
+
     return {
+        "status": "success",
         "message": "Clase publicada exitosamente."
     }, 200
 
