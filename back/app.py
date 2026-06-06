@@ -6,8 +6,6 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.seed_db import insertar_datos
 from routes import *
 
-from test_cases.test_consultar_esqueleto import intentar_consultar_esqueleto
-
 def create_app(testing=False, db_name="database.db"):
     
     os.environ["NOM_DB"] = db_name

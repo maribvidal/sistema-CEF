@@ -1,0 +1,24 @@
+@startuml
+
+title Publicar clase
+
+== Escenario de éxito ==
+
+Frontend -> ClasesRouter: << POST /clases >> \n Se pasan los parámetros: estado, \nactividad_id, profesor_id, sala_id, \ndia, hora, cupo_maximo, monto.
+ClasesRouter -> ClasesService: << publicar_clase_service(...) >>
+ClasesService -> ClasesService: Realizar validación de \ndatos de entrada
+ClasesService -> Interfaz_BD: Comprobar si existe la actividad
+Interfaz_BD -> ClasesService: La actividad existe
+ClasesService -> Interfaz_BD: Comprobar si existe el profesor
+Interfaz_BD -> ClasesService: El profesor existe
+ClasesService -> Interfaz_BD: Comprobar si existe la sala
+Interfaz_BD -> ClasesService: La sala existe
+ClasesService -> Interfaz_BD: Comprobar si la sala está ocupada para \ntal día y hora
+Interfaz_BD -> ClasesService: La sala no está ocupada
+ClasesService -> Interfaz_BD: Comprobar si cupo_maximo > capacidad
+Interfaz_BD -> ClasesService: El cupo máximo no supera la capacidad \nde la sala
+ClasesService -> Interfaz_BD: <<insertar_clase(...)>>
+Interfaz_BD -> ClasesService: Devolver el id de la clase creada
+ClasesService -> ClasesRouter: Devolver 200 junto a un mensaje de éxito.
+
+@enduml
