@@ -9,6 +9,7 @@ from db.operaciones.clases.modificar_db import modificar_clase_estado
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, obtener_clase_usuario_dia_hora
 from db.operaciones.usuario_inscribir_clase.insertar_db import insertar_usuario_inscribir_clase_por_id
 from enums.dias import Dias
+from pprint import pprint
 
 def listar_clases_service():
     """Service que lista las clases"""
@@ -183,6 +184,7 @@ def eliminar_clase_service(clase_id: int):
         return {
             "error": "Clase no encontrada."
         }, 401
+    
 
     respuesta = modificar_clase_estado(clase_id, 'Borrado', cursor)
 
