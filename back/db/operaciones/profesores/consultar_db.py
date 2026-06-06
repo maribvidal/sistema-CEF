@@ -1,4 +1,4 @@
-from db.operaciones.exception_handler import ejecutar_fetchall
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
 def consultar_profesor_por_id(id: int, cursor) -> dict:
     """Hace una consulta para devolver la tupla de un profesor por su id."""
