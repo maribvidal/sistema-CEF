@@ -60,6 +60,12 @@ def registrar_usuario_service(
             el año actual, si la fecha es válida"""
         fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d")
         return 2026 - fecha.year
+    
+    def _es_correo_unico(correo: str) -> bool:
+        """Se devuelve si el correo es único o no"""
+        respuesta = consultar_usuario_por_correo(correo, cursor)
+        return respuesta['status'] == 'error'
+
 
     errores = checkear_inputs(
         [
@@ -117,10 +123,11 @@ def registrar_usuario_service(
 
     # Comprobar que el correo no se haya utilizado
 
-    respuesta = consultar_usuario_por_correo(correo, cursor)
-    if respuesta['status'] == 'error':
+    if not _es_correo_unico(correo):
         cursor.connection.close()
-        return respuesta, 406
+        return {
+            "message": "El correo electrónico ya se encuentra registrado."
+        }, 406
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
@@ -187,7 +194,7 @@ def editar_perfil_usuario_service(
     nombre=None,
     apellido=None,
     fecha_nac=None,
-    correo=None,
+    correo: str="",
     telefono=None
 ): 
     def _obtener_años_hasta_2026(fecha) -> int:
@@ -196,6 +203,11 @@ def editar_perfil_usuario_service(
         fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d")
         return 2026 - fecha.year
 
+    def _es_correo_unico(correo: str) -> bool:
+        """Se devuelve si el correo es único o no"""
+        respuesta = consultar_usuario_por_correo(correo, cursor)
+        return respuesta['status'] == 'error'
+
     cursor = conectarse_db()
     
     usuario = consultar_usuario_por_id(usuario_id, cursor)
@@ -203,6 +215,13 @@ def editar_perfil_usuario_service(
     if usuario['status'] == 'error':
         cursor.connection.close()
         return {"message": usuario['message']}, 400
+
+    if not _es_correo_unico(correo):
+        cursor.connection.close()
+        return {
+            "message": "El correo electrónico ya se encuentra registrado."
+        }, 406
+
 
 
     datos_a_actualizar = []

@@ -129,19 +129,19 @@ const register = async () => {
 	//   }
 		const errorData = await response.json()
 	  
-		if (Array.isArray(errorData.errors)) {
-		errorMessage.value = errorData.errors
-			.map(err => `${err.name}: ${err.message}`)
-			.join('\n')
-		} else {
-		errorMessage.value =
+		// if (Array.isArray(errorData.errors)) {
+		// errorMessage.value = errorData.errors
+		// 	.map(err => `${err.name}: ${err.message}`)
+		// 	.join('\n')
+		// } else {
+
+		// Esto hay que dejarlo así porque utiliza la implementación vieja de errores del backend, la cual no posee el indice "message", para próximas implementaciones utilicen "message"
+		errorMessage.value = 
 			errorData.message ||
 			errorData.error ||
 			'Error desconocido'
-		}
 
 		return
-      
     }
 
     // Si el registro es exitoso, redirigir a la página de inicio de sesión

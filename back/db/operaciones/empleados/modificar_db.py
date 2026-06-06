@@ -97,7 +97,7 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
         Devuelve un diccionario con el resultado de la operación."""
 
     query_verificacion = f"""
-        SELECT rol_id
+        SELECT id, rol_id
         FROM Usuario
         WHERE dni = {empleado_dni}
     """
@@ -108,20 +108,40 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
             "status": "error",
             "message": "Empleado no encontrado"
         }
-    elif usuario["data"]["rol_id"] not in (0, 1, 2): # o sea si el usuario no es ni gerente ni administrador
+    elif usuario["data"]["rol_id"] not in (0, 1, 2, 5): # o sea si el usuario no es ni gerente ni administrador ni profesor
         return {
             "status": "error",
             "message": "El usuario no es un empleado"
         }
+    elif usuario["data"]['rol_id'] == 5: # o sea si el usuario es un profesor
+        ## Aca hay que mejorar la logica y verificar si el profesor tiene clases a su cargo, y en ese caso no permitir el borrado
+        print("El usuario es un profesor, se procede a verificar si tiene clases a su cargo")
+        profesor_id = usuario["data"]["id"]
+        query_clases_profesor = f"""
+            SELECT COUNT(*) as total_clases
+            FROM Clase
+            WHERE profesor_id = {profesor_id}
+              AND estado != 'Borrado'
+        """
+        resultado_clases = ejecutar_fetchone(query_clases_profesor, cursor)
+        print("RESULTADO DE LA CONSULTA DE CLASES DEL PROFESOR: ", resultado_clases)
+
+        if resultado_clases.get("status") == "success" and resultado_clases["data"]["total_clases"] > 0:
+            return {
+                "status": "error",
+                "message": f"No se puede eliminar al profesor. Tiene {resultado_clases['data']['total_clases']} clase/s asignada/s"
+            }
+
     
     # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
-    query_update = f"""
-        UPDATE Usuario
-        SET rol_id = 4
+    # AHORA ES BORRADO FISICO
+    # SI QUEREMOS HACER BORRADO TAMBIÉN EN SUS REFERENCIAS (FOREIGN KEYS), HAY QUE UTILIZAR DELETE ON CASCADE. PERO POR LAS DUDAS LO DEJO COMO DELETE NORMAL
+    query_delete = f"""
+        DELETE FROM Usuario
         WHERE dni = {empleado_dni}
     """
 
-    return ejecutar_query(query_update, cursor)
+    return ejecutar_query(query_delete, cursor)
 
 def desactivar_empleado(empleado_dni: int, cursor) -> dict:
     """Desactiva un empleado específico de la base de datos, utilizando su DNI como referencia.
