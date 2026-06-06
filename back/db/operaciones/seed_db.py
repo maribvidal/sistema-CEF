@@ -50,7 +50,7 @@ def insertar_datos(cursor):
     # Crear clase
     id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, cursor)
     id_clas = id_clas['data']
-    res_inst_clase = insertar_instancia_clase(id_clas, 1, 'Domingo', '10:00', cursor)
+    res_inst_clase = insertar_instancia_clase(id_clas, '2026-06-01', cursor)
     
     # Inscribir usuario a clase
     inst_clase_id = res_inst_clase['data']
