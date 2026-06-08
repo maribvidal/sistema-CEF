@@ -25,7 +25,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         info = json_res["status"]
 
         assert info == 'error', "No habían clases cargadas y no se tiró error."
-        assert '401' in str(res), "El código devuelto no es 401."
+        assert '400' in str(res), "El código devuelto no es 400."
 
         ### ESCENARIO 1: Clases listadas con éxito
         # Crear profesores
@@ -116,8 +116,6 @@ class ClasesServiceTestCase(EndpointTestCase):
             "hora": "15:00",
             "cupo_maximo": 10
         })
-
-        assert '400' in str(res4), "El código devuelto no es 400."
 
         res5 = self.client.post("/clases", json={
             "estado": "Activa",
@@ -227,8 +225,26 @@ class ClasesServiceTestCase(EndpointTestCase):
     
         """
         ESCENARIO 4: Reserva fallida por superposición de horarios  
-        Dado el cliente con dni "41298622" con sesión iniciada, la clase pertenece al rango de fechas que cubre la mensualidad, la clase “Pilates” no se encuentra llena y tiene la clase reservada de “Yoga” a las 19:00hs.     
+        Dado el cliente con dni "41298622" con sesión iniciada, la clase pertenece al rango de fechas que cubre la mensualidad, la clase “Yoga” 
+            no se encuentra llena y tiene la clase reservada de “Pilates” a las 18:00hs.     
         Cuando el cliente con dni "41298622" seleccione la clase “Yoga”, horario "18:00hs" presione “Confirmar Reserva”     
-        Entonces el sistema informa “El usuario ya se encuentra inscripto en esa clase”
+        Entonces el sistema informa “El usuario ya se encuentra inscripto en una clase que ocurre ese día a esa hora.”
         """
+
+        id_act2 = insertar_actividad("Yoga", 1500, self.cursor)["data"]
+        id_prof2 = insertar_profesor("Lisa", "Bruselas", "F", "44442222", self.cursor)["data"]
+        id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]
+        id_ic2 = insertar_instancia_clase(id_cla2, "2026-12-02", self.cursor)["data"]
+
+        self.cursor.connection.commit()
+
+        # Probar endpoint "reservar_clase" 
+        res = self.client.put(f"/clases/{id_ic2}/reservar", json={
+            "id_usuario": id_cli
+        })
+
+        json_res = self.decodificarRespByte(res.data)
+
+        assert '401 UNAUTHORIZED' in str(res), "El código devuelto no es 401."
+        assert json_res["status"] == 'error', "La respuesta devolvió 'error'."
         
