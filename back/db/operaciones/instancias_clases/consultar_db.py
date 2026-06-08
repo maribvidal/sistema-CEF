@@ -6,4 +6,4 @@ def consultar_instancia_clase_por_id(ins_id, cursor) -> dict:
 
 def obtener_reservas_instancia_clase(ins_id, cursor) -> dict:
     """Hace una consulta para devolver todas las reservas que tengan un mismo inst_clase_id."""
-    return ejecutar_fetchall(f"SELECT * FROM Reserva WHERE inst_clase_id = {ins_id}")
+    return ejecutar_fetchall(f"SELECT * FROM Reserva WHERE inst_clase_id = {ins_id}", cursor)

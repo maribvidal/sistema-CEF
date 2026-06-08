@@ -7,7 +7,7 @@ from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
 from db.operaciones.salas.consultar_db import consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_dia_hora
-from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
+from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
 from enums.dias import Dias
 
 def _msj_error_helper(razon: str, cursor):
@@ -238,12 +238,22 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     if res_comprob["status"] == 'success' and res_comprob["data"] is not None:
         return _msj_error_helper("El usuario ya tenía reservas hechas para una clase en dicho día a esa hora.", cursor), 403
 
+    # Comprobar que la instancia de la clase no tenga el cupo lleno
+    cons_clase = consultar_clase_por_id(id_clase, cursor)
+    cupo_clase = cons_clase["data"]["cupo_maximo"]
+    tuplas_reservas_ic = obtener_reservas_instancia_clase(id_ins_clase, cursor)
+    
+    if (tuplas_reservas_ic["data"] is not None):
+        cant_reservas = len(tuplas_reservas_ic["data"])
+        if (cant_reservas >= cupo_clase):
+            return _msj_error_helper("La clase ya se encuentra llena.", cursor), 404
+
     # Insertar reserva de clase 
     res_reserva = insertar_reserva(id_usuario, id_ins_clase, cursor)
     if res_reserva["status"] == 'error':
-        return _msj_error_helper(res_reserva['message'], cursor), 404
+        return _msj_error_helper(res_reserva['message'], cursor), 405
     if res_reserva["status"] == 'success' and res_reserva["data"] is None:
-        return _msj_error_helper("Ya se había creado una reserva para esa instancia de clase y ese usuario.", cursor), 405
+        return _msj_error_helper("Ya se había creado una reserva para esa instancia de clase y ese usuario.", cursor), 406
 
     cursor.connection.commit()
     return _msj_exito_helper(f"Se reservó una clase para el usuario {id_usuario} con éxito.", cursor, res_reserva["data"])
