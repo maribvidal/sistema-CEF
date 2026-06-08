@@ -8,7 +8,7 @@ def ejecutar_fetchall(query, cursor):
         resultado = cursor.fetchall()
         # me tiraba error por el tipo de dato que devuelve el fetchall, así que lo convertí a una lista de diccionarios
         datos = [dict(fila) for fila in resultado]
-        if resultado is None:
+        if resultado is None or str(resultado) == '[]':
             raise ValueError("Algo falló en la consulta (el resultado es None).")
 
         return {
