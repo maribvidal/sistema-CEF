@@ -7,9 +7,10 @@ def ejecutar_fetchall(query, cursor):
         cursor.execute(query)
         resultado = cursor.fetchall()
         # me tiraba error por el tipo de dato que devuelve el fetchall, así que lo convertí a una lista de diccionarios
-        datos = [dict(fila) for fila in resultado]
-        if resultado is None:
-            raise ValueError("Algo falló en la consulta (el resultado es None).")
+        if resultado is None or str(resultado) == '[]':
+            datos = None
+        else:
+            datos = [dict(fila) for fila in resultado]
 
         return {
             "status": "success",
@@ -26,10 +27,9 @@ def ejecutar_fetchone(query, cursor) -> dict:
     try:
         cursor.execute(query)
         resultado = cursor.fetchone()
-        if resultado is None:
-            raise ValueError("Algo falló en la consulta (el resultado es None).")
 
-        resultado = dict(resultado)
+        if resultado is not None:
+            resultado = dict(resultado)
 
         return {
             "status": "success",
@@ -48,8 +48,6 @@ def ejecutar_insertar(query, cursor):
     try:
         cursor.execute(query)
         nuevo_id = cursor.lastrowid
-        if nuevo_id is None:
-            raise ValueError("No se pudo insertar el registro.")
 
         cursor.connection.commit()
 

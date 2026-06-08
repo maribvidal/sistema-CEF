@@ -29,6 +29,7 @@ def create_app(testing=False, db_name="database.db"):
     app.register_blueprint(profesores_bp)
     app.register_blueprint(empleados_bp)
     app.register_blueprint(permisos_bp)
+    app.register_blueprint(reservas_bp)
 
     if not app.testing:
         cursor = conectarse_db()
