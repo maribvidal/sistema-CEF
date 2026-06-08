@@ -198,19 +198,37 @@ class ClasesServiceTestCase(EndpointTestCase):
     def test_reservar_clase(self):
         """
         ESCENARIO 1: Reserva exitosa
-        Dado el cliente con dni "41298622” que cuenta con la sesión activada, la clase pertenezca al rango de fechas que cubre la mensualidad, la clase “Pilates” con cupos disponibles y no cuenta con otra actividad dentro del rango horario de las 18:00hs     
+        Dado el cliente con dni "41298622” que cuenta con la sesión activada, la clase pertenezca al rango de fechas que cubre la mensualidad, la clase “Pilates” 
+            con cupos disponibles y no cuenta con otra actividad dentro del rango horario de las 18:00hs.
         Cuando el cliente con dni “41298622” seleccione la actividad “Pilates”, horario 18:00hs y presione “Confirmar reserva”.
         Entonces el sistema registra la reserva, resta un cupo de la clase, Informa operación exitosa
         """
 
         # Crear rol, cliente, actividad, profesor, sala, clase, instancia_clase
-        id_cli = insertar_usuario("45609890", "Mariano", "Venal", "12345678", "2004-02-02", "marianovenal@gmail.com", "542215253779", "M", 1, self.cursor)["data"]
+        id_cli = insertar_usuario("41298622", "Mariano", "Venal", "12345678", "2004-02-02", "marianovenal@gmail.com", "542215253779", "M", 1, self.cursor)["data"]
         id_prof = insertar_profesor("Gero", "Arias", "M", "22224444", self.cursor)["data"]
-        id_act = insertar_actividad("Musculatura", 1250, self.cursor)["data"]
+        id_act = insertar_actividad("Pilates", 1250, self.cursor)["data"]
         id_sala = insertar_sala("Sala 2", 10, self.cursor)["data"]
-        id_cla = insertar_clase("Activa", id_act, id_prof, id_sala, "Lunes", "10:00", 10, self.cursor)["data"]
+        id_cla = insertar_clase("Activa", id_act, id_prof, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]
         id_ic = insertar_instancia_clase(id_cla, "2026-12-02", self.cursor)["data"]
 
         self.cursor.connection.commit()
 
-        # Probar endpoint "reservar_clase"
+        # Probar endpoint "reservar_clase" 
+        res = self.client.put(f"/clases/{id_ic}/reservar", json={
+            "id_usuario": id_cli
+        })
+
+        json_res = self.decodificarRespByte(res.data)
+
+        assert '200' in str(res), "El código devuelto no es 200."
+        assert json_res["status"] == 'success', "La respuesta devolvió 'success'."
+        assert json_res["data"] == 1, "Se insertó una nueva reserva."
+    
+        """
+        ESCENARIO 4: Reserva fallida por superposición de horarios  
+        Dado el cliente con dni "41298622" con sesión iniciada, la clase pertenece al rango de fechas que cubre la mensualidad, la clase “Pilates” no se encuentra llena y tiene la clase reservada de “Yoga” a las 19:00hs.     
+        Cuando el cliente con dni "41298622" seleccione la clase “Yoga”, horario "18:00hs" presione “Confirmar Reserva”     
+        Entonces el sistema informa “El usuario ya se encuentra inscripto en esa clase”
+        """
+        

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
-    listar_clases_service, publicar_clase_service
+    listar_clases_service, publicar_clase_service,
+    reservar_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)

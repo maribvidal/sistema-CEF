@@ -163,9 +163,10 @@ def construir_tabla_usuario_tener_descuento(cursor: sqlite.Cursor):
 def construir_tabla_reserva(cursor: sqlite.Cursor):
     """Construye la tabla Reserva"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Reserva (
-                            id         INTEGER PRIMARY KEY,
-                            usuario_id INTEGER NOT NULL,
+                            id            INTEGER PRIMARY KEY,
+                            usuario_id    INTEGER NOT NULL,
                             inst_clase_id INTEGER NOT NULL,
+                            fecha         DATE NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,

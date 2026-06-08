@@ -5,6 +5,7 @@ from db.operaciones.clases.modificar_db import modificar_clase_estado
 from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
 from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
 from db.operaciones.salas.consultar_db import consultar_sala_por_id
+from db.operaciones.reservas.insertar_db import insertar_reserva
 from enums.dias import Dias
 from pprint import pprint
 
@@ -202,92 +203,22 @@ def cancelar_clase_service(clase_id: int):
         "message": "Clase cancelada exitosamente."
     }, 200
 
-def reservar_clase_service(clase_id: int, id_usuario: int, dia: Dias, hora):
+def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     """Service que, dado un usuario, lo intenta inscribir
         en una clase con una fecha y hora dada."""
 
     cursor = conectarse_db()
 
-    # Comprobar que exista la clase
-    res_clase = consultar_clase_por_id(clase_id, cursor)
-
-    if res_clase['status'] == 'error':
+    # Insertar reserva de clase 
+    res_reserva = insertar_reserva(id_usuario, id_ins_clase, cursor)
+    if res_reserva["status"] == 'error':
         cursor.connection.close()
-        return res_clase, 400
-
-    if res_clase['status'] == 'success' and not res_clase['data']:
-        cursor.connection.close()
-        return {
-            "error": "Clase no encontrada."
-        }, 401
-
-    cupo_clase = int(res_clase['data']['cupo_maximo'])
-
-    # Comprobar que exista el clase_ocurrir_sala
-
-    # res_clase_ocu_sala = consultar_clase_ocurrir_sala_por_claseid_dia_hora(clase_id, dia, hora, cursor)
-
-    if res_clase_ocu_sala['status'] == 'error':
-        cursor.connection.close()
-        return res_clase_ocu_sala, 402
-
-    id_clase_ocu_sala = res_clase_ocu_sala['data']['id']
-
-    # Comprobar que exista el usuario
-
-    res_usuario = consultar_usuario_por_id(id_usuario, cursor)
-
-    if res_usuario['status'] == 'error':
-        cursor.connection.close()
-        return res_usuario, 403
-
-    # Comprobar que el usuario no se haya inscrito ya a otra clase en esa hora
-
-    # res_usuario_clase = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
-
-    if res_usuario_clase['status'] == 'error':
-        cursor.connection.close()
-        return res_usuario_clase['message'], 404
-
-    ## Se compara si es mayor a 0 puesto que, si el dict no tiene tuplas, entonces
-    ## va a devolver una cantidad de 0 el len().
-    if len(res_usuario_clase['data']) > 0:
-        cursor.connection.close()
-        return {
-            "error": "El usuario ya se encuentra inscripto en esa clase."
-        }, 405
-
-    # Comprobar el cupo de la clase
-
-    # res_inscriptos = consultar_usuarios_inscriptos_clase_ocurrir_sala(id_clase_ocu_sala, cursor)
-
-    if res_inscriptos['status'] == 'error':
-        cursor.connection.close()
-        return res_inscriptos['message'], 406
-
-    cant_inscriptos = len(res_inscriptos['data']) + 1
-
-    if (cant_inscriptos > cupo_clase):
-        cursor.connection.close()
-        return {
-            "error": "La clase no tiene mas cupos disponibles."
-        }, 407
-
-    # Insertar el usuario en la clase
-
-    # res_usu_ins_cla = insertar_usuario_inscribir_clase_por_id(id_usuario, clase_id, id_clase_ocu_sala, cursor)
-
-    if res_usu_ins_cla['status'] == 'error':
-        cursor.connection.close()
-        return {
-            "error": res_usu_ins_cla['message']
-        }, 500
+        return res_reserva, 400
 
     cursor.connection.commit()
     cursor.connection.close()
-    return {
-        "message": "Reserva realizada exitosamente."
-    }, 200
+
+    return res_reserva, 200
 
 def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia: Dias, hora):
     """Service que devuelve si un usuario se encuentra
