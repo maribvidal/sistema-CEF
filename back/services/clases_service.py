@@ -6,6 +6,8 @@ from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
 from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
 from db.operaciones.salas.consultar_db import consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
+from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_dia_hora
+from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
 from enums.dias import Dias
 
 def _msj_error_helper(razon: str, cursor):
@@ -24,10 +26,7 @@ def listar_clases_service():
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta, 400
-
-    if respuesta['status'] == 'success' and not respuesta['data']:
-        return _msj_error_helper("No se encontraron clases.", cursor), 401
+        return _msj_error_helper("No se encontraron clases.", cursor), 400
 
     cursor.connection.close()
     return respuesta, 200
@@ -207,11 +206,26 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
 
     cursor = conectarse_db()
 
+    # Comprobar que exista la instancia de la clase
+    res_ins = consultar_instancia_clase_por_id(id_ins_clase, cursor)
+    if res_ins["status"] == 'error':
+        return _msj_error_helper("La instancia de la clase pasada no es válida.", cursor), 400 
+
+    id_clase = res_ins["data"]["clase_id"]
+    res_clase = consultar_clase_por_id(id_clase, cursor)
+    dia = res_clase["data"]["dia"]
+    hora = res_clase["data"]["hora"]
+
+    # Comprobar si el usuario ya tenía reservas hechas de una clase para ese día a esa hora
+    res_comprob = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
+    if res_comprob["status"] == 'success':
+        return _msj_error_helper("El usuario ya tenía reservas hechas para una clase en dicho día a esa hora.", cursor), 401
+
     # Insertar reserva de clase 
     res_reserva = insertar_reserva(id_usuario, id_ins_clase, cursor)
     if res_reserva["status"] == 'error':
         cursor.connection.close()
-        return res_reserva, 400
+        return res_reserva, 402
 
     cursor.connection.commit()
     cursor.connection.close()
