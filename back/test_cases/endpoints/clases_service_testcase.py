@@ -25,7 +25,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         info = json_res["status"]
 
         assert info == 'error', "No habían clases cargadas y no se tiró error."
-        assert '400' in str(res), "El código devuelto no es 400."
+        assert '401' in str(res), "El código devuelto no es 401."
 
         ### ESCENARIO 1: Clases listadas con éxito
         # Crear profesores
@@ -117,6 +117,8 @@ class ClasesServiceTestCase(EndpointTestCase):
             "cupo_maximo": 10
         })
 
+        assert '401' in str(res4), "El código devuelto no es 401."
+
         res5 = self.client.post("/clases", json={
             "estado": "Activa",
             "id_actividad": id_act,
@@ -127,7 +129,7 @@ class ClasesServiceTestCase(EndpointTestCase):
             "cupo_maximo": 10
         })
 
-        assert '401' in str(res5), "El código devuelto no es 401."
+        assert '403' in str(res5), "El código devuelto no es 403."
 
         res6 = self.client.post("/clases", json={
             "estado": "Activa",
@@ -139,7 +141,7 @@ class ClasesServiceTestCase(EndpointTestCase):
             "cupo_maximo": 10
         })
 
-        assert '402' in str(res6), "El código devuelto no es 402."
+        assert '405' in str(res6), "El código devuelto no es 405."
 
         """
         ESCENARIO 2: Sala ocupada
@@ -161,7 +163,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         json_res2 = self.decodificarRespByte(res2.data)
         json_status2 = json_res2["status"]
 
-        assert '403' in str(res2), "El código devuelto no es 403."
+        assert '407' in str(res2), "El código devuelto no es 407."
         assert json_status2 == 'error', "La respuesta no es 'error'."
 
         """
@@ -188,7 +190,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         json_res3 = self.decodificarRespByte(res3.data)
         json_status3 = json_res3["status"]
 
-        assert '404' in str(res3), "El código devuelto no es 404."
+        assert '408' in str(res3), "El código devuelto no es 408."
         assert json_status3 == 'error', "La respuesta no es 'error'."
 
         # Faltan cubrir dos códigos de error
@@ -245,6 +247,6 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         json_res = self.decodificarRespByte(res.data)
 
-        assert '401 UNAUTHORIZED' in str(res), "El código devuelto no es 401."
+        assert '403' in str(res), "El código devuelto no es 403."
         assert json_res["status"] == 'error', "La respuesta devolvió 'error'."
         
