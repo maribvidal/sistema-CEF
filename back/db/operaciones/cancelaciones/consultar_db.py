@@ -12,3 +12,33 @@ def obtener_cancelaciones_por_usuario_inst_clase(id_ins_clase: int, id_usuario: 
                 FROM Cancelacion
                 WHERE usuario_id = {id_usuario} AND inst_clase_id = {id_ins_clase};"""
     return ejecutar_fetchall(query, cursor)
+
+def obtener_clases_mas_canceladas(cursor, limite, actividad=None, fecha_inicio=None, fecha_fin=None):
+    """Operación que consulta por todas las clases más canceladas."""
+    query = f"""
+                SELECT cl.dia, cl.hora, a.nombre as actividad, COUNT(*) as cancelaciones
+                FROM Cancelacion c
+                INNER JOIN Instancia_Clase ic ON c.inst_clase_id = ic.id
+                INNER JOIN Clase cl ON ic.clase_id = cl.id
+                INNER JOIN Actividad a ON cl.actividad_id = a.id
+            """
+
+    condiciones = []
+    if actividad:
+        condiciones.append(f"a.id = {actividad}")
+    if fecha_inicio:
+        condiciones.append(f"c.fecha >= '{fecha_inicio}'")
+    if fecha_fin:
+        condiciones.append(f"c.fecha <= '{fecha_fin}'")
+
+    if condiciones:
+        query += "WHERE "
+        query += " AND ".join(condiciones)
+
+    query += f"""
+                GROUP BY c.inst_clase_id, cl.dia, cl.hora, a.nombre
+                ORDER BY cancelaciones DESC
+                LIMIT {limite};
+            """
+
+    return ejecutar_fetchall(query, cursor)
