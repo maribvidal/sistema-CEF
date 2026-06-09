@@ -9,12 +9,19 @@ def _msj_error_helper(razon: str, cursor):
         "message": razon
     }
 
-def _msj_exito_helper(razon: str, cursor):
+def _msj_exito_helper(razon: str, cursor, res=None):
     cursor.connection.close()
-    return {
-        "status": "success",
-        "message": razon
-    }, 200
+    if res is None:
+        return {
+            "status": "success",
+            "message": razon
+        }, 200
+    else:
+        return {
+            "status": "success",
+            "message": razon,
+            "data": res
+        }, 200
 
 def cancelar_reserva_service(reserva_id):
     """Service que permite cancelar la reserva de un usuario."""
@@ -33,4 +40,4 @@ def cancelar_reserva_service(reserva_id):
     
     cursor.connection.commit()
     
-    return _msj_exito_helper(f"Cancelación para la reserva con id {reserva_id} creada exitosamente.")
+    return _msj_exito_helper(f"Cancelación para la reserva con id {reserva_id} creada exitosamente.", cursor)
