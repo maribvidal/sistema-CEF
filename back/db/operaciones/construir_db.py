@@ -178,10 +178,14 @@ def construir_tabla_reserva(cursor: sqlite.Cursor):
 def construir_tabla_cancelacion(cursor: sqlite.Cursor):
     """Construye la tabla Cancelacion"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Cancelacion (
-                            id         INTEGER PRIMARY KEY,
-                            fecha      DATE NOT NULL,
-                            reserva_id INTEGER NOT NULL,
-                            FOREIGN KEY (reserva_id) REFERENCES Reserva(id)
+                            id            INTEGER PRIMARY KEY,
+                            fecha         DATE NOT NULL,
+                            usuario_id    INTEGER NOT NULL,
+                            inst_clase_id INTEGER NOT NULL,
+                            FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL,
+                            FOREIGN KEY (inst_clase_id) REFERENCES Instancia_Clase(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
