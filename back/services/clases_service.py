@@ -9,7 +9,8 @@ from db.operaciones.salas.consultar_db import consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
-from db.operaciones.cancelaciones.consultar_db import obtener_cancelaciones_por_usuario_inst_clase
+from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
+from db.modulo_fechas import generar_fecha_actual
 from enums.dias import Dias
 from pprint import pprint
 
@@ -109,6 +110,17 @@ def publicar_clase_service(
         return _msj_error_helper(resp_inser_clas['message'], cursor), 410
     if resp_inser_clas['status'] == 'success' and resp_inser_clas['data'] is None:
         return _msj_error_helper("Esa clase ya se encontraba insertada en el sistema.", cursor), 411
+
+    # Intentar insertar una instancia para la clase
+    ## TODO: Asegurarse de que la fecha utilizada para la instancia sea válida
+
+    clase_id = resp_inser_clas["data"]
+    resp_inser_inst_clase = insertar_instancia_clase(clase_id, generar_fecha_actual(), cursor)
+
+    if resp_inser_inst_clase['status'] == 'error':
+        return _msj_error_helper(resp_inser_inst_clase['message'], cursor), 412
+    if resp_inser_inst_clase['status'] == 'success' and resp_inser_inst_clase['data'] is None:
+        return _msj_error_helper("Esa instancia de clase ya se encontraba insertada en el sistema.", cursor), 413
 
     cursor.connection.commit()
     return _msj_exito_helper("Clase publicada exitosamente.", cursor, resp_inser_clas['data'])
@@ -234,25 +246,19 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     dia = res_clase["data"]["dia"]
     hora = res_clase["data"]["hora"]
 
-    # Obtener cancelaciones del usuario
-    res_cancelaciones = obtener_cancelaciones_por_usuario_inst_clase(id_ins_clase, id_usuario, cursor)
-    num_cancelaciones = 0 if (res_cancelaciones["data"] is None) else len(res_cancelaciones["data"])
-
-    # Comprobar si el usuario ya tenía reservas hechas de una clase para ese día a esa hora,
-    # y estas no están canceladas
-    res_reservas_usu_dia_hora = obtener_reservas_usuario_dia_hora(id_usuario, dia, hora, cursor)
+    # Comprobar si el usuario ya tenía reservas hechas de la misma instancia de clase
     res_reservas_inst_clase = obtener_reservas_usuario_inst_clase(id_ins_clase, id_usuario, cursor)
-    if res_reservas_usu_dia_hora["status"] == 'error':
-        return _msj_error_helper(res_reservas_usu_dia_hora['message'], cursor), 402
-    if res_reservas_usu_dia_hora["status"] == 'success' and res_reservas_usu_dia_hora["data"] is not None:
-        num_reservas_dia_hora = 0 if (res_reservas_usu_dia_hora["data"] is None) else len(res_reservas_usu_dia_hora["data"])
-        num_reservas_inst_clase = 0 if (res_reservas_inst_clase["data"] is None) else len(res_reservas_inst_clase["data"])
+    if res_reservas_inst_clase["status"] == 'error':
+        return _msj_error_helper(res_reservas_inst_clase['message'], cursor), 402
+    if res_reservas_inst_clase["status"] == 'success' and res_reservas_inst_clase["data"] is not None:
+        return _msj_error_helper("El usuario ya tenía una reserva hecha para esa misma clase en el mismo horario.", cursor), 403
 
-        if (num_reservas_dia_hora - num_reservas_inst_clase > 0):
-            return _msj_error_helper("El usuario ya tenía reservas hechas para una clase en dicho día a esa hora.", cursor), 403
-        else:
-            if (num_reservas_inst_clase - num_cancelaciones > 0):
-                return _msj_error_helper("El usuario ya tiene reservas hechas para esa instancia de clase.", cursor), 403
+    # Comprobar si el usuario ya tenía reservas hechas de otra clase para ese día a esa hora
+    res_reservas_usu_dia_hora = obtener_reservas_usuario_dia_hora(id_usuario, dia, hora, cursor)
+    if res_reservas_usu_dia_hora["status"] == 'error':
+        return _msj_error_helper(res_reservas_usu_dia_hora['message'], cursor), 404
+    if res_reservas_usu_dia_hora["status"] == 'success' and res_reservas_usu_dia_hora["data"] is not None:
+        return _msj_error_helper("El usuario ya tenía una reserva hecha para otra clase en ese mismo día y hora.", cursor), 405
 
     # Comprobar que la instancia de la clase no tenga el cupo lleno
     cons_clase = consultar_clase_por_id(id_clase, cursor)
@@ -262,14 +268,14 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     if (tuplas_reservas_ic["data"] is not None):
         cant_reservas = len(tuplas_reservas_ic["data"])
         if (cant_reservas >= cupo_clase):
-            return _msj_error_helper("La clase ya se encuentra llena.", cursor), 404
+            return _msj_error_helper("La clase ya se encuentra llena.", cursor), 406
 
     # Insertar reserva de clase 
     res_reserva = insertar_reserva(id_usuario, id_ins_clase, cursor)
     if res_reserva["status"] == 'error':
-        return _msj_error_helper(res_reserva['message'], cursor), 405
+        return _msj_error_helper(res_reserva['message'], cursor), 407
     if res_reserva["status"] == 'success' and res_reserva["data"] is None:
-        return _msj_error_helper("Ya se había creado una reserva para esa instancia de clase y ese usuario.", cursor), 406
+        return _msj_error_helper("Ya se había creado una reserva para esa instancia de clase y ese usuario.", cursor), 408
 
     cursor.connection.commit()
     return _msj_exito_helper(f"Se reservó una clase para el usuario {id_usuario} con éxito.", cursor, res_reserva["data"])
