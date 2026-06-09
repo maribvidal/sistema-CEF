@@ -1,3 +1,4 @@
+from back.db.operaciones.usuarios.consultar_db import obtener_clase_usuario_fecha
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora
 from db.operaciones.clases.insertar_db import insertar_clase
@@ -220,14 +221,13 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
 
     return res_reserva, 200
 
-def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia: Dias, hora):
+def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha):
     """Service que devuelve si un usuario se encuentra
         inscripto o no en una clase a una fecha y hora dada."""
 
     cursor = conectarse_db()
 
     # Comprobar si clase existe
-
     respuesta_consulta = consultar_clase_por_id(id_clase, cursor)
 
     if respuesta_consulta['status'] == 'error':
@@ -241,8 +241,7 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia: Dias,
         }, 401
 
     # Comprobar si el usuario está inscripto
-
-    # res_usuario_clase = obtener_clase_usuario_dia_hora(id_usuario, dia, hora, cursor)
+    res_usuario_clase = obtener_clase_usuario_fecha(id_usuario, fecha, cursor)
 
     if res_usuario_clase['status'] == 'error':
         cursor.connection.close()
@@ -258,3 +257,5 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia: Dias,
     return {
         "message": "El usuario se encuentra inscripto."
     }, 200
+
+

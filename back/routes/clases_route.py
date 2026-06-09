@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
     listar_clases_service, publicar_clase_service,
-    reservar_clase_service
+    reservar_clase_service, verificar_inscripcion_usuario_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -90,8 +90,10 @@ def verificar_inscripcion_usuario_clase(id_clase):
         en un día y hora dado."""
 
     ## TODO: Repensar implementación del endpoint
+    # Para poder verificar su inscripción, nosotros tenemos el id de la clase pero necesitamos un distintivo para saber de que usuario se trata
+    data = request.get_json()
+    id_usuario = data.get("id_usuario")
+    fecha = data.get("fecha")
 
-    return {
-        "status": "success",
-        "message": "En remodelación."
-    }, 200
+    return verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha)
+
