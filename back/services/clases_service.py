@@ -9,7 +9,6 @@ from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_dia_hora
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
-from db.operaciones.cancelaciones.consultar_db import obtener_cancelaciones_por_usuario_inst_clase
 from enums.dias import Dias
 
 def _msj_error_helper(razon: str, cursor):
@@ -232,10 +231,6 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     dia = res_clase["data"]["dia"]
     hora = res_clase["data"]["hora"]
 
-    # Obtener cancelaciones del usuario
-    res_cancelaciones = obtener_cancelaciones_por_usuario_inst_clase(id_ins_clase, id_usuario, cursor)
-    num_cancelaciones = 0 if (res_cancelaciones["data"] is None) else len(res_cancelaciones["data"])
-
     # Comprobar si el usuario ya tenía reservas hechas de una clase para ese día a esa hora,
     # y estas no están canceladas
     res_reservas_usu_dia_hora = obtener_reservas_usuario_dia_hora(id_usuario, dia, hora, cursor)
@@ -245,12 +240,6 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     if res_reservas_usu_dia_hora["status"] == 'success' and res_reservas_usu_dia_hora["data"] is not None:
         num_reservas_dia_hora = 0 if (res_reservas_usu_dia_hora["data"] is None) else len(res_reservas_usu_dia_hora["data"])
         num_reservas_inst_clase = 0 if (res_reservas_inst_clase["data"] is None) else len(res_reservas_inst_clase["data"])
-
-        if (num_reservas_dia_hora - num_reservas_inst_clase > 0):
-            return _msj_error_helper("El usuario ya tenía reservas hechas para una clase en dicho día a esa hora.", cursor), 403
-        else:
-            if (num_reservas_inst_clase - num_cancelaciones > 0):
-                return _msj_error_helper("El usuario ya tiene reservas hechas para esa instancia de clase.", cursor), 403
 
     # Comprobar que la instancia de la clase no tenga el cupo lleno
     cons_clase = consultar_clase_por_id(id_clase, cursor)
