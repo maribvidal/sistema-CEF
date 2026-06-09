@@ -1,4 +1,4 @@
-from back.db.operaciones.usuarios.consultar_db import obtener_clase_usuario_fecha
+from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_fecha
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora
 from db.operaciones.clases.insertar_db import insertar_clase
@@ -8,7 +8,6 @@ from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
 from db.operaciones.salas.consultar_db import consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
-from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_dia_hora
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
 from db.operaciones.cancelaciones.consultar_db import obtener_cancelaciones_por_usuario_inst_clase
 from enums.dias import Dias
