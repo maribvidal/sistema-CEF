@@ -6,6 +6,7 @@ from db.operaciones.salas.insertar_db import insertar_sala
 from db.operaciones.instancias_clases import insertar_instancia_clase
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.roles.insertar_db import insertar_rol
+from db.operaciones.reservas.insertar_db import insertar_reserva
 
 class ClasesServiceTestCase(EndpointTestCase):
     """Testcase para probar los endpoints del service de Clases."""
@@ -117,7 +118,7 @@ class ClasesServiceTestCase(EndpointTestCase):
             "cupo_maximo": 10
         })
 
-        assert '400' in str(res4), "El código devuelto no es 400."
+        assert '401' in str(res4), "El código devuelto no es 401."
 
         res5 = self.client.post("/clases", json={
             "estado": "Activa",
@@ -129,7 +130,7 @@ class ClasesServiceTestCase(EndpointTestCase):
             "cupo_maximo": 10
         })
 
-        assert '401' in str(res5), "El código devuelto no es 401."
+        assert '403' in str(res5), "El código devuelto no es 403."
 
         res6 = self.client.post("/clases", json={
             "estado": "Activa",
@@ -141,7 +142,7 @@ class ClasesServiceTestCase(EndpointTestCase):
             "cupo_maximo": 10
         })
 
-        assert '402' in str(res6), "El código devuelto no es 402."
+        assert '405' in str(res6), "El código devuelto no es 405."
 
         """
         ESCENARIO 2: Sala ocupada
@@ -163,7 +164,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         json_res2 = self.decodificarRespByte(res2.data)
         json_status2 = json_res2["status"]
 
-        assert '403' in str(res2), "El código devuelto no es 403."
+        assert '407' in str(res2), "El código devuelto no es 407."
         assert json_status2 == 'error', "La respuesta no es 'error'."
 
         """
@@ -190,7 +191,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         json_res3 = self.decodificarRespByte(res3.data)
         json_status3 = json_res3["status"]
 
-        assert '404' in str(res3), "El código devuelto no es 404."
+        assert '408' in str(res3), "El código devuelto no es 408."
         assert json_status3 == 'error', "La respuesta no es 'error'."
 
         # Faltan cubrir dos códigos de error
@@ -227,8 +228,50 @@ class ClasesServiceTestCase(EndpointTestCase):
     
         """
         ESCENARIO 4: Reserva fallida por superposición de horarios  
-        Dado el cliente con dni "41298622" con sesión iniciada, la clase pertenece al rango de fechas que cubre la mensualidad, la clase “Pilates” no se encuentra llena y tiene la clase reservada de “Yoga” a las 19:00hs.     
-        Cuando el cliente con dni "41298622" seleccione la clase “Yoga”, horario "18:00hs" presione “Confirmar Reserva”     
-        Entonces el sistema informa “El usuario ya se encuentra inscripto en esa clase”
+        Dado el cliente con dni "41298622" con sesión iniciada, la clase pertenece al rango de fechas que cubre la mensualidad, la clase “Pilates” 
+            no se encuentra llena y tiene la clase reservada de “Yoga” a las 18:00hs.     
+        Cuando el cliente con dni "41298622" seleccione la clase “Pilates”, horario "18:00hs" presione “Confirmar Reserva”     
+        Entonces el sistema informa “El usuario ya se encuentra inscripto en una clase que ocurre ese día a esa hora.”
         """
+
+        id_act2 = insertar_actividad("Yoga", 1500, self.cursor)["data"]
+        id_prof2 = insertar_profesor("Lisa", "Bruselas", "F", "44442222", self.cursor)["data"]
+        id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]
+        id_ic2 = insertar_instancia_clase(id_cla2, "2026-12-02", self.cursor)["data"]
+
+        self.cursor.connection.commit()
+
+        # Probar endpoint "reservar_clase" 
+        res = self.client.put(f"/clases/{id_ic2}/reservar", json={
+            "id_usuario": id_cli
+        })
+
+        json_res = self.decodificarRespByte(res.data)
+
+        assert '403' in str(res), "El código devuelto no es 403."
+        assert json_res["status"] == 'error', "La respuesta devolvió 'error'."
         
+        """
+        ESCENARIO 3: Reserva fallida por falta de cupo
+        Dado el cliente con dni “98292612” con sesión iniciada, la clase pertenece al rango de fechas que cubre la mensualidad, y la clase “Yoga” se encuentra llena. 
+        Cuando el cliente con dni “98292612” seleccione la clase “Yoga”, horario 19:00hs y presione “Confirmar reserva”
+        Entonces el sistema informa que no hay cupos y le ofrece la opción de "Inscribirse en lista de espera".
+        """
+
+        id_cla3 = insertar_clase("Activa", id_act2, id_prof2, id_sala, "Lunes", "19:00", 5, self.cursor)["data"]
+        id_ic3 = insertar_instancia_clase(id_cla3, "2026-12-02", self.cursor)["data"]
+        for i in range(0, 5):
+            id_cli_nuevo = insertar_usuario(f"40123412{i}", "Cliente", f"N°{i}", "12345678", "2004-02-02", f"cli{i}@gmail.com", "542215253779", "M", 1, self.cursor)["data"]
+            insertar_reserva(id_cli_nuevo, id_ic3, self.cursor)
+        
+        self.cursor.connection.commit()
+
+        # Probar endpoint "reservar_clase" 
+        res = self.client.put(f"/clases/{id_ic3}/reservar", json={
+            "id_usuario": id_cli
+        })
+
+        json_res = self.decodificarRespByte(res.data)
+
+        assert '404' in str(res), "El código devuelto no es 404."
+        assert json_res["status"] == 'error', "La respuesta devolvió 'error'."

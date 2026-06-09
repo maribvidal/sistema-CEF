@@ -43,6 +43,6 @@ class EndpointTestCase(TestCase):
         self.client = create_app(testing=True, db_name=TEST_DB).test_client()
 
     def decodificarRespByte(self, resp: bytes):
-        resp_json = resp.decode('utf8').replace("'", '"')
+        resp_json = resp.decode('utf8').replace("'", '"').replace('\n', '')
         data = json.loads(resp_json)
         return data
