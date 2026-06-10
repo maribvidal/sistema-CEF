@@ -261,6 +261,7 @@ def cancelar_clase_service(clase_id: int):
 
     cursor = conectarse_db()
 
+    # Primero nos fijamos que la clase que queremos cancelar, efectivamente existe en la base de datos.
     respuesta_consulta = consultar_clase_por_id(clase_id, cursor)
 
     if respuesta_consulta['status'] == 'error':
@@ -273,6 +274,22 @@ def cancelar_clase_service(clase_id: int):
             "error": "Clase no encontrada."
         }, 401
 
+
+    # Segundo: Verificamos que no exista ninguna instancia de la misma. Porque si cancelamos la clase y se encuentra instanciada, aunque no hayan reservas, puede haber una condición de carrera o una infima posibilidad de que al último momento alguien reserve
+    # PD: si no les gusta esa implementación, entonces implementen una segunda verificacion la cual verifique que no posee ninguna reserva dicha instancia
+
+    respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return respuesta, 402
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+        cursor.connection.close()
+        return {
+            "error": "No se puede cancelar la clase porque ya tiene una instancia asociada."
+        }, 403
+
+
+    # Tercero: Modificamos el estado de la clase a Cancelada.
     respuesta = modificar_clase_estado(clase_id, 'Cancelada', cursor)
 
     if respuesta['status'] == 'error':
@@ -281,9 +298,12 @@ def cancelar_clase_service(clase_id: int):
 
     cursor.connection.commit()
     cursor.connection.close()
+    # PD: EN EL FUTURO, SI QUEREMOS QUE EL BACKEND AUTOMATICAMENTE INSTANCIE LAS CLASES UNA VEZ LLEGUE EL MOMENTO, HAY QUE VERIFICAR EL ESTADO DE LA MISMA QUE NO SEA "CANCELADA", POR SI LAS DUDAS
     return {
         "message": "Clase cancelada exitosamente."
     }, 200
+
+    
 
 def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     """Service que, dado un usuario, lo intenta inscribir

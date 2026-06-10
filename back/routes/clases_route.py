@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
-    listar_clases_service, modificar_clase_service, publicar_clase_service,
+    cancelar_clase_service, listar_clases_service, modificar_clase_service, publicar_clase_service,
     reservar_clase_service, verificar_inscripcion_usuario_clase_service,
     eliminar_clase_service, anotarse_lista_espera_service
 )
@@ -95,12 +95,10 @@ def cancelar_clase(id_clase):
     """Este endpoint permite cancelar una clase específica. 
         Recibe el ID de la clase a cancelar en formato JSON."""
 
-    ## TODO: Repensar implementación del endpoint
+    # Lozi: Propuesta de implementación se encuentra en cancelar_clase_service..
+    return cancelar_clase_service(id_clase)
 
-    return {
-        "status": "success",
-        "message": "En remodelación."
-    }, 200
+
 
 @clases_bp.route("/clases/<int:id_ins_clase>/reservar", methods=["PUT"])
 def reservar_clase(id_ins_clase):
