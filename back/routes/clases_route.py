@@ -95,3 +95,20 @@ def verificar_inscripcion_usuario_clase(id_clase):
         "status": "success",
         "message": "En remodelación."
     }, 200
+
+@clases_bp.route("/clases/<int:id_clase>/inscripciones", methods=["POST"])
+def anotarse_lista_espera(id_clase):
+    """Este endpoint permite verificar si un usuario
+        tiene una inscripción a una clase específica,
+        en un día y hora dado."""
+        
+    data = request.get_json()
+
+    id_usuario = data.get("id_usuario")
+
+    respuesta, status = anotarse_lista_espera_service(id_clase, id_usuario)
+    
+    return {
+        "status": "success",
+        "message": "En remodelación."
+    }, 200

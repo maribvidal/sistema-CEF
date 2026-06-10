@@ -66,3 +66,13 @@ def listar_dnis_usuarios(cursor) -> dict:
         de los usuarios."""
     query = "SELECT dni FROM Usuario WHERE rol_id = 3"
     return ejecutar_fetchall(query, cursor)
+
+def verificar_usuario_abonado(cursor, id_usuario: int) -> bool:
+    """Hace una consulta para verificar si un usuario es abonado o no."""
+    query = f"""
+        SELECT *
+        FROM Usuario
+        INNER JOIN Mensualidad m ON Usuario.id = m.usuario_id
+        WHERE Usuario.id = {id_usuario};"""
+    resultado = ejecutar_fetchone(query, cursor)
+    return resultado is not None

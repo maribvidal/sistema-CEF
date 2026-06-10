@@ -7,11 +7,12 @@ from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
 from db.operaciones.salas.consultar_db import consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
-from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_dia_hora
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, obtener_clase_usuario_dia_hora, verificar_usuario_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
 from db.modulo_fechas import generar_fecha_actual
 from enums.dias import Dias
+from db.operaciones.clases import anotarse_lista_abonados, anotarse_lista_publico_general
 
 def _msj_error_helper(razon: str, cursor):
     cursor.connection.close()
@@ -315,4 +316,69 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, dia: Dias,
     cursor.connection.close()
     return {
         "message": "El usuario se encuentra inscripto."
+    }, 200
+
+
+def anotarse_lista_espera_service(id_clase, id_usuario):
+    """Service que permite anotarse a la lista de espera de una clase"""
+    
+    cursor = conectarse_db()
+    
+    # verificar existencia de usuario
+    res_usuario = consultar_usuario_por_id(id_usuario, cursor)
+    
+    if res_usuario["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_usuario['message']
+        }, 500
+    
+    if res_usuario["status"] == 'success' and res_usuario["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró el usuario."
+        }, 404
+    
+    esAbonado = verificar_usuario_abonado(cursor, id_usuario)
+    
+    if esAbonado:
+        
+        res = anotarse_lista_abonados(id_usuario, id_clase, cursor)
+        
+        if res["status"] == 'error':
+            cursor.connection.close()
+            return {
+                "error": res['message']
+            }, 500
+            
+        if res["status"] == 'success' and res["data"] is None:
+            cursor.connection.close()
+            return {
+                "error": "No se pudo anotar a la lista de espera."
+            }, 400
+            
+        tipo = "de abonados"
+            
+    else:
+        
+        res = anotarse_lista_publico_general(id_usuario, id_clase, cursor)
+        
+        if res["status"] == 'error':
+            cursor.connection.close()
+            return {
+                "error": res['message']
+            }, 500
+            
+        if res["status"] == 'success' and res["data"] is None:
+            cursor.connection.close()
+            return {
+                "error": "No se pudo anotar a la lista de espera."
+            }, 400
+        
+        tipo = "individual"
+            
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "message": f"Se anotó a la lista de espera {tipo} con éxito."
     }, 200
