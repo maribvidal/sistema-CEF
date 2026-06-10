@@ -107,7 +107,6 @@ def publicar_clase_service(
 
 
     # Comprobar que la sala no esté ocupada en ese día y hora
-    print("COMPROBAMOS QUE LA SALA NO ESTÉ OCUPADA EN ESE DÍA Y HORA")
     respuesta = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
     if respuesta['status'] == 'error':
         return _msj_error_helper(respuesta['message'], cursor), 406
@@ -118,7 +117,6 @@ def publicar_clase_service(
     print(respuesta["data"]['capacidad'])
 
     # Comprobar que la sala escogida tenga la capacidad suficiente
-    print("COMPROBAMOS QUE LA SALA TENGA LA CAPACIDAD SUFICIENTE")
     capacidad_sala = int(respuesta["data"]['capacidad'])
 
     if (capacidad_sala < cupo_maximo):
@@ -127,7 +125,6 @@ def publicar_clase_service(
 
 
     # Intentar insertar la clase
-    print("INTENTAMOS INSERTAR LA CLASE")
     respuesta = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, cursor)
 
     if respuesta['status'] == 'error':
@@ -137,7 +134,6 @@ def publicar_clase_service(
 
 
     # Intentar insertar una instancia para la clase
-    print("INTENTAMOS INSERTAR LA INSTANCIA DE LA CLASE")
     ## TODO: Asegurarse de que la fecha utilizada para la instancia sea válida
 
     # Lozi: SIEMPRE VA A SER VÁLIDA, porque genera fecha_actual.

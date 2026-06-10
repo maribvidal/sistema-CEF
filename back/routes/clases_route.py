@@ -19,15 +19,30 @@ def publicar_clase():
     """Este endpoint permite subir una nueva clase al
         sistema. Los datos son recibidos en formato JSON."""
 
-    data = request.get_json()
+    # ESTA IMPLEMENTACIÓN PUEDE SERVIR PARA PRÓXIMAS IMPLEMENTACIÓNES, CON ESTO NOS ASEGURAMOS QUE EL REQUEST ESTÉ BIEN Y NO HAYA NINGUN "NONE" O ALGO ASÍ
+    body = request.get_json()
 
-    estado = data.get("estado")
-    id_actividad = data.get("id_actividad")
-    id_profesor = data.get("id_profesor")
-    id_sala = data.get("id_sala")
-    dia = data.get("dia")
-    hora = data.get("hora")
-    cupo_maximo = data.get("cupo_maximo")
+    campos = [
+        "estado",
+        "id_actividad",
+        "id_profesor",
+        "id_sala",
+        "dia",
+        "hora",
+        "cupo_maximo"
+    ]
+
+    for campo in campos:
+        if campo not in body:
+            return {"error": f"Falta el campo {campo}"}, 400
+
+    estado = body.get("estado")
+    id_actividad = body.get("id_actividad")
+    id_profesor = body.get("id_profesor")
+    id_sala = body.get("id_sala")
+    dia = body.get("dia")
+    hora = body.get("hora")
+    cupo_maximo = body.get("cupo_maximo")
 
     return publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo)
 
