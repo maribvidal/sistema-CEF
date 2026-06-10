@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
-    listar_clases_service, publicar_clase_service,
+    listar_clases_service, modificar_clase_service, publicar_clase_service,
     reservar_clase_service, verificar_inscripcion_usuario_clase_service
 )
 
@@ -51,10 +51,12 @@ def modificar_clase(id_clase):
 
     ## TODO: Repensar implementación del endpoint
 
-    return {
-        "status": "success",
-        "message": "En remodelación."
-    }, 200
+    data = request.get_json()
+    print("JSON RECIBIDOOOOOOOOO:")
+    print(data)
+
+    return modificar_clase_service(id_clase, **data)
+    
 
 ## Habría que ver si a una clase cancelada hay que hacerle otra
 ## cosa que no sea cambiarle el estado.
@@ -97,8 +99,6 @@ def verificar_inscripcion_usuario_clase(id_clase):
 
     return verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha)
 
-<<<<<<< HEAD
-=======
     return {
         "status": "success",
         "message": "En remodelación."
@@ -114,10 +114,9 @@ def anotarse_lista_espera(id_clase):
 
     id_usuario = data.get("id_usuario")
 
-    respuesta, status = anotarse_lista_espera_service(id_clase, id_usuario)
+    # respuesta, status = anotarse_lista_espera_service(id_clase, id_usuario)
     
     return {
         "status": "success",
         "message": "En remodelación."
     }, 200
->>>>>>> main-dev

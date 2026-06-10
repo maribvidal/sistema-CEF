@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_fecha
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora
@@ -8,19 +10,14 @@ from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
 from db.operaciones.salas.consultar_db import consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
-<<<<<<< HEAD
-=======
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, obtener_clase_usuario_dia_hora, verificar_usuario_abonado
->>>>>>> main-dev
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
 from db.modulo_fechas import generar_fecha_actual
 from enums.dias import Dias
-<<<<<<< HEAD
-from pprint import pprint
-=======
 from db.operaciones.clases import anotarse_lista_abonados, anotarse_lista_publico_general
->>>>>>> main-dev
+from db.operaciones.clases.modificar_db import modificar_clase 
+
 
 def _msj_error_helper(razon: str, cursor):
     cursor.connection.close()
@@ -68,70 +65,96 @@ def publicar_clase_service(
     cupo_maximo: int
 ):
     """Service que publica una clase"""
+    def fecha_valida(fecha: str) -> bool:
+        """Función auxiliar para validar el formato de la fecha."""
+        try:
+            datetime.strptime(fecha, "%Y-%m-%d")
+        except ValueError:
+            return False
+
+        # Esto para validar que la fecha no sea anterior a la actual. Sino pues no tendria sentido
+        return fecha >= datetime.date.today()
 
     cursor = conectarse_db()
 
     # Comprobar que la actividad existe
-
-    resp_act = consultar_actividad_por_id(id_actividad, cursor)
-    if resp_act['status'] == 'error':
-        return _msj_error_helper(resp_act['message'], cursor), 400
-    if resp_act['status'] == 'success' and resp_act['data'] is None:
+    respuesta = consultar_actividad_por_id(id_actividad, cursor)
+    if respuesta['status'] == 'error':
+        return _msj_error_helper(respuesta['message'], cursor), 400
+    if respuesta['status'] == 'success' and respuesta['data'] is None:
         return _msj_error_helper("Se intentó devolver una actividad pero no se encontró nada.", cursor), 401
 
-    # Comprobar que el profesor existe
 
-    resp_prof = consultar_profesor_por_id(id_profesor, cursor)
-    if resp_prof['status'] == 'error':
-        return _msj_error_helper(resp_prof['message'], cursor), 402
-    if resp_prof['status'] == 'success' and resp_prof['data'] is None:
+
+
+
+    # Comprobar que el profesor existe
+    respuesta = consultar_profesor_por_id(id_profesor, cursor)
+    if respuesta['status'] == 'error':
+        return _msj_error_helper(respuesta['message'], cursor), 402
+    if respuesta['status'] == 'success' and respuesta['data'] is None:
         return _msj_error_helper("Se intentó devolver un profesor pero no se encontró nada.", cursor), 403
 
     # Comprobar que la sala existe
-
-    resp_sala = consultar_sala_por_id(id_sala, cursor)
-    if resp_sala['status'] == 'error':
-        return _msj_error_helper(resp_sala['message'], cursor), 404
-    if resp_sala['status'] == 'success' and resp_sala['data'] is None:
+    print("COMPROBAMOS QUE LA SALA EXISTE O NO")
+    respuesta = consultar_sala_por_id(id_sala, cursor)
+    if respuesta['status'] == 'error':
+        return _msj_error_helper(respuesta['message'], cursor), 404
+    if respuesta['status'] == 'success' and respuesta['data'] is None:
         return _msj_error_helper("Se intentó devolver una sala pero no se encontró nada.", cursor), 405
 
-    # Comprobar que la sala no esté ocupada en ese día y hora
 
-    resp_clas = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
-    if resp_clas['status'] == 'error':
-        return _msj_error_helper(resp_clas['message'], cursor), 406
-    if resp_clas['status'] == 'success' and resp_clas['data'] is not None:
+
+
+    # Comprobar que la sala no esté ocupada en ese día y hora
+    print("COMPROBAMOS QUE LA SALA NO ESTÉ OCUPADA EN ESE DÍA Y HORA")
+    respuesta = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
+    if respuesta['status'] == 'error':
+        return _msj_error_helper(respuesta['message'], cursor), 406
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
         return _msj_error_helper("La sala ya se encuentra ocupada en ese día y hora.", cursor), 407
 
-    # Comprobar que la sala escogida tenga la capacidad suficiente
+    respuesta = consultar_sala_por_id(id_sala, cursor)
+    print(respuesta["data"]['capacidad'])
 
-    capacidad_sala = resp_sala["data"]["capacidad"]
+    # Comprobar que la sala escogida tenga la capacidad suficiente
+    print("COMPROBAMOS QUE LA SALA TENGA LA CAPACIDAD SUFICIENTE")
+    capacidad_sala = int(respuesta["data"]['capacidad'])
 
     if (capacidad_sala < cupo_maximo):
         return _msj_error_helper("El cupo máximo ingresado supera la capacidad de la sala.", cursor), 408
 
+
+
     # Intentar insertar la clase
+    print("INTENTAMOS INSERTAR LA CLASE")
+    respuesta = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, cursor)
 
-    resp_inser_clas = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, cursor)
-
-    if resp_inser_clas['status'] == 'error':
-        return _msj_error_helper(resp_inser_clas['message'], cursor), 410
-    if resp_inser_clas['status'] == 'success' and resp_inser_clas['data'] is None:
+    if respuesta['status'] == 'error':
+        return _msj_error_helper(respuesta['message'], cursor), 410
+    if respuesta['status'] == 'success' and respuesta['data'] is None:
         return _msj_error_helper("Esa clase ya se encontraba insertada en el sistema.", cursor), 411
 
+
     # Intentar insertar una instancia para la clase
+    print("INTENTAMOS INSERTAR LA INSTANCIA DE LA CLASE")
     ## TODO: Asegurarse de que la fecha utilizada para la instancia sea válida
 
-    clase_id = resp_inser_clas["data"]
-    resp_inser_inst_clase = insertar_instancia_clase(clase_id, generar_fecha_actual(), cursor)
+    # Lozi: SIEMPRE VA A SER VÁLIDA, porque genera fecha_actual.
+    # Y antes verificas que no exista una clase para la misma fecha, hora y sala, entonces no hay forma de que se inserte una instancia para una clase con una fecha inválida.
 
-    if resp_inser_inst_clase['status'] == 'error':
-        return _msj_error_helper(resp_inser_inst_clase['message'], cursor), 412
-    if resp_inser_inst_clase['status'] == 'success' and resp_inser_inst_clase['data'] is None:
-        return _msj_error_helper("Esa instancia de clase ya se encontraba insertada en el sistema.", cursor), 413
+    clase_id: int = int(respuesta["data"])
+
+    respuesta = insertar_instancia_clase(clase_id, generar_fecha_actual(), cursor)
+
+    if respuesta['status'] == 'error':
+        return _msj_error_helper(respuesta['message'], cursor), 409
+    if respuesta['status'] == 'success' and respuesta['data'] is None:
+        return _msj_error_helper("No se pudo insertar la instancia de la clase.", cursor), 410
+
 
     cursor.connection.commit()
-    return _msj_exito_helper("Clase publicada exitosamente.", cursor, resp_inser_clas['data'])
+    return _msj_exito_helper("Clase publicada exitosamente.", cursor, respuesta['data'])
 
 def modificar_clase_service(
     clase_id: int,
@@ -147,6 +170,7 @@ def modificar_clase_service(
 
     cursor = conectarse_db()
 
+    # primero consultamos si la clase que queremos modificar, efectivamente existe en la base de datos
     respuesta_consulta = consultar_clase_por_id(clase_id, cursor)
 
     if respuesta_consulta['status'] == 'error':
@@ -159,17 +183,25 @@ def modificar_clase_service(
             "error": "Clase no encontrada."
         }, 401
 
-    # respuesta = modificar_clase(clase_id, estado, id_actividad, id_profesor, cupo_maximo, cursor)
+    # Segundo verificamos que no haya ninguna instancia de la clase que queremos modificar, ya que como instancia_clase apunta directamente a Clase, pues todo cambio que hagamos en la clase repercute en la instancia de la misma
+    respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return respuesta, 402
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+        cursor.connection.close()
+        return {
+            "error": "No se puede modificar la clase porque ya tiene una instancia asociada."
+        }, 403
+    
+
+    respuesta = modificar_clase(clase_id, estado, id_actividad, id_profesor, sala, fecha, hora, cupo_maximo, cursor)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
         return respuesta, 402
 
-    respuesta2 = modificar_clase_ocurrir_sala(clase_id, sala, fecha, hora, cursor)
-
-    if respuesta2['status'] == 'error':
-        cursor.connection.close()
-        return respuesta2, 403
     
     cursor.connection.commit()
     return _msj_exito_helper("Clase modificada exitosamente.", cursor)
@@ -326,8 +358,6 @@ def verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha):
     }, 200
 
 
-<<<<<<< HEAD
-=======
 def anotarse_lista_espera_service(id_clase, id_usuario):
     """Service que permite anotarse a la lista de espera de una clase"""
     
@@ -391,4 +421,3 @@ def anotarse_lista_espera_service(id_clase, id_usuario):
     return {
         "message": f"Se anotó a la lista de espera {tipo} con éxito."
     }, 200
->>>>>>> main-dev
