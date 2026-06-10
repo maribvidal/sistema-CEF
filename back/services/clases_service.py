@@ -17,6 +17,7 @@ from db.modulo_fechas import generar_fecha_actual
 from enums.dias import Dias
 from db.operaciones.clases import anotarse_lista_abonados, anotarse_lista_publico_general
 from db.operaciones.clases.modificar_db import modificar_clase 
+from db.operaciones.clases.borrar_db import borrar_clase
 
 
 def _msj_error_helper(razon: str, cursor):
@@ -139,14 +140,23 @@ def publicar_clase_service(
     # Lozi: SIEMPRE VA A SER VÁLIDA, porque genera fecha_actual.
     # Y antes verificas que no exista una clase para la misma fecha, hora y sala, entonces no hay forma de que se inserte una instancia para una clase con una fecha inválida.
 
+    # Lozi: OTRA COSA MAS, solo existen dos estados: Activa o Programada
+    # Activa significa que quieres crear una instancia de la clase para que puedan reservarla YA
+    # Programada significa que querés crear la clase pero no una instancia de la misma, porque por ejemplo todavía no se abrió el período de reservas para esa clase, o algo así. Entonces, si el estado es Activa, se inserta una instancia de la clase con la fecha actual, y si el estado es Programada, no se inserta ninguna instancia de la clase.
+
+    # Lozi: POR LO TANTO EL INSTANCIAR CLASE SE VA A REALIZAR INTERNAMENTE CUANDO SEA EL MOMENTO DE GENERARLA (O SEA CUANDO SE ENCUENTRE EN LA SEMANA PERTINENTE)
     clase_id: int = int(respuesta["data"])
 
-    respuesta = insertar_instancia_clase(clase_id, generar_fecha_actual(), cursor)
+    if estado == "Activa":
+        print("El Administrador eligió publicar la clase como Activa. Comenzando el proceso de creación de instanacia de clase")
+        respuesta = insertar_instancia_clase(clase_id, generar_fecha_actual(), cursor)
 
-    if respuesta['status'] == 'error':
-        return _msj_error_helper(respuesta['message'], cursor), 409
-    if respuesta['status'] == 'success' and respuesta['data'] is None:
-        return _msj_error_helper("No se pudo insertar la instancia de la clase.", cursor), 410
+        if respuesta['status'] == 'error':
+            return _msj_error_helper(respuesta['message'], cursor), 409
+        if respuesta['status'] == 'success' and respuesta['data'] is None:
+            return _msj_error_helper("No se pudo insertar la instancia de la clase.", cursor), 410
+    else:
+        print("El Admin eligió publicar la clase como programada. No se va a crear ninguna instancia de clase")
 
 
     cursor.connection.commit()
@@ -205,11 +215,9 @@ def modificar_clase_service(
 def eliminar_clase_service(clase_id: int):
     """Service que elimina una clase"""
 
-    ## Recibir id del usuario. Buscar rol del usuario.
-    ## Si no tiene el permiso necesario, tirar un error.
-
     cursor = conectarse_db()
 
+    # Primero vemos si existe ese id_clase en la TABLA Clases
     respuesta_consulta = consultar_clase_por_id(clase_id, cursor)
 
     if respuesta_consulta['status'] == 'error':
@@ -221,9 +229,22 @@ def eliminar_clase_service(clase_id: int):
         return {
             "error": "Clase no encontrada."
         }, 401
-    
 
-    respuesta = modificar_clase_estado(clase_id, 'Borrado', cursor)
+    # Despues nos aseguramos de que no exista ninguna instancia de la clase misma
+    respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return respuesta, 402
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+        cursor.connection.close()
+        return {
+            "error": "No se puede eliminar la clase porque ya tiene una instancia asociada."
+        }, 403
+
+
+    # Y si todo eso se cumple, entonces eliminamos la clase.
+    respuesta = borrar_clase(clase_id, cursor)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()

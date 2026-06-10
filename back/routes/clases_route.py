@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
     listar_clases_service, modificar_clase_service, publicar_clase_service,
-    reservar_clase_service, verificar_inscripcion_usuario_clase_service
+    reservar_clase_service, verificar_inscripcion_usuario_clase_service,
+    eliminar_clase_service, anotarse_lista_espera_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -51,12 +52,9 @@ def eliminar_clase(id_clase):
     """Este endpoint permite eliminar una clase específica. 
         Recibe el ID de la clase a eliminar en formato JSON."""
 
-    ## TODO: Repensar implementación del endpoint
+    # Lozi: La explicación de mi implementación se encuentra dentro de la función eliminar_clase...
+    return eliminar_clase_service(id_clase)
 
-    return {
-        "status": "success",
-        "message": "En remodelación."
-    }, 200
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["PUT"])
 def modificar_clase(id_clase):
@@ -66,11 +64,27 @@ def modificar_clase(id_clase):
 
     ## TODO: Repensar implementación del endpoint
 
-    data = request.get_json()
+    # ESTA IMPLEMENTACIÓN PUEDE SERVIR PARA PRÓXIMAS IMPLEMENTACIÓNES, CON ESTO NOS ASEGURAMOS QUE EL REQUEST ESTÉ BIEN Y NO HAYA NINGUN "NONE" O ALGO ASÍ
+    body = request.get_json()
     print("JSON RECIBIDOOOOOOOOO:")
-    print(data)
+    print(body)
 
-    return modificar_clase_service(id_clase, **data)
+    campos = [
+        "estado",
+        "id_actividad",
+        "id_profesor",
+        "id_sala",
+        "dia",
+        "hora",
+        "cupo_maximo"
+    ]
+
+    for campo in campos:
+        if campo not in body:
+            return {"error": f"Falta el campo {campo}"}, 400
+
+
+    return modificar_clase_service(id_clase, **body)
     
 
 ## Habría que ver si a una clase cancelada hay que hacerle otra
