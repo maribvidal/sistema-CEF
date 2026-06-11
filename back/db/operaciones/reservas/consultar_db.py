@@ -21,3 +21,10 @@ def obtener_reservas_usuario_inst_clase(id_ins_clase: int, id_usuario: int, curs
         id del usuario asociados a la reserva."""
     query = f"SELECT * FROM Reserva WHERE usuario_id = {id_usuario} AND inst_clase_id = {id_ins_clase};"
     return ejecutar_fetchall(query, cursor)
+
+def consultar_reserva_por_usuario_clase(id_usuario: int, id_clase: int, cursor):
+    """Operación que consulta por reservas según el id del usuario y el id de la clase asociada a la reserva."""
+    query = f"""SELECT 1
+                FROM Reserva r 
+                WHERE r.usuario_id = {id_usuario} AND r.inst_clase_id = {id_clase};"""
+    return ejecutar_fetchone(query, cursor)

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_fecha
+from back.db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora
 from db.operaciones.clases.insertar_db import insertar_clase
@@ -15,10 +16,9 @@ from db.operaciones.instancias_clases.consultar_db import consultar_instancia_cl
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
 from db.modulo_fechas import generar_fecha_actual
 from enums.dias import Dias
-from db.operaciones.clases import anotarse_lista_abonados, anotarse_lista_publico_general
-from db.operaciones.clases.modificar_db import modificar_clase 
-from db.operaciones.clases.borrar_db import borrar_clase
-
+from db.operaciones.listas_espera import anotarse_lista_abonados, anotarse_lista_publico_general
+from db.operaciones.reservas import consultar_reserva_por_usuario_clase
+from db.operaciones.listas_espera import consultar_lista_espera_por_usuario_clase, borrar_lista_espera
 
 def _msj_error_helper(razon: str, cursor):
     cursor.connection.close()
@@ -457,4 +457,151 @@ def anotarse_lista_espera_service(id_clase, id_usuario):
     cursor.connection.close()
     return {
         "message": f"Se anotó a la lista de espera {tipo} con éxito."
+    }, 200
+    
+def registrar_asistencia_clase_service(id_clase, id_usuario):
+    """Service que permite registrar la asistencia de un usuario a una clase"""
+    cursor = conectarse_db()
+    
+    # verificar existencia de usuario
+    res_usuario = consultar_usuario_por_id(id_usuario, cursor)
+    
+    if res_usuario["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_usuario['message']
+        }, 500
+        
+    if res_usuario["status"] == 'success' and res_usuario["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró el usuario."
+        }, 404
+        
+    # verificar existencia de clase
+    res_clase = consultar_clase_por_id(id_clase, cursor)
+
+    if res_clase["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_clase['message']
+        }, 500
+        
+    if res_clase["status"] == 'success' and res_clase["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró la clase."
+        }, 404
+        
+    # verificar que el usuario este en una lista de espera a la clase
+    res_lista_espera = consultar_lista_espera_por_usuario_clase(id_usuario, id_clase, cursor)
+
+    if res_lista_espera["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_lista_espera['message']
+        }, 500
+
+    if res_lista_espera["status"] == 'success' and res_lista_espera["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "El usuario no tiene una inscripción en la lista de espera para esta clase."
+        }, 404
+        
+    # verificar que el usuario no tenga ya registrada la asistencia a la clase
+    # peude que le den 2 veces para confirmar la asistencia
+    res_asistencia = verificar_asistencia_usuario_clase(id_usuario, id_clase, cursor)
+    
+    if res_asistencia["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_asistencia['message']
+        }, 500
+    
+    if res_asistencia["status"] == 'success' and res_asistencia["data"] is not None:
+        cursor.connection.close()
+        return {
+            "error": "El usuario ya tiene registrada la asistencia a esta clase."
+        }, 400    
+
+    # Registrar asistencia
+    res_asistencia = registrar_asistencia(id_usuario, id_clase, cursor)
+
+    if res_asistencia["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_asistencia['message']
+        }, 500
+
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "message": "Asistencia registrada con éxito."
+    }, 200
+
+def rechazar_asistencia_clase_service(id_clase, id_usuario):
+    """Service que permite rechazar la asistencia de un usuario a una clase"""
+    cursor = conectarse_db()
+    
+    # verificar existencia de usuario
+    res_usuario = consultar_usuario_por_id(id_usuario, cursor)
+    
+    if res_usuario["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_usuario['message']
+        }, 500
+        
+    if res_usuario["status"] == 'success' and res_usuario["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró el usuario."
+        }, 404
+        
+    # verificar existencia de clase
+    res_clase = consultar_clase_por_id(id_clase, cursor)
+
+    if res_clase["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_clase['message']
+        }, 500
+        
+    if res_clase["status"] == 'success' and res_clase["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró la clase."
+        }, 404
+        
+    # verificar que el usuario este en una lista de espera a la clase
+    res_lista_espera = consultar_lista_espera_por_usuario_clase(id_usuario, id_clase, cursor)
+
+    if res_lista_espera["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_lista_espera['message']
+        }, 500
+
+    if res_lista_espera["status"] == 'success' and res_lista_espera["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "El usuario no tiene una inscripción en la lista de espera para esta clase."
+        }, 404
+        
+    # Rechazar asistencia
+    # esto pensarlo bien, por el momento lo que voy a hacer es borrarlo de la lista de espera y avisar al siguiente de la lista.
+    res_asistencia = borrar_lista_espera(id_usuario, id_clase, cursor)
+    
+    if res_asistencia["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_asistencia['message']
+        }, 500
+        
+    # avisar_siguiente_lista_espera(id_clase, cursor) <---- mirar como van a hacer en la cancelacion de reserva para avisar a los de las listas y en lo posible esa parte modularizarlo
+        
+    cursor.connection.commit()
+    cursor.connection.close()
+    return {
+        "message": "Asistencia rechazada con éxito."
     }, 200
