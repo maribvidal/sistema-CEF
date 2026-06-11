@@ -42,6 +42,11 @@ def modificar_empleado_service(
         return {
             "error": "Error al obtener la información del empleado."
         }, 400
+    elif res_empl['status'] == 'success' and res_empl['data'] is None:
+        cursor.connection.close()
+        return {
+            "error": "No existe un empleado con dicho dni."
+        }, 401
 
     if dni_nuevo is None:
         dni_nuevo = empleado_dni
@@ -74,7 +79,7 @@ def modificar_empleado_service(
                 "error": "El DNI ya se encuentra registrado para un empleado."
             }, 402
 
-    respuesta = modificar_empleado_con_dni(empleado_dni, dni_nuevo, nombre, apellido, correo, genero, rol_id, cursor)
+    respuesta = modificar_empleado(cursor, empleado_dni, dni_nuevo, nombre, apellido, correo, genero, rol_id)
 
     # Con esto guardo los cambios en la base de datos
     cursor.connection.commit()

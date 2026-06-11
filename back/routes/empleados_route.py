@@ -30,7 +30,7 @@ def modificar_empleado(empleado_dni):
     
     data = request.get_json()
 
-    dni_nuevo = data.get("nuevo_dni")
+    dni_nuevo = data.get("dni_nuevo")
     nombre = data.get("nombre")
     apellido = data.get("apellido")
     correo = data.get("correo")
