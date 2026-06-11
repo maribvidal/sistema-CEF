@@ -21,7 +21,8 @@ def publicar_clase():
     """Este endpoint permite subir una nueva clase al
         sistema. Los datos son recibidos en formato JSON."""
 
-    # ESTA IMPLEMENTACIÓN PUEDE SERVIR PARA PRÓXIMAS IMPLEMENTACIÓNES, CON ESTO NOS ASEGURAMOS QUE EL REQUEST ESTÉ BIEN Y NO HAYA NINGUN "NONE" O ALGO ASÍ
+    # ESTA IMPLEMENTACIÓN PUEDE SERVIR PARA PRÓXIMAS IMPLEMENTACIÓNES, 
+    # CON ESTO NOS ASEGURAMOS QUE EL REQUEST ESTÉ BIEN Y NO HAYA NINGUN "NONE" O ALGO ASÍ
     body = request.get_json()
 
     campos = [
@@ -46,7 +47,10 @@ def publicar_clase():
     hora = body.get("hora")
     cupo_maximo = body.get("cupo_maximo")
 
-    return publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo)
+    # Este campo no lo controlo porque es opcional
+    primera_fecha = None if (body.get("primera_fecha") is None) else body.get("primera_fecha")
+
+    return publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, primera_fecha)
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["DELETE"])
 def eliminar_clase(id_clase):
@@ -55,7 +59,6 @@ def eliminar_clase(id_clase):
 
     # Lozi: La explicación de mi implementación se encuentra dentro de la función eliminar_clase...
     return eliminar_clase_service(id_clase)
-
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["PUT"])
 def modificar_clase(id_clase):
