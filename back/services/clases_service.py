@@ -1,7 +1,6 @@
 from datetime import datetime
-
 from db.operaciones.usuarios.consultar_db import obtener_clase_usuario_fecha
-from back.db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
+from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora
 from db.operaciones.clases.insertar_db import insertar_clase
@@ -14,11 +13,11 @@ from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_ho
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
-from db.modulo_fechas import generar_fecha_actual
-from enums.dias import Dias
 from db.operaciones.listas_espera import anotarse_lista_abonados, anotarse_lista_publico_general
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera import consultar_lista_espera_por_usuario_clase, borrar_lista_espera
+from db.modulo_fechas import generar_fecha_actual, validar_fecha
+from enums.dias import Dias
 
 def _msj_error_helper(razon: str, cursor):
     cursor.connection.close()
@@ -64,17 +63,9 @@ def publicar_clase_service(
     dia: Dias,
     hora: str,
     cupo_maximo: int
+    primera_fecha = None
 ):
     """Service que publica una clase"""
-    def fecha_valida(fecha: str) -> bool:
-        """Función auxiliar para validar el formato de la fecha."""
-        try:
-            datetime.strptime(fecha, "%Y-%m-%d")
-        except ValueError:
-            return False
-
-        # Esto para validar que la fecha no sea anterior a la actual. Sino pues no tendria sentido
-        return fecha >= datetime.date.today()
 
     cursor = conectarse_db()
 
@@ -85,10 +76,6 @@ def publicar_clase_service(
     if respuesta['status'] == 'success' and respuesta['data'] is None:
         return _msj_error_helper("Se intentó devolver una actividad pero no se encontró nada.", cursor), 401
 
-
-
-
-
     # Comprobar que el profesor existe
     respuesta = consultar_profesor_por_id(id_profesor, cursor)
     if respuesta['status'] == 'error':
@@ -97,15 +84,11 @@ def publicar_clase_service(
         return _msj_error_helper("Se intentó devolver un profesor pero no se encontró nada.", cursor), 403
 
     # Comprobar que la sala existe
-    print("COMPROBAMOS QUE LA SALA EXISTE O NO")
     respuesta = consultar_sala_por_id(id_sala, cursor)
     if respuesta['status'] == 'error':
         return _msj_error_helper(respuesta['message'], cursor), 404
     if respuesta['status'] == 'success' and respuesta['data'] is None:
         return _msj_error_helper("Se intentó devolver una sala pero no se encontró nada.", cursor), 405
-
-
-
 
     # Comprobar que la sala no esté ocupada en ese día y hora
     respuesta = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
@@ -115,15 +98,12 @@ def publicar_clase_service(
         return _msj_error_helper("La sala ya se encuentra ocupada en ese día y hora.", cursor), 407
 
     respuesta = consultar_sala_por_id(id_sala, cursor)
-    print(respuesta["data"]['capacidad'])
 
     # Comprobar que la sala escogida tenga la capacidad suficiente
     capacidad_sala = int(respuesta["data"]['capacidad'])
 
     if (capacidad_sala < cupo_maximo):
         return _msj_error_helper("El cupo máximo ingresado supera la capacidad de la sala.", cursor), 408
-
-
 
     # Intentar insertar la clase
     respuesta = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, cursor)
@@ -133,31 +113,28 @@ def publicar_clase_service(
     if respuesta['status'] == 'success' and respuesta['data'] is None:
         return _msj_error_helper("Esa clase ya se encontraba insertada en el sistema.", cursor), 411
 
-
-    # Intentar insertar una instancia para la clase
-    ## TODO: Asegurarse de que la fecha utilizada para la instancia sea válida
-
-    # Lozi: SIEMPRE VA A SER VÁLIDA, porque genera fecha_actual.
-    # Y antes verificas que no exista una clase para la misma fecha, hora y sala, entonces no hay forma de que se inserte una instancia para una clase con una fecha inválida.
-
-    # Lozi: OTRA COSA MAS, solo existen dos estados: Activa o Programada
-    # Activa significa que quieres crear una instancia de la clase para que puedan reservarla YA
-    # Programada significa que querés crear la clase pero no una instancia de la misma, porque por ejemplo todavía no se abrió el período de reservas para esa clase, o algo así. Entonces, si el estado es Activa, se inserta una instancia de la clase con la fecha actual, y si el estado es Programada, no se inserta ninguna instancia de la clase.
-
-    # Lozi: POR LO TANTO EL INSTANCIAR CLASE SE VA A REALIZAR INTERNAMENTE CUANDO SEA EL MOMENTO DE GENERARLA (O SEA CUANDO SE ENCUENTRE EN LA SEMANA PERTINENTE)
     clase_id: int = int(respuesta["data"])
 
-    if estado == "Activa":
-        print("El Administrador eligió publicar la clase como Activa. Comenzando el proceso de creación de instanacia de clase")
-        respuesta = insertar_instancia_clase(clase_id, generar_fecha_actual(), cursor)
+    # Ver si se recibió una fecha, y si se recibió, ver si es válida
+    fecha_actual = generar_fecha_actual(dia)
 
-        if respuesta['status'] == 'error':
-            return _msj_error_helper(respuesta['message'], cursor), 409
-        if respuesta['status'] == 'success' and respuesta['data'] is None:
-            return _msj_error_helper("No se pudo insertar la instancia de la clase.", cursor), 410
-    else:
-        print("El Admin eligió publicar la clase como programada. No se va a crear ninguna instancia de clase")
+    if (primera_fecha is not None):
+        res_validar_fecha = validar_fecha(primera_fecha)
+        if (res_validar_fecha):
+            res_validar_dia = validar_dia_fecha(primera_fecha, dia)
+            if (res_validar_dia):
+                fecha_actual = primera_fecha
+            else:
+                return _msj_error_helper("La fecha que se intentó utilizar no trascurre el día de la semana para la clase.", cursor), 412
+        else:
+            return _msj_error_helper("La fecha que se recibió no es válida o no cumple con el formato (YYY-mm-dd).", cursor), 413
 
+    respuesta = insertar_instancia_clase(clase_id, fecha_actual, cursor)
+
+    if respuesta['status'] == 'error':
+        return _msj_error_helper(respuesta['message'], cursor), 414
+    if respuesta['status'] == 'success' and respuesta['data'] is None:
+        return _msj_error_helper("No se pudo insertar la instancia de la clase.", cursor), 415
 
     cursor.connection.commit()
     return _msj_exito_helper("Clase publicada exitosamente.", cursor, respuesta['data'])
@@ -231,6 +208,7 @@ def eliminar_clase_service(clase_id: int):
         }, 401
 
     # Despues nos aseguramos de que no exista ninguna instancia de la clase misma
+    # y una instancia de la clase debería existir hasta que tenga reservas hechas
     respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
 
     if respuesta['status'] == 'error':
@@ -242,13 +220,12 @@ def eliminar_clase_service(clase_id: int):
             "error": "No se puede eliminar la clase porque ya tiene una instancia asociada."
         }, 403
 
-
     # Y si todo eso se cumple, entonces eliminamos la clase.
     respuesta = borrar_clase(clase_id, cursor)
 
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return respuesta, 402
+        return respuesta, 404
 
     cursor.connection.commit()
     cursor.connection.close()
@@ -274,7 +251,6 @@ def cancelar_clase_service(clase_id: int):
             "error": "Clase no encontrada."
         }, 401
 
-
     # Segundo: Verificamos que no exista ninguna instancia de la misma. Porque si cancelamos la clase y se encuentra instanciada, aunque no hayan reservas, puede haber una condición de carrera o una infima posibilidad de que al último momento alguien reserve
     # PD: si no les gusta esa implementación, entonces implementen una segunda verificacion la cual verifique que no posee ninguna reserva dicha instancia
 
@@ -287,7 +263,6 @@ def cancelar_clase_service(clase_id: int):
         return {
             "error": "No se puede cancelar la clase porque ya tiene una instancia asociada."
         }, 403
-
 
     # Tercero: Modificamos el estado de la clase a Cancelada.
     respuesta = modificar_clase_estado(clase_id, 'Cancelada', cursor)
@@ -302,8 +277,6 @@ def cancelar_clase_service(clase_id: int):
     return {
         "message": "Clase cancelada exitosamente."
     }, 200
-
-    
 
 def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     """Service que, dado un usuario, lo intenta inscribir
