@@ -160,6 +160,8 @@ def construir_tabla_usuario_tener_descuento(cursor: sqlite.Cursor):
                                         ON DELETE SET NULL
                         )""")
 
+## repensar estas 5 funciones, si necesitan herencia o se diferencian en algo mas
+
 def construir_tabla_reserva(cursor: sqlite.Cursor):
     """Construye la tabla Reserva"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Reserva (
@@ -189,6 +191,52 @@ def construir_tabla_cancelacion(cursor: sqlite.Cursor):
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
+    
+def construir_tabla_lista_espera_abonados(cursor: sqlite.Cursor):
+    """Construye la tabla Lista_Espera_Abonados"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Lista_Espera_Abonados (
+                            id         INTEGER PRIMARY KEY,
+                            fecha         DATETIME NOT NULL,
+                            usuario_id INTEGER NOT NULL,
+                            inst_clase_id   INTEGER NOT NULL,
+                            FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL,
+                            FOREIGN KEY (inst_clase_id) REFERENCES Instancia_Clase(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
+    
+def construir_tabla_lista_espera_publico_general(cursor: sqlite.Cursor):
+    """Construye la tabla Lista_Espera_Publico_General"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Lista_Espera_Publico_General (
+                            id         INTEGER PRIMARY KEY,
+                            fecha         DATETIME NOT NULL,
+                            usuario_id INTEGER NOT NULL,
+                            inst_clase_id   INTEGER NOT NULL,
+                            FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL,
+                            FOREIGN KEY (inst_clase_id) REFERENCES Instancia_Clase(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
+    
+def construir_tabla_asistencias_clase(cursor: sqlite.Cursor):
+    """Construye la tabla Asistencias_clase"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Asistencias_Clase (
+                            id         INTEGER PRIMARY KEY,
+                            usuario_id INTEGER NOT NULL,
+                            inst_clase_id   INTEGER NOT NULL,
+                            FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL,
+                            FOREIGN KEY (inst_clase_id) REFERENCES Instancia_Clase(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
+    
+
 
 def construir_tabla_pago(cursor: sqlite.Cursor):
     """Construye la tabla Pago"""
