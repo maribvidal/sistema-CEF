@@ -13,7 +13,7 @@ def generar_fecha_actual(dia: str = None) -> str:
 
 def obtener_fecha_dia_semana(dia: str) -> str:
     hoy = date.today()
-    dias_a_sumar = (Dias[dia].value - hoy.weekday()) % 6
+    dias_a_sumar = (Dias[dia].value - hoy.weekday()) % 6 + 1
     return (hoy + timedelta(days=dias_a_sumar)).strftime(FORMATO_FECHA)
 
 def comprobar_dia_pertenece_fecha(dia: str, fecha: str):

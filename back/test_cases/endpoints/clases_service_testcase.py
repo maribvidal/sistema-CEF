@@ -1,9 +1,9 @@
 from ..endpoint_test import EndpointTestCase
 from db.operaciones.profesores.insertar_db import insertar_profesor
 from db.operaciones.actividades.insertar_db import insertar_actividad
-from db.operaciones.clases.insertar_db import insertar_clase
+from db.operaciones.clases import insertar_clase, consultar_clase_por_id
 from db.operaciones.salas.insertar_db import insertar_sala
-from db.operaciones.instancias_clases import insertar_instancia_clase
+from db.operaciones.instancias_clases import insertar_instancia_clase, consultar_instancia_clase_por_clase_id
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.roles.insertar_db import insertar_rol
 from db.operaciones.reservas.insertar_db import insertar_reserva
@@ -105,6 +105,14 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         assert '200' in str(res), "El código devuelto no es 200."
         assert json_status == 'success', "La respuesta no es 'success'."
+
+        cons_clase_creada = consultar_clase_por_id(json_res["data"], self.cursor)
+
+        assert cons_clase_creada["data"]["dia"] == 'Lunes', "El día de la clase no coincide con el ingresado."
+        
+        cons_ins_clase_creada = consultar_instancia_clase_por_clase_id(json_res["data"], self.cursor)
+
+        assert cons_ins_clase_creada["data"][0]["fecha"] == '2026-06-15', "La fecha de la instancia de la clase creada automáticamente no es correcta."
 
         # Revisar que se devuelve fallo por los casos donde se ponga una actividad, un profesor o una sala que no existen
 
