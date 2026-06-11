@@ -49,16 +49,29 @@ def obtener_clases_usuario(id_usuario: int, cursor) -> dict:
         WHERE u.id = {id_usuario}"""
     return ejecutar_fetchall(query, cursor)
 
-def obtener_clase_usuario_dia_hora(id_usuario: int, dia, hora, cursor) -> dict:
+def obtener_clase_usuario_fecha(id_usuario: int, fecha: str, cursor) -> dict:
     """Hace una consulta para obtener la clase a la que está inscripto
         un usuario en una fecha y hora determinada, si es que el 
         usuario está inscripto a una clase en ese día y hora."""
+    # Utilizo ejecutar_fetchall por si el usuario llega a estar metido
+    # en más de una clase en la misma fecha y hora (lo cual sería un error)
+    # Lozi: Claro, ya que esa ese escenario nunca ocurriria porque lo pararia el inscribir_clase_service
     query = f"""
-        SELECT c.id, c.estado, c.actividad_id, c.profesor_id, c.sala_id, c.dia, c.hora, c.cupo_maximo, c.monto
-        FROM Clase c INNER JOIN Instancia_Clase ic ON (c.id = ic.clase_id)
-                    INNER JOIN Reserva r ON (ic.id = r.inst_clase_id)
-                    INNER JOIN Usuario u ON (r.usuario_id = u.id)
-        WHERE u.id = {id_usuario} AND c.dia = '{dia}' AND c.hora = '{hora}';"""
+        SELECT c.id,
+        c.estado,
+        c.actividad_id,
+        c.profesor_id,
+        c.sala_id,
+        c.dia,
+        c.hora,
+        c.cupo_maximo,
+        c.monto
+        FROM Reserva r
+        JOIN Instancia_Clase ic ON r.inst_clase_id = ic.id
+        JOIN Clase c ON ic.clase_id = c.id
+        WHERE r.usuario_id = {id_usuario}
+        AND ic.fecha = '{fecha}'
+    """
     return ejecutar_fetchall(query, cursor)
 
 def listar_dnis_usuarios(cursor) -> dict:

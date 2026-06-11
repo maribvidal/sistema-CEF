@@ -102,13 +102,14 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
         WHERE dni = {empleado_dni}
     """
     usuario = ejecutar_fetchone(query_verificacion, cursor)
+    print("IMPRIMIENDO RESPUESTA DEL FETCHONEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",usuario)
 
     if not usuario:
         return {
             "status": "error",
             "message": "Empleado no encontrado"
         }
-    elif usuario["data"]["rol_id"] not in (0, 1, 2, 5): # o sea si el usuario no es ni gerente ni administrador ni profesor
+    elif usuario['data']["rol_id"] not in (0, 1, 2, 5): # o sea si el usuario no es ni gerente ni administrador ni profesor
         return {
             "status": "error",
             "message": "El usuario no es un empleado"
