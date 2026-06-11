@@ -149,9 +149,7 @@ def anotarse_lista_espera(id_clase):
     
     return jsonify(respuesta), status
 
-# la logica seria que cuando se cancela una reserva entonces se notifica via mail a alguno de la lista de abonado o de individual para confirmar asistencia
-# si hago 2 endpoints para cada uno de las tipo de usuario va a ser identico
-# pienso que el front seria el que agarra directamente el id_usuario cuando el mail lo redirija a la pagina de confirmacion y que pregunte luego si es abonado o no
+
 @clases_bp.route("/clases/<int:id_clase>/confirmar_asistencia", methods=["POST"])
 def registrar_asistencia_clase(id_clase):
     """Este endpoint permite registrar la asistencia de un usuario
@@ -165,10 +163,6 @@ def registrar_asistencia_clase(id_clase):
     respuesta, status = registrar_asistencia_clase_service(id_clase, id_usuario)
     
     return jsonify(respuesta), status
-
-# pienso que las hu de usuario se diferencian en este caso desde el front
-# en el caso de la confirmacion y la cancelacion se llaman a distintos endpoints en el back. no funcionan de la misma forma que lo veniamos haciendo con los otros endpoints que era
-# un endpoint por hu
 
 @clases_bp.route("/clases/<int:id_clase>/rechazar_asistencia", methods=["POST"])
 def rechazar_asistencia_clase(id_clase):
