@@ -14,11 +14,7 @@ from db.operaciones.empleados.consultar_db import listar_dnis_empleados
 from dotenv import load_dotenv
 load_dotenv()
 
-import os
-import resend
-
-import smtplib
-from email.mime.text import MIMEText
+from utils.envio_mails import enviar_mail
 
 import datetime
 
@@ -383,59 +379,9 @@ def restablecer_contraseña_service(correo: str):
             "error": usuario['message']
         }, 401
 
-    """
-    api_key = os.getenv("RESEND_API_KEY")
-    resend.api_key = api_key
-    
-    front_url = os.getenv("FRONT_URL")
-    link = f"{front_url}/ConfirmarNuevaContrasena?correo={correo}"
-    
-    respuesta = resend.Emails.send({
-        "from": "onboarding@resend.dev",
-        "to": correo,
-        "subject": "Recuperación de contraseña",
-        "html": f""
-            <h2>Recuperar contraseña</h2>
-
-            <p>Hacé click acá:</p>
-
-            <a href="{link}">
-                Restablecer contraseña
-            </a>
-        ""
-    })
-    """
-    
-    # Configuración del servidor
-    servidor_smtp = "smtp.gmail.com"
-    puerto = 587
-    remitente = os.getenv("remitente")
-    password = os.getenv("password")
-    
-    
-    # Crear el mensaje    
-    front_url = os.getenv("FRONT_URL")
     link = f"http://localhost:5173/ConfirmarNuevaContrasena?correo={correo}"
-
-    msg = MIMEText(f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}")
-    msg['Subject'] = "Restablecer contraseña"
-    msg['From'] = "sistemacef@gmail.com"
-    msg['To'] = correo
-
-    try:
-        # Conexión al servidor
-        server = smtplib.SMTP(servidor_smtp, puerto)
-        server.starttls() # Inicia conexión segura
-        server.login("sistemacef@gmail.com", "saal ixel tbum pohe")
-        
-        # Enviar a varios remitentes (puedes usar un bucle)
-        server.send_message(msg)
-    except Exception as e:
-        return {
-            "error": str(e)
-        }, 402
-    finally:
-        server.quit()
+    mensaje = f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}"
+    enviar_mail(correo, mensaje)
     
     cursor.connection.close()
     return {

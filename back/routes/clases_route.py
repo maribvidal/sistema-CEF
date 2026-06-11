@@ -149,7 +149,8 @@ def anotarse_lista_espera(id_clase):
     
     return jsonify(respuesta), status
 
-
+# estos dos endpoints serian confirmar asistencia individual y abonado
+# - Escenario 1:
 @clases_bp.route("/clases/<int:id_clase>/confirmar_asistencia", methods=["POST"])
 def registrar_asistencia_clase(id_clase):
     """Este endpoint permite registrar la asistencia de un usuario
@@ -164,6 +165,7 @@ def registrar_asistencia_clase(id_clase):
     
     return jsonify(respuesta), status
 
+# - Escenario 2:
 @clases_bp.route("/clases/<int:id_clase>/rechazar_asistencia", methods=["POST"])
 def rechazar_asistencia_clase(id_clase):
     """Este endpoint permite rechazar la asistencia de un usuario
@@ -177,3 +179,5 @@ def rechazar_asistencia_clase(id_clase):
     respuesta, status = rechazar_asistencia_clase_service(id_clase, id_usuario)
     
     return jsonify(respuesta), status
+
+
