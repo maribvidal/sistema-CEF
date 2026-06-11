@@ -6,7 +6,7 @@ def consultar_reserva_por_id(reserva_id: int, cursor):
     query = f"SELECT * FROM Reserva WHERE id = {reserva_id}"
     return ejecutar_fetchone(query, cursor)
 
-def obtener_reservas_usuario_dia_hora(id_usuario: int, dia: Dias, hora: str, cursor):
+def obtener_reservas_usuario_dia_hora(id_usuario: int, dia: str, hora: str, cursor):
     """Operación que consulta por reservas según el id del usuario, y el dia y hora
         de la instancia de la clase asociada con la reserva."""
     query = f"""SELECT r.usuario_id, r.inst_clase_id, r.fecha

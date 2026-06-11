@@ -1,4 +1,4 @@
-from back.db.operaciones.exception_handler import ejecutar_insertar
+from db.operaciones.exception_handler import ejecutar_insertar
 
 def anotarse_lista_abonados(id_usuario: int, id_clase: int, cursor):
     """Permite insertar una fila para la tabla Lista_Espera_Abonados"""

@@ -1,4 +1,4 @@
-from back.db.operaciones.exception_handler import ejecutar_insertar
+from db.operaciones.exception_handler import ejecutar_insertar
 
 def registrar_asistencia(id_usuario: int, id_clase: int, cursor):
     """Permite insertar una fila para la tabla Asistencia"""

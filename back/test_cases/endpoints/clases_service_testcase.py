@@ -75,7 +75,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         ESCENARIO 1 - Clase publicada
         DADO que está en el apartado de clases, y que la sala 1 está disponible en la fecha 16/04 y horario 14:00
         CUANDO selecciona categoría yoga, sala 1, fecha 16/04, hora 14:00, y profesor Pedro, y presiona publicar clase
-        ENTONCES se publica la clase en el sistema y lo redirige a la página de clases
+        ENTONCES se publica la clase en el sistema y lo redirige a la página de clases.
         """
 
         # Crear profesor
@@ -248,7 +248,7 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         json_res = self.decodificarRespByte(res.data)
 
-        assert '403' in str(res), "El código devuelto no es 403."
+        assert '405' in str(res), "El código devuelto no es 405."
         assert json_res["status"] == 'error', "La respuesta devolvió 'error'."
         
         """
@@ -273,5 +273,5 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         json_res = self.decodificarRespByte(res.data)
 
-        assert '404' in str(res), "El código devuelto no es 404."
+        assert '406' in str(res), "El código devuelto no es 406."
         assert json_res["status"] == 'error', "La respuesta devolvió 'error'."

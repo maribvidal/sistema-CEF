@@ -60,9 +60,9 @@ def publicar_clase_service(
     id_actividad: int,
     id_profesor: int,
     id_sala: int,
-    dia: Dias,
+    dia: str,
     hora: str,
-    cupo_maximo: int
+    cupo_maximo: int,
     primera_fecha = None
 ):
     """Service que publica una clase"""
