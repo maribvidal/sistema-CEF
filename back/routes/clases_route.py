@@ -119,18 +119,10 @@ def verificar_inscripcion_usuario_clase(id_ins_clase):
         tiene una inscripción a una clase específica,
         en un día y hora dado."""
 
-    ## TODO: Repensar implementación del endpoint
-    # Para poder verificar su inscripción, nosotros tenemos el id de la clase pero necesitamos un distintivo para saber de que usuario se trata
     data = request.get_json()
     id_usuario = data.get("id_usuario")
-    fecha = data.get("fecha")
 
     return verificar_inscripcion_usuario_clase_service(id_ins_clase, id_usuario)
-
-    return {
-        "status": "success",
-        "message": "En remodelación."
-    }, 200
 
 @clases_bp.route("/clases/<int:id_clase>/inscripciones", methods=["POST"])
 def anotarse_lista_espera(id_clase):

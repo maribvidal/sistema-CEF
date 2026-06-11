@@ -1,9 +1,6 @@
-
-
-from back.db.operaciones.clases.consultar_db import consultar_clase_por_id, obtener_detalles_clase
-from back.db.operaciones.conectar_db import conectarse_db
-from back.db.operaciones.listas_espera.consultar_db import obtener_siguiente_usuario_abonado, obtener_siguiente_usuario_individual
-
+from db.operaciones.clases.consultar_db import consultar_clase_por_id, obtener_detalles_clase
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.listas_espera.consultar_db import obtener_siguiente_usuario_abonado, obtener_siguiente_usuario_individual
 
 def notificar_siguiente_service(id_clase: int)-> tuple:
     """Service que permite notificar al siguiente usuario en la lista de espera de una clase."""

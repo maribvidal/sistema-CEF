@@ -56,10 +56,10 @@ def obtener_usuario_esta_en_instancia_clase(id_ins_clase: int, id_usuario: int, 
 
     query = f"""
         SELECT ic.fecha,
-        ic.clase_id
+        ic.clase_id,
         r.usuario_id
         FROM Reserva r
-        JOIN Instancia_Clase ic ON r.inst_clase_id = ic.id
+        JOIN Instancia_Clase ic ON (r.inst_clase_id = ic.id)
         WHERE r.usuario_id = {id_usuario}
         AND ic.id = {id_ins_clase}
     """
