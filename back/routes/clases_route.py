@@ -89,7 +89,6 @@ def modificar_clase(id_clase):
 
 
     return modificar_clase_service(id_clase, **body)
-    
 
 ## Habría que ver si a una clase cancelada hay que hacerle otra
 ## cosa que no sea cambiarle el estado.
@@ -101,8 +100,6 @@ def cancelar_clase(id_clase):
 
     # Lozi: Propuesta de implementación se encuentra en cancelar_clase_service..
     return cancelar_clase_service(id_clase)
-
-
 
 @clases_bp.route("/clases/<int:id_ins_clase>/reservar", methods=["PUT"])
 def reservar_clase(id_ins_clase):
@@ -116,8 +113,8 @@ def reservar_clase(id_ins_clase):
 
     return reservar_clase_service(id_ins_clase, id_usuario)
 
-@clases_bp.route("/clases/<int:id_clase>", methods=["GET"])
-def verificar_inscripcion_usuario_clase(id_clase):
+@clases_bp.route("/clases/<int:id_ins_clase>/verificar", methods=["GET"])
+def verificar_inscripcion_usuario_clase(id_ins_clase):
     """Este endpoint permite verificar si un usuario
         tiene una inscripción a una clase específica,
         en un día y hora dado."""
@@ -128,7 +125,7 @@ def verificar_inscripcion_usuario_clase(id_clase):
     id_usuario = data.get("id_usuario")
     fecha = data.get("fecha")
 
-    return verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha)
+    return verificar_inscripcion_usuario_clase_service(id_ins_clase, id_usuario)
 
     return {
         "status": "success",
