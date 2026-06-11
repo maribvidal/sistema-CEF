@@ -1,3 +1,6 @@
+from back.db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
+from back.db.operaciones.listas_espera.consultar_db import consultar_lista_espera_por_usuario_clase
+from back.db.operaciones.usuarios.consultar_db import consultar_usuario_por_id
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.reservas.consultar_db import consultar_reserva_por_id
 from db.operaciones.cancelaciones.insertar_db import insertar_cancelacion
@@ -47,3 +50,61 @@ def cancelar_reserva_service(reserva_id):
     cursor.connection.commit()
     
     return _msj_exito_helper(f"Cancelación para la reserva con id {reserva_id} creada exitosamente.", cursor)
+
+def confirmar_reserva_service(id_clase, id_usuario):
+    """Service que permite confirmar la reserva de un usuario."""
+    cursor = conectarse_db()
+    
+    # validar si el usuario existe
+    usuario = consultar_usuario_por_id(id_usuario, cursor)
+    if usuario["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 500
+        
+    if usuario["status"] == 'success' and usuario["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró el usuario."
+        }, 404
+        
+    # validar si existe la instancia de clase
+    res_clase = consultar_instancia_clase_por_id(id_clase, cursor)
+    if res_clase["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": res_clase['message']
+        }, 500
+        
+    if res_clase["status"] == 'success' and res_clase["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró la clase."
+        }, 404
+    
+    # validar que el usuario este en una lista de espera para esa instancia de clase
+    validacion_lista_espera = consultar_lista_espera_por_usuario_clase(id_usuario, id_clase, cursor)
+    if validacion_lista_espera["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": validacion_lista_espera['message']
+        }, 500
+        
+    if validacion_lista_espera["status"] == 'success' and validacion_lista_espera["data"] is None:
+        cursor.connection.close()
+        return {
+            "error": "El usuario no se encuentra en una lista de espera para esta clase."
+        }, 404
+        
+    # confirmar reserva (pasa de estar en la lista de espera a estar en las reservas de la instancia de clase)
+    confirmacion = confirmar_reserva(id_usuario, id_clase, cursor)
+    
+    if confirmacion["status"] == 'error':
+        cursor.connection.close()
+        return {
+            "error": confirmacion['message']
+        }, 500
+        
+    cursor.connection.commit()
+    return confirmacion["data"], 200

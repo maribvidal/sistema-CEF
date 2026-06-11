@@ -391,7 +391,5 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
             "error": respuesta['message']
         }, 500
         
-    # avisar_siguiente_lista_espera(id_clase, cursor) <---- mirar como van a hacer en la cancelacion de reserva para avisar a los de las listas y en lo posible esa parte modularizarlo
-        
     cursor.connection.commit()
     return _msj_exito_helper("Asistencia rechazada con éxito.", cursor)
