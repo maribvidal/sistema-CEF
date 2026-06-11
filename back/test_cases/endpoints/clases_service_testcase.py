@@ -11,12 +11,11 @@ from db.operaciones.reservas.insertar_db import insertar_reserva
 class ClasesServiceTestCase(EndpointTestCase):
     """Testcase para probar los endpoints del service de Clases."""
     def setUp(self):
+        print(" > TESTING / TESTCASE DEL SERVICE DE CLASES")
         super().setUp()
-        print(" > TESTING / Comenzando TestCase para el service de Clases.")
 
     def tearDown(self):
         super().tearDown()
-        print(" > TESTING / Terminando TestCase para el service de Clases.")
 
     def test_listar_clases(self):
         ### ESCENARIO 2: Error en listado de clases
@@ -293,7 +292,8 @@ class ClasesServiceTestCase(EndpointTestCase):
         id_ic = insertar_instancia_clase(id_cla, "2026-12-02", self.cursor)["data"]
         id_re = insertar_reserva(id_cli, id_ic, self.cursor)["data"]
 
-        # Probar endpoint "verificar_inscripcion_usuario_clase"
+        # Probar caso de éxito
+
         res = self.client.get(f"/clases/{id_ic}/verificar", json={
             "id_usuario": id_cli
         })
@@ -301,3 +301,23 @@ class ClasesServiceTestCase(EndpointTestCase):
         json_res = self.decodificarRespByte(res.data)
 
         assert json_res["status"] == 'success', "La respuesta del endpoint no fue un 'success'."
+
+        # Probar caso de fallo donde el id del usuario no existe
+
+        res = self.client.get(f"/clases/{id_ic}/verificar", json={
+            "id_usuario": 10
+        })
+
+        json_res = self.decodificarRespByte(res.data)
+
+        assert json_res["status"] == 'error', "La respuesta del endpoint no fue un 'error'."
+
+        # Probar caso de fallo donde el id de la instancia de la clase no existe
+
+        res = self.client.get(f"/clases/10/verificar", json={
+            "id_usuario": id_cli
+        })
+
+        json_res = self.decodificarRespByte(res.data)
+
+        assert json_res["status"] == 'error', "La respuesta del endpoint no fue un 'error'."

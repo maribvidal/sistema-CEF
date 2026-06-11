@@ -271,17 +271,24 @@ def verificar_inscripcion_usuario_clase_service(id_ins_clase, id_usuario):
 
     cursor = conectarse_db()
 
+    # Comprobar si el usuario existe
+
+    respuesta = consultar_usuario_por_id(id_usuario, cursor)
+    control = _controlar_errores_query(respuesta, 400, "Usuario no encontrado.", 401, cursor)
+    if control is not None:
+        return control
+
     # Comprobar si la instancia de la clase existe
 
     respuesta = consultar_instancia_clase_por_id(id_ins_clase, cursor)
-    control = _controlar_errores_query(respuesta, 400, "Instancia de clase no encontrada.", 401, cursor)
+    control = _controlar_errores_query(respuesta, 402, "Instancia de clase no encontrada.", 403, cursor)
     if control is not None:
         return control
 
     # Comprobar si el usuario está inscripto en dicha instancia
 
     respuesta = obtener_usuario_esta_en_instancia_clase(id_ins_clase, id_usuario, cursor)
-    control = _controlar_errores_query(respuesta, 402, "El usuario no se encuentra inscripto en la clase.", 403, cursor)
+    control = _controlar_errores_query(respuesta, 404, "El usuario no se encuentra inscripto en la clase.", 405, cursor)
     if control is not None:
         return control
 
