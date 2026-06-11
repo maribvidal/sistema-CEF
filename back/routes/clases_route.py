@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
     anotarse_lista_espera_service, listar_clases_service, publicar_clase_service,
-    reservar_clase_service, registrar_asistencia_clase_service
+    reservar_clase_service, registrar_asistencia_clase_service, rechazar_asistencia_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -113,7 +113,7 @@ def anotarse_lista_espera(id_clase):
 # la logica seria que cuando se cancela una reserva entonces se notifica via mail a alguno de la lista de abonado o de individual para confirmar asistencia
 # si hago 2 endpoints para cada uno de las tipo de usuario va a ser identico
 # pienso que el front seria el que agarra directamente el id_usuario cuando el mail lo redirija a la pagina de confirmacion y que pregunte luego si es abonado o no
-@clases_bp.route("/clases/<int:id_clase>/asistencia", methods=["POST"])
+@clases_bp.route("/clases/<int:id_clase>/confirmar_asistencia", methods=["POST"])
 def registrar_asistencia_clase(id_clase):
     """Este endpoint permite registrar la asistencia de un usuario
         a una clase específica. Recibe el ID del usuario y el ID
@@ -124,5 +124,23 @@ def registrar_asistencia_clase(id_clase):
     id_usuario = data.get("id_usuario")
     
     respuesta, status = registrar_asistencia_clase_service(id_clase, id_usuario)
+    
+    return jsonify(respuesta), status
+
+# pienso que las hu de usuario se diferencian en este caso desde el front
+# en el caso de la confirmacion y la cancelacion se llaman a distintos endpoints en el back. no funcionan de la misma forma que lo veniamos haciendo con los otros endpoints que era
+# un endpoint por hu
+
+@clases_bp.route("/clases/<int:id_clase>/rechazar_asistencia", methods=["POST"])
+def rechazar_asistencia_clase(id_clase):
+    """Este endpoint permite rechazar la asistencia de un usuario
+        a una clase específica. Recibe el ID del usuario y el ID
+        de la clase en formato JSON."""
+        
+    data = request.get_json()
+
+    id_usuario = data.get("id_usuario")
+    
+    respuesta, status = rechazar_asistencia_clase_service(id_clase, id_usuario)
     
     return jsonify(respuesta), status
