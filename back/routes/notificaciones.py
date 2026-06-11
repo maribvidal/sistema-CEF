@@ -10,4 +10,3 @@ def notificar_siguiente(id_clase):
     respuesta, status = notificar_siguiente_service(id_clase)
     
     return jsonify(respuesta), status 
-    
