@@ -25,3 +25,19 @@ def obtener_detalles_clase(id_clase: int, cursor) -> dict:
         WHERE c.id = {id_clase}
     """
     return ejecutar_fetchone(query, cursor)
+
+def consultar_reservas_instancias_por_clase(id_clase: int, cursor) -> dict:
+    """Hace una consulta que devuelve la cantidad de reservas por instancia de clase.
+       Devuelve una fila por cada instancia_clase de la clase indicada con su conteo de reservas."""
+    query = f"""
+        SELECT c.id AS clase_id,
+               ic.id AS inst_clase_id,
+               COUNT(r.id) AS cantidad_reservas
+        FROM Clase c
+            INNER JOIN Instancia_Clase ic ON c.id = ic.clase_id
+            LEFT JOIN Reserva r ON ic.id = r.inst_clase_id
+        WHERE c.id = {id_clase}
+        GROUP BY c.id, ic.id
+    """
+
+    return ejecutar_fetchall(query, cursor)
