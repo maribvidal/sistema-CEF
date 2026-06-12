@@ -1,4 +1,5 @@
 from datetime import datetime
+from back.db.operaciones.listas_espera.consultar_db import consultar_lista_espera_individual, consultar_lista_espera_abonado
 from db.operaciones.usuarios.consultar_db import obtener_usuario_esta_en_instancia_clase
 from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
@@ -15,9 +16,11 @@ from db.operaciones.instancias_clases.consultar_db import consultar_instancia_cl
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
 from db.operaciones.listas_espera import anotarse_lista_abonados, anotarse_lista_publico_general
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
-from db.operaciones.listas_espera import consultar_lista_espera_por_usuario_clase, borrar_lista_espera
+from db.operaciones.listas_espera import borrar_lista_espera
 from utils.modulo_fechas import generar_fecha_actual, validar_fecha
 from utils.modulo_manejo_listas import revisar_si_hay_cupos
+from db.operaciones.clases import *
+from utils.modulo_fechas import validar_dia_fecha
 from enums.dias import Dias
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
@@ -325,22 +328,26 @@ def registrar_asistencia_clase_service(id_clase, id_usuario):
     cursor = conectarse_db()
     
     # verificar existencia de usuario
-
     respuesta = consultar_usuario_por_id(id_usuario, cursor)
     control = _controlar_errores_query(respuesta, 400, "No se encontró el usuario.", 401, cursor)
     if control is not None:
         return control
 
     # verificar existencia de clase
-
     respuesta = consultar_clase_por_id(id_clase, cursor)
     control = _controlar_errores_query(respuesta, 402, "No se encontró la clase.", 403, cursor)
     if control is not None:
         return control
 
-    # verificar que el usuario este en una lista de espera a la clase
+    # validar si el usuario es abonado o individual
+    es_abonado = verificar_usuario_abonado(cursor, id_usuario)
 
-    respuesta = consultar_lista_espera_por_usuario_clase(id_usuario, id_clase, cursor)
+    # validar que el usuario este en una lista de espera correspondiente
+    if es_abonado:
+        respuesta = consultar_lista_espera_abonado(id_usuario, id_clase, cursor)
+    else:
+        respuesta = consultar_lista_espera_individual(id_usuario, id_clase, cursor)
+        
     control = _controlar_errores_query(respuesta, 404, "El usuario no tiene una inscripción en la lista de espera para esta clase.", 405, cursor)
     if control is not None:
         return control
@@ -380,9 +387,15 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
     if control is not None:
         return control
 
-    # verificar que el usuario este en una lista de espera a la clase
+    # validar si el usuario es abonado o individual
+    es_abonado = verificar_usuario_abonado(cursor, id_usuario)
 
-    respuesta = consultar_lista_espera_por_usuario_clase(id_usuario, id_clase, cursor)
+    # validar que el usuario este en una lista de espera correspondiente
+    if es_abonado:
+        respuesta = consultar_lista_espera_abonado(id_usuario, id_clase, cursor)
+    else:
+        respuesta = consultar_lista_espera_individual(id_usuario, id_clase, cursor)
+        
     control = _controlar_errores_query(respuesta, 404, "El usuario no tiene una inscripción en la lista de espera para esta clase.", 405, cursor)
     if control is not None:
         return control
