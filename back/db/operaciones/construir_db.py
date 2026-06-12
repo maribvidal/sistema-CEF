@@ -50,6 +50,9 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_mensualidad(cursor) # necesita Usuario
     construir_tabla_imagenes(cursor)
     construir_tabla_instancia_clase(cursor)
+    construir_tabla_lista_espera_abonados(cursor)   # necesita Clase
+    construir_tabla_lista_espera_individual(cursor) # necesita Instancia_Clase
+    construir_tabla_asistencias_clase(cursor)       # necesita Usuario e Instancia_Clase
 
     # Construir tablas para las relaciones
     construir_tabla_usuario_tener_descuento(cursor)
@@ -198,11 +201,11 @@ def construir_tabla_lista_espera_abonados(cursor: sqlite.Cursor):
                             id         INTEGER PRIMARY KEY,
                             fecha         DATETIME NOT NULL,
                             usuario_id INTEGER NOT NULL,
-                            inst_clase_id   INTEGER NOT NULL,
+                            clase_id   INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
-                            FOREIGN KEY (inst_clase_id) REFERENCES Instancia_Clase(id)
+                            FOREIGN KEY (clase_id) REFERENCES Clase(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
@@ -235,8 +238,6 @@ def construir_tabla_asistencias_clase(cursor: sqlite.Cursor):
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
-    
-
 
 def construir_tabla_pago(cursor: sqlite.Cursor):
     """Construye la tabla Pago"""

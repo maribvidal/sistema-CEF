@@ -16,7 +16,7 @@ from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clas
 from db.operaciones.listas_espera import anotarse_lista_abonados, anotarse_lista_publico_general
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera import consultar_lista_espera_por_usuario_clase, borrar_lista_espera
-from db.modulo_fechas import generar_fecha_actual, validar_fecha
+from utils.modulo_fechas import generar_fecha_actual, validar_fecha
 from enums.dias import Dias
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper

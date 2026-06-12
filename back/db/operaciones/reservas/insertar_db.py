@@ -1,5 +1,5 @@
 from db.operaciones.exception_handler import ejecutar_insertar
-from db.modulo_fechas import generar_fecha_actual
+from utils.modulo_fechas import generar_fecha_actual
 
 def insertar_reserva(usuario_id: int, inst_clase_id: int, cursor):
     """ Permite insertar una reserva de parte de un usuario a

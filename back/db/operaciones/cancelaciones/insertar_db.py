@@ -1,5 +1,5 @@
 from db.operaciones.exception_handler import ejecutar_insertar
-from db.modulo_fechas import generar_fecha_actual
+from utils.modulo_fechas import generar_fecha_actual
 
 def insertar_cancelacion(usuario_id, inst_clase_id, cursor):
     """Operación que permite insertar una cancelación."""

@@ -140,10 +140,8 @@ def anotarse_lista_espera(id_clase):
 
 # Estos dos endpoints serian confirmar asistencia individual y abonado
 
-
 # pienso que la difenrencia que es que al confirmar al individual se le redirija a pagar lo maneja directamente el front, si no tiene los datos para ese punto que haga un 
 # llamado al back confirmando si es o no abonado y luego que mande a otro endpoint para el pago
-
 
 # - Escenario 1:
 @clases_bp.route("/clases/<int:id_clase>/confirmar_asistencia", methods=["POST"])
@@ -174,5 +172,3 @@ def rechazar_asistencia_clase(id_clase):
     respuesta, status = rechazar_asistencia_clase_service(id_clase, id_usuario)
     
     return jsonify(respuesta), status
-
-
