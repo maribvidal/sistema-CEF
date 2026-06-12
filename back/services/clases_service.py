@@ -1,5 +1,5 @@
 from datetime import datetime
-from back.db.operaciones.listas_espera.consultar_db import consultar_lista_espera_individual, consultar_lista_espera_abonado
+from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_individual, consultar_lista_espera_abonado
 from db.operaciones.usuarios.consultar_db import obtener_usuario_esta_en_instancia_clase
 from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
@@ -308,8 +308,7 @@ def anotarse_lista_espera_service(id_clase, id_usuario):
     _controlar_errores_query(respuesta, 400, "No se encontró el usuario.", 401, cursor)
     
     # verificar si el usuario abonó
-    esAbonado = verificar_usuario_abonado(cursor, id_usuario)
-    tipo = None
+    esAbonado = verificar_usuario_abonado(cursor, id_usuario, id_clase)
     
     if esAbonado:
         respuesta = anotarse_lista_abonados(id_usuario, id_clase, cursor)
@@ -340,7 +339,7 @@ def registrar_asistencia_clase_service(id_clase, id_usuario):
         return control
 
     # validar si el usuario es abonado o individual
-    es_abonado = verificar_usuario_abonado(cursor, id_usuario)
+    es_abonado = verificar_usuario_abonado(cursor, id_usuario, id_clase)
 
     # validar que el usuario este en una lista de espera correspondiente
     if es_abonado:
@@ -388,7 +387,7 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
         return control
 
     # validar si el usuario es abonado o individual
-    es_abonado = verificar_usuario_abonado(cursor, id_usuario)
+    es_abonado = verificar_usuario_abonado(cursor, id_usuario, id_clase)
 
     # validar que el usuario este en una lista de espera correspondiente
     if es_abonado:
@@ -401,8 +400,7 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
         return control
 
     # Rechazar asistencia
-    # esto pensarlo bien, por el momento lo que voy a hacer es borrarlo de la lista de espera y avisar al siguiente de la lista.
-    
+    # esto pensarlo bien, por el momento lo que voy a hacer es borrarlo de la lista de espera.
     respuesta = borrar_lista_espera(id_usuario, id_clase, cursor)
     if respuesta["status"] == 'error':
         cursor.connection.close()

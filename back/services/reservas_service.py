@@ -1,4 +1,4 @@
-from back.db.operaciones.reservas.insertar_db import confirmar_reserva_individual, confirmar_reserva_abonado
+from db.operaciones.reservas.insertar_db import confirmar_reserva_individual, confirmar_reserva_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
 from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_abonado, consultar_lista_espera_individual
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
@@ -85,7 +85,7 @@ def confirmar_reserva_service(id_clase, id_usuario):
         }, 404
     
     # validar si el usuario es abonado o individual
-    es_abonado = verificar_usuario_abonado(cursor, id_usuario)
+    es_abonado = verificar_usuario_abonado(cursor, id_usuario, id_clase) # <- repensar porque puede que tenga una mensualidad distinta a la que requiere la clase o que no este vigente
 
     # validar que el usuario este en una lista de espera correspondiente
     if es_abonado:
