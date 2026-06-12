@@ -1,6 +1,7 @@
 from db.operaciones.clases.consultar_db import consultar_clase_por_id, obtener_detalles_clase
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.listas_espera.consultar_db import obtener_siguiente_usuario_abonado, obtener_siguiente_usuario_individual
+from utils.envio_mails import enviar_mail
 
 def notificar_siguiente_service(id_clase: int)-> tuple:
     """Service que permite notificar al siguiente usuario en la lista de espera de una clase."""
@@ -41,14 +42,13 @@ def notificar_siguiente_service(id_clase: int)-> tuple:
             }, 500
 
     if usuario["data"] is not None:
-        
-        # notificar usuario por correo electrónico
         correo_usuario = usuario["data"]["correo"]
         mensaje = f"""
             Se ha liberado un cupo para la clase de '{res_clase['data']['nombre']}' el día {res_clase['data']['fecha']} a las {res_clase['data']['hora']}. 
             
             Para confirmar su reserva haga click aquí: http://localhost:5173/ConfirmarReserva?correo={correo_usuario}&clase_id={id_clase}
         """
+        enviar_mail(correo_usuario, mensaje)
 
     return {
         "message": "Notificacion enviada."

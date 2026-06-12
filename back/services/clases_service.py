@@ -301,12 +301,10 @@ def anotarse_lista_espera_service(id_clase, id_usuario):
     cursor = conectarse_db()
     
     # verificar existencia de usuario
-
     respuesta = consultar_usuario_por_id(id_usuario, cursor)
     _controlar_errores_query(respuesta, 400, "No se encontró el usuario.", 401, cursor)
     
     # verificar si el usuario abonó
-
     esAbonado = verificar_usuario_abonado(cursor, id_usuario)
     tipo = None
     
