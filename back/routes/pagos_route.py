@@ -50,3 +50,9 @@ def recibir_webhook_qr():
     respuesta, status = actualizar_estado_pago_service(id_pago, estado_pago)
     
     return respuesta, status
+
+@pagos_bp.route("/pagos/estado/<int:id_pago>", methods=["GET"])
+def obtener_estado_pago(id_pago):
+    respuesta, status = obtener_estado_pago_service(id_pago)
+    
+    return jsonify(respuesta), status

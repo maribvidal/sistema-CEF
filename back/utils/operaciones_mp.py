@@ -2,7 +2,7 @@ from os import getenv
 
 import requests
 
-api_vendedor = getenv("Access_Token")
+Access_Token = getenv("Access_Token")
 
 external_codes = {
     "mensualidad": "MENSUALIDAD",

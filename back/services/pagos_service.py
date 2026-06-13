@@ -1,6 +1,4 @@
-from back.db.operaciones.pagos.consultar_db import verificar_existencia_pago_por_id
-from back.db.operaciones.pagos.modificar_db import actualizar_estado_pago
-from db.operaciones.pagos.insertar_db import insertar_pago
+from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
 from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp
 from db.operaciones import listar_pagos
 from db.operaciones.conectar_db import conectarse_db
@@ -98,4 +96,40 @@ def actualizar_estado_pago_service(id_pago, estado):
     
     return {
         "message": f"Estado del pago con id {id_pago} actualizado a {estado}."
+    }, 200
+    
+def obtener_estado_pago_service(id_pago):
+    cursor = conectarse_db()
+    
+    # verificar que el pago exista
+    verificacion = verificar_existencia_pago_por_id(id_pago, cursor)
+    
+    if verificacion['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al verificar la existencia del pago.",
+            "message": verificacion['message']
+        }, 500
+        
+    if verificacion['status'] == 'success' and not verificacion['data']:
+        cursor.connection.close()
+        return {
+            "error": f"No se encontró un pago con el id {id_pago}."
+        }, 400
+    
+    # obtener datos de la orden de pago desde MercadoPago
+    estado = verificar_estado_pago_por_id(id_pago, cursor)
+    
+    if estado['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al consultar los datos de la orden de pago en MercadoPago.",
+            "message": estado['message']
+        }, 500
+    
+    cursor.connection.close()
+    
+    return {
+        "message": "Datos de la orden de pago obtenidos exitosamente.",
+        "data": estado['data']
     }, 200
