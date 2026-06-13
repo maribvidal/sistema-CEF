@@ -10,7 +10,7 @@ def obtener_pagos():
     
     return jsonify(respuesta), status
 
-# para hacer el pago primero llaman desde el front para obtener el qr y luego llaman para crear la orden de pago y luego preguntan por el estado del pago
+# para hacer el pago primero llaman desde el front para obtener el qr y luego llaman para crear la orden de pago y luego preguntan por el estado del pago hasta que cambie de created
 @pagos_bp.route("/pagos/obtenerQR", methods=["GET"])
 def obtener_qr_mp():
     import os
@@ -41,8 +41,6 @@ def crear_pago():
 @pagos_bp.route("/webhook/qr", methods=["POST"])
 def recibir_webhook_qr():
     data = request.json
-    # Verificar topic, ID de la orden, estado 
-    # Actualizar el pago en tu base de datos según la orden recibida
     
     id_pago = data['data']['external_reference']
     estado_pago = data['data']['status']
