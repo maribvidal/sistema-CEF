@@ -2,7 +2,7 @@ from os import getenv
 
 import requests
 
-api_vendedor = getenv("API_VENDEDOR")
+api_vendedor = getenv("Access_Token")
 
 external_codes = {
     "mensualidad": "MENSUALIDAD",
@@ -132,7 +132,7 @@ discounts = {
 # luego actualizas el estado del pago segun la consulta de la orden, cualquier cosa se elimina el pago si hay algun fallo
 def crear_orden_qr_mp(external_reference, total_amount, description, datos_item):
     url = 'https://api.mercadopago.com/v1/orders'
-    headers = {'Authorization': f'Bearer {api_vendedor}'}
+    headers = {'Authorization': f'Bearer {Access_Token}'}
 
     respuesta = requests.post(url, headers=headers)
 
@@ -249,8 +249,101 @@ def crear_orden_qr_mp(external_reference, total_amount, description, datos_item)
 # esto no se utilizaria, de todas formas lo dejo por las dudas pero se notifica con webhooks y el front es el que hace el loop y pregunta al back por el estado del pago
 def consultar_datos_orden_qr_mp(id_orden):
     url = f'https://api.mercadopago.com/v1/orders/{id_orden}'
-    headers = {'Authorization': f'Bearer {api_vendedor}'}
+    headers = {'Authorization': f'Bearer {Access_Token}'}
     respuesta = requests.get(url, headers=headers)
     return respuesta.json()
 
 # mirar posibles estados del order para despues controlarlo.
+
+# creacion de cajas y sucursales. solo se ejecuta una vez.
+def crear_caja_mp():
+    url = 'https://api.mercadopago.com/pos'
+    headers = {'Authorization': f'Bearer {Access_Token}'}
+
+    # Para una petición GET
+    respuesta = requests.post(url, headers=headers)
+
+    # Para una petición POST con JSON
+    datos = {
+    "name": "First POS",
+    "fixed_amount": True,
+    "store_id": 83558234,
+    "external_store_id": "sucursal-la-plata-001",
+    "external_id": "CAJA001"
+    }
+
+    respuesta = requests.post(url, json=datos, headers=headers)
+
+    print(respuesta.json())
+    
+def crear_sucursal_mp():
+    usr_id = getenv("User_ID")
+
+    url = f'https://api.mercadopago.com/users/{usr_id}/stores'
+    headers = {'Authorization': f'Bearer {Access_Token}'}
+
+    # Para una petición GET
+    respuesta = requests.post(url, headers=headers)
+
+    # Para una petición POST con JSON
+    datos = {
+    "name": "Sucursal Instore",
+    "business_hours": {
+        "monday": [
+        {
+            "open": "08:00",
+            "close": "17:00"
+        }
+        ],
+        "tuesday": [
+        {
+            "open": "08:00",
+            "close": "17:00"
+        }
+        ],
+        "wednesday": [
+        {
+            "open": "08:00",
+            "close": "17:00"
+        }
+        ],
+        "thursday": [
+        {
+            "open": "08:00",
+            "close": "17:00"
+        }
+        ],
+        "friday": [
+        {
+            "open": "08:00",
+            "close": "17:00"
+        }
+        ],
+        "saturday": [
+        {
+            "open": "08:00",
+            "close": "12:00"
+        }
+        ],
+        "sunday": [
+        {
+            "open": "08:00",
+            "close": "12:00"
+        }
+        ]
+    },
+    "external_id": "sucursal-la-plata-001",
+    "location": {
+        "street_number": "742",
+        "street_name": "Calle 12",
+        "city_name": "La Plata",
+        "state_name": "Buenos Aires",
+        "latitude": -34.92145,
+        "longitude": -57.95453,
+        "reference": "Zona céntrica de La Plata, cerca de Plaza Moreno."
+    }
+    }
+
+    respuesta = requests.post(url, json=datos, headers=headers)
+
+    print(respuesta.json())
