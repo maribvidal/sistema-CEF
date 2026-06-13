@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from services.mensualidad_service import configurar_fin_mensualidad_service
 
 mensualidad_bp = Blueprint('mensualidad', __name__)
@@ -14,4 +14,4 @@ def configurar_fin_mensualidad():
     
     respuesta, status = configurar_fin_mensualidad_service(dni_cliente, mensualidad_id, fecha_fin)
     
-    return {"message": "Fin de mensualidad configurado correctamente"}, 200
+    return jsonify(respuesta), status

@@ -1,5 +1,52 @@
 import requests
 
+external_codes = {
+    "mensualidad": "MENSUALIDAD",
+    "clase_particular": "CLASE-PARTICULAR"
+}
+
+def getExternalCode(nombre, id):
+    return external_codes[nombre] + "-" + str(id)
+
+# puse valores randoms
+items= {
+  "mensualidad": {
+    "title": "Mensualidad",
+    "unit_price": 10000.00,
+    "quantity": 1,
+    "unit_measure": "unit",
+    "external_categories": [
+      {"id": "gym-membership"}
+    ]
+  },
+  "clase_particular": {
+    "title": "Clase particular",
+    "unit_price": 2000.00,
+    "quantity": 1,
+    "unit_measure": "unit",
+    "external_categories": [
+      {"id": "personal-training"}
+    ]
+  }
+}
+
+def getItem(nombre, id):
+    if nombre in items:
+        item = items[nombre]
+        item["external_code"] = getExternalCode(nombre, id)
+        return item
+    return None
+
+# esto habria que agregarlo cualquier cosa para los descuentos
+discounts = {
+    "payment_methods": [
+        {
+            "new_total_amount": "47.28",
+            "type": "account_money"
+        }
+    ]
+}
+
 # External_reference:
 # 	Es la referencia externa de la order, asignada al momento de la creación. El límite máximo permitido es de 64 caracteres y los permitidos son: letras mayúsculas y minúsculas,
 # números y los símbolos guion (-) y guion bajo (_). El campo no puede utilizarse para enviar datos PII. Además, este valor debe ser único para cada order, 
@@ -76,55 +123,57 @@ import requests
 #        ]
 #    }
 # }
-def crear_orden_qr_mp(external_reference, total_amount, description):
+
+# idea: crear un pago antes de generar el orden con estado "pending" y obtenes su id, pasas el id como external reference
+# luego actualizas el estado del pago segun la consulta de la orden, cualquier cosa se elimina el pago si hay algun fallo
+def crear_orden_qr_mp(external_reference, total_amount, description, datos_item):
     url = 'https://api.mercadopago.com/v1/orders'
     headers = {'Authorization': 'Bearer APP_USR-786188901526033-061219-7f8ea4f40999726883d4f645034a3020-3470890874'}
 
     respuesta = requests.post(url, headers=headers)
 
+    if "nombre" not in datos_item or "id" not in datos_item:
+        return {
+            "status": "error",
+            "message": "Datos del item incompletos. Se requiere 'nombre' e 'id'."
+        }
+        
+    if datos_item["id"] is None:
+        return {
+            "status": "error",
+            "message": "El ID del item es requerido."
+        }
+
+    item = getItem(datos_item["nombre"], datos_item["id"])
+
+    if item is None:
+        return {
+            "status": "error",
+            "message": f"Item con nombre '{datos_item['nombre']}' no encontrado."
+        }
 
     datos = {
-    "type": "qr",
-    "total_amount": total_amount,
-    "description": description,
-    "external_reference": external_reference,
-    "expiration_time": "PT16M",
-    "config": {
-    "qr": {
-        "external_pos_id": "CAJA001",
-        "mode": "static"
-    }
-    },
-    "transactions": {
-    "payments": [
-        {
-        "amount": "50.00"
-        }
-    ]
-    },
-    "items": [
-    {
-        "title": "Smartphone",
-        "unit_price": "50.00",
-        "quantity": 1,
-        "unit_measure": "kg",
-        "external_code": "777489134",
-        "external_categories": [
-        {
-            "id": "device"
-        }
+        "type": "qr",
+        "total_amount": total_amount,
+        "description": description,
+        "external_reference": external_reference,
+        "expiration_time": "PT16M",
+        "config": {
+            "qr": {
+                "external_pos_id": "CAJA001",
+                "mode": "static"
+            }
+        },
+        "transactions": {
+            "payments": [
+                {
+                "amount": total_amount
+                }
+            ]
+        },
+        "items": [
+            item
         ]
-    }
-    ],
-    "discounts": {
-    "payment_methods": [
-        {
-        "new_total_amount": "47.28",
-        "type": "account_money"
-
-        }
-        ]
-    }
     }
     respuesta = requests.post(url, json=datos, headers=headers)
 
@@ -192,6 +241,8 @@ def crear_orden_qr_mp(external_reference, total_amount, description):
 #        ]
 #    }
 # }
+
+# esto no se utilizaria, de todas formas lo dejo por las dudas pero se notifica con webhooks y el front es el que hace el loop y pregunta al back por el estado del pago
 def consultar_datos_orden_qr_mp(id_orden):
     url = f'https://api.mercadopago.com/v1/orders/{id_orden}'
     headers = {'Authorization': 'Bearer APP_USR-786188901526033-061219-7f8ea4f40999726883d4f645034a3020-3470890874'}
