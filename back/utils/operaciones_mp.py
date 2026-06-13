@@ -1,4 +1,8 @@
+from os import getenv
+
 import requests
+
+api_vendedor = getenv("API_VENDEDOR")
 
 external_codes = {
     "mensualidad": "MENSUALIDAD",
@@ -128,7 +132,7 @@ discounts = {
 # luego actualizas el estado del pago segun la consulta de la orden, cualquier cosa se elimina el pago si hay algun fallo
 def crear_orden_qr_mp(external_reference, total_amount, description, datos_item):
     url = 'https://api.mercadopago.com/v1/orders'
-    headers = {'Authorization': 'Bearer APP_USR-786188901526033-061219-7f8ea4f40999726883d4f645034a3020-3470890874'}
+    headers = {'Authorization': f'Bearer {api_vendedor}'}
 
     respuesta = requests.post(url, headers=headers)
 
@@ -245,7 +249,7 @@ def crear_orden_qr_mp(external_reference, total_amount, description, datos_item)
 # esto no se utilizaria, de todas formas lo dejo por las dudas pero se notifica con webhooks y el front es el que hace el loop y pregunta al back por el estado del pago
 def consultar_datos_orden_qr_mp(id_orden):
     url = f'https://api.mercadopago.com/v1/orders/{id_orden}'
-    headers = {'Authorization': 'Bearer APP_USR-786188901526033-061219-7f8ea4f40999726883d4f645034a3020-3470890874'}
+    headers = {'Authorization': f'Bearer {api_vendedor}'}
     respuesta = requests.get(url, headers=headers)
     return respuesta.json()
 
