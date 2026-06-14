@@ -46,7 +46,7 @@ def obtener_lista_espera_abonados_por_id_clase(id_clase: int, cursor):
     """Operaión que obtiene una lista de espera de abonados por el
         id de la clase a la cual está asociada."""
     query = f"""
-        SELECT *
+        SELECT id
         FROM Lista_Espera_Abonados
         WHERE clase_id = {id_clase};
     """
@@ -66,7 +66,7 @@ def obtener_lista_espera_individual_por_id_ins_clase(id_ins_clase: int, cursor):
     """Operaión que obtiene una lista de espera individual por el
         id de la instancia de la clase a la cual está asociada."""
     query = f"""
-        SELECT *
+        SELECT id
         FROM Lista_Espera_Individual
         WHERE inst_clase_id = {id_ins_clase};
     """
