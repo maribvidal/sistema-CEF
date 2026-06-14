@@ -201,7 +201,6 @@ def construir_tabla_lista_espera_abonados(cursor: sqlite.Cursor):
     """Construye la tabla Lista_Espera_Abonados"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Lista_Espera_Abonados (
                             id         INTEGER PRIMARY KEY,
-                            fecha         DATETIME NOT NULL,
                             clase_id   INTEGER NOT NULL,
                             FOREIGN KEY (clase_id) REFERENCES Clase(id)
                                         ON UPDATE CASCADE
@@ -226,7 +225,6 @@ def construir_tabla_lista_espera_individual(cursor: sqlite.Cursor):
     """Construye la tabla Lista_Espera_Individual"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Lista_Espera_Individual (
                             id         INTEGER PRIMARY KEY,
-                            fecha         DATETIME NOT NULL,
                             inst_clase_id   INTEGER NOT NULL,
                             FOREIGN KEY (inst_clase_id) REFERENCES Instancia_Clase(id)
                                         ON UPDATE CASCADE
