@@ -41,3 +41,43 @@ def obtener_siguiente_usuario_individual(id_clase: int, cursor):
         LIMIT 1
     """
     return ejecutar_fetchone(query, cursor);
+
+def obtener_lista_espera_abonados_por_id_clase(id_clase: int, cursor):
+    """Operaión que obtiene una lista de espera de abonados por el
+        id de la clase a la cual está asociada."""
+    query = f"""
+        SELECT *
+        FROM Lista_Espera_Abonados
+        WHERE clase_id = {id_clase};
+    """
+    return ejecutar_fetchone(query, cursor)
+
+def obtener_usuarios_lista_espera_abonados(id_lea: int, cursor):
+    """Operación que obtiene todos los usuarios que pertenecen a
+        una lista de espera de abonados. Requiere el id de esta."""
+    query = f"""
+        SELECT *
+        FROM Usuario_Pertenece_Lista_Espera_Abonados
+        WHERE lea_id = {id_lea};
+    """
+    return ejecutar_fetchall(query, cursor)
+
+def obtener_lista_espera_individual_por_id_ins_clase(id_ins_clase: int, cursor):
+    """Operaión que obtiene una lista de espera individual por el
+        id de la instancia de la clase a la cual está asociada."""
+    query = f"""
+        SELECT *
+        FROM Lista_Espera_Individual
+        WHERE inst_clase_id = {id_ins_clase};
+    """
+    return ejecutar_fetchone(query, cursor)
+
+def obtener_usuarios_lista_espera_individual(id_lei: int, cursor):
+    """Operación que obtiene todos los usuarios que pertenecen a
+        una lista de espera individual. Requiere el id de esta."""
+    query = f"""
+        SELECT *
+        FROM Usuario_Pertenece_Lista_Espera_Individual
+        WHERE lei_id = {id_lei};
+    """
+    return ejecutar_fetchall(query, cursor)
