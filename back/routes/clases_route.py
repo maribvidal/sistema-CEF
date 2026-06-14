@@ -173,9 +173,3 @@ def rechazar_asistencia_clase(id_clase):
     respuesta, status = rechazar_asistencia_clase_service(id_clase, id_usuario)
     
     return jsonify(respuesta), status
-
-@clases_bp.route("/clases/teste", methods=["GET"])
-def endpo_test():
-    respuesta, status = test_cl_service()
-
-    return jsonify(respuesta), status

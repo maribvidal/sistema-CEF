@@ -17,7 +17,7 @@ from db.operaciones.listas_espera import anotarse_lista_abonados, anotarse_lista
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera import consultar_lista_espera_por_usuario_clase, borrar_lista_espera
 from utils.modulo_fechas import generar_fecha_actual, validar_fecha
-from utils.modulo_manejo_listas import revisar_si_hay_cupos
+from utils.modulo_manejo_listas import manejar_listas_de_espera_por_clase
 from enums.dias import Dias
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
@@ -401,8 +401,3 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
         
     cursor.connection.commit()
     return _msj_exito_helper("Asistencia rechazada con éxito.", cursor)
-
-def test_cl_service():
-    cursor = conectarse_db()
-    print(revisar_si_hay_cupos(1, cursor))
-    return _msj_exito_helper("10 puntos maestro", cursor), 200
