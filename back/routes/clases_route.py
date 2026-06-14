@@ -134,7 +134,7 @@ def anotarse_lista_espera(id_clase):
 
     id_usuario = data.get("id_usuario")
 
-    # respuesta, status = anotarse_lista_espera_service(id_clase, id_usuario)
+    respuesta, status = anotarse_lista_espera_service(id_clase, id_usuario)
     
     return jsonify(respuesta), status
 

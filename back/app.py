@@ -5,6 +5,14 @@ from db.operaciones.construir_db import reconstruir_db
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.seed_db import insertar_datos
 from routes import *
+import ngrok
+from dotenv import load_dotenv
+ 
+load_dotenv()
+
+def connect_ngrok():
+    forwarder = ngrok.forward("localhost:5000", authtoken_from_env=True)
+    print(f"Available at: {forwarder.url()}")
 
 def create_app(testing=False, db_name="database.db"):
     
@@ -31,6 +39,8 @@ def create_app(testing=False, db_name="database.db"):
     app.register_blueprint(permisos_bp)
     app.register_blueprint(reservas_bp)
     app.register_blueprint(metricas_bp)
+    app.register_blueprint(notificaciones_bp)
+    app.register_blueprint(mensualidad_bp)
 
     if not app.testing:
         cursor = conectarse_db()
@@ -39,6 +49,8 @@ def create_app(testing=False, db_name="database.db"):
 
     return app
 
+# puse el debug en false porq me tiraba error el ngrok
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True)
+    connect_ngrok()
+    app.run(debug=False)

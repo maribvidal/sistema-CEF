@@ -250,6 +250,7 @@ def construir_tabla_asistencias_clase(cursor: sqlite.Cursor):
     cursor.execute("""CREATE TABLE IF NOT EXISTS Asistencias_Clase (
                             id         INTEGER PRIMARY KEY,
                             usuario_id INTEGER NOT NULL,
+                            con_mensualidad BOOLEAN NOT NULL,
                             inst_clase_id   INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
@@ -266,6 +267,8 @@ def construir_tabla_pago(cursor: sqlite.Cursor):
                             monto      REAL,
                             fecha     DATE,
                             usuario_id INTEGER NOT NULL,
+                            estado      VARCHAR(20) NOT NULL,
+                            mp_order_id VARCHAR(75) UNIQUE,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL

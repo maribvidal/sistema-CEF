@@ -8,6 +8,6 @@ def borrar_lista_espera(id_usuario: int, id_clase: int, cursor):
         WHERE usuario_id = {id_usuario} AND inst_clase_id = {id_clase};
 
         DELETE FROM Lista_Espera_Abonados
-        WHERE usuario_id = {id_usuario} AND inst_clase_id = {id_clase};
+        WHERE usuario_id = {id_usuario} AND clase_id = {id_clase};
     """
     return ejecutar_query(query, cursor)

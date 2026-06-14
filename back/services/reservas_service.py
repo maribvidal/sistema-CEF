@@ -1,10 +1,11 @@
+from db.operaciones.reservas.insertar_db import confirmar_reserva_individual, confirmar_reserva_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
-from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_por_usuario_clase
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id
+from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_abonado, consultar_lista_espera_individual
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.reservas.consultar_db import consultar_reserva_por_id
 from db.operaciones.cancelaciones.insertar_db import insertar_cancelacion
-from db.operaciones.reservas.borrar_db import borrar_reserva
+from db.operaciones.reservas import borrar_reserva
 
 def _msj_error_helper(razon: str, cursor):
     cursor.connection.close()
@@ -45,7 +46,7 @@ def cancelar_reserva_service(reserva_id):
     id_ins_clase = res_reserva["data"]["inst_clase_id"]
     res_ins_cancelacion = insertar_cancelacion(id_usuario, id_ins_clase, cursor)
     if res_ins_cancelacion['status'] == 'error':
-        return _msj_error_helper(res_ins_cancelacion['message']), 402
+        return _msj_error_helper(res_ins_cancelacion['message'], cursor), 402
     
     cursor.connection.commit()
     
@@ -83,8 +84,15 @@ def confirmar_reserva_service(id_clase, id_usuario):
             "error": "No se encontró la clase."
         }, 404
     
-    # validar que el usuario este en una lista de espera para esa instancia de clase
-    validacion_lista_espera = consultar_lista_espera_por_usuario_clase(id_usuario, id_clase, cursor)
+    # validar si el usuario es abonado o individual
+    es_abonado = verificar_usuario_abonado(cursor, id_usuario, id_clase) # <- repensar porque puede que tenga una mensualidad distinta a la que requiere la clase o que no este vigente
+
+    # validar que el usuario este en una lista de espera correspondiente
+    if es_abonado:
+        validacion_lista_espera = consultar_lista_espera_abonado(id_usuario, id_clase, cursor)
+    else:
+        validacion_lista_espera = consultar_lista_espera_individual(id_usuario, id_clase, cursor)
+    
     if validacion_lista_espera["status"] == 'error':
         cursor.connection.close()
         return {
@@ -97,8 +105,12 @@ def confirmar_reserva_service(id_clase, id_usuario):
             "error": "El usuario no se encuentra en una lista de espera para esta clase."
         }, 404
         
-    # confirmar reserva (pasa de estar en la lista de espera a estar en las reservas de la instancia de clase)
-    confirmacion = confirmar_reserva(id_usuario, id_clase, cursor)
+    if es_abonado:
+        # confirmar reserva (pasa de estar en la lista de espera a estar en las reservas de la instancia de clase)
+        confirmacion = confirmar_reserva_abonado(id_usuario, id_clase, cursor)
+    else:
+        # confirmar reserva (pasa de estar en la lista de espera a estar en las reservas de la instancia de clase)
+        confirmacion = confirmar_reserva_individual(id_usuario, id_clase, cursor)
     
     if confirmacion["status"] == 'error':
         cursor.connection.close()

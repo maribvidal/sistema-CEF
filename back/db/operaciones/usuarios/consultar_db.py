@@ -71,12 +71,22 @@ def listar_dnis_usuarios(cursor) -> dict:
     query = "SELECT dni FROM Usuario WHERE rol_id = 3"
     return ejecutar_fetchall(query, cursor)
 
-def verificar_usuario_abonado(cursor, id_usuario: int) -> bool:
+def verificar_usuario_abonado(cursor, id_usuario: int, id_clase: int) -> bool:
     """Hace una consulta para verificar si un usuario es abonado o no."""
     query = f"""
-        SELECT *
+        SELECT 1
         FROM Usuario
         INNER JOIN Mensualidad m ON Usuario.id = m.usuario_id
-        WHERE Usuario.id = {id_usuario};"""
+        WHERE Usuario.id = {id_usuario} AND DATE('now') BETWEEN (m.fecha_inicio AND m.fecha_fin) AND m.clase_id = {id_clase}"""
+    resultado = ejecutar_fetchone(query, cursor)
+    return resultado is not None
+
+def verificar_usuario_tiene_mensualidad(id_usuario: int, id_mensualidad: int, cursor) -> bool:
+    """Hace una consulta para verificar si un usuario tiene una mensualidad vigente o no."""
+    query = f"""
+        SELECT 1
+        FROM Usuario
+        INNER JOIN Mensualidad m ON Usuario.id = m.usuario_id
+        WHERE Usuario.id = {id_usuario} AND m.id = {id_mensualidad}"""
     resultado = ejecutar_fetchone(query, cursor)
     return resultado is not None

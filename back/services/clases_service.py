@@ -1,4 +1,5 @@
 from datetime import datetime
+from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_individual, consultar_lista_espera_abonado
 from db.operaciones.usuarios.consultar_db import obtener_usuario_esta_en_instancia_clase
 from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
@@ -299,7 +300,6 @@ def anotarse_lista_espera_service(id_clase, id_usuario):
     cursor = conectarse_db()
     
     # verificar existencia de usuario
-
     respuesta = consultar_usuario_por_id(id_usuario, cursor)
     _controlar_errores_query(respuesta, 400, "No se encontró el usuario.", 401, cursor)
     
@@ -315,14 +315,12 @@ def registrar_asistencia_clase_service(id_clase, id_usuario):
     cursor = conectarse_db()
     
     # verificar existencia de usuario
-
     respuesta = consultar_usuario_por_id(id_usuario, cursor)
     control = _controlar_errores_query(respuesta, 400, "No se encontró el usuario.", 401, cursor)
     if control is not None:
         return control
 
     # verificar existencia de clase
-
     respuesta = consultar_clase_por_id(id_clase, cursor)
     control = _controlar_errores_query(respuesta, 402, "No se encontró la clase.", 403, cursor)
     if control is not None:
@@ -331,7 +329,12 @@ def registrar_asistencia_clase_service(id_clase, id_usuario):
     """
     # verificar que el usuario este en una lista de espera a la clase
 
-    respuesta = consultar_lista_espera_por_usuario_clase(id_usuario, id_clase, cursor)
+    # validar que el usuario este en una lista de espera correspondiente
+    if es_abonado:
+        respuesta = consultar_lista_espera_abonado(id_usuario, id_clase, cursor)
+    else:
+        respuesta = consultar_lista_espera_individual(id_usuario, id_clase, cursor)
+        
     control = _controlar_errores_query(respuesta, 404, "El usuario no tiene una inscripción en la lista de espera para esta clase.", 405, cursor)
     if control is not None:
         return control
@@ -375,14 +378,18 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
     """
     # verificar que el usuario este en una lista de espera a la clase
 
-    respuesta = consultar_lista_espera_por_usuario_clase(id_usuario, id_clase, cursor)
+    # validar que el usuario este en una lista de espera correspondiente
+    if es_abonado:
+        respuesta = consultar_lista_espera_abonado(id_usuario, id_clase, cursor)
+    else:
+        respuesta = consultar_lista_espera_individual(id_usuario, id_clase, cursor)
+        
     control = _controlar_errores_query(respuesta, 404, "El usuario no tiene una inscripción en la lista de espera para esta clase.", 405, cursor)
     if control is not None:
         return control
 
     # Rechazar asistencia
-    # esto pensarlo bien, por el momento lo que voy a hacer es borrarlo de la lista de espera y avisar al siguiente de la lista.
-    
+    # esto pensarlo bien, por el momento lo que voy a hacer es borrarlo de la lista de espera.
     respuesta = borrar_lista_espera(id_usuario, id_clase, cursor)
     if respuesta["status"] == 'error':
         cursor.connection.close()
