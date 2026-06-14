@@ -15,8 +15,8 @@ from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verif
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
+from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
 from utils.modulo_fechas import generar_fecha_actual, validar_fecha
-from utils.modulo_manejo_listas import manejar_listas_de_espera_por_clase
 from enums.dias import Dias
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
@@ -106,8 +106,21 @@ def publicar_clase_service(
         else:
             return _msj_error_helper("La fecha que se recibió no es válida o no cumple con el formato (YYY-mm-dd).", cursor), 413
 
+    # Insertar instancia de clase e listas de esperas
+
+    respuesta = insertar_lista_espera_abonados(clase_id, cursor)
+    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la lista de espera de abonados.", 415, cursor)
+    if control is not None:
+        return control
+
     respuesta = insertar_instancia_clase(clase_id, fecha_actual, cursor)
-    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la instancia de la clase.", 415, cursor)
+    control = _controlar_errores_query(respuesta, 416, "No se pudo insertar la instancia de la clase.", 417, cursor)
+    if control is not None:
+        return control
+    id_ins_clase = respuesta["data"]
+
+    respuesta = insertar_lista_espera_individual(id_ins_clase, cursor)
+    control = _controlar_errores_query(respuesta, 418, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 419, cursor)
     if control is not None:
         return control
 

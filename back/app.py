@@ -45,6 +45,7 @@ def create_app(testing=False, db_name="database.db"):
     if not app.testing:
         cursor = conectarse_db()
         insertar_datos(cursor)
+        cursor.connection.commit()
         cursor.connection.close()
 
     return app

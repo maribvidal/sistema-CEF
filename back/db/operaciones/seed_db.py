@@ -8,6 +8,8 @@ from db.operaciones import insertar_pago, insertar_clase
 from db.operaciones import insertar_pago_pagar_clase
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
 from db.operaciones.reservas.insertar_db import insertar_reserva
+from db.operaciones.usuarios.insertar_db import insertar_usuario_lista_espera_abonados, insertar_usuario_lista_espera_individual
+from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
 
 # necesito insertarle mensualidades con actividades a los usuarios
 def insertar_datos(cursor):  
@@ -48,9 +50,15 @@ def insertar_datos(cursor):
     id_clas = id_clas['data']
     res_inst_clase = insertar_instancia_clase(id_clas, '2026-06-01', cursor)
     
-    # Inscribir usuario a clase
+    # Crear listas de espera para la clase
     inst_clase_id = res_inst_clase['data']
+    id_lea = insertar_lista_espera_abonados(id_clas, cursor)["data"]
+    id_lei = insertar_lista_espera_individual(inst_clase_id, cursor)["data"]
+
+    # Inscribir usuario a clase
     insertar_reserva(1, inst_clase_id, cursor)
+    insertar_usuario_lista_espera_abonados(id_lea, 2, cursor)
+    insertar_usuario_lista_espera_individual(id_lei, 4, cursor)
 
     # Crear pagos
     insertar_pago(50.0, 1, cursor)

@@ -10,7 +10,7 @@ def insertar_usuario_lista_espera_abonados(id_lea: int, id_usuario: int, cursor)
     """Permite insertar a un usuario en una lista de espera de abonados."""
     query = f"""INSERT INTO Usuario_Pertenece_Lista_Espera_Abonados (usuario_id, lea_id)
                                                         VALUES      ({id_usuario}, {id_lea});
-        """
+    """
     return ejecutar_insertar(query, cursor)
 
 def insertar_usuario_lista_espera_individual(id_lei: int, id_usuario: int, cursor):
