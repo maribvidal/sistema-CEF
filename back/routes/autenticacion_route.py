@@ -5,6 +5,7 @@ from db import modulo_qr
 from services.autenticacion_service import login_service
 from services.autenticacion_service import register_service
 from services.usuario_service import registrar_usuario_service
+from services.autenticacion_service import validar_qr_service
 
 autenticacion_bp = Blueprint("autenticacion", __name__)
 
@@ -69,3 +70,16 @@ def generar_qr(id_cliente: int):
         qr,
         mimetype='image/png'
     )
+
+
+# Implementar validar QR, se debe recibir el id de la clase + id_cliente, y se debe validar que el client tenga una reserva para esa clase, y que la clase esté activa, y que la fecha y hora sean correctas. Si todo es correcto, se debe devolver un mensaje de éxito, sino se debe devolver un mensaje de error.
+@autenticacion_bp.route("/clientes/<int:inst_clase_id>/validar_qr", methods=["POST"])
+def validar_qr(inst_clase_id: int):
+    # Aquí se debe implementar la lógica para validar el QR, utilizando el id_cliente y el inst_clase_id para verificar si el client tiene una reserva para esa clase, y si la clase está activa, y si la fecha y hora son correctas.
+    # Si todo es correcto, se debe devolver un mensaje de éxito, sino se debe devolver un mensaje de error.
+    data = request.get_json()
+    id_usuario = data.get("id_usuario")
+
+    respuesta, status = validar_qr_service(inst_clase_id, id_usuario)
+
+    return jsonify(respuesta), status
