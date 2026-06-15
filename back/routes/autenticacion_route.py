@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
+from flask import send_file
 
+from db import modulo_qr
 from services.autenticacion_service import login_service
 from services.autenticacion_service import register_service
 from services.usuario_service import registrar_usuario_service
@@ -55,3 +57,15 @@ def registro():
     )
 
     return jsonify(respuesta), status
+
+
+# Implementar validar QR no es necesario, ya que existe en clases_route una verificación de validar.
+# Hay que ver si se implementa o no el visualizar qr, creo que es mucho mejor el simplemente generarlo por demanda así no ocupa espacio
+@autenticacion_bp.route("/clientes/<int:id_cliente>/qr", methods=["GET"])
+def generar_qr(id_cliente: int):
+    qr = modulo_qr.generar_qr(id_cliente)
+
+    return send_file(
+        qr,
+        mimetype='image/png'
+    )
