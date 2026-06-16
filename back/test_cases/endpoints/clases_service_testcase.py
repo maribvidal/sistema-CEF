@@ -29,8 +29,8 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         ### ESCENARIO 1: Clases listadas con éxito
         # Crear profesores
-        id_prof1 = insertar_profesor("Gero", "Arias", "M", "22224444", self.cursor)["data"]
-        id_prof2 = insertar_profesor("Malena", "Bancos", "F", "23234545", self.cursor)["data"]
+        id_prof1 = insertar_profesor("Gero", "Arias", '542215004012', "M", "22224444", self.cursor)["data"]
+        id_prof2 = insertar_profesor("Malena", "Bancos", '542215004012', "F", "23234545", self.cursor)["data"]
 
         # Crear actividades
         id_act1 = insertar_actividad("Musculatura", 1250, self.cursor)["data"]
@@ -78,7 +78,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         """
 
         # Crear profesor
-        id_prof = insertar_profesor("Gero", "Arias", "M", "22224444", self.cursor)["data"]
+        id_prof = insertar_profesor("Gero", "Arias", "542215253770", "M", "22224444", self.cursor)["data"]
 
         # Crear actividad
         id_act = insertar_actividad("Musculatura", 1250, self.cursor)["data"]
@@ -214,7 +214,7 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         # Crear rol, cliente, actividad, profesor, sala, clase, instancia_clase
         id_cli = insertar_usuario("41298622", "Mariano", "Venal", "12345678", "2004-02-02", "marianovenal@gmail.com", "542215253779", "M", 1, self.cursor)["data"]
-        id_prof = insertar_profesor("Gero", "Arias", "M", "22224444", self.cursor)["data"]
+        id_prof = insertar_profesor("Gero", "Arias", "542215253770", "M", "22224444", self.cursor)["data"]
         id_act = insertar_actividad("Pilates", 1250, self.cursor)["data"]
         id_sala = insertar_sala("Sala 2", 10, self.cursor)["data"]
         id_cla = insertar_clase("Activa", id_act, id_prof, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]
@@ -285,7 +285,7 @@ class ClasesServiceTestCase(EndpointTestCase):
 
     def test_verificar_inscripcion_usuario_clase(self):
         id_cli = insertar_usuario("41298622", "Mariano", "Venal", "12345678", "2004-02-02", "marianovenal@gmail.com", "542215253779", "M", 1, self.cursor)["data"]
-        id_prof = insertar_profesor("Gero", "Arias", "M", "22224444", self.cursor)["data"]
+        id_prof = insertar_profesor("Gero", "Arias", "542215253770", "M", "22224444", self.cursor)["data"]
         id_act = insertar_actividad("Pilates", 1250, self.cursor)["data"]
         id_sala = insertar_sala("Sala 2", 10, self.cursor)["data"]
         id_cla = insertar_clase("Activa", id_act, id_prof, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]

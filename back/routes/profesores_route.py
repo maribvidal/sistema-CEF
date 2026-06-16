@@ -18,8 +18,9 @@ def crear_profesor():
     dni = data.get("dni")
     nombre = data.get("nombre")
     apellido = data.get("apellido")
+    telefono = data.get("telefono")
     genero = data.get("genero")
 
-    respuesta, status = crear_profesor_service(dni, nombre, apellido, genero)
+    respuesta, status = crear_profesor_service(dni, nombre, apellido, telefono, genero)
 
     return jsonify(respuesta), status

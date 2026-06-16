@@ -23,8 +23,8 @@ def insertar_datos(cursor):
     # Crear solo usuarios comunes
 
     # Crear profesores
-    id_prof1 = insertar_profesor('Carlos', 'López', 'M', 11223344, cursor)
-    insertar_profesor('Ana', 'Martínez', 'F', 44332211, cursor)
+    id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, cursor)
+    insertar_profesor('Ana', 'Martínez', '542215004013','F', 44332211, cursor)
 
     id_prof1 = id_prof1['data']
 
