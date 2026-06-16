@@ -1,5 +1,6 @@
 from db.operaciones.clases.consultar_db import consultar_reservas_instancias_por_clase
 from db.operaciones.listas_espera.consultar_db import obtener_lista_espera_abonados_por_id_clase, obtener_usuarios_lista_espera_abonados, obtener_lista_espera_individual_por_id_ins_clase, obtener_usuarios_lista_espera_individual
+from utils.modulo_fechas import comprobar_fecha_anterior
 
 """
         - MÓDULO DE MANEJO DE LISTAS DE ESPERA -
@@ -73,7 +74,11 @@ def manejar_listas_de_espera_por_clase(clase_id, cursor):
     dict_individual = tupla_gente_esperando[1]
     if (not lista_abonados and not dict_individual):
         return None
-    
+
+    # Si hay cupos disponibles, enviarle a los usuarios
+    # confirmaciones para cupos según alguno de los tres
+    # escenarios descritos anteriormente.
+        
     return (lista_abonados, dict_individual)
 
 def revisar_si_hay_cupos(clase_id, cursor) -> dict:
@@ -110,7 +115,11 @@ def revisar_gente_esperando_lista_abonados(clase_id: int, cursor) -> list:
     if (id_lea is not None):
         consulta2 = obtener_usuarios_lista_espera_abonados(id_lea, cursor)["data"]
         if (consulta2 is not None):
-            lista_usuarios_esperando = [tupla["usuario_id"] for tupla in consulta2]
+            # Devolver los ids de los usuarios ordenados por la fecha en la cual se
+            # anotaron a la lista de espera de abonados.
+            lista_aux = [(tupla["usuario_id"], tupla["fecha"]) for tupla in consulta2]
+            lista_aux.sort(key=lambda item: item[1])
+            lista_usuarios_esperando = [item[0] for item in lista_aux]
 
     return lista_usuarios_esperando
 
