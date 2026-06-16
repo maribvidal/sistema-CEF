@@ -115,11 +115,7 @@ def revisar_gente_esperando_lista_abonados(clase_id: int, cursor) -> list:
     if (id_lea is not None):
         consulta2 = obtener_usuarios_lista_espera_abonados(id_lea, cursor)["data"]
         if (consulta2 is not None):
-            # Devolver los ids de los usuarios ordenados por la fecha en la cual se
-            # anotaron a la lista de espera de abonados.
-            lista_aux = [(tupla["usuario_id"], tupla["fecha"]) for tupla in consulta2]
-            lista_aux.sort(key=lambda item: item[1])
-            lista_usuarios_esperando = [item[0] for item in lista_aux]
+            lista_usuarios_esperando = ordenar_lista_espera_por_fecha(consulta2)
 
     return lista_usuarios_esperando
 
@@ -135,7 +131,7 @@ def revisar_gente_esperando_lista_individuales(dict_cupos: dict, cursor):
             consulta2 = obtener_usuarios_lista_espera_individual(id_lei, cursor)["data"]
             if (consulta2 is not None):
                 if (len(consulta2) >= 0):
-                    lista_usuarios_esperando_ins_clase = [tupla["usuario_id"] for tupla in consulta2]
+                    lista_usuarios_esperando_ins_clase = ordenar_lista_espera_por_fecha(consulta2)
                     dict_usuarios_esperando[ins_clase_id] = lista_usuarios_esperando_ins_clase
     
     return dict_usuarios_esperando
@@ -143,3 +139,11 @@ def revisar_gente_esperando_lista_individuales(dict_cupos: dict, cursor):
 def obtener_lista_ids_ins_clases(dict_cupos: list) -> list:
     lista_ids = [key for key in dict_cupos.keys()]
     return lista_ids
+
+def ordenar_lista_espera_por_fecha(consulta) -> list:
+    # Devolver los ids de los usuarios ordenados por la fecha en la cual se
+    # anotaron a la lista de espera de abonados.
+    lista_aux = [(tupla["usuario_id"], tupla["fecha"]) for tupla in consulta2]
+    lista_aux.sort(key=lambda item: item[1])
+    lista_ordenada = [item[0] for item in lista_aux]
+    return lista_ordenada
