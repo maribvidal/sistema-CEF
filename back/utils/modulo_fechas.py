@@ -45,3 +45,10 @@ def validar_dia_fecha(fecha: str, dia: str):
     if fecha_normalizada:
         return fecha_normalizada.weekday() == Dias[dia].value
     return False
+
+def comprobar_fecha_anterior(fecha1: str, fecha2: str) -> bool:
+    """Valida si la fecha1 es anterior a la fecha2 o no."""
+    fecha1_normalizada = convertir_fecha(fecha1)
+    fecha2_normalizada = convertir_fecha(fecha2)
+
+    return fecha1_normalizada < fecha2_normalizada
