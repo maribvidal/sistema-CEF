@@ -9,7 +9,7 @@ def listar_profesores_service():
     cursor.connection.close()
     return respuesta, 200
 
-def crear_profesor_service(dni, nombre, apellido, genero):
+def crear_profesor_service(dni, nombre, apellido, telefono, genero):
     """Service que crea un profesor."""
 
     cursor = conectarse_db()
@@ -34,7 +34,7 @@ def crear_profesor_service(dni, nombre, apellido, genero):
 
     # Intentar insertar el nuevo profesor
 
-    res_insertar = insertar_profesor(nombre, apellido, genero, dni, cursor)
+    res_insertar = insertar_profesor(nombre, apellido, telefono, genero, dni, cursor)
 
     if res_insertar['status'] == 'error':
         cursor.connection.close()

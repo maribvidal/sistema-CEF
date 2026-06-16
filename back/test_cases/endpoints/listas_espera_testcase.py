@@ -23,8 +23,8 @@ class ListasEsperaTestcase(EndpointTestCase):
 
     def test_manejo_lista_espera(self):
         # Crear profesores
-        id_prof1 = insertar_profesor("Gero", "Arias", "M", "22224444", self.cursor)["data"]
-        id_prof2 = insertar_profesor("Malena", "Bancos", "F", "23234545", self.cursor)["data"]
+        id_prof1 = insertar_profesor("Gero", "Arias", "542215253770", "M", "22224444", self.cursor)["data"]
+        id_prof2 = insertar_profesor("Malena", "Bancos", "542215253722", "F", "23234545", self.cursor)["data"]
 
         # Crear actividades
         id_act1 = insertar_actividad("Musculatura", 1250, self.cursor)["data"]
