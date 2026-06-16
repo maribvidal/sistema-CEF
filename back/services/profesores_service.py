@@ -1,5 +1,5 @@
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.profesores.consultar_db import listar_profesores
+from db.operaciones.profesores.consultar_db import listar_profesores, listar_dnis_profesores
 from db.operaciones.profesores.insertar_db import insertar_profesor
 
 def listar_profesores_service():

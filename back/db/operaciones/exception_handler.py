@@ -6,9 +6,11 @@ def ejecutar_fetchall(query, cursor):
     try:
         cursor.execute(query)
         resultado = cursor.fetchall()
-
         # me tiraba error por el tipo de dato que devuelve el fetchall, así que lo convertí a una lista de diccionarios
-        datos = [dict(fila) for fila in resultado]
+        if resultado is None or str(resultado) == '[]':
+            datos = None
+        else:
+            datos = [dict(fila) for fila in resultado]
 
         return {
             "status": "success",
@@ -23,13 +25,12 @@ def ejecutar_fetchall(query, cursor):
 
 def ejecutar_fetchone(query, cursor) -> dict:
     try:
-        print("Ejecutando query de consulta: ", query)
         cursor.execute(query)
-        
         resultado = cursor.fetchone()
-        resultado = dict(resultado) if resultado else None
 
-        print("Resultado consulta: ", resultado)
+        if resultado is not None:
+            resultado = dict(resultado)
+
         return {
             "status": "success",
             "data": resultado
@@ -72,9 +73,6 @@ def ejecutar_query(query, cursor):
             "data": None
         }
     except Exception as e:
-        print("ERROR SQL:")
-        print(e)
-
         return {
             "status": "error",
             "message": str(e)

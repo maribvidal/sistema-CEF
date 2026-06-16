@@ -42,41 +42,51 @@ def obtener_clases_usuario(id_usuario: int, cursor) -> dict:
     """Hace una consulta para obtener las clases a las que un usuario está inscrito,
         y devuelve una lista de tuplas"""
     query = f"""
-        SELECT 
-            cos.fecha,
-            cos.hora,
-            c.estado,
-            a.nombre AS nombre_actividad,
-            p.nombre AS nombre_profesor,
-            s.nombre AS nombre_sala
-        FROM Clase c
-        INNER JOIN Usuario_Inscribir_Clase i ON (c.id = i.clase_id)
-        INNER JOIN Actividad a ON (c.actividad_id = a.id)
-        INNER JOIN Usuario p ON (c.profesor_id = p.id)
-        INNER JOIN Clase_Ocurrir_Sala cos ON (c.id = cos.clase_id)
-        INNER JOIN Sala s ON (cos.sala_id = s.id)
-        WHERE i.usuario_id = {id_usuario}
-    """
+        SELECT c.id, c.estado, c.actividad_id, c.profesor_id, c.sala_id, c.dia, c.hora, c.cupo_maximo, c.monto
+        FROM Clase c INNER JOIN Instancia_Clase ic ON (c.id = ic.clase_id)
+                    INNER JOIN Reserva r ON (ic.id = r.inst_clase_id)
+                    INNER JOIN Usuario u ON (r.usuario_id = u.id)
+        WHERE u.id = {id_usuario}"""
     return ejecutar_fetchall(query, cursor)
 
-def obtener_clase_usuario_fecha_hora(id_usuario: int, fecha, hora, cursor) -> dict:
-    """Hace una consulta para obtener la clase a la que está inscripto
-        un usuario en una fecha y hora determinada, si es que el 
-        usuario está inscripto a una clase en esa fecha y hora."""
-    # Utilizo ejecutar_fetchall por si el usuario llega a estar metido
-    # en más de una clase en la misma fecha y hora (lo cual sería un error)
+def obtener_usuario_esta_en_instancia_clase(id_ins_clase: int, id_usuario: int, cursor) -> dict:
+    """Hace una consulta para obtener una tupla de un usuario, del que se recibe
+        su id, con una instancia clase, de lac cual también se recibe su id, para ver
+        si el usuario está inscripto en esa instancia clase o no."""
+
     query = f"""
-            SELECT
-                cos.id
-            FROM Usuario u
-                INNER JOIN Usuario_Inscribir_Clase uic ON (u.id = uic.usuario_id)
-                INNER JOIN Clase_Ocurrir_Sala cos ON (uic.clase_ocurrir_sala_id = cos.id)
-            WHERE u.id = {id_usuario} AND cos.fecha = '{fecha}' AND cos.hora = '{hora}'
-            """
-    return ejecutar_fetchall(query, cursor)
+        SELECT ic.fecha,
+        ic.clase_id,
+        r.usuario_id
+        FROM Reserva r
+        JOIN Instancia_Clase ic ON (r.inst_clase_id = ic.id)
+        WHERE r.usuario_id = {id_usuario}
+        AND ic.id = {id_ins_clase}
+    """
+    return ejecutar_fetchone(query, cursor)
 
 def listar_dnis_usuarios(cursor) -> dict:
     """Hace una consulta para retornar todos los dnis registrados
         de los usuarios."""
     query = "SELECT dni FROM Usuario WHERE rol_id = 3"
     return ejecutar_fetchall(query, cursor)
+
+def verificar_usuario_abonado(cursor, id_usuario: int, id_clase: int) -> bool:
+    """Hace una consulta para verificar si un usuario es abonado o no."""
+    query = f"""
+        SELECT 1
+        FROM Usuario
+        INNER JOIN Mensualidad m ON Usuario.id = m.usuario_id
+        WHERE Usuario.id = {id_usuario} AND DATE('now') BETWEEN (m.fecha_inicio AND m.fecha_fin) AND m.clase_id = {id_clase}"""
+    resultado = ejecutar_fetchone(query, cursor)
+    return resultado is not None
+
+def verificar_usuario_tiene_mensualidad(id_usuario: int, id_mensualidad: int, cursor) -> bool:
+    """Hace una consulta para verificar si un usuario tiene una mensualidad vigente o no."""
+    query = f"""
+        SELECT 1
+        FROM Usuario
+        INNER JOIN Mensualidad m ON Usuario.id = m.usuario_id
+        WHERE Usuario.id = {id_usuario} AND m.id = {id_mensualidad}"""
+    resultado = ejecutar_fetchone(query, cursor)
+    return resultado is not None

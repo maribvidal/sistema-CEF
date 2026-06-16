@@ -1,7 +1,7 @@
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.empleados.insertar_db import insertar_recepcionista
 from db.operaciones.empleados.modificar_db import modificar_empleado, borrar_empleado, desactivar_empleado, modificar_empleado_con_dni
-from db.operaciones.empleados.consultar_db import listar_empleados, listar_correos_empleados, listar_dnis_empleados
+from db.operaciones.empleados.consultar_db import listar_empleados, listar_correos_empleados, listar_dnis_empleados, obtener_empleado_por_dni
 
 def listar_empleados_service():
     """Service que lista los empleados."""
@@ -26,29 +26,60 @@ def modificar_empleado_service(
     dni_nuevo: int, 
     nombre: str, 
     apellido: str,
+    correo: str,
+    genero: str,
     rol_id: int
     ):
     """Service que modifica un empleado."""
     cursor = conectarse_db()
 
-    # Comprobar que el dni al que se quiere cambiar no esté siendo
-    # utilizado por otro empleado
+    # Comprobar si el empleado no quiere cambiar algún que otro dato
 
-    res_dnis = listar_dnis_empleados(cursor)
+    res_empl = obtener_empleado_por_dni(empleado_dni, cursor)
 
-    if res_dnis['status'] == 'error':
+    if res_empl['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": "Error al obtener los DNIs de los empleados."
+            "error": "Error al obtener la información del empleado."
         }, 400
-
-    if (str(dni_nuevo) in str(res_dnis['data'])):
+    elif res_empl['status'] == 'success' and res_empl['data'] is None:
         cursor.connection.close()
         return {
-            "error": "El DNI ya se encuentra registrado para un empleado."
+            "error": "No existe un empleado con dicho dni."
         }, 401
 
-    respuesta = modificar_empleado_con_dni(empleado_dni, dni_nuevo, nombre, apellido, rol_id, cursor)
+    if dni_nuevo is None:
+        dni_nuevo = empleado_dni
+    if nombre is None:
+        nombre = res_empl['data']['nombre']
+    if apellido is None:
+        apellido = res_empl['data']['apellido']
+    if correo is None:
+        correo = res_empl['data']['correo']
+    if genero is None:
+        genero = res_empl['data']['genero']
+
+    # Comprobar que el dni al que se quiere cambiar no esté siendo
+    # utilizado por otro empleado. Salvo en el caso de que el
+    # dni sea el suyo mismo
+
+    if (int(dni_nuevo) != int(empleado_dni)):
+
+        res_dnis = listar_dnis_empleados(cursor)
+
+        if res_dnis['status'] == 'error':
+            cursor.connection.close()
+            return {
+                "error": "Error al obtener los DNIs de los empleados."
+            }, 401
+
+        if (str(dni_nuevo) in str(res_dnis['data'])):
+            cursor.connection.close()
+            return {
+                "error": "El DNI ya se encuentra registrado para un empleado."
+            }, 402
+
+    respuesta = modificar_empleado(cursor, empleado_dni, dni_nuevo, nombre, apellido, correo, genero, rol_id)
 
     # Con esto guardo los cambios en la base de datos
     cursor.connection.commit()
@@ -75,7 +106,9 @@ def borrar_empleado_service(empleado_dni: int):
     cursor.connection.commit()
     cursor.connection.close()
 
-    return respuesta['data'], 200
+    print("RESPUESTA DEL SERVICE DE BORRAR EMPLEADO: ", respuesta)
+
+    return {"message": "El empleado ha sido borrado con éxito."}, 200
 
 def desactivar_empleado_service(empleado_dni: int):
    """Service que desactiva un empleado.""" 
@@ -155,5 +188,5 @@ def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, gene
     cursor.connection.close()
 
     return {
-        "mensaje": "El recepcionista ha sido creado con éxito."
+        "message": "El recepcionista ha sido creado con éxito."
     }, 200

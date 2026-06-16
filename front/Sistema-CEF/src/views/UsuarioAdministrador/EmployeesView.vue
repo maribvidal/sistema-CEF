@@ -406,10 +406,11 @@ const eliminarEmpleado = (empleado) => {
       try {
         await EmployeesService.deleteEmployee(dni)
         await cargarEmpleados() // Refresca la tabla
+        console.log("Empleado eliminado:", empleado)
         notificationStore.showNotification('Empleado eliminado exitosamente', 'success')
       } catch (error) {
         console.error('Error al eliminar empleado:', error)
-        const errorMsg = error.data?.error || 'No se pudo eliminar el empleado'
+        const errorMsg = error.data?.message || 'No se pudo eliminar el empleado'
         notificationStore.showNotification(errorMsg, 'danger')
       }
     }

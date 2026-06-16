@@ -2,23 +2,21 @@ from db.operaciones.exception_handler import ejecutar_fetchone, ejecutar_query
 
 # falta implementar & testear
 def modificar_empleado(
-        empleado_dni: int, 
-        nombre: str, 
-        apellido, 
-        correo, 
-        contraseña, 
-        fecha_nac, 
-        telefono, 
-        genero, 
-        rol_id, 
-        cursor
+        cursor,
+        empleado_dni: int,
+        dni_nuevo = None,
+        nombre = None, 
+        apellido = None, 
+        correo = None, 
+        genero = None, 
+        rol_id = None
     ) -> dict:
     """Modifica un empleado específico en la base de datos, utilizando su ID como referencia.
         Recibe el ID del empleado a modificar y los nuevos datos (nombre, apellido, cargo, salario).
         Devuelve un diccionario con el resultado de la operación."""
 
     query_verificacion = f"""
-        SELECT nombre, apellido, correo, contraseña, fecha_nac, telefono, genero, rol_id
+        SELECT nombre, apellido, correo, genero, rol_id
         FROM Usuario
         WHERE dni = {empleado_dni}
     """
@@ -37,23 +35,19 @@ def modificar_empleado(
         }
 
     datos_actuales = usuario["data"]
+    dni_final = empleado_dni if (dni_nuevo is None) else dni_nuevo
     nombre_final = nombre if nombre is not None else datos_actuales["nombre"]
     apellido_final = apellido if apellido is not None else datos_actuales["apellido"]
     correo_final = correo if correo is not None else datos_actuales["correo"]
-    contraseña_final = contraseña if contraseña is not None else datos_actuales["contraseña"]
-    fecha_nac_final = fecha_nac if fecha_nac is not None else datos_actuales["fecha_nac"]
-    telefono_final = telefono if telefono is not None else datos_actuales["telefono"]
     genero_final = genero if genero is not None else datos_actuales["genero"]
     rol_id_final = rol_id if rol_id is not None else datos_actuales["rol_id"]
     
     query_update = f"""
         UPDATE Usuario
-        SET nombre = '{nombre_final}',
+        SET dni = {dni_final},
+            nombre = '{nombre_final}',
             apellido = '{apellido_final}',
             correo = '{correo_final}',
-            contraseña = '{contraseña_final}',
-            fecha_nac = '{fecha_nac_final}',
-            telefono = '{telefono_final}',
             genero = '{genero_final}',
             rol_id = {rol_id_final}
         WHERE dni = {empleado_dni}
@@ -68,6 +62,8 @@ def modificar_empleado_con_dni(
         nuevo_dni: int,
         nombre: str, 
         apellido,
+        correo,
+        genero,
         rol_id, 
         cursor
     ) -> dict:
@@ -79,6 +75,8 @@ def modificar_empleado_con_dni(
         SET dni = {nuevo_dni},
             nombre = '{nombre}',
             apellido = '{apellido}',
+            correo = '{correo}',
+            genero = '{genero}',
             rol_id = {rol_id}
         WHERE dni = {empleado_dni}
     """
@@ -93,31 +91,52 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
         Devuelve un diccionario con el resultado de la operación."""
 
     query_verificacion = f"""
-        SELECT rol_id
+        SELECT id, rol_id
         FROM Usuario
         WHERE dni = {empleado_dni}
     """
     usuario = ejecutar_fetchone(query_verificacion, cursor)
+    print("IMPRIMIENDO RESPUESTA DEL FETCHONEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",usuario)
 
     if not usuario:
         return {
             "status": "error",
             "message": "Empleado no encontrado"
         }
-    elif usuario["data"]["rol_id"] not in (0, 1, 2): # o sea si el usuario no es ni gerente ni administrador
+    elif usuario['data']["rol_id"] not in (0, 1, 2, 5): # o sea si el usuario no es ni gerente ni administrador ni profesor
         return {
             "status": "error",
             "message": "El usuario no es un empleado"
         }
+    elif usuario["data"]['rol_id'] == 5: # o sea si el usuario es un profesor
+        ## Aca hay que mejorar la logica y verificar si el profesor tiene clases a su cargo, y en ese caso no permitir el borrado
+        print("El usuario es un profesor, se procede a verificar si tiene clases a su cargo")
+        profesor_id = usuario["data"]["id"]
+        query_clases_profesor = f"""
+            SELECT COUNT(*) as total_clases
+            FROM Clase
+            WHERE profesor_id = {profesor_id}
+              AND estado != 'Borrado'
+        """
+        resultado_clases = ejecutar_fetchone(query_clases_profesor, cursor)
+        print("RESULTADO DE LA CONSULTA DE CLASES DEL PROFESOR: ", resultado_clases)
+
+        if resultado_clases.get("status") == "success" and resultado_clases["data"]["total_clases"] > 0:
+            return {
+                "status": "error",
+                "message": f"No se puede eliminar al profesor. Tiene {resultado_clases['data']['total_clases']} clase/s asignada/s"
+            }
+
     
     # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
-    query_update = f"""
-        UPDATE Usuario
-        SET rol_id = 4
+    # AHORA ES BORRADO FISICO
+    # SI QUEREMOS HACER BORRADO TAMBIÉN EN SUS REFERENCIAS (FOREIGN KEYS), HAY QUE UTILIZAR DELETE ON CASCADE. PERO POR LAS DUDAS LO DEJO COMO DELETE NORMAL
+    query_delete = f"""
+        DELETE FROM Usuario
         WHERE dni = {empleado_dni}
     """
 
-    return ejecutar_query(query_update, cursor)
+    return ejecutar_query(query_delete, cursor)
 
 def desactivar_empleado(empleado_dni: int, cursor) -> dict:
     """Desactiva un empleado específico de la base de datos, utilizando su DNI como referencia.

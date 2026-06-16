@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.insertar_db import insertar_usuario
@@ -46,17 +47,11 @@ def login_service(correo: str, contraseña: str) -> tuple:
         return {
             "error": usuario["message"]
         }, 500
-    
-    if usuario["status"] == 'success' and usuario["data"] is None:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado"
-        }, 400
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
         if usuario['data']['contraseña'] != contraseña:
             cursor.connection.close()
-            return {"error": "Contraseña incorrecta"}, 401
+            return {"error": "Contraseña incorrecta"}, 400
 
         # Generar JWT
         token = _generate_jwt({
@@ -70,7 +65,7 @@ def login_service(correo: str, contraseña: str) -> tuple:
         cursor.connection.commit()
         cursor.connection.close()
         return {
-            "mensaje": "Inicio de sesión exitoso",
+            "message": "Inicio de sesión exitoso",
             "token": token,
             "usuario": {
                 "id": usuario['data']['id'],
@@ -82,7 +77,9 @@ def login_service(correo: str, contraseña: str) -> tuple:
         }, 200
     
     cursor.connection.close()
-    return {"error": "Error desconocido"}, 500
+    # Si por alguna razón no se cumplió ninguna de las condiciones, pues me hago el boludo y devuelvo datos incorrectos, ya que no se contempla en la HU otro escenario
+    # Cambio 500 por error 400, solo en caso de que pase algo falopa
+    return {"error": "Datos Incorrectos"}, 400
     
 
 
@@ -134,10 +131,36 @@ def register_service(dni: int, nombre: str, apellido: str, contrasena: str, fech
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Usuario registrado exitosamente",
+        "message": "Usuario registrado exitosamente",
         "usuario_id": resultado['data']
     }, 200
 
 def cerrar_sesion():
     # Aca podes implementar la lógica para cerrar sesión.
     return
+
+def validar_qr_service(inst_clase_id: int, id_usuario: int):
+    # Primero verificamos que en la tabla Reserva exista una reserva con id_cliente e id_inst_clase.
+    cursor = conectarse_db()
+    reserva = obtener_reservas_usuario_inst_clase(
+        id_usuario=id_usuario, 
+        id_ins_clase=inst_clase_id, 
+        cursor=cursor
+    )
+
+    if reserva['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": reserva['message']
+        }, 500
+    # pongo "not reserva" mas que nada porque el fetchall me puede devovler tanto como None, o una lista vacia, etc.
+    if not reserva['data']:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró una reserva para ese cliente en esa clase."
+        }, 404
+
+    cursor.connection.close()
+    return {
+        "message": "Asistencia confirmada exitosamente"
+    }, 200   

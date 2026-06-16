@@ -1,5 +1,4 @@
 from db.operaciones.clases.consultar_db import consultar_clase_por_id
-from db.operaciones.usuario_inscribir_clase.consultar_db import consultar_usuario_inscribir_clase_por_usuario_id
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.checkeos.checkear_inputs import checkear_inputs
@@ -15,11 +14,7 @@ from db.operaciones.empleados.consultar_db import listar_dnis_empleados
 from dotenv import load_dotenv
 load_dotenv()
 
-import os
-import resend
-
-import smtplib
-from email.mime.text import MIMEText
+from utils.envio_mails import enviar_mail
 
 import datetime
 
@@ -61,6 +56,12 @@ def registrar_usuario_service(
             el año actual, si la fecha es válida"""
         fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d")
         return 2026 - fecha.year
+    
+    def _es_correo_unico(correo: str) -> bool:
+        """Se devuelve si el correo es único o no"""
+        respuesta = consultar_usuario_por_correo(correo, cursor)
+        return respuesta['status'] == 'error'
+
 
     errores = checkear_inputs(
         [
@@ -77,25 +78,24 @@ def registrar_usuario_service(
     )
     
     # Comprobaciones de las entradas
-
     if len(errores) > 0:
         return errores, 400
 
     if (not _es_un_rol_valido(rol_id)):
         return {
-            "error": "El rol_id pasado no es válido."
+            "message": "El rol_id pasado no es válido."
         }, 401
 
     if (_es_fecha_valida(fecha_nac) is False):
         cursor.connection.close()
         return {
-            "error": "La fecha de nacimiento no es válida."
+            "message": "La fecha de nacimiento no es válida."
         }, 402
     
     if _obtener_años_hasta_2026(fecha_nac) < 14:
         cursor.connection.close()
         return {
-            "error": "El usuario debe ser mayor de 14 años"
+            "message": "El usuario debe ser mayor de 14 años"
         }, 403
 
     cursor = conectarse_db()
@@ -107,28 +107,23 @@ def registrar_usuario_service(
     if res_dnis['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": "Error al obtener los DNIs de los usuarios."
+            "message": "Error al obtener los DNIs de los usuarios."
         }, 404
 
     for res_dni in res_dnis['data']:
         if dni == res_dni['dni']:
             cursor.connection.close()
             return {
-                "error": "El DNI ya se encuentra registrado para un usuario."
+                "message": "El DNI ya se encuentra registrado para un usuario."
             }, 405
 
     # Comprobar que el correo no se haya utilizado
 
-    respuesta = consultar_usuario_por_correo(correo, cursor)
-    if respuesta['status'] == 'error':
-        cursor.connection.close()
-        return respuesta, 406
-
-    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+    if not _es_correo_unico(correo):
         cursor.connection.close()
         return {
-            "error": "El correo electrónico ya se encuentra registrado."
-        }, 407
+            "message": "El correo electrónico ya se encuentra registrado."
+        }, 406
 
     ## TODO: Si hay que agregar otra comprobación de la fecha, hacerlo
       
@@ -148,14 +143,14 @@ def registrar_usuario_service(
     if res['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": res['message']
+            "message": res['message']
         }, 500
 
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Usuario registrado exitosamente."
-    }, 201
+        "message": "Usuario registrado exitosamente."
+    }, 200
     
 def obtener_perfil_usuario_service(usuario_id: int):
     cursor = conectarse_db()
@@ -164,12 +159,6 @@ def obtener_perfil_usuario_service(usuario_id: int):
     if usuario['status'] == 'error':
         cursor.connection.close()
         return usuario, 400
-    
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 401
 
     cursor.connection.close()
     return {
@@ -183,12 +172,6 @@ def listar_pagos_usuario_service(usuario_id: int):
     if usuario['status'] == 'error':
         cursor.connection.close()
         return usuario, 400
-
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 401
     
     pagos = consultar_pagos_de_usuario(usuario_id, cursor)
 
@@ -197,12 +180,6 @@ def listar_pagos_usuario_service(usuario_id: int):
         return {
             "error": pagos['message']
         }, 500
-
-    if not pagos['data']:
-        cursor.connection.close()
-        return {
-            "error": "No se encontraron pagos para este usuario."
-        }, 402
 
     cursor.connection.close()
     return pagos['data'], 200
@@ -213,25 +190,35 @@ def editar_perfil_usuario_service(
     nombre=None,
     apellido=None,
     fecha_nac=None,
-    correo=None,
+    correo: str="",
     telefono=None
-):
-    
+): 
+    def _obtener_años_hasta_2026(fecha) -> int:
+        """Se devuelve la cantidad de años que faltan hasta
+            el año actual, si la fecha es válida"""
+        fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d")
+        return 2026 - fecha.year
+
+    def _es_correo_unico(correo: str) -> bool:
+        """Se devuelve si el correo es único o no"""
+        respuesta = consultar_usuario_por_correo(correo, cursor)
+        return respuesta['status'] == 'error'
+
     cursor = conectarse_db()
     
     usuario = consultar_usuario_por_id(usuario_id, cursor)
 
     if usuario['status'] == 'error':
         cursor.connection.close()
-        return {
-            "error": usuario['message']
-        }, 400
+        return {"message": usuario['message']}, 400
 
-    if usuario['status'] == 'success' and not usuario['data']:
+    if not _es_correo_unico(correo):
         cursor.connection.close()
         return {
-            "error": "Usuario no encontrado"
-        }, 402
+            "message": "El correo electrónico ya se encuentra registrado."
+        }, 406
+
+
 
     datos_a_actualizar = []
     
@@ -249,13 +236,7 @@ def editar_perfil_usuario_service(
         respuesta = consultar_usuario_por_correo(correo, cursor)
         if respuesta['status'] == 'error':
             cursor.connection.close()
-            return respuesta, 403
-
-        if respuesta['status'] == 'success' and respuesta['data'] is not None:
-            cursor.connection.close()
-            return {
-                "error": "El correo electrónico ya se encuentra registrado."
-            }, 404
+            return respuesta, 402
     
     if telefono is not None:
         datos_a_actualizar.append({"name": "telefono", "value": telefono})
@@ -266,8 +247,14 @@ def editar_perfil_usuario_service(
     
     if len(errores) > 0:
         cursor.connection.close()
-        return errores, 403
+        return {"message": "Errores de validación en los datos"}, 400
+
     
+    if fecha_nac is not None and _obtener_años_hasta_2026(fecha_nac) < 14:
+        cursor.connection.close()
+        return {"message": "El usuario debe ser mayor de 14 años"}, 403
+
+    print("COMIENZO MODIFICACION DE PERFIL DE USUARIOOOOOOOO")
     res = modificar_perfil_usuario(
         cursor,
         usuario_id,
@@ -282,13 +269,13 @@ def editar_perfil_usuario_service(
     if res['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": "Se produjo un error desde el lado del servidor al modificar el perfil del usuario."
+            "message": "Se produjo un error desde el lado del servidor al modificar el perfil del usuario."
         }, 500
 
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Perfil actualizado exitosamente."
+        "message": "Perfil actualizado exitosamente."
     }, 200
 
 # Servicios para las HUs de contraseñas
@@ -337,19 +324,13 @@ def modificar_contraseña_service(
             "error": usuario['message']
         }, 401
 
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 402
-
     # Comprobar que la contraseña actual coincide
 
     if usuario['data']["contraseña"] != contraseña_actual:
         cursor.connection.close()
         return {
             "error": "La contraseña actual es incorrecta."
-        }, 403
+        }, 402
 
     # Comprobar que la contraseña actual no sea igual a la nueva contraseña
     
@@ -357,7 +338,7 @@ def modificar_contraseña_service(
         cursor.connection.close()
         return {
             "error": "La nueva contraseña no puede ser igual a la contraseña actual."
-        }, 404
+        }, 403
 
     # Modificar la contraseña del usuario
 
@@ -376,7 +357,7 @@ def modificar_contraseña_service(
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Contraseña modificada exitosamente."
+        "message": "Contraseña modificada exitosamente."
     }, 200
 
 def restablecer_contraseña_service(correo: str):
@@ -398,69 +379,13 @@ def restablecer_contraseña_service(correo: str):
             "error": usuario['message']
         }, 401
 
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado con el correo proporcionado."
-        }, 402
-
-    """
-    api_key = os.getenv("RESEND_API_KEY")
-    resend.api_key = api_key
-    
-    front_url = os.getenv("FRONT_URL")
-    link = f"{front_url}/ConfirmarNuevaContrasena?correo={correo}"
-    
-    respuesta = resend.Emails.send({
-        "from": "onboarding@resend.dev",
-        "to": correo,
-        "subject": "Recuperación de contraseña",
-        "html": f""
-            <h2>Recuperar contraseña</h2>
-
-            <p>Hacé click acá:</p>
-
-            <a href="{link}">
-                Restablecer contraseña
-            </a>
-        ""
-    })
-    """
-    
-    # Configuración del servidor
-    servidor_smtp = "smtp.gmail.com"
-    puerto = 587
-    remitente = os.getenv("remitente")
-    password = os.getenv("password")
-    
-    
-    # Crear el mensaje    
-    front_url = os.getenv("FRONT_URL")
     link = f"http://localhost:5173/ConfirmarNuevaContrasena?correo={correo}"
-
-    msg = MIMEText(f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}")
-    msg['Subject'] = "Restablecer contraseña"
-    msg['From'] = "sistemacef@gmail.com"
-    msg['To'] = correo
-
-    try:
-        # Conexión al servidor
-        server = smtplib.SMTP(servidor_smtp, puerto)
-        server.starttls() # Inicia conexión segura
-        server.login("sistemacef@gmail.com", "saal ixel tbum pohe")
-        
-        # Enviar a varios remitentes (puedes usar un bucle)
-        server.send_message(msg)
-    except Exception as e:
-        return {
-            "error": str(e)
-        }, 403
-    finally:
-        server.quit()
+    mensaje = f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}"
+    enviar_mail(correo, mensaje)
     
     cursor.connection.close()
     return {
-        "mensaje": "Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña."
+        "message": "Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña."
     }, 200
     
 # checkeo de escenario 4 de olvidar contraseña se haria en el front no?
@@ -492,18 +417,12 @@ def confirmar_nueva_contrasena_service(nueva_contraseña: str, correo: str):
         return {
             "error": usuario['message']
         }, 401
-
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado con el correo proporcionado."
-        }, 402
         
     if usuario['data']['contraseña'] == nueva_contraseña:
         cursor.connection.close()
         return {
             "error": "La nueva contraseña no puede ser igual a la contraseña actual."
-        }, 403
+        }, 402
 
     res = modificar_contraseña(
         usuario['data']['id'],
@@ -520,7 +439,7 @@ def confirmar_nueva_contrasena_service(nueva_contraseña: str, correo: str):
     cursor.connection.commit()
     cursor.connection.close()
     return {
-        "mensaje": "Nueva contraseña confirmada exitosamente."
+        "message": "Nueva contraseña confirmada exitosamente."
     }, 200
     
 def listar_usuarios_service():
@@ -535,11 +454,6 @@ def listar_usuarios_service():
             "error": respuesta['message']
         }, 500
         
-    if respuesta['status'] == 'success' and respuesta['data'] is None:
-        return {
-            "error": "No se encontraron usuarios."
-        }, 404
-        
     return respuesta['data'], 200
 
 def obtener_clases_usuario_service(id_usuario: int):
@@ -553,13 +467,7 @@ def obtener_clases_usuario_service(id_usuario: int):
         return {
             "error": respuesta['message']
         }, 400
-
-    if respuesta['status'] == 'success' and not respuesta['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 401
-
+    
     respuesta = obtener_clases_usuario(id_usuario, cursor)
 
     if respuesta['status'] == 'error':
@@ -567,12 +475,6 @@ def obtener_clases_usuario_service(id_usuario: int):
         return {
             "error": respuesta['message']
         }, 500
-
-    if respuesta['status'] == 'success' and not respuesta['data']:
-        cursor.connection.close()
-        return {
-            "error": "No se encontraron clases para este usuario."
-        }, 402
 
     cursor.connection.close()
     return respuesta['data'], 200
@@ -587,8 +489,6 @@ def subir_avatar_usuario_service(usuario_id, avatar):
             "error": "El parámetro 'avatar' está vacío."
         }, 400
 
-    # TODO: ¿Valido que el parámetro sea una imagen codificada?
-
     cursor = conectarse_db()
 
     # Validar si el usuario existe
@@ -601,12 +501,6 @@ def subir_avatar_usuario_service(usuario_id, avatar):
             "error": usuario['message']
         }, 401
 
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 402
-
     # Insertar la imagen en la base de datos
 
     res = insertar_imagen(avatar, cursor)
@@ -615,13 +509,7 @@ def subir_avatar_usuario_service(usuario_id, avatar):
         cursor.connection.close()
         return {
             "error": res['message']
-        }, 403
-
-    if res['status'] == 'success' and res['data'] is None:
-        cursor.connection.close()
-        return {
-            "error": "No se pudo insertar la imagen."
-        }, 404
+        }, 402
 
     imagen_id = res['data']
 
@@ -635,17 +523,17 @@ def subir_avatar_usuario_service(usuario_id, avatar):
             "error": res2['message']
         }, 500
     
-    if res2['status'] == 'success' and res2['data'] is not None:
+    if res2['status'] == 'success':
         cursor.connection.close()
         return {
             "error": "Ocurrió un error al intentar asociar la imagen al usuario."
-        }, 405
+        }, 403
     
     cursor.connection.commit()
     cursor.connection.close()
 
     return {
-        "mensaje": "Avatar subido y asociado al usuario exitosamente."
+        "message": "Avatar subido y asociado al usuario exitosamente."
     }, 200
 
 def obtener_avatar_usuario_service(usuario_id):
@@ -663,12 +551,6 @@ def obtener_avatar_usuario_service(usuario_id):
             "error": usuario['message']
         }, 400
 
-    if usuario['status'] == 'success' and not usuario['data']:
-        cursor.connection.close()
-        return {
-            "error": "Usuario no encontrado."
-        }, 401
-
     # Obtener el avatar asociado al usuario
 
     res = consultar_imagen_actual_usuario(usuario_id, cursor)
@@ -677,13 +559,7 @@ def obtener_avatar_usuario_service(usuario_id):
         cursor.connection.close()
         return {
             "error": res['message']
-        }, 402
-    
-    if res['status'] == 'success' and res['data'] is None:
-        cursor.connection.close()
-        return {
-            "error": "El usuario no tiene un avatar asociado."
-        }, 403
+        }, 401
 
     cursor.connection.close()
     return {

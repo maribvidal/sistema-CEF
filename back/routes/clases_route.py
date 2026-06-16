@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from services.clases_service import (
-    listar_clases_service, publicar_clase_service, 
-    modificar_clase_service, eliminar_clase_service,
-    cancelar_clase_service, reservar_clase_service,
-    verificar_inscripcion_usuario_clase_service
+    cancelar_clase_service, listar_clases_service, modificar_clase_service, publicar_clase_service,
+    reservar_clase_service, verificar_inscripcion_usuario_clase_service,
+    eliminar_clase_service, anotarse_lista_espera_service, listar_clases_service, publicar_clase_service,
+    reservar_clase_service, registrar_asistencia_clase_service, rechazar_asistencia_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -21,64 +21,74 @@ def publicar_clase():
     """Este endpoint permite subir una nueva clase al
         sistema. Los datos son recibidos en formato JSON."""
 
-    data = request.get_json()
+    # ESTA IMPLEMENTACIÓN PUEDE SERVIR PARA PRÓXIMAS IMPLEMENTACIÓNES, 
+    # CON ESTO NOS ASEGURAMOS QUE EL REQUEST ESTÉ BIEN Y NO HAYA NINGUN "NONE" O ALGO ASÍ
+    body = request.get_json()
 
-    estado = data.get("estado")
-    id_actividad = data.get("id_actividad")
-    id_profesor = data.get("id_profesor")
-    fecha = data.get("fecha")
-    hora = data.get("hora")
-    sala = data.get("sala")
-    cupo_maximo = data.get("cupo_maximo")
+    campos = [
+        "estado",
+        "id_actividad",
+        "id_profesor",
+        "id_sala",
+        "dia",
+        "hora",
+        "cupo_maximo"
+    ]
 
-    respuesta, status = publicar_clase_service(
-        estado,
-        id_actividad,
-        id_profesor,
-        fecha,
-        hora,
-        sala,
-        cupo_maximo
-    )
+    for campo in campos:
+        if campo not in body:
+            return {"error": f"Falta el campo {campo}"}, 400
 
-    return jsonify(respuesta), status
+    estado = body.get("estado")
+    id_actividad = body.get("id_actividad")
+    id_profesor = body.get("id_profesor")
+    id_sala = body.get("id_sala")
+    dia = body.get("dia")
+    hora = body.get("hora")
+    cupo_maximo = body.get("cupo_maximo")
+
+    # Este campo no lo controlo porque es opcional
+    primera_fecha = None if (body.get("primera_fecha") is None) else body.get("primera_fecha")
+
+    return publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, primera_fecha)
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["DELETE"])
 def eliminar_clase(id_clase):
     """Este endpoint permite eliminar una clase específica. 
         Recibe el ID de la clase a eliminar en formato JSON."""
 
-    respuesta, status = eliminar_clase_service(id_clase)
-
-    return jsonify(respuesta), status
+    # Lozi: La explicación de mi implementación se encuentra dentro de la función eliminar_clase...
+    return eliminar_clase_service(id_clase)
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["PUT"])
 def modificar_clase(id_clase):
     """Este endpoint permite modificar los detalles de una 
         clase específica. Recibe el ID de la clase a modificar 
         y los nuevos datos en formato JSON."""
-    data = request.get_json()
 
-    estado = data.get("estado")
-    id_actividad = data.get("id_actividad")
-    id_profesor = data.get("id_profesor")
-    fecha = data.get("fecha")
-    hora = data.get("hora")
-    sala = data.get("sala")
-    cupo_maximo = data.get("cupo_maximo")
+    ## TODO: Repensar implementación del endpoint
 
-    respuesta, status = modificar_clase_service(
-        id_clase,
-        estado,
-        id_actividad,
-        id_profesor,
-        fecha,
-        hora,
-        sala,
-        cupo_maximo
-    )
+    # ESTA IMPLEMENTACIÓN PUEDE SERVIR PARA PRÓXIMAS IMPLEMENTACIÓNES, CON ESTO NOS ASEGURAMOS QUE EL REQUEST ESTÉ BIEN Y NO HAYA NINGUN "NONE" O ALGO ASÍ
+    body = request.get_json()
+    print("JSON RECIBIDOOOOOOOOO:")
+    print(body)
 
-    return jsonify(respuesta), status
+    campos = [
+        "estado",
+        "id_actividad",
+        "id_profesor",
+        "id_sala",
+        "dia",
+        "hora",
+        "cupo_maximo"
+    ]
+
+    for campo in campos:
+        if campo not in body:
+            return {"error": f"Falta el campo {campo}"}, 400
+
+
+    return modificar_clase_service(id_clase, **body)
 
 ## Habría que ver si a una clase cancelada hay que hacerle otra
 ## cosa que no sea cambiarle el estado.
@@ -88,42 +98,77 @@ def cancelar_clase(id_clase):
     """Este endpoint permite cancelar una clase específica. 
         Recibe el ID de la clase a cancelar en formato JSON."""
 
-    respuesta, status = cancelar_clase_service(id_clase)
+    # Lozi: Propuesta de implementación se encuentra en cancelar_clase_service..
+    return cancelar_clase_service(id_clase)
 
-    return jsonify(respuesta), status
-
-## No estoy seguro de como implementar esto. Mañana lo voy
-## a ver mejor, porque también podríamos implementar un
-## endpoint que reciba simplemente la id del 
-## clase_ocurrir_sala en vez de esto.
-
-@clases_bp.route("/clases/<int:id_clase>/reservar", methods=["PUT"])
-def reservar_clase(id_clase):
+@clases_bp.route("/clases/<int:id_ins_clase>/reservar", methods=["PUT"])
+def reservar_clase(id_ins_clase):
     """Este endpoint permite inscribir a un usuario a
         una clase específica. Esto se hace pidiendo el
-        id del usuario, la fecha, y la hora de la clase."""
+        id del usuario y el id de la instancia de la clase."""
 
     data = request.get_json()
+
     id_usuario = data.get("id_usuario")
-    fecha = data.get("fecha")
-    hora = data.get("hora")
 
-    respuesta, status = reservar_clase_service(id_clase, id_usuario, fecha, hora)
+    return reservar_clase_service(id_ins_clase, id_usuario)
 
-    return jsonify(respuesta), status
-
-@clases_bp.route("/clases/<int:id_clase>", methods=["GET"])
-def verificar_inscripcion_usuario_clase(id_clase):
+@clases_bp.route("/clases/<int:id_ins_clase>/verificar", methods=["GET"])
+def verificar_inscripcion_usuario_clase(id_ins_clase):
     """Este endpoint permite verificar si un usuario
         tiene una inscripción a una clase específica,
-        en una fecha y hora dada."""
+        en un día y hora dado."""
 
+    data = request.get_json()
+    id_usuario = data.get("id_usuario")
+
+    return verificar_inscripcion_usuario_clase_service(id_ins_clase, id_usuario)
+
+@clases_bp.route("/clases/<int:id_clase>/inscripciones", methods=["POST"])
+def anotarse_lista_espera(id_clase):
+    """Este endpoint permite verificar si un usuario
+        tiene una inscripción a una clase específica,
+        en un día y hora dado."""
+        
     data = request.get_json()
 
     id_usuario = data.get("id_usuario")
-    fecha = data.get("fecha")
-    hora = data.get("hora")
-    
-    respuesta, status = verificar_inscripcion_usuario_clase_service(id_clase, id_usuario, fecha, hora)
 
+    respuesta, status = anotarse_lista_espera_service(id_clase, id_usuario)
+    
+    return jsonify(respuesta), status
+
+# Estos dos endpoints serian confirmar asistencia individual y abonado
+
+# pienso que la difenrencia que es que al confirmar al individual se le redirija a pagar lo maneja directamente el front, si no tiene los datos para ese punto que haga un 
+# llamado al back confirmando si es o no abonado y luego que mande a otro endpoint para el pago
+
+# - Escenario 1:
+@clases_bp.route("/clases/<int:id_clase>/confirmar_asistencia", methods=["POST"])
+def registrar_asistencia_clase(id_clase):
+    """Este endpoint permite registrar la asistencia de un usuario
+        a una clase específica. Recibe el ID del usuario y el ID
+        de la clase en formato JSON."""
+        
+    data = request.get_json()
+
+    id_usuario = data.get("id_usuario")
+    
+    respuesta, status = registrar_asistencia_clase_service(id_clase, id_usuario)
+    
+    return jsonify(respuesta), status
+
+# - Escenario 2:
+@clases_bp.route("/clases/<int:id_clase>/rechazar_asistencia", methods=["POST"])
+def rechazar_asistencia_clase(id_clase):
+    """Este endpoint permite rechazar la asistencia de un usuario
+        a una clase específica. Recibe el ID del usuario y el ID
+        de la clase en formato JSON."""
+        
+    data = request.get_json()
+
+    id_usuario = data.get("id_usuario")
+    
+    respuesta, status = rechazar_asistencia_clase_service(id_clase, id_usuario)
+    
     return jsonify(respuesta), status

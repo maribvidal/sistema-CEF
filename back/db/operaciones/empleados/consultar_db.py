@@ -1,5 +1,10 @@
 from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
+def obtener_empleado_por_dni(dni, cursor) -> dict:
+    """Devuelve una tupla que representa un empleado."""
+    query = f"SELECT * FROM Usuario WHERE rol_id IN (0, 1, 2, 4) AND dni = {dni}"
+    return ejecutar_fetchone(query, cursor) 
+
 def listar_empleados(cursor) -> dict:
     """Lista todos los usuarios que son empleados."""
     query = """

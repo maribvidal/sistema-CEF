@@ -68,7 +68,7 @@ const email = ref('')
 408: Error de servidor al validar el correo electrónico
 409: El correo electrónico ya se encuentra registrado
 500: Error del lado del servidor al intentar insertar
-201: Usuario registrado exitosamente. */
+200: Usuario registrado exitosamente. */
 
 const password = ref('')
 const dni = ref('')
@@ -102,6 +102,7 @@ const register = async () => {
       // El rol se asignará por defecto en el backend, usualmente.
         rol_id: 3
     }
+	console.log("DATA ENVIADA:", usuario)
 
 	const response = await fetch('http://127.0.0.1:5000/usuarios', {
       method: 'POST',
@@ -112,21 +113,35 @@ const register = async () => {
     })
 
     if (!response.ok) {
-      if (response.status === 400) {
+	// MIRA LO QUE TE AHORRAS HERMANO. VAMOOOOOOOOOS
+    //   if (response.status === 400) {
+	// 	const errorData = await response.json()
+	// 	errorMessage.value = errorData.message || 'Error de validación. Por favor, revisa tus datos.'
+	//   } else if (response.status === 406 || response.status === 407) {
+	// 	errorMessage.value = 'El correo electrónico ya se encuentra registrado.'
+	//   } else if (response.status === 405) {
+	// 	errorMessage.value = 'El DNI ya se encuentra registrado.'
+	//   } else if (response.status === 403){
+	// 	errorMessage.value = 'El usuario debe ser mayor de 14 años.'
+	//   }
+	// 	else {
+	// 	errorMessage.value = 'Error al registrar el usuario. Por favor, intenta nuevamente.'
+	//   }
 		const errorData = await response.json()
-		errorMessage.value = errorData.message || 'Error de validación. Por favor, revisa tus datos.'
-	  } else if (response.status === 406 || response.status === 407) {
-		errorMessage.value = 'El correo electrónico ya se encuentra registrado.'
-	  } else if (response.status === 405) {
-		errorMessage.value = 'El DNI ya se encuentra registrado.'
-	  } else if (response.status === 403){
-		errorMessage.value = 'El usuario debe ser mayor de 14 años.'
-	  }
-		else {
-		errorMessage.value = 'Error al registrar el usuario. Por favor, intenta nuevamente.'
-	  }
-	  return
-      
+	  
+		// if (Array.isArray(errorData.errors)) {
+		// errorMessage.value = errorData.errors
+		// 	.map(err => `${err.name}: ${err.message}`)
+		// 	.join('\n')
+		// } else {
+
+		// Esto hay que dejarlo así porque utiliza la implementación vieja de errores del backend, la cual no posee el indice "message", para próximas implementaciones utilicen "message"
+		errorMessage.value = 
+			errorData.message ||
+			errorData.error ||
+			'Error desconocido'
+
+		return
     }
 
     // Si el registro es exitoso, redirigir a la página de inicio de sesión

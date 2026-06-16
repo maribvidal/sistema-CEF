@@ -7,3 +7,7 @@ from .actividades_route import actividades_bp
 from .profesores_route import profesores_bp
 from .empleados_route import empleados_bp
 from .permisos_route import permisos_bp
+from .reservas_route import reservas_bp
+from .metricas_route import metricas_bp
+from .notificaciones import notificaciones_bp
+from .mensualidad_route import mensualidad_bp

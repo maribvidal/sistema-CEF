@@ -9,7 +9,6 @@ from services.usuario_service import (
     modificar_contraseña_service,
     restablecer_contraseña_service,
     confirmar_nueva_contrasena_service,
-    obtener_clases_usuario_service,
     subir_avatar_usuario_service,
     obtener_avatar_usuario_service
 )
@@ -158,9 +157,12 @@ def obtener_clases_usuario(usuario_id):
     """Este endpoint permite obtener una lista de las clases a las que un usuario está inscrito.
         Se conecta a la base de datos, consulta la tabla de clases y devuelve la lista de clases en formato JSON."""
 
-    respuesta, status = obtener_clases_usuario_service(usuario_id)
-        
-    return jsonify(respuesta), status
+    ## TODO: Repensar implementación del endpoint
+
+    return {
+        "status": "success",
+        "message": "En remodelación."
+    }, 200
 
 # falta un delete
 
