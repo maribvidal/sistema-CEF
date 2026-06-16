@@ -66,27 +66,16 @@ def modificar_clase(id_clase):
         clase específica. Recibe el ID de la clase a modificar 
         y los nuevos datos en formato JSON."""
 
-    ## TODO: Repensar implementación del endpoint
-
-    # ESTA IMPLEMENTACIÓN PUEDE SERVIR PARA PRÓXIMAS IMPLEMENTACIÓNES, CON ESTO NOS ASEGURAMOS QUE EL REQUEST ESTÉ BIEN Y NO HAYA NINGUN "NONE" O ALGO ASÍ
     body = request.get_json()
-    print("JSON RECIBIDOOOOOOOOO:")
-    print(body)
 
     campos = [
         "estado",
-        "id_actividad",
-        "id_profesor",
-        "id_sala",
-        "dia",
-        "hora",
-        "cupo_maximo"
+        "id_sala"
     ]
 
     for campo in campos:
         if campo not in body:
             return {"error": f"Falta el campo {campo}"}, 400
-
 
     return modificar_clase_service(id_clase, **body)
 
