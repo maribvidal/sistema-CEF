@@ -18,3 +18,4 @@ from .imagenes import *
 from .cancelaciones import *
 from .reservas import *
 from .instancias_clases import *
+from .listas_espera import *

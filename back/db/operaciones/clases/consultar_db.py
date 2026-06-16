@@ -30,7 +30,7 @@ def consultar_reservas_instancias_por_clase(id_clase: int, cursor) -> dict:
     """Hace una consulta que devuelve la cantidad de reservas por instancia de clase.
        Devuelve una fila por cada instancia_clase de la clase indicada con su conteo de reservas."""
     query = f"""
-        SELECT c.id AS clase_id,
+        SELECT c.id,
                ic.id AS inst_clase_id,
                COUNT(r.id) AS cantidad_reservas
         FROM Clase c

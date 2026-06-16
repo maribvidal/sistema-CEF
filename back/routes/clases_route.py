@@ -3,8 +3,7 @@ from services.clases_service import (
     cancelar_clase_service, listar_clases_service, modificar_clase_service, publicar_clase_service,
     reservar_clase_service, verificar_inscripcion_usuario_clase_service,
     eliminar_clase_service, anotarse_lista_espera_service, listar_clases_service, publicar_clase_service,
-    reservar_clase_service, registrar_asistencia_clase_service, rechazar_asistencia_clase_service,
-    test_cl_service
+    reservar_clase_service, registrar_asistencia_clase_service, rechazar_asistencia_clase_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -172,10 +171,4 @@ def rechazar_asistencia_clase(id_clase):
     
     respuesta, status = rechazar_asistencia_clase_service(id_clase, id_usuario)
     
-    return jsonify(respuesta), status
-
-@clases_bp.route("/clases/teste", methods=["GET"])
-def endpo_test():
-    respuesta, status = test_cl_service()
-
     return jsonify(respuesta), status

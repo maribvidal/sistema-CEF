@@ -46,3 +46,21 @@ def listar_pagos(cursor):
         INNER JOIN Pago_Pagar_Clase c ON p.id = c.pago_id
     """
     return ejecutar_fetchall(query, cursor)
+
+def verificar_existencia_pago_por_id(id_pago: int, cursor) -> dict:
+    """Hace una consulta por un pago con un id pasado por parámetro."""
+    query = f"""
+        SELECT 1
+        FROM Pago p
+        WHERE p.id = {id_pago};
+    """
+    return ejecutar_fetchone(query, cursor)
+
+def verificar_estado_pago_por_id(id_pago: int, cursor) -> dict:
+    """Hace una consulta por el estado de un pago con un id pasado por parámetro."""
+    query = f"""
+        SELECT p.estado
+        FROM Pago p
+        WHERE p.id = {id_pago};
+    """
+    return ejecutar_fetchone(query, cursor)

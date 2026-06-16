@@ -61,6 +61,8 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_pago_pagar_clase(cursor)
     construir_tabla_pago_pagar_mensualidad(cursor)
     construir_tabla_clase_tener_mensualidad(cursor)
+    construir_tabla_usuario_pertenece_lista_espera_abonados(cursor)
+    construir_tabla_usuario_pertenece_lista_espera_individual(cursor)
 
 ## FUNCIONES QUE CREAN TABLAS
 # En este apartado aparecen todas las funciones que crean
@@ -199,13 +201,22 @@ def construir_tabla_lista_espera_abonados(cursor: sqlite.Cursor):
     """Construye la tabla Lista_Espera_Abonados"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Lista_Espera_Abonados (
                             id         INTEGER PRIMARY KEY,
-                            fecha         DATETIME NOT NULL,
-                            usuario_id INTEGER NOT NULL,
                             clase_id   INTEGER NOT NULL,
+                            FOREIGN KEY (clase_id) REFERENCES Clase(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
+
+def construir_tabla_usuario_pertenece_lista_espera_abonados(cursor: sqlite.Cursor):
+    """Construye la tabla Usuario_Pertenece_Lista_Espera_Abonados"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Usuario_Pertenece_Lista_Espera_Abonados (
+                            id            INTEGER PRIMARY KEY,
+                            usuario_id    INTEGER NOT NULL,
+                            lea_id        INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
-                            FOREIGN KEY (clase_id) REFERENCES Clase(id)
+                            FOREIGN KEY (lea_id) REFERENCES Lista_Espera_Abonados(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
@@ -214,19 +225,28 @@ def construir_tabla_lista_espera_individual(cursor: sqlite.Cursor):
     """Construye la tabla Lista_Espera_Individual"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Lista_Espera_Individual (
                             id         INTEGER PRIMARY KEY,
-                            fecha         DATETIME NOT NULL,
-                            usuario_id INTEGER NOT NULL,
                             inst_clase_id   INTEGER NOT NULL,
+                            FOREIGN KEY (inst_clase_id) REFERENCES Instancia_Clase(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
+
+def construir_tabla_usuario_pertenece_lista_espera_individual(cursor: sqlite.Cursor):
+    """Construye la tabla Usuario_Pertenece_Lista_Espera_Individual"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Usuario_Pertenece_Lista_Espera_Individual (
+                            id            INTEGER PRIMARY KEY,
+                            usuario_id    INTEGER NOT NULL,
+                            lei_id        INTEGER NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
-                            FOREIGN KEY (inst_clase_id) REFERENCES Instancia_Clase(id)
+                            FOREIGN KEY (lei_id) REFERENCES Lista_Espera_Individual(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
     
 def construir_tabla_asistencias_clase(cursor: sqlite.Cursor):
-    """Construye la tabla Asistencias_clase"""
+    """Construye la tabla Asistencias_Clase"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Asistencias_Clase (
                             id         INTEGER PRIMARY KEY,
                             usuario_id INTEGER NOT NULL,
@@ -247,6 +267,8 @@ def construir_tabla_pago(cursor: sqlite.Cursor):
                             monto      REAL,
                             fecha     DATE,
                             usuario_id INTEGER NOT NULL,
+                            estado      VARCHAR(20) NOT NULL,
+                            mp_order_id VARCHAR(75) UNIQUE,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL

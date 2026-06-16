@@ -14,13 +14,9 @@ from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_ho
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
 from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
-from db.operaciones.listas_espera import anotarse_lista_abonados, anotarse_lista_publico_general
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
-from db.operaciones.listas_espera import borrar_lista_espera
+from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
 from utils.modulo_fechas import generar_fecha_actual, validar_fecha
-from utils.modulo_manejo_listas import revisar_si_hay_cupos
-from db.operaciones.clases import *
-from utils.modulo_fechas import validar_dia_fecha
 from enums.dias import Dias
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
@@ -110,8 +106,21 @@ def publicar_clase_service(
         else:
             return _msj_error_helper("La fecha que se recibió no es válida o no cumple con el formato (YYY-mm-dd).", cursor), 413
 
+    # Insertar instancia de clase e listas de esperas
+
+    respuesta = insertar_lista_espera_abonados(clase_id, cursor)
+    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la lista de espera de abonados.", 415, cursor)
+    if control is not None:
+        return control
+
     respuesta = insertar_instancia_clase(clase_id, fecha_actual, cursor)
-    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la instancia de la clase.", 415, cursor)
+    control = _controlar_errores_query(respuesta, 416, "No se pudo insertar la instancia de la clase.", 417, cursor)
+    if control is not None:
+        return control
+    id_ins_clase = respuesta["data"]
+
+    respuesta = insertar_lista_espera_individual(id_ins_clase, cursor)
+    control = _controlar_errores_query(respuesta, 418, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 419, cursor)
     if control is not None:
         return control
 
@@ -308,16 +317,8 @@ def anotarse_lista_espera_service(id_clase, id_usuario):
     _controlar_errores_query(respuesta, 400, "No se encontró el usuario.", 401, cursor)
     
     # verificar si el usuario abonó
-    esAbonado = verificar_usuario_abonado(cursor, id_usuario, id_clase)
-    
-    if esAbonado:
-        respuesta = anotarse_lista_abonados(id_usuario, id_clase, cursor)
-        _controlar_errores_query(respuesta, 402, "No se pudo anotar a la lista de espera.", 403, cursor)
-        tipo = "de abonados"
-    else:
-        respuesta = anotarse_lista_publico_general(id_usuario, id_clase, cursor)
-        _controlar_errores_query(respuesta, 404, "No se pudo anotar a la lista de espera.", 405, cursor)
-        tipo = "individual"
+
+    # REWORK
             
     cursor.connection.commit()
     return _msj_exito_helper(f"Se anotó a la lista de espera {tipo} con éxito.", cursor)
@@ -338,8 +339,8 @@ def registrar_asistencia_clase_service(id_clase, id_usuario):
     if control is not None:
         return control
 
-    # validar si el usuario es abonado o individual
-    es_abonado = verificar_usuario_abonado(cursor, id_usuario, id_clase)
+    """
+    # verificar que el usuario este en una lista de espera a la clase
 
     # validar que el usuario este en una lista de espera correspondiente
     if es_abonado:
@@ -364,6 +365,7 @@ def registrar_asistencia_clase_service(id_clase, id_usuario):
     respuesta = registrar_asistencia(id_usuario, id_clase, cursor)
     if respuesta["status"] == 'error':
         _msj_error_helper(respuesta['message'], cursor), 408
+    """
 
     cursor.connection.commit()
     return _msj_exito_helper("Asistencia registrada con éxito.", cursor)
@@ -386,8 +388,8 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
     if control is not None:
         return control
 
-    # validar si el usuario es abonado o individual
-    es_abonado = verificar_usuario_abonado(cursor, id_usuario, id_clase)
+    """
+    # verificar que el usuario este en una lista de espera a la clase
 
     # validar que el usuario este en una lista de espera correspondiente
     if es_abonado:
@@ -407,11 +409,7 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
         return {
             "error": respuesta['message']
         }, 500
-        
+    """
+    
     cursor.connection.commit()
     return _msj_exito_helper("Asistencia rechazada con éxito.", cursor)
-
-def test_cl_service():
-    cursor = conectarse_db()
-    print(revisar_si_hay_cupos(1, cursor))
-    return _msj_exito_helper("10 puntos maestro", cursor), 200
