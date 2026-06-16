@@ -154,9 +154,8 @@ def validar_reserva_service(inst_clase_id: int, id_usuario: int):
         return {
             "error": reserva['message']
         }, 500
-    # pongo "not reserva" mas que nada porque el fetchall me puede devovler tanto como None, o una lista vacia, etc.
+    # fetchall puede devolver una lista vacía cuando no existen reservas
     if not reserva['data']:
-        print(reserva)
         cursor.connection.close()
         return {
             "error": "No se encontró una reserva para ese cliente en esa clase."
@@ -167,7 +166,6 @@ def validar_reserva_service(inst_clase_id: int, id_usuario: int):
         "message": "Asistencia confirmada exitosamente"
     }, 200   
 
-
 def validar_reserva_dni_service(inst_clase_id: int, dni: int):
     cursor = conectarse_db()
     usuario = consultar_usuario_por_dni(dni, cursor)
@@ -175,7 +173,8 @@ def validar_reserva_dni_service(inst_clase_id: int, dni: int):
     if usuario['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": usuario['message']
+            "error": "Error al consultar usuario por DNI.",
+            "details": usuario['message']
         }, 500
     if usuario['data'] is None:
         cursor.connection.close()
