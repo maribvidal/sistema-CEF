@@ -1,4 +1,6 @@
 from flask import Blueprint, request, jsonify
+import os
+from dotenv import load_dotenv
 
 from services.pagos_service import *
 
@@ -12,10 +14,7 @@ def obtener_pagos():
 
 # para hacer el pago primero llaman desde el front para obtener el qr y luego llaman para crear la orden de pago y luego preguntan por el estado del pago hasta que cambie de created
 @pagos_bp.route("/pagos/obtenerQR", methods=["GET"])
-def obtener_qr_mp():
-    import os
-    from dotenv import load_dotenv
-    
+def obtener_qr_mp():    
     load_dotenv()
     
     return os.getenv("QR")
@@ -31,11 +30,14 @@ def crear_pago():
     # mensualidad seria para la renovacion o pago de esta y la clase_particular para cuando se llama a pagar con mp en 'confirmar asistencia lista espera individual'
     tipo_pago = data.get("tipo_pago") 
     
-    # es necesario el id del item a pagar, sea de la mensualidad o de la clase 
+    # es necesario el id del item a pagar, sea de la mensualidad o de la instancia clase
     id_item = data.get("id_item")
     
     respuesta, status = crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item)
     
+    # TODO: Crear la orden, y loopear hasta que se llegue a un 'status_detail' que sea distinto de
+    #       'created' o 'partially_refunded'
+
     return jsonify(respuesta), status
 
 @pagos_bp.route("/webhook/qr", methods=["POST"])

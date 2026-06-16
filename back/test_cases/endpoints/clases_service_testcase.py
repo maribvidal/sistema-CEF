@@ -242,7 +242,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         """
 
         id_act2 = insertar_actividad("Yoga", 1500, self.cursor)["data"]
-        id_prof2 = insertar_profesor("Lisa", "Bruselas", "F", "44442222", self.cursor)["data"]
+        id_prof2 = insertar_profesor("Lisa", "Bruselas", "542215253770", "F", "44442222", self.cursor)["data"]
         id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]
         id_ic2 = insertar_instancia_clase(id_cla2, "2026-12-02", self.cursor)["data"]
 

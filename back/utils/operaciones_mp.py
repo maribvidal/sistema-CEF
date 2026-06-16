@@ -41,16 +41,6 @@ def getItem(nombre, id):
         return item
     return None
 
-# esto habria que agregarlo cualquier cosa para los descuentos
-discounts = {
-    "payment_methods": [
-        {
-            "new_total_amount": "47.28",
-            "type": "account_money"
-        }
-    ]
-}
-
 # External_reference:
 # 	Es la referencia externa de la order, asignada al momento de la creación. El límite máximo permitido es de 64 caracteres y los permitidos son: letras mayúsculas y minúsculas,
 # números y los símbolos guion (-) y guion bajo (_). El campo no puede utilizarse para enviar datos PII. Además, este valor debe ser único para cada order, 
@@ -291,44 +281,44 @@ def crear_sucursal_mp():
     "business_hours": {
         "monday": [
         {
-            "open": "08:00",
-            "close": "17:00"
+            "open": "00:00",
+            "close": "23:59"
         }
         ],
         "tuesday": [
         {
-            "open": "08:00",
-            "close": "17:00"
+            "open": "00:00",
+            "close": "23:59"
         }
         ],
         "wednesday": [
         {
-            "open": "08:00",
-            "close": "17:00"
+            "open": "00:00",
+            "close": "23:59"
         }
         ],
         "thursday": [
         {
-            "open": "08:00",
-            "close": "17:00"
+            "open": "00:00",
+            "close": "23:59"
         }
         ],
         "friday": [
         {
-            "open": "08:00",
-            "close": "17:00"
+            "open": "00:00",
+            "close": "23:59"
         }
         ],
         "saturday": [
         {
-            "open": "08:00",
-            "close": "12:00"
+            "open": "00:00",
+            "close": "23:59"
         }
         ],
         "sunday": [
         {
-            "open": "08:00",
-            "close": "12:00"
+            "open": "00:00",
+            "close": "23:59"
         }
         ]
     },
