@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pprint import pprint
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from db.operaciones.conectar_db import conectarse_db
@@ -155,6 +156,7 @@ def validar_reserva_service(inst_clase_id: int, id_usuario: int):
         }, 500
     # pongo "not reserva" mas que nada porque el fetchall me puede devovler tanto como None, o una lista vacia, etc.
     if not reserva['data']:
+        print(reserva)
         cursor.connection.close()
         return {
             "error": "No se encontró una reserva para ese cliente en esa clase."
@@ -164,3 +166,25 @@ def validar_reserva_service(inst_clase_id: int, id_usuario: int):
     return {
         "message": "Asistencia confirmada exitosamente"
     }, 200   
+
+
+def validar_reserva_dni_service(inst_clase_id: int, dni: int):
+    cursor = conectarse_db()
+    usuario = consultar_usuario_por_dni(dni, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 500
+    if usuario['data'] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró un usuario con ese DNI."
+        }, 404
+
+    cursor.connection.close()
+
+    id_usuario = usuario['data']['id']
+    return validar_reserva_service(inst_clase_id, id_usuario)
+

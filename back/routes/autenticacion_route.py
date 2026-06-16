@@ -6,6 +6,7 @@ from services.autenticacion_service import login_service
 from services.autenticacion_service import register_service
 from services.usuario_service import registrar_usuario_service
 from services.autenticacion_service import validar_reserva_service
+from services.autenticacion_service import validar_reserva_dni_service
 
 autenticacion_bp = Blueprint("autenticacion", __name__)
 
@@ -83,3 +84,15 @@ def validar_qr(inst_clase_id: int):
     respuesta, status = validar_reserva_service(inst_clase_id, id_usuario)
 
     return jsonify(respuesta), status
+
+
+@autenticacion_bp.route("/clientes/<int:inst_clase_id>/validar_dni", methods=["POST"])
+def validar_reserva_dni(inst_clase_id: int):
+    data = request.get_json()
+    dni = data.get("usuario_dni")
+
+    respuesta, status = validar_reserva_dni_service(inst_clase_id, dni)
+
+    return jsonify(respuesta), status
+
+
