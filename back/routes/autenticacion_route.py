@@ -1,8 +1,11 @@
 from flask import Blueprint, request, jsonify
+from flask import send_file
 
+from db import modulo_qr
 from services.autenticacion_service import login_service
 from services.autenticacion_service import register_service
 from services.usuario_service import registrar_usuario_service
+from services.autenticacion_service import validar_qr_service
 
 autenticacion_bp = Blueprint("autenticacion", __name__)
 
@@ -53,5 +56,30 @@ def registro():
         genero,
         rol_id 
     )
+
+    return jsonify(respuesta), status
+
+
+# Implementar validar QR no es necesario, ya que existe en clases_route una verificación de validar.
+# Hay que ver si se implementa o no el visualizar qr, creo que es mucho mejor el simplemente generarlo por demanda así no ocupa espacio
+@autenticacion_bp.route("/clientes/<int:id_cliente>/qr", methods=["GET"])
+def generar_qr(id_cliente: int):
+    qr = modulo_qr.generar_qr(id_cliente)
+
+    return send_file(
+        qr,
+        mimetype='image/png'
+    )
+
+
+# Implementar validar QR, se debe recibir el id de la clase + id_cliente, y se debe validar que el client tenga una reserva para esa clase, y que la clase esté activa, y que la fecha y hora sean correctas. Si todo es correcto, se debe devolver un mensaje de éxito, sino se debe devolver un mensaje de error.
+@autenticacion_bp.route("/clientes/<int:inst_clase_id>/validar_qr", methods=["POST"])
+def validar_qr(inst_clase_id: int):
+    # Aquí se debe implementar la lógica para validar el QR, utilizando el id_cliente y el inst_clase_id para verificar si el client tiene una reserva para esa clase, y si la clase está activa, y si la fecha y hora son correctas.
+    # Si todo es correcto, se debe devolver un mensaje de éxito, sino se debe devolver un mensaje de error.
+    data = request.get_json()
+    id_usuario = data.get("id_usuario")
+
+    respuesta, status = validar_qr_service(inst_clase_id, id_usuario)
 
     return jsonify(respuesta), status
