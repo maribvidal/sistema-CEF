@@ -60,6 +60,12 @@ const router = createRouter({
       path: '/ConfirmarNuevaContrasena',
       name: 'cambiarContraeñaOlvidada',
       component: () => import('../views/UsuarioVisitante/ChangeForgottenPass.vue')
+    },
+    {
+      path :'/ConfirmarReserva/:clase_id/:inst_clase_id/:usuario_id',
+      name: 'confirmarReserva',
+      component: () => import('../views/UsuarioCliente/ConfirmarReserva.vue'),
+      props: true,
     }
   ],
 })
