@@ -139,7 +139,7 @@ def cerrar_sesion():
     # Aca podes implementar la lógica para cerrar sesión.
     return
 
-def validar_qr_service(inst_clase_id: int, id_usuario: int):
+def validar_reserva_service(inst_clase_id: int, id_usuario: int):
     # Primero verificamos que en la tabla Reserva exista una reserva con id_cliente e id_inst_clase.
     cursor = conectarse_db()
     reserva = obtener_reservas_usuario_inst_clase(

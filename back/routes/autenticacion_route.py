@@ -5,7 +5,7 @@ from db import modulo_qr
 from services.autenticacion_service import login_service
 from services.autenticacion_service import register_service
 from services.usuario_service import registrar_usuario_service
-from services.autenticacion_service import validar_qr_service
+from services.autenticacion_service import validar_reserva_service
 
 autenticacion_bp = Blueprint("autenticacion", __name__)
 
@@ -80,6 +80,6 @@ def validar_qr(inst_clase_id: int):
     data = request.get_json()
     id_usuario = data.get("id_usuario")
 
-    respuesta, status = validar_qr_service(inst_clase_id, id_usuario)
+    respuesta, status = validar_reserva_service(inst_clase_id, id_usuario)
 
     return jsonify(respuesta), status
