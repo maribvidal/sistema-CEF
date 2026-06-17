@@ -174,7 +174,7 @@
         <v-card-text class="pt-4">
           <v-form>
             <v-row>
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="6" v-if="!isEditing">
                 <v-select
                   v-model="nuevaClase.id_actividad"
                   :items="actividades"
@@ -196,47 +196,27 @@
                   density="compact"
                 ></v-select>
               </v-col>
-              <v-col cols="12" sm="6">
-                <v-menu v-model="menuFecha" :close-on-content-click="false">
-                  <template v-slot:activator="{ props }">
-                    <v-text-field
-                      v-model="nuevaClase.dia"
-                      label="Seleccionar Día"
-                      prepend-inner-icon="mdi-calendar"
-                      readonly
-                      v-bind="props"
-                      variant="outlined"
-                      density="compact"
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker v-model="fechaSeleccionada" @update:model-value="confirmarFecha"></v-date-picker>
-                </v-menu>
+              <v-col cols="12" sm="6" v-if="!isEditing">
+                <v-select
+                  v-model="nuevaClase.dia"
+                  :items="diasSemana"
+                  label="Día de la Semana"
+                  variant="outlined"
+                  density="compact"
+                ></v-select>
               </v-col>
-              <v-col cols="12" sm="6">
-                <v-row no-gutters>
-                  <v-col cols="7" class="pr-1">
-                    <v-select
-                      v-model="horaSel"
-                      :items="horas"
-                      label="Hora"
-                      variant="outlined"
-                      density="compact"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="5" class="pl-1">
-                    <v-select
-                      v-model="minutoSel"
-                      :items="minutos"
-                      label="Min"
-                      variant="outlined"
-                      density="compact"
-                    ></v-select>
-                  </v-col>
-                </v-row>
+              <v-col cols="12" sm="6" v-if="!isEditing">
+                <v-select
+                  v-model="horaSel"
+                  :items="horas"
+                  label="Hora"
+                  variant="outlined"
+                  density="compact"
+                ></v-select>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="nuevaClase.sala"
+                  v-model="nuevaClase.id_sala"
                   :items="salas"
                   item-title="nombre"
                   item-value="id"
@@ -262,7 +242,6 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { ClasesService } from '@/services/ClasesServices'
-import DateFormatterService from '@/services/DateFormatterService.js'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
 
 import { useNotificationStore } from '@/stores/notificationStore.js'
@@ -270,26 +249,22 @@ import { useAuth } from '@/services/UsuariosServices.js'
 const { userProfile, userRole } = useAuth()
 const isEditing = ref(false)
 const dialog = ref(false)
-const menuFecha = ref(false)
-const fechaSeleccionada = ref(null)
 const notificationStore = useNotificationStore()
 const horas = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
-const minutos = ['00', '30']
 const horaSel = ref('08')
-const minutoSel = ref('00')
 
 const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del usuario
 
-watch([horaSel, minutoSel], ([h, m]) => {
-  nuevaClase.value.hora = `${h}:${m}`
+watch(horaSel, (h) => {
+  nuevaClase.value.hora = `${h}:00`
 })
 
 const nuevaClase = ref({
   id_actividad: null,
   id_profesor: null,
-  fecha: '',
+  id_sala: '', 
+  dia: '',
   hora: '',
-  sala: '',
   cupo_maximo: ''
 })
 
@@ -297,6 +272,7 @@ const clases = ref([])
 const actividades = ref([])
 const profesores = ref([])
 const salas = ref([])
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 
 const fetchAuxData = async () => {
   try {
@@ -353,9 +329,9 @@ const fetchClases = async () => {
         id: claseId,
         id_actividad: c.actividad_id ?? c[2],
         estado: c.estado ?? c[1],
-        dia: (c.fecha ?? c[4]) ?? 'A confirmar',
+        dia: c.dia ?? c.fecha ?? c[4] ?? 'A confirmar',
         hora: (c.hora ?? c[5]) ?? '--:--',
-        id_profesor: c.profesor_id ?? c[3],
+        id_profesor: c.profesor_id ?? c[3], // Ensure this is id_profesor
         sala: c.sala_id ?? c[6],
         cupo_maximo: c.cupo_maximo ?? c[7],
         categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
@@ -363,7 +339,7 @@ const fetchClases = async () => {
         profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
                   || `ID Prof: ${c.profesor_id ?? c[3]}`,
         sala_nombre: salas.value.find(s => s.id == (c.sala_id ?? c[6]))?.nombre 
-                  || `Sala ID: ${c.sala_id ?? c[6]}`,
+                  || `Sala ID: ${c.sala_id ?? c[6]}`, // Ensure this is sala_nombre
         // Comparamos el ID actual con el array de reservas
         yaReservada: clasesReservadasIds.value.includes(claseId), 
         imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
@@ -380,23 +356,16 @@ onMounted(async () => {
   await fetchClases()
 })
 
-const confirmarFecha = (val) => {
-  nuevaClase.value.dia = val ? new Date(val).toLocaleDateString() : ''
-  menuFecha.value = false
-}
-
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', sala: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', id_sala: '', cupo_maximo: '' }
   horaSel.value = '08'
-  minutoSel.value = '00'
   dialog.value = true
 }
 
 const cerrarDialog = () => {
-  dialog.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
-  fechaSeleccionada.value = null
+  dialog.value = false // Close the dialog
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '' } // Reset form fields
   isEditing.value = false
 }
 
@@ -406,12 +375,12 @@ const guardarClase = async () => {
       estado: 'Activa',
       id_actividad: nuevaClase.value.id_actividad,
       id_profesor: nuevaClase.value.id_profesor,
-      fecha: DateFormatterService.formatDateForBackend(nuevaClase.value.dia),
+      id_sala: nuevaClase.value.id_sala,
+      dia: nuevaClase.value.dia,
       hora: nuevaClase.value.hora,
-      sala: nuevaClase.value.sala,
-      cupo_maximo: 30
+      cupo_maximo: 1
     }
-
+    
     if (isEditing.value) {
       await ClasesService.modificarClase(nuevaClase.value.id, payload)
     } else {
@@ -428,14 +397,7 @@ const guardarClase = async () => {
 
 const editarClase = (clase) => {
   isEditing.value = true
-  nuevaClase.value = { ...clase }
-
-  if (clase.hora && clase.hora.includes(':')) {
-    const [h, m] = clase.hora.split(':')
-    horaSel.value = h
-    minutoSel.value = minutos.includes(m) ? m : '00'
-  }
-
+  nuevaClase.value = { ...clase, id_sala: clase.sala } // Ensure id_sala is correctly populated
   dialog.value = true
 }
 
