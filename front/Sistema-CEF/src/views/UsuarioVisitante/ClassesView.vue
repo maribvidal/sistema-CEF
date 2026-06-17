@@ -174,7 +174,7 @@
         <v-card-text class="pt-4">
           <v-form>
             <v-row>
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="6" v-if="!isEditing">
                 <v-select
                   v-model="nuevaClase.id_actividad"
                   :items="actividades"
@@ -196,7 +196,7 @@
                   density="compact"
                 ></v-select>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="6" v-if="!isEditing">
                 <v-select
                   v-model="nuevaClase.dia"
                   :items="diasSemana"
@@ -205,7 +205,7 @@
                   density="compact"
                 ></v-select>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="6" v-if="!isEditing">
                 <v-select
                   v-model="horaSel"
                   :items="horas"
@@ -242,7 +242,6 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { ClasesService } from '@/services/ClasesServices'
-import DateFormatterService from '@/services/DateFormatterService.js'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
 
 import { useNotificationStore } from '@/stores/notificationStore.js'
@@ -381,7 +380,7 @@ const guardarClase = async () => {
       hora: nuevaClase.value.hora,
       cupo_maximo: 1
     }
-    console.log(payload)
+    
     if (isEditing.value) {
       await ClasesService.modificarClase(nuevaClase.value.id, payload)
     } else {
@@ -398,16 +397,7 @@ const guardarClase = async () => {
 
 const editarClase = (clase) => {
   isEditing.value = true
-  // Map existing class data to the form model
   nuevaClase.value = { ...clase, id_sala: clase.sala } // Ensure id_sala is correctly populated
-  // The 'dia' field should already be a string like 'Lunes', 'Martes', etc.
-  // No need for date formatting here.
-
-  if (clase.hora && clase.hora.includes(':')) {
-    const [h, m] = clase.hora.split(':')
-    horaSel.value = h
-  }
-
   dialog.value = true
 }
 
