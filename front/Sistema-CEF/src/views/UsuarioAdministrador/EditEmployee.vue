@@ -98,13 +98,20 @@ const updateEmployee = async () => {
   try {
     // Cuando integrés tu API puedes llamar a:
     await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value.nuevo_dni, employee.value)
-    
-    notificationStore.showNotification('Empleado actualizado exitosamente.', 'success')
+
+    notificationStore.showNotification('El empleado fue modificado correctamente', 'success')
     emit('updated')
     emit('close')
   } catch (error) {
     console.error('Error al actualizar empleado:', error)
-    notificationStore.showNotification('Hubo un error al actualizar los datos.', 'danger')
+    const statusCode = error.response?.status
+    if (statusCode === 402) {
+      notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
+    } else if (statusCode === 403) {
+      notificationStore.showNotification('Ya existe un empleado con ese correo', 'danger')
+    } else {
+      notificationStore.showNotification('Hubo un error al actualizar los datos.', 'danger')
+    }
   } finally {
     loading.value = false
   }

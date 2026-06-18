@@ -449,13 +449,17 @@ const abrirEditorRol = (empleado) => {
 
 const confirmarCambioRol = async () => {
   try {
-    // Nota: Por ahora solo se envía el rol al backend; el género se actualiza solo en el estado local del front.
     await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.dni, nuevoRolId.value)
     await cargarEmpleados()
     dialog.value = false
-    notificationStore.showNotification('Rol actualizado exitosamente', 'success')
+    notificationStore.showNotification('Los permisos fueron modificados exitosamente', 'success')
   } catch (error) {
-    notificationStore.showNotification('Error al actualizar el rol: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+    const statusCode = error.response?.status
+    if (statusCode === 402) {
+      notificationStore.showNotification('El empleado ya posee esos permisos', 'danger')
+    } else {
+      notificationStore.showNotification('Error al actualizar el rol: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+    }
   }
 }
 
