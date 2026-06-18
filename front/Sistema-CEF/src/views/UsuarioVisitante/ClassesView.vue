@@ -17,7 +17,7 @@
           </v-btn>
         </div>
         
-        <v-row>
+        <v-row v-if="clases.length > 0">
           <v-col 
             v-for="clase in clases"  
             :key="clase.id" 
@@ -161,6 +161,14 @@
                 </v-col>
               </v-row>
             </v-card>
+          </v-col>
+        </v-row>
+
+        <v-row v-else justify="center" class="mt-10">
+          <v-col cols="12" md="8" class="text-center">
+            <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-calendar-search</v-icon>
+            <div class="text-h5 text-grey-darken-1 font-weight-medium">No hay ninguna clase publicada de momento</div>
+            <p class="text-body-1 text-grey-darken-1 mt-2">Vuelve a consultar más tarde para ver las nuevas actividades.</p>
           </v-col>
         </v-row>
       </v-col>
