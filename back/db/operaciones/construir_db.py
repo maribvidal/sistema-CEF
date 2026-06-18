@@ -213,6 +213,7 @@ def construir_tabla_usuario_pertenece_lista_espera_abonados(cursor: sqlite.Curso
                             id            INTEGER PRIMARY KEY,
                             usuario_id    INTEGER NOT NULL,
                             lea_id        INTEGER NOT NULL,
+                            fecha         DATE NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
@@ -237,6 +238,7 @@ def construir_tabla_usuario_pertenece_lista_espera_individual(cursor: sqlite.Cur
                             id            INTEGER PRIMARY KEY,
                             usuario_id    INTEGER NOT NULL,
                             lei_id        INTEGER NOT NULL,
+                            fecha         DATE NOT NULL,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,

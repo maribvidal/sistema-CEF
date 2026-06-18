@@ -8,7 +8,7 @@ def verificar_asistencia_usuario_clase(id_usuario: int, id_clase: int, cursor):
                 WHERE a.usuario_id = {id_usuario} AND a.inst_clase_id = {id_clase};"""
     return ejecutar_fetchone(query, cursor);
 
-def obtener_clases_con_mensualidad_mas_concurridas(limite, fecha_inicio, fecha_fin, cursor):
+def obtener_clases_con_mensualidad_mas_concurridas(fecha_inicio, fecha_fin, cursor):
     """Operación que obtiene las clases con mensualidad más concurridas."""
     query = f"""
         SELECT c.id AS clase_id, COUNT(DISTINCT a.usuario_id) AS cantidad_asistencias
@@ -25,8 +25,5 @@ def obtener_clases_con_mensualidad_mas_concurridas(limite, fecha_inicio, fecha_f
         GROUP BY c.id
         ORDER BY cantidad_asistencias DESC;
     """
-    
-    if limite is not None:
-        query += f" LIMIT {limite}"
 
     return ejecutar_fetchall(query, cursor);

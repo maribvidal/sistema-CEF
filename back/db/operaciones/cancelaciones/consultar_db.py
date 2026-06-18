@@ -38,7 +38,6 @@ def obtener_clases_mas_canceladas(cursor, limite, actividad=None, fecha_inicio=N
     query += f"""
                 GROUP BY c.inst_clase_id, cl.dia, cl.hora, a.nombre
                 ORDER BY cancelaciones DESC
-                LIMIT {limite};
             """
 
     return ejecutar_fetchall(query, cursor)

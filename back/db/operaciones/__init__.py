@@ -9,6 +9,7 @@ from .permisos import *
 from .profesores import *
 from .roles import *
 from .salas import *
+from .usuario_pertenece_lista_espera_abonados import *
 from .usuario_tener_descuento import *
 from .usuarios import *
 from .construir_db import *

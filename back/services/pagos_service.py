@@ -49,7 +49,12 @@ def crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item):
     
     id_pago = pago['data']
     
-    respuesta_json = crear_orden_qr_mp(id_pago, monto, descripcion, tipo_pago, id_item)
+    datos_item = {
+        "nombre": tipo_pago,
+        "id": id_item
+    }
+    
+    respuesta_json = crear_orden_qr_mp(id_pago, monto, descripcion, datos_item)
     
     if respuesta_json.get('status') == 'error':
         cursor.connection.close()

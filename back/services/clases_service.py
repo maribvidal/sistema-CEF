@@ -5,7 +5,7 @@ from db.operaciones.asistencias import verificar_asistencia_usuario_clase, regis
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora
 from db.operaciones.clases.insertar_db import insertar_clase
-from db.operaciones.clases.modificar_db import modificar_clase_estado
+from db.operaciones.clases import modificar_clase_estado, modificar_clase, borrar_clase
 from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
 from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
 from db.operaciones.salas.consultar_db import consultar_sala_por_id
@@ -13,10 +13,10 @@ from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
-from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
+from db.operaciones.instancias_clases import insertar_instancia_clase
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
-from utils.modulo_fechas import generar_fecha_actual, validar_fecha
+from utils.modulo_fechas import generar_fecha_actual, validar_fecha, validar_dia_fecha
 from enums.dias import Dias
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
@@ -119,6 +119,10 @@ def publicar_clase_service(
         return control
     id_ins_clase = respuesta["data"]
 
+    if not isinstance(id_ins_clase, int):
+        cursor.connection.close()
+        return _msj_error_helper("No se pudo obtener un id válido para la instancia de la clase.", cursor), 418
+
     respuesta = insertar_lista_espera_individual(id_ins_clase, cursor)
     control = _controlar_errores_query(respuesta, 418, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 419, cursor)
     if control is not None:
@@ -157,7 +161,7 @@ def modificar_clase_service(
 
     # Tercero, intentamos modificar la clase
 
-    respuesta = modificar_clase(clase_id, estado, id_actividad, id_profesor, sala, fecha, hora, cupo_maximo, cursor)
+    respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor)
 
     if respuesta['status'] == 'error':
         return _msj_error_helper(respuesta["message"], cursor), 404
@@ -314,14 +318,16 @@ def anotarse_lista_espera_service(id_clase, id_usuario):
     
     # verificar existencia de usuario
     respuesta = consultar_usuario_por_id(id_usuario, cursor)
-    _controlar_errores_query(respuesta, 400, "No se encontró el usuario.", 401, cursor)
+    control = _controlar_errores_query(respuesta, 400, "No se encontró el usuario.", 401, cursor)
+    if control is not None:
+        return control
     
     # verificar si el usuario abonó
 
     # REWORK
             
     cursor.connection.commit()
-    return _msj_exito_helper(f"Se anotó a la lista de espera {tipo} con éxito.", cursor)
+    return _msj_exito_helper("Se anotó a la lista de espera con éxito.", cursor)
     
 def registrar_asistencia_clase_service(id_clase, id_usuario):
     """Service que permite registrar la asistencia de un usuario a una clase"""

@@ -4,12 +4,19 @@ from enums.dias import Dias
 import dateparser
 
 FORMATO_FECHA = '%Y-%m-%d'
+FORMATO_FECHA_2 = '%Y-%m-%d %H:%M:%S'
 
 def generar_fecha_actual(dia: str = None) -> str:
     """Genera la fecha del día de hoy con el formato FORMATO_FECHA."""
     if (dia is not None):
         return obtener_fecha_dia_semana(dia)
     return datetime.today().strftime(FORMATO_FECHA)
+
+def generar_fecha_hora_actual(dia: str = None) -> str:
+    """Genera la fecha del día de hoy con el formato FORMATO_FECHA_2."""
+    if (dia is not None):
+        return obtener_fecha_dia_semana(dia)
+    return datetime.today().strftime(FORMATO_FECHA_2)
 
 def obtener_fecha_dia_semana(dia: str) -> str:
     hoy = date.today()
@@ -45,3 +52,10 @@ def validar_dia_fecha(fecha: str, dia: str):
     if fecha_normalizada:
         return fecha_normalizada.weekday() == Dias[dia].value
     return False
+
+def comprobar_fecha_anterior(fecha1: str, fecha2: str) -> bool:
+    """Valida si la fecha1 es anterior a la fecha2 o no."""
+    fecha1_normalizada = convertir_fecha(fecha1)
+    fecha2_normalizada = convertir_fecha(fecha2)
+
+    return fecha1_normalizada < fecha2_normalizada

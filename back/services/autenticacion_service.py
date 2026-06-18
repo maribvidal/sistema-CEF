@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pprint import pprint
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from db.operaciones.conectar_db import conectarse_db
@@ -139,7 +140,7 @@ def cerrar_sesion():
     # Aca podes implementar la lógica para cerrar sesión.
     return
 
-def validar_qr_service(inst_clase_id: int, id_usuario: int):
+def validar_reserva_service(inst_clase_id: int, id_usuario: int):
     # Primero verificamos que en la tabla Reserva exista una reserva con id_cliente e id_inst_clase.
     cursor = conectarse_db()
     reserva = obtener_reservas_usuario_inst_clase(
@@ -153,7 +154,7 @@ def validar_qr_service(inst_clase_id: int, id_usuario: int):
         return {
             "error": reserva['message']
         }, 500
-    # pongo "not reserva" mas que nada porque el fetchall me puede devovler tanto como None, o una lista vacia, etc.
+    # fetchall puede devolver una lista vacía cuando no existen reservas
     if not reserva['data']:
         cursor.connection.close()
         return {
@@ -164,3 +165,25 @@ def validar_qr_service(inst_clase_id: int, id_usuario: int):
     return {
         "message": "Asistencia confirmada exitosamente"
     }, 200   
+
+def validar_reserva_dni_service(inst_clase_id: int, dni: int):
+    cursor = conectarse_db()
+    usuario = consultar_usuario_por_dni(dni, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al consultar usuario por DNI.",
+            "details": usuario['message']
+        }, 500
+    if usuario['data'] is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró un usuario con ese DNI."
+        }, 404
+
+    cursor.connection.close()
+
+    id_usuario = usuario['data']['id']
+    return validar_reserva_service(inst_clase_id, id_usuario)
+

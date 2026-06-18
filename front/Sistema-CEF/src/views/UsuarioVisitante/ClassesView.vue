@@ -17,7 +17,7 @@
           </v-btn>
         </div>
         
-        <v-row>
+        <v-row v-if="clases.length > 0">
           <v-col 
             v-for="clase in clases"  
             :key="clase.id" 
@@ -163,6 +163,13 @@
             </v-card>
           </v-col>
         </v-row>
+
+        <v-row v-else justify="center" class="mt-10">
+          <v-col cols="12" md="8" class="text-center">
+            <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-calendar-search</v-icon>
+            <div class="text-h5 text-grey-darken-1 font-weight-medium">No hay ninguna clase publicada de momento</div>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
 
@@ -174,7 +181,7 @@
         <v-card-text class="pt-4">
           <v-form>
             <v-row>
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="6" v-if="!isEditing">
                 <v-select
                   v-model="nuevaClase.id_actividad"
                   :items="actividades"
@@ -196,47 +203,27 @@
                   density="compact"
                 ></v-select>
               </v-col>
-              <v-col cols="12" sm="6">
-                <v-menu v-model="menuFecha" :close-on-content-click="false">
-                  <template v-slot:activator="{ props }">
-                    <v-text-field
-                      v-model="nuevaClase.dia"
-                      label="Seleccionar Día"
-                      prepend-inner-icon="mdi-calendar"
-                      readonly
-                      v-bind="props"
-                      variant="outlined"
-                      density="compact"
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker v-model="fechaSeleccionada" @update:model-value="confirmarFecha"></v-date-picker>
-                </v-menu>
+              <v-col cols="12" sm="6" v-if="!isEditing">
+                <v-select
+                  v-model="nuevaClase.dia"
+                  :items="diasSemana"
+                  label="Día de la Semana"
+                  variant="outlined"
+                  density="compact"
+                ></v-select>
               </v-col>
-              <v-col cols="12" sm="6">
-                <v-row no-gutters>
-                  <v-col cols="7" class="pr-1">
-                    <v-select
-                      v-model="horaSel"
-                      :items="horas"
-                      label="Hora"
-                      variant="outlined"
-                      density="compact"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="5" class="pl-1">
-                    <v-select
-                      v-model="minutoSel"
-                      :items="minutos"
-                      label="Min"
-                      variant="outlined"
-                      density="compact"
-                    ></v-select>
-                  </v-col>
-                </v-row>
+              <v-col cols="12" sm="6" v-if="!isEditing">
+                <v-select
+                  v-model="horaSel"
+                  :items="horas"
+                  label="Hora"
+                  variant="outlined"
+                  density="compact"
+                ></v-select>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="nuevaClase.sala"
+                  v-model="nuevaClase.id_sala"
                   :items="salas"
                   item-title="nombre"
                   item-value="id"
@@ -252,7 +239,11 @@
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
           <v-btn color="grey-darken-1" variant="text" @click="cerrarDialog">Cancelar</v-btn>
-          <v-btn color="black" variant="elevated" @click="guardarClase">Guardar Clase</v-btn>
+          <v-btn 
+            color="black" 
+            variant="elevated" 
+            @click="isEditing ? actualizarClase() : crearClase()"
+          >Guardar Clase</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -262,7 +253,6 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { ClasesService } from '@/services/ClasesServices'
-import DateFormatterService from '@/services/DateFormatterService.js'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
 
 import { useNotificationStore } from '@/stores/notificationStore.js'
@@ -270,26 +260,22 @@ import { useAuth } from '@/services/UsuariosServices.js'
 const { userProfile, userRole } = useAuth()
 const isEditing = ref(false)
 const dialog = ref(false)
-const menuFecha = ref(false)
-const fechaSeleccionada = ref(null)
 const notificationStore = useNotificationStore()
 const horas = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
-const minutos = ['00', '30']
 const horaSel = ref('08')
-const minutoSel = ref('00')
 
 const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del usuario
 
-watch([horaSel, minutoSel], ([h, m]) => {
-  nuevaClase.value.hora = `${h}:${m}`
+watch(horaSel, (h) => {
+  nuevaClase.value.hora = `${h}:00`
 })
 
 const nuevaClase = ref({
   id_actividad: null,
   id_profesor: null,
-  fecha: '',
+  id_sala: '', 
+  dia: '',
   hora: '',
-  sala: '',
   cupo_maximo: ''
 })
 
@@ -297,6 +283,7 @@ const clases = ref([])
 const actividades = ref([])
 const profesores = ref([])
 const salas = ref([])
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 
 const fetchAuxData = async () => {
   try {
@@ -353,9 +340,9 @@ const fetchClases = async () => {
         id: claseId,
         id_actividad: c.actividad_id ?? c[2],
         estado: c.estado ?? c[1],
-        dia: (c.fecha ?? c[4]) ?? 'A confirmar',
+        dia: c.dia ?? c.fecha ?? c[4] ?? 'A confirmar',
         hora: (c.hora ?? c[5]) ?? '--:--',
-        id_profesor: c.profesor_id ?? c[3],
+        id_profesor: c.profesor_id ?? c[3], // Ensure this is id_profesor
         sala: c.sala_id ?? c[6],
         cupo_maximo: c.cupo_maximo ?? c[7],
         categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
@@ -363,7 +350,7 @@ const fetchClases = async () => {
         profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
                   || `ID Prof: ${c.profesor_id ?? c[3]}`,
         sala_nombre: salas.value.find(s => s.id == (c.sala_id ?? c[6]))?.nombre 
-                  || `Sala ID: ${c.sala_id ?? c[6]}`,
+                  || `Sala ID: ${c.sala_id ?? c[6]}`, // Ensure this is sala_nombre
         // Comparamos el ID actual con el array de reservas
         yaReservada: clasesReservadasIds.value.includes(claseId), 
         imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
@@ -380,62 +367,71 @@ onMounted(async () => {
   await fetchClases()
 })
 
-const confirmarFecha = (val) => {
-  nuevaClase.value.dia = val ? new Date(val).toLocaleDateString() : ''
-  menuFecha.value = false
-}
-
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', sala: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', id_sala: '', cupo_maximo: '' }
   horaSel.value = '08'
-  minutoSel.value = '00'
   dialog.value = true
 }
 
 const cerrarDialog = () => {
-  dialog.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', sala: '' }
-  fechaSeleccionada.value = null
+  dialog.value = false // Close the dialog
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '' } // Reset form fields
   isEditing.value = false
 }
 
-const guardarClase = async () => {
+const crearClase = async () => {
   try {
     const payload = {
       estado: 'Activa',
       id_actividad: nuevaClase.value.id_actividad,
       id_profesor: nuevaClase.value.id_profesor,
-      fecha: DateFormatterService.formatDateForBackend(nuevaClase.value.dia),
+      id_sala: nuevaClase.value.id_sala,
+      dia: nuevaClase.value.dia,
       hora: nuevaClase.value.hora,
-      sala: nuevaClase.value.sala,
-      cupo_maximo: 30
-    }
-
-    if (isEditing.value) {
-      await ClasesService.modificarClase(nuevaClase.value.id, payload)
-    } else {
-      await ClasesService.publicarClase(payload)
+      cupo_maximo: 1 // lo hardcodeo, despues lo vemos 
     }
     
+    await ClasesService.publicarClase(payload)
+    notificationStore.showNotification('La clase fue publicada con éxito', 'success')
     await fetchClases()
     cerrarDialog()
   } catch (error) {
-    console.error('Error al guardar clase:', error)
-    notificationStore.showNotification('Hubo un error al procesar la clase', 'danger')
+    console.error('Error al publicar la clase:', error)
+    const statusCode = error.response?.status;
+    if (statusCode === 406 || statusCode === 407) {
+      notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
+    } else if (statusCode === 408) {
+      notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
+    } else {
+      // Mensaje genérico para otros errores
+      notificationStore.showNotification('Hubo un error al publicar la clase', 'danger');
+    }
+  }
+}
+
+const actualizarClase = async () => {
+  try {
+    // Para editar, solo enviamos los campos que el backend permite modificar ahora
+    const payload = {
+      estado: 'Activa',
+      id_profesor: nuevaClase.value.id_profesor,
+      id_sala: nuevaClase.value.id_sala
+    }
+    
+    await ClasesService.modificarClase(nuevaClase.value.id, payload)
+    notificationStore.showNotification('Clase actualizada exitosamente', 'success')
+    await fetchClases()
+    cerrarDialog()
+  } catch (error) {
+    console.error('Error al actualizar clase:', error)
+    notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
   }
 }
 
 const editarClase = (clase) => {
   isEditing.value = true
-  nuevaClase.value = { ...clase }
-
-  if (clase.hora && clase.hora.includes(':')) {
-    const [h, m] = clase.hora.split(':')
-    horaSel.value = h
-    minutoSel.value = minutos.includes(m) ? m : '00'
-  }
-
+  nuevaClase.value = { ...clase, id_sala: clase.sala } // Ensure id_sala is correctly populated
   dialog.value = true
 }
 
@@ -443,10 +439,16 @@ const eliminarClase = async (clase) => {
   if (confirm(`¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`)) {
     try {
       await ClasesService.eliminarClase(clase.id)
+      notificationStore.showNotification('La clase fue eliminada con éxito', 'success')
       await fetchClases()
     } catch (error) {
       console.error('Error al eliminar clase:', error)
-      notificationStore.showNotification('Hubo un error al eliminar la clase', 'danger')
+      const statusCode = error.response?.status;
+      if (statusCode === 402 || statusCode === 403) {
+        notificationStore.showNotification('No se puede eliminar una clase con usuarios inscriptos en alguna de sus instancias', 'danger');
+      } else {
+        notificationStore.showNotification('Hubo un error al eliminar la clase', 'danger')
+      }
     }
   }
 }
