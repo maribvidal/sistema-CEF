@@ -1,24 +1,24 @@
 from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
-def consultar_lista_espera_abonado(id_usuario: int, id_clase: int, cursor):
+def consultar_lista_espera_abonado(id_usuario: int, id_lea: int, cursor):
     """Operación que consulta por listas de espera según el id del usuario y el id de la clase
         asociada a la lista de espera."""
     query = f"""
         SELECT 1
-        FROM Lista_Espera_Abonados lea
-        WHERE lea.usuario_id = {id_usuario}
-          AND lea.clase_id = {id_clase}
+        FROM Lista_Espera_Abonados
+        WHERE usuario_id = {id_usuario}
+          AND lea_id = {id_lea}
     """
     return ejecutar_fetchone(query, cursor);
   
-def consultar_lista_espera_individual(id_usuario: int, id_clase: int, cursor):
+def consultar_lista_espera_individual(id_usuario: int, id_lei: int, cursor):
     """Operación que consulta por listas de espera según el id del usuario y el id de la clase
         asociada a la lista de espera."""
     query = f"""
         SELECT 1
-        FROM Lista_Espera_Individual lei
-        WHERE lei.usuario_id = {id_usuario}
-          AND lei.inst_clase_id = {id_clase}
+        FROM Lista_Espera_Individual
+        WHERE usuario_id = {id_usuario}
+          AND lei_id = {id_lei}
     """
     return ejecutar_fetchone(query, cursor);
   
