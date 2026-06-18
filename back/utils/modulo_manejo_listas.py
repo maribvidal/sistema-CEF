@@ -189,6 +189,8 @@ def avisar_abonados(id_lea: int, lista_abonados: list, cupos_disp: int, cursor):
     while (cant_abonados_esperando > 0 and cupos_disp > 0):
         # Quitar un usuario de la lista
         id_abonado = lista_abonados.pop(0)
+        # Quizás no habría que quitar a los usuarios de la 
+        # lista de espera en este momento, pero después lo veo mejor.
         cons = borrar_usuario_pertenece_lista_espera_abonados_por_id(id_lea, id_abonado, cursor)
         cant_abonados_esperando = len(lista_abonados)
         cursor.connection.commit()
