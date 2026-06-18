@@ -232,7 +232,11 @@
         <v-card-actions class="pa-4">
           <v-spacer></v-spacer>
           <v-btn color="grey-darken-1" variant="text" @click="cerrarDialog">Cancelar</v-btn>
-          <v-btn color="black" variant="elevated" @click="guardarClase">Guardar Clase</v-btn>
+          <v-btn 
+            color="black" 
+            variant="elevated" 
+            @click="isEditing ? actualizarClase() : crearClase()"
+          >Guardar Clase</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -369,7 +373,7 @@ const cerrarDialog = () => {
   isEditing.value = false
 }
 
-const guardarClase = async () => {
+const crearClase = async () => {
   try {
     const payload = {
       estado: 'Activa',
@@ -378,20 +382,42 @@ const guardarClase = async () => {
       id_sala: nuevaClase.value.id_sala,
       dia: nuevaClase.value.dia,
       hora: nuevaClase.value.hora,
-      cupo_maximo: 1
+      cupo_maximo: 1 // lo hardcodeo, despues lo vemos 
     }
     
-    if (isEditing.value) {
-      await ClasesService.modificarClase(nuevaClase.value.id, payload)
-    } else {
-      await ClasesService.publicarClase(payload)
-    }
-    
+    await ClasesService.publicarClase(payload)
+    notificationStore.showNotification('La clase fue publicada con éxito', 'success')
     await fetchClases()
     cerrarDialog()
   } catch (error) {
-    console.error('Error al guardar clase:', error)
-    notificationStore.showNotification('Hubo un error al procesar la clase', 'danger')
+    const statusCode = error.response?.status;
+    if (statusCode === 406 || statusCode === 407) {
+      notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
+    } else if (statusCode === 408) {
+      notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
+    } else {
+      // Mensaje genérico para otros errores
+      notificationStore.showNotification('Hubo un error al publicar la clase', 'danger');
+    }
+  }
+}
+
+const actualizarClase = async () => {
+  try {
+    // Para editar, solo enviamos los campos que el backend permite modificar ahora
+    const payload = {
+      estado: 'Activa',
+      id_profesor: nuevaClase.value.id_profesor,
+      id_sala: nuevaClase.value.id_sala
+    }
+    
+    await ClasesService.modificarClase(nuevaClase.value.id, payload)
+    notificationStore.showNotification('Clase actualizada exitosamente', 'success')
+    await fetchClases()
+    cerrarDialog()
+  } catch (error) {
+    console.error('Error al actualizar clase:', error)
+    notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
   }
 }
 
@@ -405,10 +431,16 @@ const eliminarClase = async (clase) => {
   if (confirm(`¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`)) {
     try {
       await ClasesService.eliminarClase(clase.id)
+      notificationStore.showNotification('La clase fue eliminada con éxito', 'success')
       await fetchClases()
     } catch (error) {
       console.error('Error al eliminar clase:', error)
-      notificationStore.showNotification('Hubo un error al eliminar la clase', 'danger')
+      const statusCode = error.response?.status;
+      if (statusCode === 402 || statusCode === 403) {
+        notificationStore.showNotification('No se puede eliminar una clase con usuarios inscriptos en alguna de sus instancias', 'danger');
+      } else {
+        notificationStore.showNotification('Hubo un error al eliminar la clase', 'danger')
+      }
     }
   }
 }
