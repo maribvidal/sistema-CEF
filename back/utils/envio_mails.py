@@ -31,4 +31,4 @@ def enviar_mail_confirmacion_asistencia(id_usuario: int, cursor):
     consulta = consultar_usuario_por_id(id_usuario, cursor)
     correo = consulta["data"]["correo"]
 
-    enviar_mail(correo, "Buenos días, tiene la posibilidad de reservar si lo desea.")
+    enviar_mail(correo, "Buenos días, tiene la posibilidad de reservar si lo desea.\nHaga click en este enlace para confirmar.")

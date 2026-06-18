@@ -80,20 +80,18 @@ def manejar_listas_de_espera_por_clase(clase_id, cursor):
         return None
 
     # Si hay cupos disponibles, enviarle a los usuarios
-    # confirmaciones para cupos según alguno de los tres
-    # escenarios descritos anteriormente.
+    # confirmaciones para cupos según la prioridad
+    # descrita anteriormente.
 
-    # Escenario 3.1
+    # Primero revisar los abonados
 
     if (lista_abonados):
         manejar_cupos_disponibles_abonados(clase_id, lista_abonados, dict_cupos, cursor)
 
-    # Escenario 3.2
+    # Y luego los que pagaron de forma individual
 
     if (dict_individual):
-        manejar_cupos_disponibles_individuales(dict_cupos, dict_individual, cursor)
-        
-    return (lista_abonados, dict_individual)
+        manejar_cupos_disponibles_individual(dict_cupos, dict_individual, cursor)
 
 def revisar_si_hay_cupos(clase_id, cursor) -> dict:
     """Función que devuelve un diccionario vacío o
@@ -126,34 +124,16 @@ def manejar_cupos_disponibles_abonados(clase_id, lista_abonados, dict_cupos, cur
     if (cupos_disponibles_abonado > 0):
         avisar_abonados(id_lea, lista_abonados, cupos_disponibles_abonado, cursor)
 
-def manejar_cupos_disponibles_individuales(dict_cupos, dict_individual, cursor):
+def manejar_cupos_disponibles_individual(dict_cupos, dict_individual, cursor):
     """Función que se encarga de manejar el tema de los cupos para
         las personas que pagaron la clase de forma individual."""
     lista_ids = obtener_lista_ids_ins_clases(dict_cupos)
     for item in lista_ids:
-        cupos_disponibles_inviduales = dict_cupos[item]
-        lista_individuales_ins_clase = dict_individual[item]
-        gente_esperando = len(lista_individuales_ins_clase)
-
-        if (cupos_disponibles_inviduales > 0):
-
-    while (cant_cupos > 0 and gente_esperando > 0):
-        id_individual = lista_individuales.pop(0)
-        # Quizás no habría que quitar a los usuarios de la 
-        # lista de espera en este momento, pero después lo veo mejor.
-        cons = borrar_usuario_pertenece_lista_espera_abonados_por_id(id_lea, id_abonado, cursor)
-        cant_abonados_esperando = len(lista_abonados)
-        cursor.connection.commit()
-        # Enviarle un email para que pueda confirmar su asistencia
-        enviar_mail_confirmacion_asistencia(id_abonado, cursor)
-        # Restar un cupo disponible (igualmente, si el usuario
-        # cancela, entonces ese cupo va a volver a estar disponible.)
-        cupos_disp -= 1
-
-
-    cupos_disponibles_abonado = revisar_cupos_disponible_abonado(dict_cupos)
-    if (cupos_disponibles_abonado > 0 and lista_abonados):
-        avisar_abonados(id_lea, lista_abonados, cupos_disponibles_abonado, cursor)
+        cupos_disponibles_individuales = dict_cupos[item]
+        lista_individual_ins_clase = dict_individual[item]
+        id_lei = obtener_lista_espera_individual_por_id_ins_clase(item, cursor)
+        avisar_individual(id_lei, lista_individual_ins_clase, cupos_disponibles_individuales, cursor)
+        lista_ids = lista_ids.remove(item)
 
 def revisar_cupos_disponible_abonado(dict_cupos: dict) -> bool:
     """Función que itera sobre todas las instancias de clases que
@@ -176,8 +156,8 @@ def revisar_gente_esperando(dict_cupos: dict, clase_id: int, cursor) -> (list, d
         relacionadas con la clase recibida, y si hay, devuelve una
         tupla compuesta de una lista y un diccionario."""
     cupos_abonados = revisar_gente_esperando_lista_abonados(clase_id, cursor)
-    cupos_individuales = revisar_gente_esperando_lista_individuales(dict_cupos, cursor)
-    return (cupos_abonados, cupos_individuales)
+    cupos_individual = revisar_gente_esperando_lista_individual(dict_cupos, cursor)
+    return (cupos_abonados, cupos_individual)
 
 def revisar_gente_esperando_lista_abonados(clase_id: int, cursor) -> list:
     consulta = obtener_lista_espera_abonados_por_id_clase(clase_id, cursor)
@@ -191,7 +171,7 @@ def revisar_gente_esperando_lista_abonados(clase_id: int, cursor) -> list:
 
     return lista_usuarios_esperando
 
-def revisar_gente_esperando_lista_individuales(dict_cupos: dict, cursor):
+def revisar_gente_esperando_lista_individual(dict_cupos: dict, cursor):
     dict_usuarios_esperando = {}
     lista_ids = obtener_lista_ids_ins_clases(dict_cupos)
 
@@ -238,4 +218,23 @@ def avisar_abonados(id_lea: int, lista_abonados: list, cupos_disp: int, cursor):
         enviar_mail_confirmacion_asistencia(id_abonado, cursor)
         # Restar un cupo disponible (igualmente, si el usuario
         # cancela, entonces ese cupo va a volver a estar disponible.)
+        cupos_disp -= 1
+
+def avisar_individual(id_lei: int, lista_individual: list, cupos_disp: int, cursor):
+    """Función que le envía un mail a cada usuario que estaba
+        esperando en la lista por esa clase y que reservó la
+        clase de manera individual, mientras hayan cupos 
+        disponibles."""
+    cant_individual_esperando = len(lista_individual)
+
+    while (cupos_disp > 0 and cant_individual_esperando > 0):
+        id_individual = lista_individual.pop(0)
+        # Quizás no habría que quitar a los usuarios de la 
+        # lista de espera en este momento, pero después lo veo mejor.
+        cons = borrar_usuario_pertenece_lista_espera_individual_por_id(id_lei, id_individual, cursor)
+        cant_individual_esperando = len(lista_individual)
+        cursor.connection.commit()
+
+        enviar_mail_confirmacion_asistencia(id_individual, cursor)
+
         cupos_disp -= 1
