@@ -8,6 +8,8 @@ from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.roles.insertar_db import insertar_rol
 from db.operaciones.reservas.insertar_db import insertar_reserva
 
+from utils.modulo_fechas import generar_fecha_actual
+
 class ClasesServiceTestCase(EndpointTestCase):
     """Testcase para probar los endpoints del service de Clases."""
     def setUp(self):
@@ -111,7 +113,8 @@ class ClasesServiceTestCase(EndpointTestCase):
         
         cons_ins_clase_creada = consultar_instancia_clase_por_clase_id(json_res["data"], self.cursor)
 
-        assert cons_ins_clase_creada["data"][0]["fecha"] == '2026-06-15', "La fecha de la instancia de la clase creada automáticamente no es correcta."
+        fecha_aux = generar_fecha_actual('Lunes')
+        assert cons_ins_clase_creada["data"][0]["fecha"] == fecha_aux, "La fecha de la instancia de la clase creada automáticamente no es correcta."
 
         # Revisar que se devuelve fallo por los casos donde se ponga una actividad, un profesor o una sala que no existen
 
