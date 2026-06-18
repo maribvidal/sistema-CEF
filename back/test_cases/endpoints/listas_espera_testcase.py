@@ -7,10 +7,11 @@ from db.operaciones.salas.insertar_db import insertar_sala
 from db.operaciones.instancias_clases import insertar_instancia_clase, consultar_instancia_clase_por_clase_id
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.reservas.insertar_db import insertar_reserva
-
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
 from db.operaciones.usuarios.insertar_db import insertar_usuario_lista_espera_abonados, insertar_usuario_lista_espera_individual
+
 from utils.modulo_manejo_listas import manejar_listas_de_espera_por_clase
+from utils.modulo_fechas import generar_fecha_hora_actual
 
 class ListasEsperaTestcase(EndpointTestCase):
     """Testcase para probar el mecanismo de la listas de espera."""
@@ -47,15 +48,15 @@ class ListasEsperaTestcase(EndpointTestCase):
         # Crear usuarios
         id_usuarios_reservaron = []
         for i in range(0, 2):
-            id_cli_nuevo = insertar_usuario(f"40123412{i}", "Cliente", f"N°{i}", "12345678", "2004-02-02", f"cli{i}@gmail.com", "542215253772", "M", 3, self.cursor)["data"]
-            id_cli_nuevo2 = insertar_usuario(f"5012301{i}", "Cliente", f"N°{i+2}", "12345678", "2004-02-02", f"cli{i+2}@gmail.com", "542215253773", "F", 3, self.cursor)["data"]
+            id_cli_nuevo = insertar_usuario(f"40123412{i}", "Cliente", f"N°{i}", "12345678", generar_fecha_hora_actual(), f"cef_cli{i}@yopmail.com", "542215253772", "M", 3, self.cursor)["data"]
+            id_cli_nuevo2 = insertar_usuario(f"5012301{i}", "Cliente", f"N°{i+2}", "12345678", generar_fecha_hora_actual(), f"cef_cli{i+2}@gmail.com", "542215253773", "F", 3, self.cursor)["data"]
             insertar_reserva(id_cli_nuevo, id_ic1, self.cursor)
             insertar_reserva(id_cli_nuevo2, id_ic3, self.cursor)
             id_usuarios_reservaron.append(id_cli_nuevo)
             id_usuarios_reservaron.append(id_cli_nuevo2)
         for i in range(0, 2):
-            id_cli_nuevo = insertar_usuario(f"30123412{i}", "Cliente", f"N°{i+4}", "12345678", "2004-02-02", f"cli{i+4}@gmail.com", "542215253774", "M", 3, self.cursor)["data"]
-            id_cli_nuevo2 = insertar_usuario(f"2012301{i}", "Cliente", f"N°{i+6}", "12345678", "2004-02-02", f"cli{i+6}@gmail.com", "542215253775", "F", 3, self.cursor)["data"]
+            id_cli_nuevo = insertar_usuario(f"30123412{i}", "Cliente", f"N°{i+4}", "12345678", generar_fecha_hora_actual(), f"cef_cli{i+4}@yopmail.com", "542215253774", "M", 3, self.cursor)["data"]
+            id_cli_nuevo2 = insertar_usuario(f"2012301{i}", "Cliente", f"N°{i+6}", "12345678", generar_fecha_hora_actual(), f"cef_cli{i+6}@yopmail.com", "542215253775", "F", 3, self.cursor)["data"]
             insertar_reserva(id_cli_nuevo, id_ic2, self.cursor)
             insertar_reserva(id_cli_nuevo2, id_ic4, self.cursor)
             id_usuarios_reservaron.append(id_cli_nuevo)
@@ -63,8 +64,8 @@ class ListasEsperaTestcase(EndpointTestCase):
 
         id_usuarios_esperando = []
         for i in range(0, 3):
-            id_cli_nuevo = insertar_usuario(f"80123412{i}", "Cliente", f"N°{i+8}", "12345678", "2004-02-02", f"cli{i}@gmail.com", "542215253776", "M", 3, self.cursor)["data"]
-            id_cli_nuevo2 = insertar_usuario(f"7012301{i}", "Cliente", f"N°{i+11}", "12345678", "2004-02-02", f"cli{i+2}@gmail.com", "542215253777", "F", 3, self.cursor)["data"]
+            id_cli_nuevo = insertar_usuario(f"80123412{i}", "Cliente", f"N°{i+8}", "12345678", generar_fecha_hora_actual(), f"cef_cli{i}@yopmail.com", "542215253776", "M", 3, self.cursor)["data"]
+            id_cli_nuevo2 = insertar_usuario(f"7012301{i}", "Cliente", f"N°{i+11}", "12345678", generar_fecha_hora_actual(), f"cef_cli{i+2}@yopmail.com", "542215253777", "F", 3, self.cursor)["data"]
             id_usuarios_esperando.append(id_cli_nuevo)
             id_usuarios_esperando.append(id_cli_nuevo2)
 
