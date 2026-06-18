@@ -47,6 +47,22 @@ def listar_pagos(cursor):
     """
     return ejecutar_fetchall(query, cursor)
 
+def listar_pagos_fechas(cursor, fecha_inicio, fecha_fin):
+    """Hace una consulta por todos los pagos registrados en la base de datos entre dos fechas,
+        y devuelve una lista de tuplas"""
+    query = f"""
+        SELECT
+            p.id,
+            p.monto,
+            p.fecha,
+            c.id AS clase_id,
+            p.usuario_id
+        FROM Pago p
+        INNER JOIN Pago_Pagar_Clase c ON p.id = c.pago_id
+        WHERE p.fecha >= '{fecha_inicio}' AND p.fecha <= '{fecha_fin}';
+    """
+    return ejecutar_fetchall(query, cursor)
+
 def verificar_existencia_pago_por_id(id_pago: int, cursor) -> dict:
     """Hace una consulta por un pago con un id pasado por parámetro."""
     query = f"""

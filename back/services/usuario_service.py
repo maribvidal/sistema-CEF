@@ -513,6 +513,12 @@ def subir_avatar_usuario_service(usuario_id, avatar):
 
     imagen_id = res['data']
 
+    if not isinstance(imagen_id, int):
+        cursor.connection.close()
+        return {
+            "error": "No se pudo obtener un id de imagen válido."
+        }, 500
+
     # Asociar la imagen al usuario
 
     res2 = modificar_avatar(usuario_id, imagen_id, cursor)
