@@ -168,7 +168,6 @@
           <v-col cols="12" md="8" class="text-center">
             <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-calendar-search</v-icon>
             <div class="text-h5 text-grey-darken-1 font-weight-medium">No hay ninguna clase publicada de momento</div>
-            <p class="text-body-1 text-grey-darken-1 mt-2">Vuelve a consultar más tarde para ver las nuevas actividades.</p>
           </v-col>
         </v-row>
       </v-col>
@@ -398,6 +397,7 @@ const crearClase = async () => {
     await fetchClases()
     cerrarDialog()
   } catch (error) {
+    console.error('Error al publicar la clase:', error)
     const statusCode = error.response?.status;
     if (statusCode === 406 || statusCode === 407) {
       notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
