@@ -30,6 +30,5 @@ def enviar_mail_confirmacion_asistencia(id_usuario: int, cursor):
         puede tener una reserva para una clase en la cual estaba esperando."""
     consulta = consultar_usuario_por_id(id_usuario, cursor)
     correo = consulta["data"]["correo"]
-    print(correo)
 
     enviar_mail(correo, "Buenos días, tiene la posibilidad de reservar si lo desea.")
