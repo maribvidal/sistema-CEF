@@ -4,9 +4,16 @@ from enums.dias import Dias
 import dateparser
 
 FORMATO_FECHA = '%Y-%m-%d'
+FORMATO_FECHA_2 = '%Y-%m-%d %H:%M:%S'
 
 def generar_fecha_actual(dia: str = None) -> str:
     """Genera la fecha del día de hoy con el formato FORMATO_FECHA."""
+    if (dia is not None):
+        return obtener_fecha_dia_semana(dia)
+    return datetime.today().strftime(FORMATO_FECHA)
+
+def generar_fecha_hora_actual(dia: str = None) -> str:
+    """Genera la fecha del día de hoy con el formato FORMATO_FECHA_2."""
     if (dia is not None):
         return obtener_fecha_dia_semana(dia)
     return datetime.today().strftime(FORMATO_FECHA)
