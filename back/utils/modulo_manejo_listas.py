@@ -1,6 +1,10 @@
-from db.operaciones.clases.consultar_db import consultar_reservas_instancias_por_clase
+from db.operaciones.clases.consultar_db import consultar_reservas_instancias_por_clase, consultar_clase_por_id
 from db.operaciones.listas_espera.consultar_db import obtener_lista_espera_abonados_por_id_clase, obtener_usuarios_lista_espera_abonados, obtener_lista_espera_individual_por_id_ins_clase, obtener_usuarios_lista_espera_individual
+from db.operaciones.usuario_pertenece_lista_espera_abonados.borrar_db import borrar_usuario_pertenece_lista_espera_abonados_por_id
+from db.operaciones.reservas.insertar_db import insertar_reserva
+
 from utils.modulo_fechas import comprobar_fecha_anterior
+from utils.envio_mails import enviar_mail_confirmacion_asistencia
 
 """
         - MÓDULO DE MANEJO DE LISTAS DE ESPERA -
@@ -78,6 +82,13 @@ def manejar_listas_de_espera_por_clase(clase_id, cursor):
     # Si hay cupos disponibles, enviarle a los usuarios
     # confirmaciones para cupos según alguno de los tres
     # escenarios descritos anteriormente.
+
+    # Escenario 3.1
+
+    id_lea = obtener_lista_espera_abonados_por_id_clase(clase_id, cursor)["data"]["id"]
+    cupos_disponibles_abonado = revisar_cupo_disponible_abonado(dict_cupos)
+    if (cupos_disponibles_abonado > 0 and lista_abonados):
+        avisar_abonados(id_lea, lista_abonados, cupos_disponibles_abonado, cursor)
         
     return (lista_abonados, dict_individual)
 
@@ -87,17 +98,38 @@ def revisar_si_hay_cupos(clase_id, cursor) -> dict:
     
     dict_cupos = {}
 
+    # Obtener el cupo máximo de la clase.
+
+    consulta = consultar_clase_por_id(clase_id, cursor)
+    cupo_maximo = consulta["data"]["cupo_maximo"]
+
     # Calcular la cantidad de cupos que hay para todas
     # las instancias de la clase.
 
-    consulta = consultar_reservas_instancias_por_clase(clase_id, cursor)
-    tuplas = consulta["data"]
+    consulta2 = consultar_reservas_instancias_por_clase(clase_id, cursor)
+    tuplas = consulta2["data"]
     
     for tup in tuplas:
         key_name = f"{tup["inst_clase_id"]}"
-        dict_cupos[key_name] = tup["cantidad_reservas"]
+        dict_cupos[key_name] = cupo_maximo - tup["cantidad_reservas"]
 
     return dict_cupos
+
+def revisar_cupo_disponible_abonado(dict_cupos: dict) -> bool:
+    """Función que itera sobre todas las instancias de clases que
+        figuran en dict_cupos, y comprueba que en todas haya
+        por lo menos 1 cupo."""
+    cant_ins_clases = len(dict_cupos)
+    cant_ins_clases_con_1_cupo = 0
+
+    for ins_clase in dict_cupos:
+        if dict_cupos[ins_clase] > 0:
+            cant_ins_clases_con_1_cupo += 1
+
+    hay_cupos = cant_ins_clases_con_1_cupo > 0
+    hay_para_toda_ins_clase = cant_ins_clases_con_1_cupo == cant_ins_clases
+
+    return hay_cupos and hay_para_toda_ins_clase
 
 def revisar_gente_esperando(dict_cupos: dict, clase_id: int, cursor) -> (list, dict):
     """Función que revisa si hay gente esperando en las listas de espera
@@ -143,7 +175,25 @@ def obtener_lista_ids_ins_clases(dict_cupos: list) -> list:
 def ordenar_lista_espera_por_fecha(consulta) -> list:
     # Devolver los ids de los usuarios ordenados por la fecha en la cual se
     # anotaron a la lista de espera de abonados.
-    lista_aux = [(tupla["usuario_id"], tupla["fecha"]) for tupla in consulta2]
+    lista_aux = [(tupla["usuario_id"], tupla["fecha"]) for tupla in consulta]
     lista_aux.sort(key=lambda item: item[1])
     lista_ordenada = [item[0] for item in lista_aux]
     return lista_ordenada
+
+def avisar_abonados(id_lea: int, lista_abonados: list, cupos_disp: int, cursor):
+    """Función que le envía un mail a cada abonado que estaba
+        esperando en la lista por esa clase, mientras hayan
+        cupos disponibles."""
+    cant_abonados_esperando = len(lista_abonados)
+
+    while (cant_abonados_esperando > 0 and cupos_disp > 0):
+        # Quitar un usuario de la lista
+        id_abonado = lista_abonados.pop(0)
+        cons = borrar_usuario_pertenece_lista_espera_abonados_por_id(id_lea, id_abonado, cursor)
+        cant_abonados_esperando = len(lista_abonados)
+        cursor.connection.commit()
+        # Enviarle un email para que pueda confirmar su asistencia
+        enviar_mail_confirmacion_asistencia(id_abonado, cursor)
+        # Restar un cupo disponible (igualmente, si el usuario
+        # cancela, entonces ese cupo va a volver a estar disponible.)
+        cupos_disp -= 1

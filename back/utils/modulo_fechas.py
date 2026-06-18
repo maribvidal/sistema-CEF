@@ -16,7 +16,7 @@ def generar_fecha_hora_actual(dia: str = None) -> str:
     """Genera la fecha del día de hoy con el formato FORMATO_FECHA_2."""
     if (dia is not None):
         return obtener_fecha_dia_semana(dia)
-    return datetime.today().strftime(FORMATO_FECHA)
+    return datetime.today().strftime(FORMATO_FECHA_2)
 
 def obtener_fecha_dia_semana(dia: str) -> str:
     hoy = date.today()

@@ -9,7 +9,7 @@ def insertar_usuario(dni: int, nombre: str, apellido: str, contraseña: str, fec
 
 def insertar_usuario_lista_espera_abonados(id_lea: int, id_usuario: int, cursor):
     """Permite insertar a un usuario en una lista de espera de abonados."""
-    fecha = generar_fecha_actual()
+    fecha = generar_fecha_hora_actual()
     query = f"""INSERT INTO Usuario_Pertenece_Lista_Espera_Abonados (usuario_id, lea_id, fecha)
                                                         VALUES      ({id_usuario}, {id_lea}, '{fecha}');
     """
@@ -17,7 +17,7 @@ def insertar_usuario_lista_espera_abonados(id_lea: int, id_usuario: int, cursor)
 
 def insertar_usuario_lista_espera_individual(id_lei: int, id_usuario: int, cursor):
     """Permite insertar a un usuario en una lista de espera individual."""
-    fecha = generar_fecha_actual()
+    fecha = generar_fecha_hora_actual()
     query = f"""INSERT INTO Usuario_Pertenece_Lista_Espera_Individual (usuario_id, lei_id, fecha)
                                                         VALUES      ({id_usuario}, {id_lei}, '{fecha}');
         """
