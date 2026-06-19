@@ -40,76 +40,85 @@
             ></v-text-field>
           </v-card-title>
 
-          <v-data-table
-            :headers="headers"
-            :items="empleados.concat(profesores)"
-            :search="search"
-            :loading="loading"
-            loading-text="Cargando personal..."
-            no-data-text="No se encontraron empleados"
-          >
-            <template v-slot:[`item.rol_id`]='{ item }'>
-              <v-chip :color="getRoleColor(item.rol_id)" size="small" class="font-weight-bold">
-                {{ getRoleName(item.rol_id) }}
-              </v-chip>
-            </template>
+          <template v-if="empleados.length > 0 || profesores.length > 0">
+            <v-data-table
+              :headers="headers"
+              :items="empleados.concat(profesores)"
+              :search="search"
+              :loading="loading"
+              loading-text="Cargando personal..."
+              no-data-text="No se encontraron empleados"
+            >
+              <template v-slot:[`item.rol_id`]='{ item }'>
+                <v-chip :color="getRoleColor(item.rol_id)" size="small" class="font-weight-bold">
+                  {{ getRoleName(item.rol_id) }}
+                </v-chip>
+              </template>
 
-            <template v-slot:[`item.acciones`]='{ item }'>
-              <div class="d-flex justify-end">
-                <v-btn v-if="!isDisabled"
-                  icon="mdi-pencil"
-                  variant="text"
-                  color="blue-darken-1"
-                  size="small"
-                  @click="modificarEmpleado(item)"
-                  title="Modificar Datos"
-                ></v-btn>
-                <v-btn v-if="!isDisabled"
-                  icon="mdi-shield-key"
-                  variant="text"
-                  color="orange-darken-2"
-                  size="small"
-                  @click="abrirEditorRol(item)"
-                  title="Cambiar Permisos/Rol"
-                ></v-btn>
-                <v-btn v-if="!isDisabled"
-                  icon="mdi-account-off"
-                  variant="text"
-                  color="grey-darken-1"
-                  size="small"
-                  @click="desactivarEmpleado(item)"
-                  title="Desactivar"
-                ></v-btn>
-                <v-btn v-if="!isDisabled"
-                  icon="mdi-delete"
-                  variant="text"
-                  color="red-darken-1"
-                  size="small"
-                  @click="eliminarEmpleado(item)"
-                  title="Eliminar"
-                ></v-btn>
-                <v-btn v-if="isDisabled"
-                  icon="mdi-account-off-outline"
-                  variant="text"
-                  color="green-darken-1"
-                  size="small"
-                  @click="activarEmpleado(item)"
-                  title="Reactivar Empleado"
-                ></v-btn>
-              </div>
-            </template>
-          </v-data-table>
+              <template v-slot:[`item.acciones`]='{ item }'>
+                <div class="d-flex justify-end">
+                  <v-btn v-if="!isDisabled"
+                    icon="mdi-pencil"
+                    variant="text"
+                    color="blue-darken-1"
+                    size="small"
+                    @click="modificarEmpleado(item)"
+                    title="Modificar Datos"
+                  ></v-btn>
+                  <v-btn v-if="!isDisabled"
+                    icon="mdi-shield-key"
+                    variant="text"
+                    color="orange-darken-2"
+                    size="small"
+                    @click="abrirEditorRol(item)"
+                    title="Cambiar Permisos/Rol"
+                  ></v-btn>
+                  <v-btn v-if="!isDisabled"
+                    icon="mdi-account-off"
+                    variant="text"
+                    color="grey-darken-1"
+                    size="small"
+                    @click="desactivarEmpleado(item)"
+                    title="Desactivar"
+                  ></v-btn>
+                  <v-btn v-if="!isDisabled"
+                    icon="mdi-delete"
+                    variant="text"
+                    color="red-darken-1"
+                    size="small"
+                    @click="eliminarEmpleado(item)"
+                    title="Eliminar"
+                  ></v-btn>
+                  <v-btn v-if="isDisabled"
+                    icon="mdi-account-off-outline"
+                    variant="text"
+                    color="green-darken-1"
+                    size="small"
+                    @click="activarEmpleado(item)"
+                    title="Reactivar Empleado"
+                  ></v-btn>
+                </div>
+              </template>
+            </v-data-table>
+          </template>
+          <template v-else>
+            <v-row justify="center" class="mt-10 mb-10">
+              <v-col cols="12" md="8" class="text-center">
+                <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-account-off</v-icon>
+                <div class="text-h5 text-grey-darken-1 font-weight-medium">No existen empleados registrados</div>
+              </v-col>
+            </v-row>
+          </template>
         </v-card>
       </v-col>
     </v-row>
-
     <!-- Diálogo para cambiar Rol -->
     <v-dialog v-model="dialog" max-width="400px">
       <v-card rounded="lg">
         <v-card-title class="bg-grey-lighten-3">Cambiar Rol de Empleado</v-card-title>
         <v-card-text class="pt-4">
           <div class="mb-4">
-            <strong>Empleado:</strong> {{ empleadoSeleccionado?.nombre }} {{ empleadoSeleccionado?.apellido }}
+            <strong>Empleado:</strong> {{ empleadoSeleccionado?.nombre }} {{ empleadoSeleccionado?.apellido }} 
           </div>
           <v-select
             v-model="nuevoRolId"
@@ -331,12 +340,17 @@ const guardarProfesor = async () => {
       return
     }
     await EmployeesService.createProfessor(nuevoProfesor.value)
-    notificationStore.showNotification('Profesor creado exitosamente', 'success')
+    notificationStore.showNotification('El profesor fue creado con éxito', 'success')
     dialogProfesor.value = false
     await cargarEmpleados()
   } catch (error) {
     console.error('Error al crear profesor:', error)
-    notificationStore.showNotification('No se pudo crear el profesor', 'danger')
+    const statusCode = error.response?.status
+    if (statusCode === 401) {
+      notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
+    } else {
+      notificationStore.showNotification('No se pudo crear el profesor', 'danger')
+    }
   }
 }
 
@@ -352,12 +366,19 @@ const guardarRecepcionista = async () => {
       return
     }
     await EmployeesService.createReceptionist(nuevoRecepcionista.value)
-    notificationStore.showNotification('Recepcionista creado exitosamente', 'success')
+    notificationStore.showNotification('Se creo el recepcionista exitosamente', 'success')
     dialogRecepcionista.value = false
     await cargarEmpleados()
   } catch (error) {
     console.error('Error al crear recepcionista:', error)
-    notificationStore.showNotification('No se pudo crear el recepcionista: ' + (error.response?.data?.error || ''), 'danger')
+    const statusCode = error.response?.status
+    if (statusCode === 401) {
+      notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
+    } else if (statusCode === 403) {
+      notificationStore.showNotification('Ya existe un empleado con ese correo', 'danger')
+    } else {
+      notificationStore.showNotification('No se pudo crear el recepcionista: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+    }
   }
 }
 
@@ -406,12 +427,15 @@ const eliminarEmpleado = (empleado) => {
       try {
         await EmployeesService.deleteEmployee(dni)
         await cargarEmpleados() // Refresca la tabla
-        console.log("Empleado eliminado:", empleado)
-        notificationStore.showNotification('Empleado eliminado exitosamente', 'success')
+        notificationStore.showNotification('El empleado fue eliminado con éxito', 'success')
       } catch (error) {
         console.error('Error al eliminar empleado:', error)
-        const errorMsg = error.data?.message || 'No se pudo eliminar el empleado'
-        notificationStore.showNotification(errorMsg, 'danger')
+        const statusCode = error.response?.status
+        if (statusCode === 400) {
+          notificationStore.showNotification('El empleado no puede eliminarse si esta asociado a una clase', 'danger')
+        } else {
+          notificationStore.showNotification('Hubo un error al eliminar el empleado', 'danger')
+        }
       }
     }
   )
@@ -425,13 +449,17 @@ const abrirEditorRol = (empleado) => {
 
 const confirmarCambioRol = async () => {
   try {
-    // Nota: Por ahora solo se envía el rol al backend; el género se actualiza solo en el estado local del front.
     await EmployeesService.updateEmployeeRole(empleadoSeleccionado.value.dni, nuevoRolId.value)
     await cargarEmpleados()
     dialog.value = false
-    notificationStore.showNotification('Rol actualizado exitosamente', 'success')
+    notificationStore.showNotification('Los permisos fueron modificados exitosamente', 'success')
   } catch (error) {
-    notificationStore.showNotification('Error al actualizar el rol: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+    const statusCode = error.response?.status
+    if (statusCode === 402) {
+      notificationStore.showNotification('El empleado ya posee esos permisos', 'danger')
+    } else {
+      notificationStore.showNotification('Error al actualizar el rol: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+    }
   }
 }
 

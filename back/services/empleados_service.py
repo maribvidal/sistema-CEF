@@ -102,7 +102,10 @@ def borrar_empleado_service(empleado_dni: int):
             "error": "Error al intentar borrar empleado.",
             "message": respuesta['message']
         }, 500
-
+    elif respuesta['status'] == 'clases_asignadas':
+        return {
+            "error": "tiene clases asignadas",
+        }, 400
     cursor.connection.commit()
     cursor.connection.close()
 

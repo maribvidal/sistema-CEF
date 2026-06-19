@@ -91,7 +91,7 @@ Empleados
 | /empleados | GET | - | 404: No se encontraron empleados <br> 500: Error al obtener empleados <br> 200: Se devuelve una lista de los empleados. |
 | /empleados/recepcionistas | POST | dni, nombre, apellido, correo, contraseña, genero | 400: Error al obtener la lista de validación de DNIs <br> 401: El DNI ya se encuentra registrado <br> 402: Error interno al obtener lista de correos <br> 403: El correo ya se encuentra registrado <br> 404: Error en base de datos al insertar el registro <br> 405: El recepcionista no se pudo crear <br> 200: El recepcionista ha sido creado con éxito. |
 | /empleados/(empleado_dni) | PUT | dni_nuevo, nombre, apellido, correo, genero, rol_id | 400: Error al obtener la información <br> 401: No existe un empleado con dicho DNI o error listando base <br> 402: El DNI nuevo ya se encuentra registrado para otro empleado <br> 500: Error al intentar modificar <br> 200: Empleado modificado exitosamente. |
-| /empleados/(empleado_dni) | DELETE | - | 500: Error al intentar borrar empleado <br> 200: Empleado borrado exitosamente. |
+| /empleados/(empleado_dni) | DELETE | - | 500: Error al intentar borrar empleado <br> 402: Error al intentar eliminar un empleado con clases <br> 200: Empleado borrado exitosamente. |
 | /empleados/(empleado_dni)/desactivar | PATCH | - | 500: Error al intentar borrar/desactivar empleado <br> 200: Empleado desactivado exitosamente. |
 
 Permisos
