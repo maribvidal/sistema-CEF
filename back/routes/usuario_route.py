@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 
 from services.usuario_service import (
     listar_usuarios_service,
-    registrar_usuario_service,
     listar_pagos_usuario_service,
     obtener_perfil_usuario_service,
     editar_perfil_usuario_service,
@@ -14,40 +13,6 @@ from services.usuario_service import (
 )
 
 usuario_bp = Blueprint("usuario", __name__)
-
-@usuario_bp.route("/usuarios", methods=["POST"])
-def registrar_usuario():
-    """Este endpoint registra un nuevo usuario en el sistema. 
-        Recibe los datos del usuario en formato JSON, incluyendo 
-        su DNI, nombre, apellido, contraseña, fecha de nacimiento, 
-        correo electrónico, teléfono y género. Luego, llama al 
-        servicio correspondiente para procesar el registro y devuelve 
-        una respuesta con el resultado de la operación."""
-    data = request.get_json()
-
-    dni = data.get("dni")
-    nombre = data.get("nombre")
-    apellido = data.get("apellido")
-    contraseña = data.get("contraseña")
-    fecha_nac = data.get("fecha_nac")
-    correo = data.get("correo")
-    telefono = data.get("telefono")
-    genero = data.get("genero")
-    rol_id = data.get("rol_id")
-
-    respuesta, status = registrar_usuario_service(
-        dni,
-        nombre,
-        apellido,
-        contraseña,
-        fecha_nac,
-        correo,
-        telefono,
-        genero,
-        rol_id
-    )
-
-    return jsonify(respuesta), status
 
 @usuario_bp.route("/usuarios/<int:usuario_id>/pagos", methods=["GET"])
 def listar_pagos_usuario(usuario_id):
