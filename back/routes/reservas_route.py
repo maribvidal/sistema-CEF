@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
-from services.reservas_service import cancelar_reserva_service, confirmar_reserva_service
-
+from services.reservas_service import cancelar_reserva_service
 reservas_bp = Blueprint('reservas', __name__)
 
 @reservas_bp.route('/reservas/<int:reserva_id>/cancelar', methods=['DELETE'])
@@ -16,6 +15,6 @@ def confirmar_reserva(id_clase):
     data = request.get_json()
     id_usuario = data.get("id_usuario")
     
-    respuesta, status = confirmar_reserva_service(id_clase, id_usuario)
+    "respuesta, status = confirmar_reserva_service(id_clase, id_usuario)"
     
     return jsonify(respuesta), status
