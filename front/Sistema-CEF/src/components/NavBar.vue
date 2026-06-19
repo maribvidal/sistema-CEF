@@ -52,15 +52,18 @@ import { useAuth } from '@/services/UsuariosServices.js'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { ref, onMounted } from 'vue'
+import { useNotificationStore } from '@/stores/notificationStore.js'
+
 const router = useRouter()
 const { isLoggedIn, userProfile, logout, fetchUserProfile } = useAuth()
 const profileData = ref(null)
-
+const notificationStore = useNotificationStore()
 const userRole = computed(() => userProfile.value?.rol || profileData.value?.rol_id)
 
 const handleLogout = async () => {
     await logout()
     router.push('/inicioSesion')
+    notificationStore.showNotification('Cierre de sesion exitoso', 'success')
 }
 
 onMounted(() => {
