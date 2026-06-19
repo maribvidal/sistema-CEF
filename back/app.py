@@ -39,10 +39,9 @@ def create_app(testing=False, db_name="database.db"):
     app.register_blueprint(permisos_bp)
     app.register_blueprint(reservas_bp)
     app.register_blueprint(metricas_bp)
-    app.register_blueprint(notificaciones_bp)
     app.register_blueprint(mensualidad_bp)
 
-    if not app.testing:
+    if not testing:
         cursor = conectarse_db()
         insertar_datos(cursor)
         cursor.connection.commit()

@@ -57,23 +57,28 @@
 
               <template v-slot:[`item.acciones`]='{ item }'>
                 <div class="d-flex justify-end">
-                  <v-btn v-if="!isDisabled"
+                  <v-btn 
                     icon="mdi-pencil"
                     variant="text"
                     color="blue-darken-1"
                     size="small"
+                    :disabled="item.rol_id === 0"
                     @click="modificarEmpleado(item)"
                     title="Modificar Datos"
                   ></v-btn>
-                  <v-btn v-if="!isDisabled"
+                  
+                  <v-btn 
                     icon="mdi-shield-key"
                     variant="text"
                     color="orange-darken-2"
                     size="small"
+                    :disabled="item.rol_id === 0"
                     @click="abrirEditorRol(item)"
                     title="Cambiar Permisos/Rol"
                   ></v-btn>
-                  <v-btn v-if="!isDisabled"
+                  
+                  <v-btn 
+                    v-if="item.rol_id !== 0"
                     icon="mdi-account-off"
                     variant="text"
                     color="grey-darken-1"
@@ -81,21 +86,24 @@
                     @click="desactivarEmpleado(item)"
                     title="Desactivar"
                   ></v-btn>
-                  <v-btn v-if="!isDisabled"
+
+                  <v-btn 
+                    v-else
+                    icon="mdi-account-check"
+                    variant="text"
+                    color="green-darken-1"
+                    size="small"
+                    @click="activarEmpleado(item)"
+                    title="Reactivar Empleado"
+                  ></v-btn>
+
+                  <v-btn
                     icon="mdi-delete"
                     variant="text"
                     color="red-darken-1"
                     size="small"
                     @click="eliminarEmpleado(item)"
                     title="Eliminar"
-                  ></v-btn>
-                  <v-btn v-if="isDisabled"
-                    icon="mdi-account-off-outline"
-                    variant="text"
-                    color="green-darken-1"
-                    size="small"
-                    @click="activarEmpleado(item)"
-                    title="Reactivar Empleado"
                   ></v-btn>
                 </div>
               </template>
@@ -112,7 +120,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <!-- Diálogo para cambiar Rol -->
     <v-dialog v-model="dialog" max-width="400px">
       <v-card rounded="lg">
         <v-card-title class="bg-grey-lighten-3">Cambiar Rol de Empleado</v-card-title>
@@ -122,7 +129,7 @@
           </div>
           <v-select
             v-model="nuevoRolId"
-            :items="roles"
+            :items="rolesASeleccionar"
             item-title="label"
             item-value="id"
             label="Seleccionar Nuevo Rol"
@@ -138,7 +145,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- Diálogo para Crear Profesor -->
     <v-dialog v-model="dialogProfesor" max-width="500px">
       <v-card rounded="lg">
         <v-card-title class="pa-4 bg-black text-white">Crear Nuevo Profesor</v-card-title>
@@ -165,7 +171,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- Diálogo para Crear Recepcionista -->
     <v-dialog v-model="dialogRecepcionista" max-width="500px">
       <v-card rounded="lg">
         <v-card-title class="pa-4 bg-black text-white">Crear Nuevo Recepcionista</v-card-title>
@@ -214,7 +219,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- Dialogo para edicion de empleado -->
     <v-dialog v-model="dialogEditarEmpleado" max-width="600px">
       <EditEmployee :empleado="empleadoSeleccionado" @close="dialogEditarEmpleado = false" @updated="cargarEmpleados" />
     </v-dialog>
@@ -236,7 +240,9 @@ const dialogEditarEmpleado = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
 const nuevoGenero = ref(null)
-const isDisabled = ref(false) // Para manejar el estado de desactivación de empleados
+
+// Se removió 'isDisabled' de aquí ya que lo evaluamos fila por fila en el template.
+
 const notificationStore = useNotificationStore()
 
 // Estados para creación de personal
@@ -278,6 +284,12 @@ const roles = [
   { id: 4, label: 'Eliminado' }
 ]
 
+const rolesASeleccionar = [
+  { id: 1, label: 'Administrador' },
+  { id: 2, label: 'Recepcionista' },
+  { id: 3, label: 'Usuario' }
+]
+
 const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Profesor'
 const getRoleColor = (id) => {
   if (id === 0) return 'grey-darken-1' // Empleado desactivado
@@ -301,7 +313,9 @@ const cargarEmpleados = async () => {
       nombre: e.nombre ?? e[5],
       rol_id: e.rol_id ?? e[6]
     }))
+
     empleados.value = fetched
+    // Se eliminó la validación incorrecta de isDisabled aquí.
   } catch (error) {
     console.error('Error cargando empleados:', error)
     empleados.value = []
@@ -310,11 +324,9 @@ const cargarEmpleados = async () => {
   }
 }
 
-
 const cargarProfesores = async () => {
   try {
     const resp = await EmployeesService.getProfessors()
-    // Depending on backend returning directly an array or { status: "success", data: [...] }
     const resData = resp.data && Array.isArray(resp.data) ? resp.data : (Array.isArray(resp) ? resp : [])
     profesores.value = resData.map(p => ({
       dni: p.dni,
@@ -397,7 +409,7 @@ const desactivarEmpleado = (empleado) => {
   notificationStore.showNotification(
     `¿Desactivar a ${empleado.nombre} ${empleado.apellido}?`,
     'warning',
-    0, // timeout 0 para que no desaparezca
+    0,
     async () => {
       try {
         await EmployeesService.deactivateEmployee(dni)
@@ -409,6 +421,18 @@ const desactivarEmpleado = (empleado) => {
       }
     }
   )
+}
+
+// Función añadida para la lógica de Reactivar
+const activarEmpleado = (empleado) => {
+  const dni = empleado?.dni ?? empleado?.raw?.dni
+  if (!dni) return
+  
+  // Asumiendo que el flujo sea simplemente restaurar el rol (o puedes llamar a tu endpoint correspondiente)
+  empleadoSeleccionado.value = empleado
+  nuevoRolId.value = 2 // Puedes asignar un rol por defecto o abrir el modal de roles
+  dialog.value = true
+  notificationStore.showNotification('Por favor asigne un nuevo rol para reactivar al empleado.', 'info')
 }
 
 const eliminarEmpleado = (empleado) => {
@@ -426,7 +450,7 @@ const eliminarEmpleado = (empleado) => {
     async () => {
       try {
         await EmployeesService.deleteEmployee(dni)
-        await cargarEmpleados() // Refresca la tabla
+        await cargarEmpleados()
         notificationStore.showNotification('El empleado fue eliminado con éxito', 'success')
       } catch (error) {
         console.error('Error al eliminar empleado:', error)

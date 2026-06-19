@@ -57,6 +57,7 @@ Clases
 | /clases/(id_clase)/inscripciones | POST | id_usuario | 400/401: Error de validación de listas de espera <br> 200: Se anotó a la lista de espera con éxito. |
 | /clases/(id_clase)/confirmar_asistencia | POST | id_usuario | 400/401: Error o Usuario no encontrado <br> 402/403: Error o Clase no encontrada <br> 200: Asistencia registrada con éxito. |
 | /clases/(id_clase)/rechazar_asistencia | POST | id_usuario | 400/401: Error o Usuario no encontrado <br> 402/403: Error o Clase no encontrada <br> 200: Asistencia rechazada con éxito. |
+| /clases/(id_clase)/instancias | GET | | 400/401: Error por la consulta hecha sobre la clase recibida. <br> 402/403: Error por la consulta hecha para las instancias. |
 
 Reservas y Cancelaciones
 
@@ -77,12 +78,6 @@ Métricas
 | --- | --- | --- | --- |
 | /metricas/clases_mas_canceladas | GET | limite, id_actividad, fecha_inicio, fecha_fin | 400: No se encontraron clases canceladas <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
 | /metricas/clases_con_mensualidad | GET | limite, fecha_inicio, fecha_fin | 400: No se encontraron clases <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
-
-Notificaciones
-
-| **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
-| --- | --- | --- | --- |
-| /notificaciones/(id_clase) | GET | - | 404: No se encontró la clase <br> 500: Error interno de consulta o fallos del servidor <br> 200: Notificación enviada exitosamente. |
 
 Actividades
 
