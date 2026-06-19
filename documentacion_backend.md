@@ -57,6 +57,7 @@ Clases
 | /clases/(id_clase)/inscripciones | POST | id_usuario | 400/401: Error de validación de listas de espera <br> 200: Se anotó a la lista de espera con éxito. |
 | /clases/(id_clase)/confirmar_asistencia | POST | id_usuario | 400/401: Error o Usuario no encontrado <br> 402/403: Error o Clase no encontrada <br> 200: Asistencia registrada con éxito. |
 | /clases/(id_clase)/rechazar_asistencia | POST | id_usuario | 400/401: Error o Usuario no encontrado <br> 402/403: Error o Clase no encontrada <br> 200: Asistencia rechazada con éxito. |
+| /clases/(id_clase)/instancias | GET | | 400/401: Error por la consulta hecha sobre la clase recibida. <br> 402/403: Error por la consulta hecha para las instancias. |
 
 Reservas y Cancelaciones
 
