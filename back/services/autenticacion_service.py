@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 from pprint import pprint
+from db.operaciones.clases.consultar_db import consultar_clase_por_id
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
 from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
 
 import jwt
 
@@ -141,6 +143,7 @@ def cerrar_sesion():
     return
 
 def validar_reserva_service(inst_clase_id: int, id_usuario: int):
+
     # Primero verificamos que en la tabla Reserva exista una reserva con id_cliente e id_inst_clase.
     cursor = conectarse_db()
     reserva = obtener_reservas_usuario_inst_clase(
@@ -160,6 +163,41 @@ def validar_reserva_service(inst_clase_id: int, id_usuario: int):
         return {
             "error": "No se encontró una reserva para ese cliente en esa clase."
         }, 404
+
+    # Si la reserva existe, entonces verificamos que aun sigue siendo valida en base al horario actual y el horario de la clase.
+    # Primero sacamos el id de la clase en base a su instancia
+    id_clase_res = consultar_instancia_clase_por_id(inst_clase_id, cursor)
+
+    if id_clase_res is None:
+        cursor.connection.close()
+        return {
+            "error": "No se encontró la clase asociada a esa instancia."
+        }, 404
+
+    id_clase = id_clase_res['data']['clase_id']
+
+    hora_clase = consultar_clase_por_id(id_clase, cursor)['data']['hora']
+
+    # Ahora comparamos la hora actual con la hora de la clase
+    hora_actual = datetime.now()
+    hora_clase_dt = datetime.strptime(hora_clase, "%H:%M")
+
+    hora_clase_dt = hora_actual.replace(
+        hour=hora_clase_dt.hour,
+        minute=hora_clase_dt.minute,
+        second=0,
+        microsecond=0
+    )
+
+    if hora_actual > hora_clase_dt + timedelta(minutes=30):
+        return {
+            "error": "La clase comenzó hace más de 30 minutos."
+        }, 409
+    elif hora_actual < hora_clase_dt - timedelta(minutes=30):
+        return {
+            "error": "La clase aún no ha comenzado. Puedes validar tu asistencia 30 minutos antes de la clase."
+        }, 422
+
 
     cursor.connection.close()
     return {
