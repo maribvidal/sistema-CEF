@@ -78,12 +78,6 @@ Métricas
 | /metricas/clases_mas_canceladas | GET | limite, id_actividad, fecha_inicio, fecha_fin | 400: No se encontraron clases canceladas <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
 | /metricas/clases_con_mensualidad | GET | limite, fecha_inicio, fecha_fin | 400: No se encontraron clases <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
 
-Notificaciones
-
-| **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
-| --- | --- | --- | --- |
-| /notificaciones/(id_clase) | GET | - | 404: No se encontró la clase <br> 500: Error interno de consulta o fallos del servidor <br> 200: Notificación enviada exitosamente. |
-
 Actividades
 
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
