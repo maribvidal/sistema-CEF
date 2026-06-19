@@ -45,3 +45,7 @@ def confirmar_reserva_abonado_service(id_clase, id_usuario):
 def confirmar_reserva_individual_service(id_ins_clase, id_usuario):
     ## TODO: Repensar
     pass
+
+def confirmar_reserva_service(id_clase, id_usuario):
+    ## TODO: Repensar
+    pass
