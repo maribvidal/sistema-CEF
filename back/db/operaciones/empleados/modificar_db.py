@@ -123,7 +123,7 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
 
         if resultado_clases.get("status") == "success" and resultado_clases["data"]["total_clases"] > 0:
             return {
-                "status": "error",
+                "status": "clases_asignadas",
                 "message": f"No se puede eliminar al profesor. Tiene {resultado_clases['data']['total_clases']} clase/s asignada/s"
             }
 
