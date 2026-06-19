@@ -3,7 +3,7 @@ from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_ind
 from db.operaciones.usuarios.consultar_db import obtener_usuario_esta_en_instancia_clase
 from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora
+from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora, consultar_instancias_por_clase_id
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases import modificar_clase_estado, modificar_clase, borrar_clase
 from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
@@ -419,3 +419,24 @@ def rechazar_asistencia_clase_service(id_clase, id_usuario):
     
     cursor.connection.commit()
     return _msj_exito_helper("Asistencia rechazada con éxito.", cursor)
+
+def obtener_instancias_clases_service(id_clase):
+    """Service que permite obtener las instancias de una clase"""
+    cursor = conectarse_db()
+
+    # Controlar que exista la clase
+
+    respuesta = consultar_clase_por_id(id_clase, cursor)
+    control = _controlar_errores_query(respuesta, 400, "No se encontró la clase.", 401, cursor)
+    if control is not None:
+        return control
+
+    # Obtener instancias
+
+    respuesta = consultar_instancias_por_clase_id(id_clase, cursor)
+    control = _controlar_errores_query(respuesta, 402, "No se encontraron instancias para dicha clase.", 403, cursor)
+    if control is not None:
+        return control
+
+    return _msj_exito_helper("Instancias obtenidas exitosamente.", cursor)
+    

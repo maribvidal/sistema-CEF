@@ -161,3 +161,12 @@ def rechazar_asistencia_clase(id_clase):
     respuesta, status = rechazar_asistencia_clase_service(id_clase, id_usuario)
     
     return jsonify(respuesta), status
+
+@clases_bp.route("/clases/<int:id_clase>/instancias", methods=["GET"])
+def obtener_instancias_clases(id_clase):
+    """Este endpoint permite obtener todas las instancias
+        que existan de una clase."""
+
+    respuesta, status = obtener_instancias_clases_service(id_clase)
+
+    return jsonify(respuesta), status
