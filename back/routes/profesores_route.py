@@ -20,7 +20,8 @@ def crear_profesor():
     apellido = data.get("apellido")
     telefono = data.get("telefono")
     genero = data.get("genero")
+    actividades = data.get("actividades", []) # Lo que se espera es que sea una lista de IDs de actividades (por defecto, es una lista vacía)
 
-    respuesta, status = crear_profesor_service(dni, nombre, apellido, telefono, genero)
+    respuesta, status = crear_profesor_service(dni, nombre, apellido, telefono, genero, actividades)
 
     return jsonify(respuesta), status
