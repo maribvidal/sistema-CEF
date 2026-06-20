@@ -9,42 +9,47 @@ def listar_profesores_service():
     cursor.connection.close()
     return respuesta, 200
 
-def crear_profesor_service(dni, nombre, apellido, telefono, genero):
-    """Service que crea un profesor."""
+def crear_profesor_service(dni, nombre, apellido, telefono, genero, actividades: list):
+    """Service que crea un profesor y le asigna sus actividades."""
+
+    if not actividades: # Si la lista es None o está vacía []
+        return {
+            "error": "Un profesor debe tener al menos una actividad asignada."
+        }, 400 # Bad Request
 
     cursor = conectarse_db()
 
-    # Comprobar que el DNI no se encuentre registrado
-
+    # comprobamos que el DNI no se encuentre registrado
     res_dnis = listar_dnis_profesores(cursor)
 
     if res_dnis['status'] == 'error':
         cursor.connection.close()
         return {
             "error": "Hubo un error tratando de listar los DNIs de los profesores.",
-            "message": res_dnis['message']
-        }, 400
+            "details": res_dnis['message']
+        }, 500 # Internal Server Error 
 
-        for res_dni in res_dnis['data']:
-            if (str(dni) == res_dni['dni']):
-                cursor.connection.close()
-                return {
-                    "error": "El DNI ya se encuentra registrado para un profesor."
-                }, 401
+    # Bucle corregido (Tenia problema de identación)
+    for res_dni in res_dnis['data']:
+        if str(dni) == str(res_dni['dni']):
+            cursor.connection.close()
+            return {
+                "error": "El DNI ya se encuentra registrado para un profesor."
+            }, 409 # Conflict (El recurso ya existe y por lo tanto causa conflicto)
 
-    # Intentar insertar el nuevo profesor
-
-    res_insertar = insertar_profesor(nombre, apellido, telefono, genero, dni, cursor)
+    # Intentamos insertar el nuevo profesor (Ahora agregando también las actividades)
+    res_insertar = insertar_profesor(nombre, apellido, telefono, genero, dni, actividades, cursor)
 
     if res_insertar['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": res_insertar['message']
-        }, 402
+            "error": "Error al insertar el profesor en la base de datos.",
+            "details": res_insertar['message']
+        }, 500 # Internal Server Error
 
     cursor.connection.commit()
     cursor.connection.close()
 
     return {
         "message": f"El profesor con id {res_insertar['data']} ha sido creado con éxito."
-    }, 200
+    }, 200 # Se ha creado con éxito
