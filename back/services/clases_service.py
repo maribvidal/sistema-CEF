@@ -185,23 +185,23 @@ def eliminar_clase_service(clase_id: int):
 
     cursor = conectarse_db()
 
-    # Primero vemos si existe ese id_clase en la TABLA Clases
-
+    # vemos si existe ese id_clase en la TABLA Clases
     respuesta = consultar_clase_por_id(clase_id, cursor)
+    
+    # usamos _controlar_errores_query normal con sus códigos 400/401
     control = _controlar_errores_query(respuesta, 400, "Clase no encontrada.", 401, cursor)
     if control is not None:
         return control
 
-    # Despues nos aseguramos de que no exista ninguna instancia de la clase misma
-    # y una instancia de la clase debería existir hasta que tenga reservas hechas
-
+    # nos aseguramos de que no exista ninguna instancia de la clase
     respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
-    _controlar_errores_query_sin_none(respuesta, 402, "No se puede eliminar la clase porque ya tiene una instancia asociada.", 403, cursor)
+    
+    # Le agregamos "control =" y mantenemos el _sin_none con 402/403
+    control = _controlar_errores_query_sin_none(respuesta, 402, "No se puede eliminar la clase porque ya tiene una instancia asociada.", 403, cursor)
     if control is not None:
         return control
 
-    # Y si todo eso se cumple, entonces eliminamos la clase.
-
+    # si todo eso se cumple, entonces eliminamos la clase.
     respuesta = borrar_clase(clase_id, cursor)
 
     if respuesta['status'] == 'error':
