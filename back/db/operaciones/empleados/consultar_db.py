@@ -2,15 +2,16 @@ from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchon
 
 def obtener_empleado_por_dni(dni, cursor) -> dict:
     """Devuelve una tupla que representa un empleado."""
-    query = f"SELECT * FROM Usuario WHERE rol_id IN (0, 1, 2, 4) AND dni = {dni}"
+    query = f"SELECT * FROM Usuario WHERE rol_id IN (0, 1, 2, 4, 5) AND dni = {dni}"
     return ejecutar_fetchone(query, cursor) 
 
 def listar_empleados(cursor) -> dict:
     """Lista todos los usuarios que son empleados."""
+    # UN PROFESOR TAMBIÉN ES UN EMPLEADOOOOOOO
     query = """
         SELECT id, nombre, apellido, rol_id, dni, correo, genero
         FROM Usuario
-        WHERE rol_id IN (0, 1, 2, 4)
+        WHERE rol_id IN (0, 1, 2, 4, 5)
     """
     return ejecutar_fetchall(query, cursor)
 
