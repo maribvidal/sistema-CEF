@@ -18,6 +18,7 @@ from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
 from utils.modulo_fechas import generar_fecha_actual, validar_fecha, validar_dia_fecha
 from enums.dias import Dias
+from db.operaciones.profesores.consultar_db import verificar_actividad_profesor
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
 
@@ -60,6 +61,13 @@ def publicar_clase_service(
     control = _controlar_errores_query(respuesta, 402, "Se intentó devolver un profesor pero no se encontró nada.", 403, cursor)
     if control is not None:
         return control
+
+    # Como existe, entonces analicemos qué actividades puede realizar y compararlas con las actividades que puede realizar el profesor, para ver si efectivamente el profesor puede dar la clase de la actividad que se quiere publicar.
+    res_habilitado = verificar_actividad_profesor(id_profesor, id_actividad, cursor)
+    if res_habilitado['status'] == 'error':
+        return _msj_error_helper("Error interno al verificar las actividades del profesor.", cursor), 500
+    if not res_habilitado['data']:
+        return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
 
     # Comprobar que la sala existe
 
@@ -130,6 +138,9 @@ def publicar_clase_service(
 
     cursor.connection.commit()
     return _msj_exito_helper("Clase publicada exitosamente.", cursor, respuesta['data'])
+
+
+
 
 def modificar_clase_service(
     clase_id: int,
