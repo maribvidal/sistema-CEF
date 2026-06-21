@@ -517,8 +517,9 @@ const cancelarReserva = async (clase) => {
 <style scoped>
 .classes-view {
   padding-top: 40px;
-  background-color: #f5f5f5;
+  background-color: var(--bg-main);
   min-height: 100vh;
+
 }
 
 .class-card-horizontal {
