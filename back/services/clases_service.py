@@ -139,21 +139,13 @@ def publicar_clase_service(
     cursor.connection.commit()
     return _msj_exito_helper("Clase publicada exitosamente.", cursor, respuesta['data'])
 
-
-
-
 def modificar_clase_service(
     clase_id: int,
     estado: str,
-    id_actividad: int,
     id_profesor: int,
-    fecha,
-    hora: str,
     sala: int,
-    cupo_maximo: int
 ):
     """Service que modifica una clase"""
-
     cursor = conectarse_db()
 
     # Primero consultamos si la clase que queremos modificar, efectivamente existe en la base de datos
@@ -162,16 +154,24 @@ def modificar_clase_service(
     control = _controlar_errores_query(respuesta, 400, "Clase no encontrada.", 401, cursor)
     if control is not None:
         return control
+    
+    # Como la clase existe, extraemos su actividad actual
+    id_actividad_actual = respuesta['data']['actividad_id']
+
+    # Ahora realizamos una validación nueva: Verificar si el profesor puede dar la actividad fija de esta clase
+    res_habilitado = verificar_actividad_profesor(id_profesor, id_actividad_actual, cursor)
+    if res_habilitado['status'] == 'error':
+        return _msj_error_helper("Error interno al verificar las actividades del profesor.", cursor), 500
+    if not res_habilitado['data']:
+        return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
 
     # Segundo verificamos que no haya ninguna instancia de la clase que queremos modificar, ya que como instancia_clase apunta directamente a Clase, pues todo cambio que hagamos en la clase repercute en la instancia de la misma
-
     respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
     control = _controlar_errores_query_sin_none(respuesta, 402, "No se puede modificar la clase porque ya tiene una instancia asociada.", 403, cursor)
     if control is not None:
         return control
 
     # Tercero, intentamos modificar la clase
-
     respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor)
 
     if respuesta['status'] == 'error':
