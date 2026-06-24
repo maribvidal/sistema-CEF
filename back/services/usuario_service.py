@@ -60,7 +60,7 @@ def registrar_usuario_service(
     def _es_correo_unico(correo: str) -> bool:
         """Se devuelve si el correo es único o no"""
         respuesta = consultar_usuario_por_correo(correo, cursor)
-        return respuesta['status'] == 'error'
+        return respuesta['status'] == 'success' and respuesta.get('data') is None
 
 
     errores = checkear_inputs(
@@ -202,7 +202,7 @@ def editar_perfil_usuario_service(
     def _es_correo_unico(correo: str) -> bool:
         """Se devuelve si el correo es único o no"""
         respuesta = consultar_usuario_por_correo(correo, cursor)
-        return respuesta['status'] == 'error'
+        return respuesta['status'] == 'success' and respuesta.get('data') is None
 
     cursor = conectarse_db()
     

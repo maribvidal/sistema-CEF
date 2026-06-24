@@ -438,5 +438,5 @@ def obtener_instancias_clases_service(id_clase):
     if control is not None:
         return control
 
-    return _msj_exito_helper("Instancias obtenidas exitosamente.", cursor)
+    return _msj_exito_helper("Instancias obtenidas exitosamente.", cursor, respuesta["data"])
     
