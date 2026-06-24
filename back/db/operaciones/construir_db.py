@@ -63,6 +63,7 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_clase_tener_mensualidad(cursor)
     construir_tabla_usuario_pertenece_lista_espera_abonados(cursor)
     construir_tabla_usuario_pertenece_lista_espera_individual(cursor)
+    construir_tabla_profesores_actividad(cursor)
 
 ## FUNCIONES QUE CREAN TABLAS
 # En este apartado aparecen todas las funciones que crean
@@ -335,4 +336,18 @@ def construir_tabla_rol(cursor: sqlite.Cursor):
     cursor.execute(f"""CREATE TABLE IF NOT EXISTS Rol (
                             id          INTEGER PRIMARY KEY,
                             nombre      VARCHAR({LONG_NOM})
+                        )""")
+
+def construir_tabla_profesores_actividad(cursor: sqlite.Cursor):
+    """Construye la tabla Profesores_Actividad"""
+    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Profesores_Actividad (
+                            id           INTEGER PRIMARY KEY,
+                            profesor_id  INTEGER NOT NULL,
+                            actividad_id INTEGER NOT NULL,
+                            FOREIGN KEY (profesor_id) REFERENCES Usuario(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL,
+                            FOREIGN KEY (actividad_id) REFERENCES Actividad(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
                         )""")
