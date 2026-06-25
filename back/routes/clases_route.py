@@ -58,7 +58,8 @@ def eliminar_clase(id_clase):
         Recibe el ID de la clase a eliminar en formato JSON."""
 
     # Lozi: La explicación de mi implementación se encuentra dentro de la función eliminar_clase...
-    return eliminar_clase_service(id_clase)
+    resp, status = eliminar_clase_service(id_clase)
+    return resp, status
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["PUT"])
 def modificar_clase(id_clase):
