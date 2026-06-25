@@ -49,8 +49,8 @@ def publicar_clase():
 
     # Este campo no lo controlo porque es opcional
     primera_fecha = None if (body.get("primera_fecha") is None) else body.get("primera_fecha")
-
-    return publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, primera_fecha)
+    respuesta, status = publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, primera_fecha)
+    return jsonify(respuesta), status
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["DELETE"])
 def eliminar_clase(id_clase):
