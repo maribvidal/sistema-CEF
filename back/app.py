@@ -52,5 +52,5 @@ def create_app(testing=False, db_name="database.db"):
 # puse el debug en false porq me tiraba error el ngrok
 if __name__ == "__main__":
     app = create_app()
-    connect_ngrok()
+    # connect_ngrok()
     app.run(debug=False)

@@ -70,14 +70,18 @@ def modificar_clase(id_clase):
 
     campos = [
         "estado",
-        "id_sala"
+        "id_sala",
+        "id_profesor"
     ]
 
     for campo in campos:
         if campo not in body:
             return {"error": f"Falta el campo {campo}"}, 400
+    estado = body.get("estado")
+    id_sala = body.get("id_sala")
+    id_profesor = body.get("id_profesor")
 
-    return modificar_clase_service(id_clase, **body)
+    return modificar_clase_service(id_clase, estado, id_profesor, id_sala)
 
 ## Habría que ver si a una clase cancelada hay que hacerle otra
 ## cosa que no sea cambiarle el estado.

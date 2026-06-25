@@ -18,6 +18,7 @@ from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
 from utils.modulo_fechas import generar_fecha_actual, validar_fecha, validar_dia_fecha
 from enums.dias import Dias
+from db.operaciones.profesores.consultar_db import verificar_actividad_profesor
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
 
@@ -60,6 +61,13 @@ def publicar_clase_service(
     control = _controlar_errores_query(respuesta, 402, "Se intentó devolver un profesor pero no se encontró nada.", 403, cursor)
     if control is not None:
         return control
+
+    # Como existe, entonces analicemos qué actividades puede realizar y compararlas con las actividades que puede realizar el profesor, para ver si efectivamente el profesor puede dar la clase de la actividad que se quiere publicar.
+    res_habilitado = verificar_actividad_profesor(id_profesor, id_actividad, cursor)
+    if res_habilitado['status'] == 'error':
+        return _msj_error_helper("Error interno al verificar las actividades del profesor.", cursor), 500
+    if not res_habilitado['data']:
+        return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
 
     # Comprobar que la sala existe
 
@@ -134,15 +142,10 @@ def publicar_clase_service(
 def modificar_clase_service(
     clase_id: int,
     estado: str,
-    id_actividad: int,
     id_profesor: int,
-    fecha,
-    hora: str,
     sala: int,
-    cupo_maximo: int
 ):
     """Service que modifica una clase"""
-
     cursor = conectarse_db()
 
     # Primero consultamos si la clase que queremos modificar, efectivamente existe en la base de datos
@@ -151,16 +154,24 @@ def modificar_clase_service(
     control = _controlar_errores_query(respuesta, 400, "Clase no encontrada.", 401, cursor)
     if control is not None:
         return control
+    
+    # Como la clase existe, extraemos su actividad actual
+    id_actividad_actual = respuesta['data']['actividad_id']
+
+    # Ahora realizamos una validación nueva: Verificar si el profesor puede dar la actividad fija de esta clase
+    res_habilitado = verificar_actividad_profesor(id_profesor, id_actividad_actual, cursor)
+    if res_habilitado['status'] == 'error':
+        return _msj_error_helper("Error interno al verificar las actividades del profesor.", cursor), 500
+    if not res_habilitado['data']:
+        return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
 
     # Segundo verificamos que no haya ninguna instancia de la clase que queremos modificar, ya que como instancia_clase apunta directamente a Clase, pues todo cambio que hagamos en la clase repercute en la instancia de la misma
-
     respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
     control = _controlar_errores_query_sin_none(respuesta, 402, "No se puede modificar la clase porque ya tiene una instancia asociada.", 403, cursor)
     if control is not None:
         return control
 
     # Tercero, intentamos modificar la clase
-
     respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor)
 
     if respuesta['status'] == 'error':
@@ -174,23 +185,23 @@ def eliminar_clase_service(clase_id: int):
 
     cursor = conectarse_db()
 
-    # Primero vemos si existe ese id_clase en la TABLA Clases
-
+    # vemos si existe ese id_clase en la TABLA Clases
     respuesta = consultar_clase_por_id(clase_id, cursor)
+    
+    # usamos _controlar_errores_query normal con sus códigos 400/401
     control = _controlar_errores_query(respuesta, 400, "Clase no encontrada.", 401, cursor)
     if control is not None:
         return control
 
-    # Despues nos aseguramos de que no exista ninguna instancia de la clase misma
-    # y una instancia de la clase debería existir hasta que tenga reservas hechas
-
+    # nos aseguramos de que no exista ninguna instancia de la clase
     respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
-    _controlar_errores_query_sin_none(respuesta, 402, "No se puede eliminar la clase porque ya tiene una instancia asociada.", 403, cursor)
+    
+    # Le agregamos "control =" y mantenemos el _sin_none con 402/403
+    control = _controlar_errores_query_sin_none(respuesta, 402, "No se puede eliminar la clase porque ya tiene una instancia asociada.", 403, cursor)
     if control is not None:
         return control
 
-    # Y si todo eso se cumple, entonces eliminamos la clase.
-
+    # si todo eso se cumple, entonces eliminamos la clase.
     respuesta = borrar_clase(clase_id, cursor)
 
     if respuesta['status'] == 'error':

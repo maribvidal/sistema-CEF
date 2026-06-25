@@ -13,6 +13,22 @@ def listar_dnis_profesores(cursor) -> dict:
         profesores, y devuelve una lista de tuplas."""
     return ejecutar_fetchall("SELECT dni FROM Usuario WHERE rol_id = 5", cursor)
 
+def verificar_actividad_profesor(id_profesor: int, id_actividad: int, cursor) -> dict:
+    """Verifica si un profesor está habilitado para dar una actividad específica."""
+    query = f"""
+        SELECT 1 
+        FROM Profesor_Actividad 
+        WHERE profesor_id = {id_profesor} AND actividad_id = {id_actividad}
+    """
+    resultado = ejecutar_fetchone(query, cursor)
+    
+    if resultado['status'] == 'error':
+        return resultado
+    
+    # Si 'data' no es None, significa que encontró el registro (está habilitado)
+    esta_habilitado = resultado['data'] is not None
+    return {"status": "success", "data": esta_habilitado}
+
 # def consultar_profesor_actividad(id_profesor: int, id_actividad: int, cursor):
 #     """
 #     Verifica si el profesor tiene asignada la aptitud para dar una actividad.

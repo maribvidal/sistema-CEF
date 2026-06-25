@@ -22,16 +22,18 @@ def insertar_datos(cursor):
    
     # Crear solo usuarios comunes
 
-    # Crear profesores
-    id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, cursor)
-    insertar_profesor('Ana', 'Martínez', '542215004013','F', 44332211, cursor)
-
-    id_prof1 = id_prof1['data']
-
     # Crear actividades
     insertar_actividad('Yoga', 50.0, cursor)
     insertar_actividad('Pilates', 60.0, cursor)
     insertar_actividad('Funcional', 70.0, cursor)
+
+    # Crear profesores
+    # id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, cursor)
+    # insertar_profesor('Ana', 'Martínez', '542215004013','F', 44332211, cursor)
+    id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, [1, 2], cursor)
+    id_prof2 = insertar_profesor('Ana', 'Martínez', '542215004013', 'F', 44332211, [3], cursor)
+
+    id_prof1 = id_prof1['data']
 
     insertar_mensualidad('2026-01-01', '2026-12-01', 1, cursor)
     insertar_mensualidad('2026-02-02', '2026-12-02', 2, cursor)
