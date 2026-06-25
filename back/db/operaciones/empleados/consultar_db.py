@@ -20,7 +20,7 @@ def listar_correos_empleados(cursor) -> dict:
     query = """
         SELECT correo
         FROM Usuario
-        WHERE rol_id = 2
+        WHERE rol_id IN (0, 1, 2, 4, 5)
     """
     return ejecutar_fetchall(query, cursor)
 

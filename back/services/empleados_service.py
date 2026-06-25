@@ -86,6 +86,14 @@ def modificar_empleado_service(
             cursor.connection.close()
             return {"error": "El DNI ya se encuentra registrado."}, 409 # Error de conflicto
 
+    # Revisar si el correo no está siendo utilizado por otro empleado
+    correos = listar_correos_empleados(cursor)
+    if correos['status'] == 'success' and correos['data'] is not None:
+        lista_correos = [item['correo'] for item in correos['data']]
+        if correo in lista_correos and correo != res_empl['data']['correo']:
+            cursor.connection.close()
+            return {"error": "El correo ya se encuentra registrado."}, 410 # Error de conflicto
+
     # Ahora inyectamos actividades a la BD
     respuesta = modificar_empleado(cursor, empleado_dni, dni_nuevo, nombre, apellido, correo, genero, rol_id, actividades)
 
