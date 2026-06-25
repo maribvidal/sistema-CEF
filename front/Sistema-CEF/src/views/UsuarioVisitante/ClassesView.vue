@@ -398,12 +398,17 @@ const crearClase = async () => {
     cerrarDialog()
   } catch (error) {
     console.error('Error al publicar la clase:', error)
+    console.log(error)
     const statusCode = error.response?.status;
+    console.log(error.response.status) 
     if (statusCode === 406 || statusCode === 407) {
       notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
     } else if (statusCode === 408) {
       notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
-    } else {
+    } else if (statusCode === 400) {
+      notificationStore.showNotification('Este profesor no puede dar una clase de esa categoría', 'danger');
+    }
+    else {
       // Mensaje genérico para otros errores
       notificationStore.showNotification('Hubo un error al publicar la clase', 'danger');
     }
