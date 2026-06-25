@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 from pprint import pprint
+from db.operaciones.clases.consultar_db import consultar_clase_por_id
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
 from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
 
 import jwt
 
@@ -141,6 +143,7 @@ def cerrar_sesion():
     return
 
 def validar_reserva_service(inst_clase_id: int, id_usuario: int):
+
     # Primero verificamos que en la tabla Reserva exista una reserva con id_cliente e id_inst_clase.
     cursor = conectarse_db()
     reserva = obtener_reservas_usuario_inst_clase(
@@ -161,10 +164,54 @@ def validar_reserva_service(inst_clase_id: int, id_usuario: int):
             "error": "No se encontró una reserva para ese cliente en esa clase."
         }, 404
 
+    instancia_res = consultar_instancia_clase_por_id(inst_clase_id, cursor)
+
+    if instancia_res is None or instancia_res['status'] == 'error':
+        cursor.connection.close()
+        return {"error": "No se encontró la instancia de la clase."}, 404
+
+    id_clase = instancia_res['data']['clase_id']
+    fecha_instancia = instancia_res['data']['fecha'] # Ej: "2026-06-22"
+
+    clase_res = consultar_clase_por_id(id_clase, cursor)
+    if clase_res is None or clase_res['status'] == 'error':
+        cursor.connection.close()
+        return {"error": "No se encontró la clase asociada."}, 404
+
+    hora_clase = clase_res['data']['hora'] # Ej: 12:30 o 12:30:00
+
+    fecha_hora_str = f"{fecha_instancia} {hora_clase}"
+    print(fecha_hora_str)
+
+    # Mejor hago esto por si las dudas para parsear mejor
+    try:
+        # Asumiendo que la BD trae segundos
+        fecha_hora_clase_dt = datetime.strptime(fecha_hora_str, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        # Si falla, es porque la BD no trae segundos (12:30)
+        fecha_hora_clase_dt = datetime.strptime(fecha_hora_str, "%Y-%m-%d %H:%M")
+
+    # Calculo límites absolutos
+    limite_inferior = fecha_hora_clase_dt - timedelta(minutes=30)
+    limite_superior = fecha_hora_clase_dt + timedelta(minutes=30)
+    hora_actual = datetime.now()
+
+    print("Hora actual: ", hora_actual)
+    print("Límite inferior: ", limite_inferior)
+    print("Límite superior: ", limite_superior)
+
+    # Clausular de Guarda de tiempo
+    if hora_actual < limite_inferior:
+        cursor.connection.close()
+        return {"error": "La clase aún no ha comenzado. Puedes validar tu asistencia 30 minutos antes de la clase."}, 422
+
+    if hora_actual > limite_superior:
+        cursor.connection.close()
+        return {"error": "La reserva expiró. La clase comenzó hace más de 30 minutos."}, 409
+
     cursor.connection.close()
-    return {
-        "message": "Asistencia confirmada exitosamente"
-    }, 200   
+    return {"message": "Asistencia confirmada exitosamente"}, 200
+
 
 def validar_reserva_dni_service(inst_clase_id: int, dni: int):
     cursor = conectarse_db()
