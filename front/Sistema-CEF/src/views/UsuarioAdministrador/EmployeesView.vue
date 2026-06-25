@@ -324,21 +324,6 @@ const cargarEmpleados = async () => {
   }
 }
 
-const cargarProfesores = async () => {
-  try {
-    const resp = await EmployeesService.getProfessors()
-    const resData = resp.data && Array.isArray(resp.data) ? resp.data : (Array.isArray(resp) ? resp : [])
-    profesores.value = resData.map(p => ({
-      dni: p.dni,
-      nombre: p.nombre,
-      apellido: p.apellido,
-      genero: p.genero || 'N/A'
-    }))
-  } catch (error) {
-    console.error('Error cargando profesores:', error)
-    profesores.value = []
-  }
-}
 
 const crearProfesor = () => {
   nuevoProfesor.value = { nombre: '', apellido: '', dni: '', genero: '' }
@@ -357,7 +342,7 @@ const guardarProfesor = async () => {
     await cargarEmpleados()
   } catch (error) {
     console.error('Error al crear profesor:', error)
-    const statusCode = error.response?.status
+    const statusCode = error.status
     if (statusCode === 401) {
       notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
     } else {
@@ -383,13 +368,13 @@ const guardarRecepcionista = async () => {
     await cargarEmpleados()
   } catch (error) {
     console.error('Error al crear recepcionista:', error)
-    const statusCode = error.response?.status
+    const statusCode = error.status
     if (statusCode === 401) {
       notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
     } else if (statusCode === 403) {
       notificationStore.showNotification('Ya existe un empleado con ese correo', 'danger')
     } else {
-      notificationStore.showNotification('No se pudo crear el recepcionista: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+      notificationStore.showNotification('No se pudo crear el recepcionista: ' + ('Error desconocido'), 'danger')
     }
   }
 }
@@ -454,7 +439,7 @@ const eliminarEmpleado = (empleado) => {
         notificationStore.showNotification('El empleado fue eliminado con éxito', 'success')
       } catch (error) {
         console.error('Error al eliminar empleado:', error)
-        const statusCode = error.response?.status
+        const statusCode = error.status
         if (statusCode === 400) {
           notificationStore.showNotification('El empleado no puede eliminarse si esta asociado a una clase', 'danger')
         } else {
@@ -478,18 +463,17 @@ const confirmarCambioRol = async () => {
     dialog.value = false
     notificationStore.showNotification('Los permisos fueron modificados exitosamente', 'success')
   } catch (error) {
-    const statusCode = error.response?.status
+    const statusCode = error.status
     if (statusCode === 402) {
       notificationStore.showNotification('El empleado ya posee esos permisos', 'danger')
     } else {
-      notificationStore.showNotification('Error al actualizar el rol: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+      notificationStore.showNotification('Error al actualizar el rol: ' + ('Error desconocido'), 'danger')
     }
   }
 }
 
 onMounted(() => {
   cargarEmpleados()
-  cargarProfesores()
 })
 </script>
 

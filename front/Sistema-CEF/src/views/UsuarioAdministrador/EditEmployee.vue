@@ -104,7 +104,7 @@ const updateEmployee = async () => {
     emit('close')
   } catch (error) {
     console.error('Error al actualizar empleado:', error)
-    const statusCode = error.response?.status
+    const statusCode = error.status
     if (statusCode === 402) {
       notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
     } else if (statusCode === 403) {
