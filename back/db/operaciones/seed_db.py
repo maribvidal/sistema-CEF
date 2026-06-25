@@ -20,6 +20,9 @@ def insertar_datos(cursor):
     insertar_usuario(32031512, 'Lourdes', 'Gonzales', '6543713241', '1992-07-05', 'lourdes.gonzales@example.com', "5678",'F', 2, cursor)
     insertar_usuario(34673342, 'Gaspar', 'Solari', '7325466314', '2008-07-10', 'gaspar.solari@example.com', "5678",'M', 1, cursor)
    
+    # Admin de prueba
+    insertar_usuario(110101010, 'Admin', 'Ejemplo', '12345678', '2000-01-01', 'admin@gmail.com', "5678",'M', 1, cursor)
+
     # Crear actividades
     insertar_actividad('Yoga', 50.0, cursor)
     insertar_actividad('Pilates', 60.0, cursor)

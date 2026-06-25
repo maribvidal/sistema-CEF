@@ -428,18 +428,19 @@ const actualizarClase = async () => {
     await fetchClases()
     cerrarDialog()
   } catch (error) {
-    const statusCode = error.status;
-    if (statusCode === 400) {
-    console.error('Error al modificar la clase:', error)
-    notificationStore.showNotification('Este profesor no puede dar una clase de esa categoría:', 'danger')
-  } else if (statusCode === 405) {
-    notificationStore.showNotification('Esa sala esta ocupada en ese horario y fecha:', 'danger')
-  } else if (statusCode === 406) {
-    notificationStore.showNotification('Ese profesor ya tiene una clase asignada en ese día y horario:', 'danger')
-  } else {
-    notificationStore.showNotification('Hubo un error al modificar la clase', 'danger');
+    const statusCode = error.status
+    console.error('Error al actualizar clase:', error)
+    
+    if (statusCode === 405) {
+      notificationStore.showNotification('Esa sala está ocupada en ese horario y fecha', 'danger')
+    } else if (statusCode === 411) {
+      notificationStore.showNotification('Ese profesor ya tiene una clase asignada en ese día y horario', 'danger')
+    } else if (statusCode === 412) {
+      notificationStore.showNotification('El profesor no está habilitado para dar esa actividad', 'danger')
+    } else {
+      notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
+    }
   }
-}
 }
 
 const editarClase = (clase) => {
