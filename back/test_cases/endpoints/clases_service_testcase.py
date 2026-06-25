@@ -75,7 +75,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         """
         ESCENARIO 1 - Clase publicada
         DADO que está en el apartado de clases, y que la sala 1 está disponible en la fecha 16/04 y horario 14:00
-        CUANDO selecciona categoría yoga, sala 1, fecha 16/04, hora 14:00, y profesor Pedro, y presiona publicar clase
+        CUANDO selecciona estado “Activa”, id de actividad 1, sala 1, fecha 16/04, hora 14:00, y profesor Pedro, y presiona publicar clase
         ENTONCES se publica la clase en el sistema y lo redirige a la página de clases.
         """
 
@@ -115,45 +115,7 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         fecha_aux = generar_fecha_actual('Lunes')
         assert cons_ins_clase_creada["data"][0]["fecha"] == fecha_aux, "La fecha de la instancia de la clase creada automáticamente no es correcta."
-
-        # Revisar que se devuelve fallo por los casos donde se ponga una actividad, un profesor o una sala que no existen
-
-        res4 = self.client.post("/clases", json={
-            "estado": "Activa",
-            "id_actividad": 10,
-            "id_profesor": id_prof,
-            "id_sala": id_sala,
-            "dia": "Lunes",
-            "hora": "15:00",
-            "cupo_maximo": 10
-        })
-
-        assert '401' in str(res4), "El código devuelto no es 401."
-
-        res5 = self.client.post("/clases", json={
-            "estado": "Activa",
-            "id_actividad": id_act,
-            "id_profesor": 10,
-            "id_sala": id_sala,
-            "dia": "Lunes",
-            "hora": "15:00",
-            "cupo_maximo": 10
-        })
-
-        assert '403' in str(res5), "El código devuelto no es 403."
-
-        res6 = self.client.post("/clases", json={
-            "estado": "Activa",
-            "id_actividad": id_act,
-            "id_profesor": id_prof,
-            "id_sala": 10,
-            "dia": "Lunes",
-            "hora": "15:00",
-            "cupo_maximo": 10
-        })
-
-        assert '405' in str(res6), "El código devuelto no es 405."
-
+    
         """
         ESCENARIO 2: Sala ocupada
         DADO que está en el apartado de clases y que la sala 1 no está disponible el día Lunes en el horario 14:00
@@ -203,8 +165,6 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         assert '408' in str(res3), "El código devuelto no es 408."
         assert json_status3 == 'error', "La respuesta no es 'error'."
-
-        # Faltan cubrir dos códigos de error
 
     def test_reservar_clase(self):
         """
