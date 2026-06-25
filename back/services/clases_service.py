@@ -7,7 +7,7 @@ from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_po
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases import modificar_clase_estado, modificar_clase, borrar_clase
 from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
-from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
+from db.operaciones.profesores.consultar_db import consultar_profesor_por_id, consultar_clases_profesor_dia_hora
 from db.operaciones.salas.consultar_db import consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
@@ -90,11 +90,18 @@ def publicar_clase_service(
 
     if (capacidad_sala < cupo_maximo):
         return _msj_error_helper("El cupo máximo ingresado supera la capacidad de la sala.", cursor), 408
+    
+    # Comprobar que el profesor no se encuentre ocupado en ese día y hora
+
+    respuesta = consultar_clases_profesor_dia_hora(id_profesor, dia, hora, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 410, "El profesor ya se encuentra ocupado en ese día y hora.", 411, cursor)
+    if control is not None:
+        return control
 
     # Intentar insertar la clase
 
     respuesta = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, cursor)
-    control = _controlar_errores_query(respuesta, 410, "Esa clase ya se encontraba insertada en el sistema.", 411, cursor)
+    control = _controlar_errores_query(respuesta, 412, "Esa clase ya se encontraba insertada en el sistema.", 413, cursor)
     if control is not None:
         return control
 
@@ -110,14 +117,14 @@ def publicar_clase_service(
             if (res_validar_dia):
                 fecha_actual = primera_fecha
             else:
-                return _msj_error_helper("La fecha que se intentó utilizar no trascurre el día de la semana para la clase.", cursor), 412
+                return _msj_error_helper("La fecha que se intentó utilizar no trascurre el día de la semana para la clase.", cursor), 414
         else:
-            return _msj_error_helper("La fecha que se recibió no es válida o no cumple con el formato (YYY-mm-dd).", cursor), 413
+            return _msj_error_helper("La fecha que se recibió no es válida o no cumple con el formato (YYY-mm-dd).", cursor), 415
 
     # Insertar instancia de clase e listas de esperas
 
     respuesta = insertar_lista_espera_abonados(clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la lista de espera de abonados.", 415, cursor)
+    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la lista de espera de abonados.", 416, cursor)
     if control is not None:
         return control
 
@@ -132,7 +139,7 @@ def publicar_clase_service(
         return _msj_error_helper("No se pudo obtener un id válido para la instancia de la clase.", cursor), 418
 
     respuesta = insertar_lista_espera_individual(id_ins_clase, cursor)
-    control = _controlar_errores_query(respuesta, 418, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 419, cursor)
+    control = _controlar_errores_query(respuesta, 419, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 420, cursor)
     if control is not None:
         return control
 
@@ -164,6 +171,8 @@ def modificar_clase_service(
         return _msj_error_helper("Error interno al verificar las actividades del profesor.", cursor), 500
     if not res_habilitado['data']:
         return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
+
+    # Comprobar que el profesor que se cambie pueda dar la actividad, y el día y la hora de la clase esté bien
 
     # Segundo verificamos que no haya ninguna instancia de la clase que queremos modificar, ya que como instancia_clase apunta directamente a Clase, pues todo cambio que hagamos en la clase repercute en la instancia de la misma
     respuesta = consultar_instancia_clase_por_id(clase_id, cursor)

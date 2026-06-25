@@ -389,7 +389,7 @@ const crearClase = async () => {
       id_sala: nuevaClase.value.id_sala,
       dia: nuevaClase.value.dia,
       hora: nuevaClase.value.hora,
-      cupo_maximo: 1 // lo hardcodeo, despues lo vemos 
+      cupo_maximo: 40 // lo hardcodeo, despues lo vemos 
     }
     
     await ClasesService.publicarClase(payload)
@@ -407,8 +407,9 @@ const crearClase = async () => {
       notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
     } else if (statusCode === 400) {
       notificationStore.showNotification('Este profesor no puede dar una clase de esa categoría', 'danger');
-    }
-    else {
+    } else if (statusCode === 411) {
+      notificationStore.showNotification('El profesor ya se encuentra ocupado en ese día y hora', 'danger');
+    } else {
       // Mensaje genérico para otros errores
       notificationStore.showNotification('Hubo un error al publicar la clase', 'danger');
     }
