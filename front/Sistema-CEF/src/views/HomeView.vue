@@ -10,7 +10,7 @@
         <h2 class="text-center mb-4">Elige tu forma de pago</h2>
         <v-row class="justify-center">
           <v-col cols="12" md="4">
-            <v-card class="pa-4" color="#f0f0f0">
+            <v-card class="pa-4" color="--bg-card">
               <v-card-title class="text-h6">Por Clase</v-card-title>
               <v-card-text>
                 Acceso a las instalaciones en horarios específicos.
@@ -25,7 +25,7 @@
             </v-card>
           </v-col>
           <v-col cols="12" md="4">
-            <v-card class="pa-4" color="#f0f0f0">
+            <v-card class="pa-4" color="--bg-card">
               <v-card-title class="text-h6">Mensual</v-card-title>
               <v-card-text>
                 Acceso completo a las instalaciones durante todo el horario de apertura.

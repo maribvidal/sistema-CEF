@@ -19,19 +19,22 @@ def insertar_datos(cursor):
     insertar_usuario(39674828, 'Ernesto', 'Garcia', '12345678', '1997-07-10', 'ernesto.garcia@example.com', "5678",'M', 2, cursor)
     insertar_usuario(32031512, 'Lourdes', 'Gonzales', '6543713241', '1992-07-05', 'lourdes.gonzales@example.com', "5678",'F', 2, cursor)
     insertar_usuario(34673342, 'Gaspar', 'Solari', '7325466314', '2008-07-10', 'gaspar.solari@example.com', "5678",'M', 1, cursor)
-   
+    insertar_usuario(110101010, 'Admin', 'Ejemplo', '12345678', '2000-01-01', 'admin@gmail.com', "5678",'M', 1, cursor)
+
     # Crear solo usuarios comunes
-
-    # Crear profesores
-    id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, cursor)
-    insertar_profesor('Ana', 'Martínez', '542215004013','F', 44332211, cursor)
-
-    id_prof1 = id_prof1['data']
 
     # Crear actividades
     insertar_actividad('Yoga', 50.0, cursor)
     insertar_actividad('Pilates', 60.0, cursor)
     insertar_actividad('Funcional', 70.0, cursor)
+
+    # Crear profesores
+    # id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, cursor)
+    # insertar_profesor('Ana', 'Martínez', '542215004013','F', 44332211, cursor)
+    id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, [1, 2], cursor)
+    id_prof2 = insertar_profesor('Ana', 'Martínez', '542215004013', 'F', 44332211, [3], cursor)
+
+    id_prof1 = id_prof1['data']
 
     insertar_mensualidad('2026-01-01', '2026-12-01', 1, cursor)
     insertar_mensualidad('2026-02-02', '2026-12-02', 2, cursor)

@@ -49,8 +49,8 @@ def publicar_clase():
 
     # Este campo no lo controlo porque es opcional
     primera_fecha = None if (body.get("primera_fecha") is None) else body.get("primera_fecha")
-
-    return publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, primera_fecha)
+    respuesta, status = publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, primera_fecha)
+    return jsonify(respuesta), status
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["DELETE"])
 def eliminar_clase(id_clase):
@@ -58,7 +58,8 @@ def eliminar_clase(id_clase):
         Recibe el ID de la clase a eliminar en formato JSON."""
 
     # Lozi: La explicación de mi implementación se encuentra dentro de la función eliminar_clase...
-    return eliminar_clase_service(id_clase)
+    resp, status = eliminar_clase_service(id_clase)
+    return resp, status
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["PUT"])
 def modificar_clase(id_clase):
@@ -70,14 +71,18 @@ def modificar_clase(id_clase):
 
     campos = [
         "estado",
-        "id_sala"
+        "id_sala",
+        "id_profesor"
     ]
 
     for campo in campos:
         if campo not in body:
             return {"error": f"Falta el campo {campo}"}, 400
+    estado = body.get("estado")
+    id_sala = body.get("id_sala")
+    id_profesor = body.get("id_profesor")
 
-    return modificar_clase_service(id_clase, **body)
+    return modificar_clase_service(id_clase, estado, id_profesor, id_sala)
 
 ## Habría que ver si a una clase cancelada hay que hacerle otra
 ## cosa que no sea cambiarle el estado.

@@ -167,8 +167,8 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 500px;
   overflow: hidden;
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: var(--bg-main);
+  color: var(--text-main);
   border-radius: 8px;
 }
 .slideshow-inner {

@@ -398,12 +398,17 @@ const crearClase = async () => {
     cerrarDialog()
   } catch (error) {
     console.error('Error al publicar la clase:', error)
-    const statusCode = error.response?.status;
+    console.log(error)
+    const statusCode = error.status
+    console.log(statusCode)
     if (statusCode === 406 || statusCode === 407) {
       notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
     } else if (statusCode === 408) {
       notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
-    } else {
+    } else if (statusCode === 400) {
+      notificationStore.showNotification('Este profesor no puede dar una clase de esa categoría', 'danger');
+    }
+    else {
       // Mensaje genérico para otros errores
       notificationStore.showNotification('Hubo un error al publicar la clase', 'danger');
     }
@@ -517,8 +522,9 @@ const cancelarReserva = async (clase) => {
 <style scoped>
 .classes-view {
   padding-top: 40px;
-  background-color: #f5f5f5;
+  background-color: var(--bg-main);
   min-height: 100vh;
+
 }
 
 .class-card-horizontal {

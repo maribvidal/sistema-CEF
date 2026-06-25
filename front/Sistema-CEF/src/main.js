@@ -6,6 +6,7 @@ import router from './router'
 import vuetify from './plugins/vuetify'
 import { initAuth } from './services/UsuariosServices.js'
 import './assets/main.css'
+import './assets/base.css'
 
 const app = createApp(App)
 

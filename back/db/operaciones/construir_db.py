@@ -56,6 +56,7 @@ def construir_tablas(cursor: sqlite.Cursor):
 
     # Construir tablas para las relaciones
     construir_tabla_usuario_tener_descuento(cursor)
+    construir_tabla_profesor_actividad(cursor) 
     construir_tabla_reserva(cursor)
     construir_tabla_cancelacion(cursor)
     construir_tabla_pago_pagar_clase(cursor)
@@ -338,16 +339,16 @@ def construir_tabla_rol(cursor: sqlite.Cursor):
                             nombre      VARCHAR({LONG_NOM})
                         )""")
 
-def construir_tabla_profesores_actividad(cursor: sqlite.Cursor):
-    """Construye la tabla Profesores_Actividad"""
-    cursor.execute(f"""CREATE TABLE IF NOT EXISTS Profesores_Actividad (
-                            id           INTEGER PRIMARY KEY,
+def construir_tabla_profesor_actividad(cursor: sqlite.Cursor):
+    """Construye la tabla intermedia Profesor_Actividad"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Profesor_Actividad (
                             profesor_id  INTEGER NOT NULL,
                             actividad_id INTEGER NOT NULL,
+                            PRIMARY KEY (profesor_id, actividad_id),
                             FOREIGN KEY (profesor_id) REFERENCES Usuario(id)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL,
+                                         ON UPDATE CASCADE
+                                         ON DELETE CASCADE,
                             FOREIGN KEY (actividad_id) REFERENCES Actividad(id)
-                                        ON UPDATE CASCADE
-                                        ON DELETE SET NULL
+                                         ON UPDATE CASCADE
+                                         ON DELETE CASCADE
                         )""")

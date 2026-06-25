@@ -45,23 +45,27 @@
 <style scoped>
 .about-page {
   min-height: calc(100vh - 120px);
-  background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+  /* Usa la variable de base.css, con fallback al gradiente si querés, pero para el dark mode es mejor el bg-main */
+  background: var(--bg-main, linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%));
 }
 
 .about-hero {
-  background: linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
+  background: var(--bg-card, linear-gradient(135deg, #ffffff 0%, #eef6ff 100%));
   border: 1px solid rgba(25, 118, 210, 0.12);
+  color: var(--text-main);
 }
 
 .eyebrow {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.8rem;
-  color: #1e4f91;
+  color: var(--primary-color, #1e4f91);
   font-weight: 700;
 }
 
 .about-card {
+  background-color: var(--bg-card);
+  color: var(--text-main);
   border: 1px solid rgba(25, 118, 210, 0.08);
 }
 </style>

@@ -11,7 +11,9 @@
     expand-on-hover
   >
     <v-list nav density="compact" class="menu-content">
-      
+      <v-btn density="comfortable" rounded="circle" class="theme-btn" color="blue-darken-3" variant="flat" @click="toggleTheme">
+                <v-icon>{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
+            </v-btn>
       <v-list-item class="menu-link-item" to="/">
         <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
           <v-icon start>{{ appMenuIcons.home }}</v-icon>
@@ -70,9 +72,20 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '@/services/UsuariosServices.js'
+import { useTheme } from 'vuetify'
+
+const theme = useTheme()
+const isDark = computed(() => theme.global.name.value === 'dark')
+
+function toggleTheme() {
+  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+  // Si también querés aplicar el data-theme en html para custom properties (por si se usan)
+  document.documentElement.setAttribute('data-theme', theme.global.name.value)
+}
 
 const router = useRouter()
 const { isLoggedIn, userProfile, logout } = useAuth()
+const userRole = computed(() => userProfile.value?.rol || null)
 const handleLogout = async () => {
     await logout()
     router.push('/inicioSesion')
@@ -99,7 +112,7 @@ const localMenuOpen = computed({
   max-height: calc(100vh - 48px);
   border-radius: 9px;
   overflow: hidden;
-  background: #fff;
+  background: var(--bg-card);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
   transition-property: all; /* Suaviza la animación */
   transition-duration: 600ms;

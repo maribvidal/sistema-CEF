@@ -28,26 +28,34 @@ def modificar_empleado_service(
     apellido: str,
     correo: str,
     genero: str,
-    rol_id: int
+    rol_id: int,
+    actividades: list
     ):
     """Service que modifica un empleado."""
+
+    # Aca verificamos de antemano si mandaron la key "actividades" en el JSON. Y si lo hicieron, que no sea una lista vacía
+    if actividades is not None and len(actividades) == 0:
+        return {
+            "error": "La lista de actividades no puede estar vacía."
+        }, 400
+
     cursor = conectarse_db()
 
     # Comprobar si el empleado no quiere cambiar algún que otro dato
-
     res_empl = obtener_empleado_por_dni(empleado_dni, cursor)
 
     if res_empl['status'] == 'error':
         cursor.connection.close()
         return {
             "error": "Error al obtener la información del empleado."
-        }, 400
+        }, 500
     elif res_empl['status'] == 'success' and res_empl['data'] is None:
         cursor.connection.close()
         return {
             "error": "No existe un empleado con dicho dni."
-        }, 401
+        }, 404 # O sea Not Found
 
+    # Estas validaciónes las dejo como están ya que ta bien
     if dni_nuevo is None:
         dni_nuevo = empleado_dni
     if nombre is None:
@@ -62,7 +70,6 @@ def modificar_empleado_service(
     # Comprobar que el dni al que se quiere cambiar no esté siendo
     # utilizado por otro empleado. Salvo en el caso de que el
     # dni sea el suyo mismo
-
     if (int(dni_nuevo) != int(empleado_dni)):
 
         res_dnis = listar_dnis_empleados(cursor)
@@ -71,25 +78,28 @@ def modificar_empleado_service(
             cursor.connection.close()
             return {
                 "error": "Error al obtener los DNIs de los empleados."
-            }, 401
+            }, 500
 
-        if (str(dni_nuevo) in str(res_dnis['data'])):
+        # Solucionado un mini-bug: buscar con string directamente falla si es que buscas "12" y existe "123" por ejemplo
+        lista_dnis_existentes = [str(item['dni']) for item in res_dnis['data']]
+        if (str(dni_nuevo) in lista_dnis_existentes):
             cursor.connection.close()
-            return {
-                "error": "El DNI ya se encuentra registrado para un empleado."
-            }, 402
+            return {"error": "El DNI ya se encuentra registrado."}, 409 # Error de conflicto
 
-    respuesta = modificar_empleado(cursor, empleado_dni, dni_nuevo, nombre, apellido, correo, genero, rol_id)
+    # Ahora inyectamos actividades a la BD
+    respuesta = modificar_empleado(cursor, empleado_dni, dni_nuevo, nombre, apellido, correo, genero, rol_id, actividades)
+
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al intentar modificar empleado.",
+            "message": respuesta['message']
+        }, 500
 
     # Con esto guardo los cambios en la base de datos
     cursor.connection.commit()
     cursor.connection.close()
 
-    if respuesta['status'] == 'error':
-        return {
-            "error": "Error al intentar modificar empleado.",
-            "message": respuesta['message']
-        }, 500
     return respuesta, 200
 
 def borrar_empleado_service(empleado_dni: int):
