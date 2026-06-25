@@ -149,7 +149,7 @@ const icons = {
 }
 
 .dark {
-  background-color: #1f2937;
+  background-color: var(--text-main);
   color: #f3f4f6;
   border-left: 4px solid #4b5563;
 }

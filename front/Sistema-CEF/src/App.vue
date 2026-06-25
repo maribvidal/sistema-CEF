@@ -11,7 +11,7 @@
       <router-view />
       
 
-      <v-footer class="pa-4" color="#f0f0f0">
+      <v-footer class="pa-4 bg-light">
         <span>&copy; 2026 CEF. Todos los derechos reservados.</span>
       </v-footer>
       
@@ -43,6 +43,7 @@ const appMenuIcons = {
   accountnew: 'mdi-account-plus',
   employees: 'mdi-account-multiple-cog',
   moon: 'mdi-moon-waning-crescent',
+  sun: 'mdi-white-balance-sun',
 }
 onMounted(() => {
   if (isLoggedIn.value) {

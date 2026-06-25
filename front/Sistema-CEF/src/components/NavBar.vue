@@ -1,15 +1,15 @@
 <template>
-    <v-app-bar app color="white" elevation="1">
+    <v-app-bar app color="--bg-navBar" elevation="1">
         <!-- Logo Text / Image placeholder -->
         <router-link to="/" class="navbar-logo">
             <v-img class="NavBarIMG" :src="logoImg" alt="Logo CEF" contain height="40" width="150" />
         </router-link>
 
         <v-spacer></v-spacer>
-        <!--<v-btn density="comfortable" rounded="circle" class="theme-btn" color="blue-darken-3" variant="flat" hidden>
-                <v-icon>mdi-moon-waning-crescent</v-icon>
+        <v-btn density="comfortable" rounded="circle" class="theme-btn" color="blue-darken-3" variant="flat" @click="toggleTheme">
+                <v-icon>{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-moon-waning-crescent' }}</v-icon>
             </v-btn>
-        <!-- Use d-none d-md-flex to hide links on smaller screens if needed -->
+        
         <div class="d-none d-md-flex align-center">
             
             <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/">Inicio</v-btn>
@@ -53,6 +53,16 @@ import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { ref, onMounted } from 'vue'
 import { useNotificationStore } from '@/stores/notificationStore.js'
+import { useTheme } from 'vuetify'
+
+const theme = useTheme()
+const isDark = computed(() => theme.global.name.value === 'dark')
+
+function toggleTheme() {
+  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
+  // Si también querés aplicar el data-theme en html para custom properties (por si se usan)
+  document.documentElement.setAttribute('data-theme', theme.global.name.value)
+}
 
 const router = useRouter()
 const { isLoggedIn, userProfile, logout, fetchUserProfile } = useAuth()
@@ -120,5 +130,6 @@ onMounted(() => {
     max-block-size: 50px;
     max-width: 30px;
     margin-right: 30px;
+
 }
 </style>

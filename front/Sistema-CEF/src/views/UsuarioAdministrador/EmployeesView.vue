@@ -496,7 +496,7 @@ onMounted(() => {
 <style scoped>
 .employees-admin {
   padding-top: 40px;
-  background-color: #f5f5f5;
+  background-color: var(--bg-main); /* Fallback a gris claro si la variable no está definida */
   min-height: 100vh;
 }
 .search-field :deep(.v-field__input) {

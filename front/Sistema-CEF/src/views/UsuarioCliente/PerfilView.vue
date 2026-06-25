@@ -108,6 +108,6 @@ const goToChangePassword = () => {
   font-weight: 600;
 }
 .text--secondary {
-  color: rgba(0,0,0,0.6);
+  color: var(--text-secondary);
 }
 </style>

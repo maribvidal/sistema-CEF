@@ -41,7 +41,6 @@
 
 <script setup>
   import { useNotificationStore } from '@/stores/notificationStore.js'
-
   const store = useNotificationStore()
 </script>
 
@@ -54,7 +53,7 @@
   z-index: 10000;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px var(--shadow-color); /* Usamos tu variable de sombra */
   max-width: 400px;
   width: 90%;
   display: flex;
@@ -62,7 +61,10 @@
   gap: 10px;
   font-size: 1rem;
   line-height: 1.5;
-  background-color: white;
+  
+  /* AQUÍ VUELVEN TUS VARIABLES */
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
 .notification-content {
@@ -87,6 +89,7 @@
   cursor: pointer;
   opacity: 0.5;
   transition: opacity 0.2s;
+  color: inherit; /* Toma el color del texto */
 }
 
 .close-btn:hover {
@@ -115,51 +118,40 @@
 }
 
 .accept-btn {
-  background-color: #10b981; /* Emerald 500 */
+  background-color: #10b981; 
   color: white;
 }
 .accept-btn:hover {
-  background-color: #059669; /* Emerald 600 */
+  background-color: #059669; 
 }
 
 .decline-btn {
-  background-color: #ef4444; /* Red 500 */
+  background-color: #ef4444; 
   color: white;
 }
 .decline-btn:hover {
-  background-color: #dc2626; /* Red 600 */
+  background-color: #dc2626; 
 }
 
-/* Variants - matching FloatingNotification but adapted for modal style */
+/* Variantes simplificadas: Solo cambian el borde superior */
+/* Al no tener 'background-color' definido aquí, respetan el fondo blanco de .notification-card */
 .info {
   border-top: 5px solid #3b82f6;
-  background-color: #ffffff;
-  color: #1f2937;
 }
 
 .success {
   border-top: 5px solid #22c55e;
-  background-color: #ffffff;
-  color: #1f2937;
 }
 
 .warning {
   border-top: 5px solid #eab308;
-  background-color: #ffffff;
-  color: #1f2937;
 }
 
 .danger {
   border-top: 5px solid #ef4444;
-  background-color: #ffffff;
-  color: #1f2937;
 }
 
-.dark {
-  border-top: 5px solid #4b5563;
-  background-color: #1f2937;
-  color: #f3f4f6;
-}
+
 
 /* Transitions */
 .fade-enter-active,

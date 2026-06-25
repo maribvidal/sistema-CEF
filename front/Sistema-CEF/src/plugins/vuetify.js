@@ -20,6 +20,19 @@ export default createVuetify({
           surface: '#ffffff', // Fondo de tarjetas
         },
       },
+      dark: {
+        colors: {
+          primary: '#90caf9', // Azul más claro para modo oscuro
+          secondary: '#bdbdbd', 
+          accent: '#448aff', 
+          error: '#ef5350', 
+          info: '#29b6f6',
+          success: '#66bb6a',
+          warning: '#ffa726',
+          background: '#121212', // Fondo oscuro
+          surface: '#1e1e1e', // Fondo de tarjetas oscuro
+        },
+      },
     },
   },
 })
