@@ -100,11 +100,11 @@ const register = async () => {
 		telefono: cellphone.value,
 		genero: gender.value ? gender.value.charAt(0) : 'O',
       // El rol se asignará por defecto en el backend, usualmente.
-        rol_id: 3
+        rol: 3
     }
 	console.log("DATA ENVIADA:", usuario)
 
-	const response = await fetch('http://127.0.0.1:5000/usuarios', {
+	const response = await fetch('http://127.0.0.1:5000/registro', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

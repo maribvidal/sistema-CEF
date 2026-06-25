@@ -60,7 +60,6 @@ def registro():
 
     return jsonify(respuesta), status
 
-
 # Implementar validar QR no es necesario, ya que existe en clases_route una verificación de validar.
 # Hay que ver si se implementa o no el visualizar qr, creo que es mucho mejor el simplemente generarlo por demanda así no ocupa espacio
 @autenticacion_bp.route("/clientes/<int:id_cliente>/qr", methods=["GET"])
@@ -71,7 +70,6 @@ def generar_qr(id_cliente: int):
         qr,
         mimetype='image/png'
     )
-
 
 # Implementar validar QR, se debe recibir el id de la clase + id_cliente, y se debe validar que el client tenga una reserva para esa clase, y que la clase esté activa, y que la fecha y hora sean correctas. Si todo es correcto, se debe devolver un mensaje de éxito, sino se debe devolver un mensaje de error.
 @autenticacion_bp.route("/clientes/<int:inst_clase_id>/validar_qr", methods=["POST"])
