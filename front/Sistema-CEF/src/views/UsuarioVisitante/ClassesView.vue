@@ -398,9 +398,7 @@ const crearClase = async () => {
     cerrarDialog()
   } catch (error) {
     console.error('Error al publicar la clase:', error)
-    console.log(error)
     const statusCode = error.status
-    console.log(statusCode)
     if (statusCode === 406 || statusCode === 407) {
       notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
     } else if (statusCode === 408) {
