@@ -13,6 +13,15 @@ def listar_dnis_profesores(cursor) -> dict:
         profesores, y devuelve una lista de tuplas."""
     return ejecutar_fetchall("SELECT dni FROM Usuario WHERE rol_id = 5", cursor)
 
+def consultar_clases_profesor_dia_hora(id_profesor: int, dia: str, hora: str, cursor) -> dict:
+    """Hace una consulta para devolver las clases de un profesor en un día y hora específicos."""
+    query = f"""
+        SELECT * 
+        FROM Clase 
+        WHERE profesor_id = {id_profesor} AND dia = '{dia}' AND hora = '{hora}';
+    """
+    return ejecutar_fetchall(query, cursor)
+
 def verificar_actividad_profesor(id_profesor: int, id_actividad: int, cursor) -> dict:
     """Verifica si un profesor está habilitado para dar una actividad específica."""
     query = f"""

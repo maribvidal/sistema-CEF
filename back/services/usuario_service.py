@@ -529,7 +529,7 @@ def subir_avatar_usuario_service(usuario_id, avatar):
             "error": res2['message']
         }, 500
     
-    if res2['status'] == 'success':
+    if res2['status'] == 'success' and res2['data'] is not None:
         cursor.connection.close()
         return {
             "error": "Ocurrió un error al intentar asociar la imagen al usuario."
