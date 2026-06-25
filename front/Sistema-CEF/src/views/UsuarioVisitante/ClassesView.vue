@@ -389,7 +389,7 @@ const crearClase = async () => {
       id_sala: nuevaClase.value.id_sala,
       dia: nuevaClase.value.dia,
       hora: nuevaClase.value.hora,
-      cupo_maximo: 40 // lo hardcodeo, despues lo vemos 
+      cupo_maximo: 1 // lo hardcodeo, despues lo vemos 
     }
     
     await ClasesService.publicarClase(payload)
@@ -449,7 +449,7 @@ const eliminarClase = async (clase) => {
       await fetchClases()
     } catch (error) {
       console.error('Error al eliminar clase:', error)
-      const statusCode = error.response?.status;
+      const statusCode = error.status;
       if (statusCode === 402 || statusCode === 403) {
         notificationStore.showNotification('No se puede eliminar una clase con usuarios inscriptos en alguna de sus instancias', 'danger');
       } else {

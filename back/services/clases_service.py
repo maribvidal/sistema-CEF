@@ -3,7 +3,7 @@ from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_ind
 from db.operaciones.usuarios.consultar_db import obtener_usuario_esta_en_instancia_clase
 from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora, consultar_instancias_por_clase_id
+from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora, consultar_instancias_por_clase_id, consultar_reservas_total_por_clase
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases import modificar_clase_estado, modificar_clase, borrar_clase
 from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
@@ -79,6 +79,7 @@ def publicar_clase_service(
     # Comprobar que la sala no esté ocupada en ese día y hora
 
     respuesta = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
+    print(respuesta)
     control = _controlar_errores_query_sin_none(respuesta, 406, "La sala ya se encuentra ocupada en ese día y hora.", 407, cursor)
     if control is not None:
         return control
@@ -172,13 +173,15 @@ def modificar_clase_service(
     if not res_habilitado['data']:
         return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
 
-    # Comprobar que el profesor que se cambie pueda dar la actividad, y el día y la hora de la clase esté bien
+    # TODO: Comprobar que el profesor que se cambie pueda dar la actividad, y el día y la hora de la clase esté bien
 
-    # Segundo verificamos que no haya ninguna instancia de la clase que queremos modificar, ya que como instancia_clase apunta directamente a Clase, pues todo cambio que hagamos en la clase repercute en la instancia de la misma
-    respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
-    control = _controlar_errores_query_sin_none(respuesta, 402, "No se puede modificar la clase porque ya tiene una instancia asociada.", 403, cursor)
-    if control is not None:
-        return control
+    respuesta = consultar_reservas_total_por_clase(clase_id, cursor)
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return _msj_error_helper(respuesta["message"], cursor), 402
+    if respuesta['status'] == 'success' and respuesta['data']['id'] is not None:
+        cursor.connection.close()
+        return _msj_error_helper("No se pudo eliminar la clase porque existían reservas asociadas.", cursor), 403
 
     # Tercero, intentamos modificar la clase
     respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor)
@@ -202,16 +205,20 @@ def eliminar_clase_service(clase_id: int):
     if control is not None:
         return control
 
-    # nos aseguramos de que no exista ninguna instancia de la clase
-    respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
+    # nos aseguramos de que no exista ninguna reserva
+    respuesta = consultar_reservas_total_por_clase(clase_id, cursor)
     
     # Le agregamos "control =" y mantenemos el _sin_none con 402/403
-    control = _controlar_errores_query_sin_none(respuesta, 402, "No se puede eliminar la clase porque ya tiene una instancia asociada.", 403, cursor)
-    if control is not None:
-        return control
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return _msj_error_helper(respuesta["message"], cursor), 402
+    if respuesta['status'] == 'success' and respuesta['data']['id'] is not None:
+        cursor.connection.close()
+        return _msj_error_helper("No se pudo eliminar la clase porque existían reservas asociadas.", cursor), 403
 
     # si todo eso se cumple, entonces eliminamos la clase.
     respuesta = borrar_clase(clase_id, cursor)
+    print(respuesta)
 
     if respuesta['status'] == 'error':
         return _msj_error_helper(respuesta["message"], cursor), 404
