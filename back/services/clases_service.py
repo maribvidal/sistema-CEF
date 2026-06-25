@@ -8,7 +8,7 @@ from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases import modificar_clase_estado, modificar_clase, borrar_clase
 from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
 from db.operaciones.profesores.consultar_db import consultar_profesor_por_id, consultar_clases_profesor_dia_hora
-from db.operaciones.salas.consultar_db import consultar_sala_por_id
+from db.operaciones.salas.consultar_db import consultar_sala_profe_por_dia_hora, consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
@@ -163,8 +163,10 @@ def modificar_clase_service(
     if control is not None:
         return control
     
-    # Como la clase existe, extraemos su actividad actual
+    # Como la clase existe, extraemos su actividad actual y otros datos
     id_actividad_actual = respuesta['data']['actividad_id']
+    dia_clase = respuesta['data']['dia']
+    hora_clase = respuesta['data']['hora']
 
     # Ahora realizamos una validación nueva: Verificar si el profesor puede dar la actividad fija de esta clase
     res_habilitado = verificar_actividad_profesor(id_profesor, id_actividad_actual, cursor)
@@ -173,7 +175,27 @@ def modificar_clase_service(
     if not res_habilitado['data']:
         return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
 
-    # TODO: Comprobar que el profesor que se cambie pueda dar la actividad, y el día y la hora de la clase esté bien
+    # Comprobar que la sala no está ocupada ya para ese día y hora por ese profe
+    respuesta = consultar_sala_profe_por_dia_hora(dia_clase, hora_clase, cursor)
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return _msj_error_helper(respuesta["message"], cursor), 405
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+        salas = [sala for sala in respuesta["data"] if sala["id"] != sala and sala["profesor_id"] != id_profesor]
+        if len(salas) > 0:
+            cursor.connection.close()
+            return _msj_error_helper("La sala ya se encuentra ocupada en ese día y hora.", cursor), 406
+
+    # Comprobar que el profesor no se encuentre ocupado en ese día y hora
+    respuesta = consultar_clases_profesor_dia_hora(id_profesor, dia_clase, hora_clase, cursor)
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return _msj_error_helper(respuesta["message"], cursor), 410
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+        clases = [clase for clase in respuesta["data"] if clase["id"] != clase_id]
+        if len(clases) > 0:
+            cursor.connection.close()
+            return _msj_error_helper("El profesor ya se encuentra ocupado en ese día y hora.", cursor), 411
 
     respuesta = consultar_reservas_total_por_clase(clase_id, cursor)
     if respuesta['status'] == 'error':

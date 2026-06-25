@@ -9,10 +9,11 @@ def listar_salas(cursor) -> dict:
     return ejecutar_fetchall("""SELECT s.id, s.nombre
                                 FROM Sala s""", cursor)
 
-def consultar_sala_por_dia_hora(dia: str, hora: str, cursor) -> dict:
+def consultar_sala_profe_por_dia_hora(dia: str, hora: str, cursor) -> dict:
     """Hace una consulta para devolver la tupla de una sala por el día y hora
         en el que transcurra una clase.."""
-    return ejecutar_fetchone(f"""SELECT s.id, s.nombre
+    return ejecutar_fetchall(f"""SELECT s.id, p.id as profesor_id
                                 FROM Sala s
-                                JOIN Clase c ON s.id = c.sala_id
+                                INNER JOIN Clase c ON s.id = c.sala_id
+                                INNER JOIN Usuario p ON c.profesor_id = p.id
                                 WHERE c.dia = '{dia}' AND c.hora = '{hora}';""", cursor)
