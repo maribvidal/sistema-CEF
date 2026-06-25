@@ -430,8 +430,18 @@ const actualizarClase = async () => {
     await fetchClases()
     cerrarDialog()
   } catch (error) {
+    const statusCode = error.status
     console.error('Error al actualizar clase:', error)
-    notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
+    
+    if (statusCode === 405) {
+      notificationStore.showNotification('Esa sala está ocupada en ese horario y fecha', 'danger')
+    } else if (statusCode === 411) {
+      notificationStore.showNotification('Ese profesor ya tiene una clase asignada en ese día y horario', 'danger')
+    } else if (statusCode === 412) {
+      notificationStore.showNotification('El profesor no está habilitado para dar esa actividad', 'danger')
+    } else {
+      notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
+    }
   }
 }
 

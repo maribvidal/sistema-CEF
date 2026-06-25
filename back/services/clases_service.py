@@ -79,7 +79,6 @@ def publicar_clase_service(
     # Comprobar que la sala no esté ocupada en ese día y hora
 
     respuesta = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
-    print(respuesta)
     control = _controlar_errores_query_sin_none(respuesta, 406, "La sala ya se encuentra ocupada en ese día y hora.", 407, cursor)
     if control is not None:
         return control
@@ -167,24 +166,26 @@ def modificar_clase_service(
     id_actividad_actual = respuesta['data']['actividad_id']
     dia_clase = respuesta['data']['dia']
     hora_clase = respuesta['data']['hora']
+    id_profe_orig = respuesta['data']['profesor_id']
 
     # Ahora realizamos una validación nueva: Verificar si el profesor puede dar la actividad fija de esta clase
     res_habilitado = verificar_actividad_profesor(id_profesor, id_actividad_actual, cursor)
     if res_habilitado['status'] == 'error':
         return _msj_error_helper("Error interno al verificar las actividades del profesor.", cursor), 500
     if not res_habilitado['data']:
-        return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
+        return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 412 # 400: Bad Request
 
     # Comprobar que la sala no está ocupada ya para ese día y hora por ese profe
     respuesta = consultar_sala_profe_por_dia_hora(dia_clase, hora_clase, cursor)
     if respuesta['status'] == 'error':
         cursor.connection.close()
-        return _msj_error_helper(respuesta["message"], cursor), 405
+        return _msj_error_helper(respuesta["message"], cursor), 406
     if respuesta['status'] == 'success' and respuesta['data'] is not None:
-        salas = [sala for sala in respuesta["data"] if sala["id"] != sala and sala["profesor_id"] != id_profesor]
+        salas = [sal for sal in respuesta["data"] if sal["id"] == sala and sal["profesor_id"] != id_profe_orig]
+        print(salas)
         if len(salas) > 0:
             cursor.connection.close()
-            return _msj_error_helper("La sala ya se encuentra ocupada en ese día y hora.", cursor), 406
+            return _msj_error_helper("La sala ya se encuentra ocupada en ese día y hora.", cursor), 405
 
     # Comprobar que el profesor no se encuentre ocupado en ese día y hora
     respuesta = consultar_clases_profesor_dia_hora(id_profesor, dia_clase, hora_clase, cursor)
