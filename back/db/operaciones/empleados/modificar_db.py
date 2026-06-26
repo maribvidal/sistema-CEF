@@ -150,12 +150,19 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
     # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
     # AHORA ES BORRADO FISICO
     # SI QUEREMOS HACER BORRADO TAMBIÉN EN SUS REFERENCIAS (FOREIGN KEYS), HAY QUE UTILIZAR DELETE ON CASCADE. PERO POR LAS DUDAS LO DEJO COMO DELETE NORMAL
-    query_delete = f"""
-        DELETE FROM Usuario
+    # query_delete = f"""
+    #     DELETE FROM Usuario
+    #     WHERE dni = {empleado_dni}
+    # """
+    # AHORA ES LÓGICO LA RREPUTAMADRE DECIDANSÉ MATERIA DE LA REVERENDA CONCHA
+    # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
+    query_update = f"""
+        UPDATE Usuario
+        SET rol_id = 4
         WHERE dni = {empleado_dni}
     """
 
-    return ejecutar_query(query_delete, cursor)
+    return ejecutar_query(query_update, cursor)
 
 def desactivar_empleado(empleado_dni: int, cursor) -> dict:
     """Desactiva un empleado específico de la base de datos, utilizando su DNI como referencia.
