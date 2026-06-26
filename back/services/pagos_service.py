@@ -74,7 +74,7 @@ def crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item):
             "message": respuesta_json.get('message')
         }, 500
     
-    respuesta = consultar_datos_orden_qr_mp(respuesta_json.get("id"))
+    respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
     
     if respuesta['status'] == 'error':
         cursor.connection.close()
@@ -83,9 +83,9 @@ def crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item):
             "message": respuesta['message']
         }, 500
     
-    while(respuesta == "created"):
+    while(respuesta['data']['status'] == "created"):
         time.sleep(2)
-        respuesta = consultar_datos_orden_qr_mp(respuesta_json.get("id"))
+        respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
 
         if respuesta['status'] == 'error':
             cursor.connection.close()
@@ -94,14 +94,14 @@ def crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item):
                 "message": respuesta['message']
             }, 500
         
-    if respuesta['data'] == "expired" or respuesta['data'] == "refunded":
+    if respuesta['data']['status'] == "expired" or respuesta['data']['status'] == "refunded":
         borrar_pago(cursor, id_pago)
         
         cursor.connection.close()
         return {
-            "error": f"La orden de pago con id {respuesta_json.get('id')} ha expirado o fue cancelada."
-        }, 400
-        
+            "error": f"La orden de pago con id {respuesta_json['data']['id']} ha expirado o fue cancelada."
+        }, 400    
+    
     # actuaizar estado del pago
     res_actualizar = actualizar_estado_pago(id_pago, respuesta['data'], cursor)
     
