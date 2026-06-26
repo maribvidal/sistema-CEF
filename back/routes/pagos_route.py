@@ -17,7 +17,9 @@ def obtener_pagos():
 def obtener_qr_mp():    
     load_dotenv()
     
-    return os.getenv("QR")
+    QR = os.getenv("QR")
+    
+    return jsonify(QR), 200
 
 @pagos_bp.route("/pagos", methods=["POST"])
 def crear_pago():
@@ -40,19 +42,20 @@ def crear_pago():
 
     return jsonify(respuesta), status
 
-@pagos_bp.route("/webhook/qr", methods=["POST"])
-def recibir_webhook_qr():
-    data = request.json
+#
+# @pagos_bp.route("/webhook/qr", methods=["POST"])
+# def recibir_webhook_qr():
+#     data = request.json
     
-    id_pago = data['data']['external_reference']
-    estado_pago = data['data']['status']
+#     id_pago = data['data']['external_reference']
+#     estado_pago = data['data']['status']
     
-    respuesta, status = actualizar_estado_pago_service(id_pago, estado_pago)
+#     respuesta, status = actualizar_estado_pago_service(id_pago, estado_pago)
     
-    return respuesta, status
+#     return respuesta, status
 
-@pagos_bp.route("/pagos/estado/<int:id_pago>", methods=["GET"])
-def obtener_estado_pago(id_pago):
-    respuesta, status = obtener_estado_pago_service(id_pago)
+# @pagos_bp.route("/pagos/estado/<int:id_pago>", methods=["GET"])
+# def obtener_estado_pago(id_pago):
+#     respuesta, status = obtener_estado_pago_service(id_pago)
     
-    return jsonify(respuesta), status
+#     return jsonify(respuesta), status

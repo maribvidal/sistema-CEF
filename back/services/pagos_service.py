@@ -1,3 +1,6 @@
+import time
+
+from db.operaciones.pagos.borrar_db import borrar_pago
 from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
 from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp
 from db.operaciones import listar_pagos
@@ -47,7 +50,15 @@ def crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item):
             "error": "No se pudo crear el pago."
         }, 400
     
-    id_pago = pago['data']
+    id_pago_raw = pago['data']
+
+    try:
+        id_pago = int(id_pago_raw)
+    except (TypeError, ValueError):
+        cursor.connection.close()
+        return {
+            "error": "El id del pago creado no es válido."
+        }, 500
     
     datos_item = {
         "nombre": tipo_pago,
@@ -62,33 +73,37 @@ def crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item):
             "error": "Error al crear la orden de pago en MercadoPago.",
             "message": respuesta_json.get('message')
         }, 500
-        
-    return {
-        "message": "Orden de pago creada exitosamente.",
-        "status_mp": respuesta_json.get("status")
-    }, 200    
     
-def actualizar_estado_pago_service(id_pago, estado):
-    cursor = conectarse_db()
+    respuesta = consultar_datos_orden_qr_mp(respuesta_json.get("id"))
     
-    # verificar que el pago exista
-    verificacion = verificar_existencia_pago_por_id(id_pago, cursor)
-    
-    if verificacion['status'] == 'error':
+    if respuesta['status'] == 'error':
         cursor.connection.close()
         return {
-            "error": "Error al verificar la existencia del pago.",
-            "message": verificacion['message']
+            "error": "Error al consultar los datos de la orden de pago en MercadoPago.",
+            "message": respuesta['message']
         }, 500
+    
+    while(respuesta == "created"):
+        time.sleep(2)
+        respuesta = consultar_datos_orden_qr_mp(respuesta_json.get("id"))
+
+        if respuesta['status'] == 'error':
+            cursor.connection.close()
+            return {
+                "error": "Error al consultar los datos de la orden de pago en MercadoPago.",
+                "message": respuesta['message']
+            }, 500
         
-    if verificacion['status'] == 'success' and not verificacion['data']:
+    if respuesta['data'] == "expired" or respuesta['data'] == "refunded":
+        borrar_pago(cursor, id_pago)
+        
         cursor.connection.close()
         return {
-            "error": f"No se encontró un pago con el id {id_pago}."
+            "error": f"La orden de pago con id {respuesta_json.get('id')} ha expirado o fue cancelada."
         }, 400
-    
+        
     # actuaizar estado del pago
-    res_actualizar = actualizar_estado_pago(id_pago, estado, cursor)
+    res_actualizar = actualizar_estado_pago(id_pago, respuesta['data'], cursor)
     
     if res_actualizar['status'] == 'error':
         cursor.connection.close()
@@ -98,12 +113,48 @@ def actualizar_estado_pago_service(id_pago, estado):
         }, 500
     
     cursor.connection.close()
-    
+        
     return {
-        "message": f"Estado del pago con id {id_pago} actualizado a {estado}."
-    }, 200
+        "message": "Orden de pago creada exitosamente.",
+        "status_mp": respuesta_json.get("status")
+    }, 200    
     
-def obtener_estado_pago_service(id_pago):
+# def actualizar_estado_pago_service(id_pago, estado):
+#     cursor = conectarse_db()
+    
+#     # verificar que el pago exista
+#     verificacion = verificar_existencia_pago_por_id(id_pago, cursor)
+    
+#     if verificacion['status'] == 'error':
+#         cursor.connection.close()
+#         return {
+#             "error": "Error al verificar la existencia del pago.",
+#             "message": verificacion['message']
+#         }, 500
+        
+#     if verificacion['status'] == 'success' and not verificacion['data']:
+#         cursor.connection.close()
+#         return {
+#             "error": f"No se encontró un pago con el id {id_pago}."
+#         }, 400
+    
+#     # actuaizar estado del pago
+#     res_actualizar = actualizar_estado_pago(id_pago, estado, cursor)
+    
+#     if res_actualizar['status'] == 'error':
+#         cursor.connection.close()
+#         return {
+#             "error": "Error al actualizar el estado del pago.",
+#             "message": res_actualizar['message']
+#         }, 500
+    
+#     cursor.connection.close()
+    
+#     return {
+#         "message": f"Estado del pago con id {id_pago} actualizado a {estado}."
+#     }, 200
+    
+# def obtener_estado_pago_service(id_pago):
     cursor = conectarse_db()
     
     # verificar que el pago exista

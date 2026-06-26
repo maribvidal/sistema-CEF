@@ -1,4 +1,5 @@
 from os import getenv
+import uuid
 
 import requests
 
@@ -36,8 +37,9 @@ items= {
 
 def getItem(nombre, id):
     if nombre in items:
-        item = items[nombre]
+        item = items[nombre].copy()
         item["external_code"] = getExternalCode(nombre, id)
+        item["unit_price"] = str(item["unit_price"])
         return item
     return None
 
@@ -121,59 +123,70 @@ def getItem(nombre, id):
 # idea: crear un pago antes de generar el orden con estado "pending" y obtenes su id, pasas el id como external reference
 # luego actualizas el estado del pago segun la consulta de la orden, cualquier cosa se elimina el pago si hay algun fallo
 def crear_orden_qr_mp(external_reference, total_amount, description, datos_item):
-    url = 'https://api.mercadopago.com/v1/orders'
-    headers = {'Authorization': f'Bearer {Access_Token}'}
+    try:
+        url = 'https://api.mercadopago.com/v1/orders'
+        headers = {
+            'Authorization': f'Bearer {Access_Token}',
+            'X-Idempotency-Key': str(uuid.uuid4())
+        }
 
-    respuesta = requests.post(url, headers=headers)
+        if "nombre" not in datos_item or "id" not in datos_item:
+            return {
+                "status": "error",
+                "message": "Datos del item incompletos. Se requiere 'nombre' e 'id'."
+            }
+            
+        if datos_item["id"] is None:
+            return {
+                "status": "error",
+                "message": "El ID del item es requerido."
+            }
 
-    if "nombre" not in datos_item or "id" not in datos_item:
+        item = getItem(datos_item["nombre"], datos_item["id"])
+
+        if item is None:
+            return {
+                "status": "error",
+                "message": f"Item con nombre '{datos_item['nombre']}' no encontrado."
+            }
+
+        datos = {
+            "type": "qr",
+            "total_amount": str(total_amount),
+            "description": description,
+            "external_reference": str(external_reference),
+            "expiration_time": "PT16M",
+            "config": {
+                "qr": {
+                    "external_pos_id": "CAJA001",
+                    "mode": "static"
+                }
+            },
+            "transactions": {
+                "payments": [
+                    {
+                    "amount": str(total_amount)
+                    }
+                ]
+            },
+            "items": [
+                item
+            ]
+        }
+        respuesta = requests.post(url, json=datos, headers=headers)
+
+        print(respuesta.json())
+        
         return {
-            "status": "error",
-            "message": "Datos del item incompletos. Se requiere 'nombre' e 'id'."
+            "status": "success",
+            "data": respuesta.json()
         }
         
-    if datos_item["id"] is None:
+    except Exception as e:
         return {
             "status": "error",
-            "message": "El ID del item es requerido."
+            "message": str(e)
         }
-
-    item = getItem(datos_item["nombre"], datos_item["id"])
-
-    if item is None:
-        return {
-            "status": "error",
-            "message": f"Item con nombre '{datos_item['nombre']}' no encontrado."
-        }
-
-    datos = {
-        "type": "qr",
-        "total_amount": total_amount,
-        "description": description,
-        "external_reference": external_reference,
-        "expiration_time": "PT16M",
-        "config": {
-            "qr": {
-                "external_pos_id": "CAJA001",
-                "mode": "static"
-            }
-        },
-        "transactions": {
-            "payments": [
-                {
-                "amount": total_amount
-                }
-            ]
-        },
-        "items": [
-            item
-        ]
-    }
-    respuesta = requests.post(url, json=datos, headers=headers)
-
-    print(respuesta.json())
-    
-    return respuesta.json()
 
 # el id de la orden se obtiene en la respuesta de la creacion de la orden
 
@@ -238,10 +251,21 @@ def crear_orden_qr_mp(external_reference, total_amount, description, datos_item)
 
 # esto no se utilizaria, de todas formas lo dejo por las dudas pero se notifica con webhooks y el front es el que hace el loop y pregunta al back por el estado del pago
 def consultar_datos_orden_qr_mp(id_orden):
-    url = f'https://api.mercadopago.com/v1/orders/{id_orden}'
-    headers = {'Authorization': f'Bearer {Access_Token}'}
-    respuesta = requests.get(url, headers=headers)
-    return respuesta.json()
+    try:
+        url = f'https://api.mercadopago.com/v1/orders/{id_orden}'
+        headers = {'Authorization': f'Bearer {Access_Token}'}
+        respuesta = requests.get(url, headers=headers)
+
+        return {
+            "status": "success",
+            "data": respuesta.json()
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 # mirar posibles estados del order para despues controlarlo.
 
@@ -249,9 +273,6 @@ def consultar_datos_orden_qr_mp(id_orden):
 def crear_caja_mp():
     url = 'https://api.mercadopago.com/pos'
     headers = {'Authorization': f'Bearer {Access_Token}'}
-
-    # Para una petición GET
-    respuesta = requests.post(url, headers=headers)
 
     # Para una petición POST con JSON
     datos = {
@@ -271,9 +292,6 @@ def crear_sucursal_mp():
 
     url = f'https://api.mercadopago.com/users/{usr_id}/stores'
     headers = {'Authorization': f'Bearer {Access_Token}'}
-
-    # Para una petición GET
-    respuesta = requests.post(url, headers=headers)
 
     # Para una petición POST con JSON
     datos = {
