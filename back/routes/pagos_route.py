@@ -21,24 +21,28 @@ def obtener_qr_mp():
     
     return jsonify(QR), 200
 
-@pagos_bp.route("/pagos", methods=["POST"])
-def crear_pago():
+@pagos_bp.route("/pagos/mensualidad", methods=["POST"])
+def crear_pago_mensualidad():
     data = request.get_json()
-    monto = data.get("monto")
     usuario_id = data.get("usuario_id")
     descripcion = data.get("descripcion")
     
-    # aca tiene que venir si es 'mensualidad' o 'clase_particular'
-    # mensualidad seria para la renovacion o pago de esta y la clase_particular para cuando se llama a pagar con mp en 'confirmar asistencia lista espera individual'
-    tipo_pago = data.get("tipo_pago") 
-    
     # es necesario el id del item a pagar, sea de la mensualidad o de la instancia clase
-    id_item = data.get("id_item")
+    id_mensualidad = data.get("id_mensualidad")
     
-    respuesta, status = crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item)
+    respuesta, status = crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad)
+
+    return jsonify(respuesta), status
+
+@pagos_bp.route("/pagos/particular", methods=["POST"])
+def crear_pago_particular():
+    data = request.get_json()
+    usuario_id = data.get("usuario_id")
+    descripcion = data.get("descripcion")
     
-    # TODO: Crear la orden, y loopear hasta que se llegue a un 'status_detail' que sea distinto de
-    #       'created' o 'partially_refunded'
+    clase_id = data.get("clase_id")
+
+    respuesta, status = crear_pago_service_particular(usuario_id, descripcion, clase_id)
 
     return jsonify(respuesta), status
 

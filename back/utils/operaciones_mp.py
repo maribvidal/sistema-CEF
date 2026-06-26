@@ -122,40 +122,22 @@ def getItem(nombre, id):
 
 # idea: crear un pago antes de generar el orden con estado "pending" y obtenes su id, pasas el id como external reference
 # luego actualizas el estado del pago segun la consulta de la orden, cualquier cosa se elimina el pago si hay algun fallo
-def crear_orden_qr_mp(external_reference, total_amount, description, datos_item):
+def crear_orden_qr_mp(external_reference, total_amount, description, item):
     try:
         url = 'https://api.mercadopago.com/v1/orders'
         headers = {
             'Authorization': f'Bearer {Access_Token}',
             'X-Idempotency-Key': str(uuid.uuid4())
         }
-
-        if "nombre" not in datos_item or "id" not in datos_item:
-            return {
-                "status": "error",
-                "message": "Datos del item incompletos. Se requiere 'nombre' e 'id'."
-            }
-            
-        if datos_item["id"] is None:
-            return {
-                "status": "error",
-                "message": "El ID del item es requerido."
-            }
-
-        item = getItem(datos_item["nombre"], datos_item["id"])
-
-        if item is None:
-            return {
-                "status": "error",
-                "message": f"Item con nombre '{datos_item['nombre']}' no encontrado."
-            }
+        
+        # verificar datos de item
 
         datos = {
             "type": "qr",
             "total_amount": str(total_amount),
             "description": description,
             "external_reference": str(external_reference),
-            "expiration_time": "PT1M",
+            "expiration_time": "PT2M",
             "config": {
                 "qr": {
                     "external_pos_id": "CAJA001",

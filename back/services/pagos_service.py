@@ -3,7 +3,7 @@ import time
 from db.operaciones.pagos.borrar_db import borrar_pago
 from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
 from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp
-from db.operaciones import listar_pagos
+from db.operaciones import listar_pagos, consultar_clase_por_id
 from db.operaciones.conectar_db import conectarse_db
 
 def obtener_pagos_service():
@@ -25,17 +25,19 @@ def obtener_pagos_service():
 
     return pagos['data'], 200
 
-def crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item):
+def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
     cursor = conectarse_db()
     
-    if not monto or not usuario_id or not descripcion or not tipo_pago or not id_item:
+    if not usuario_id or not descripcion or not id_mensualidad:
         cursor.connection.close()
         return {
             "error": "Faltan datos requeridos para crear el pago."
         }, 400
     
+    #verificar existancia de la mensualidad
+    
     # Crear el pago en la base de datos con estado "pending"
-    pago = insertar_pago(monto, usuario_id, cursor)
+    pago = insertar_pago(10000, usuario_id, cursor)
 
     if pago['status'] == 'error':
         cursor.connection.close()
@@ -60,12 +62,131 @@ def crear_pago_service(monto, usuario_id, descripcion, tipo_pago, id_item):
             "error": "El id del pago creado no es válido."
         }, 500
     
-    datos_item = {
-        "nombre": tipo_pago,
-        "id": id_item
+    item = {
+        "title": "Mensualidad",
+        "unit_price": 10000.00,
+        "quantity": 1,
+        "unit_measure": "unit",
+        "external_categories": [
+        {"id": "gym-membership"}
+        ]
     }
     
-    respuesta_json = crear_orden_qr_mp(id_pago, monto, descripcion, datos_item)
+    respuesta_json = crear_orden_qr_mp(id_pago, 10000, descripcion, item)
+    
+    if respuesta_json.get('status') == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al crear la orden de pago en MercadoPago.",
+            "message": respuesta_json.get('message')
+        }, 500
+    
+    respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
+    
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al consultar los datos de la orden de pago en MercadoPago.",
+            "message": respuesta['message']
+        }, 500
+    
+    while(respuesta['data']['status'] == "created"):
+        time.sleep(2)
+        respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
+
+        if respuesta['status'] == 'error':
+            cursor.connection.close()
+            return {
+                "error": "Error al consultar los datos de la orden de pago en MercadoPago.",
+                "message": respuesta['message']
+            }, 500
+        
+    if respuesta['data']['status'] == "expired" or respuesta['data']['status'] == "refunded":
+        borrar_pago(cursor, id_pago)
+        
+        cursor.connection.close()
+        return {
+            "error": f"La orden de pago con id {respuesta_json['data']['id']} ha expirado o fue cancelada."
+        }, 400    
+    
+    # actuaizar estado del pago
+    res_actualizar = actualizar_estado_pago(id_pago, respuesta['data'], cursor)
+    
+    if res_actualizar['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al actualizar el estado del pago.",
+            "message": res_actualizar['message']
+        }, 500
+    
+    cursor.connection.close()
+        
+    return {
+        "message": "Orden de pago creada exitosamente.",
+        "status_mp": respuesta_json.get("status")
+    }, 200    
+    
+def crear_pago_service_particular(usuario_id, descripcion, clase_id):
+    cursor = conectarse_db()
+    
+    if not clase_id or not usuario_id or not descripcion:
+        cursor.connection.close()
+        return {
+            "error": "Faltan datos requeridos para crear el pago."
+        }, 400
+    
+    clase = consultar_clase_por_id(clase_id, cursor)
+    
+    if clase['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al obtener la clase.",
+            "message": clase['message']
+        }, 500
+    
+    if clase['status'] == 'success' and not clase['data']:
+        cursor.connection.close()
+        return {
+            "error": "No se encontro la clase."
+        }, 400
+    
+    # Crear el pago en la base de datos con estado "pending"
+    pago = insertar_pago(clase['data']['monto'], usuario_id, cursor)
+
+    if pago['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "Error al crear el pago.",
+            "message": pago['message']
+        }, 500
+    
+    if pago['status'] == 'success' and not pago['data']:
+        cursor.connection.close()
+        return {
+            "error": "No se pudo crear el pago."
+        }, 400
+    
+    id_pago_raw = pago['data']
+
+    try:
+        id_pago = int(id_pago_raw)
+    except (TypeError, ValueError):
+        cursor.connection.close()
+        return {
+            "error": "El id del pago creado no es válido."
+        }, 500
+    
+    item = {
+        "title": "Clase particular",
+        "unit_price": str(clase['data']['monto']),
+        "quantity": 1,
+        "unit_measure": "unit",
+        "external_categories": [
+        {"id": "personal-training"}
+        ]
+    }
+    
+    respuesta_json = crear_orden_qr_mp(id_pago, clase['data']['monto'], descripcion, item)
     
     if respuesta_json.get('status') == 'error':
         cursor.connection.close()
