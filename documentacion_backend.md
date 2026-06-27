@@ -48,7 +48,6 @@ Clases
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
 | /clases | GET | - | 400: Error interno de consulta <br> 401: No se encontraron clases <br> 200: Se devuelve la lista de clases disponibles. |
-| /clase | GET | - | 400: Error interno de consulta <br> 401: No se encontraron clases <br> 200: Se devuelve la lista de clases sin información extra de ocurrencia. |
 | /clases | POST | estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, (opcional: primera_fecha) | 400: Actividad no encontrada / Profesor inhabilitado <br> 402: Profesor no encontrado <br> 404: Sala no encontrada <br> 406: Sala ya ocupada <br> 408: Cupo supera capacidad <br> 410: Profesor ocupado <br> 412: Clase ya insertada <br> 414: Fecha no transcurre en el día correcto <br> 415: Formato de fecha inválido <br> 500: Error interno <br> 200: Clase publicada exitosamente. |
 | /clases/(id_clase) | PUT | estado, id_sala, id_profesor | 400: Clase no encontrada / Falta campo <br> 402: Existen reservas asociadas <br> 405: Sala ocupada <br> 408: Cupo supera capacidad <br> 411: Profesor ocupado <br> 412: Profesor inhabilitado para la actividad <br> 500: Error interno de DB <br> 200: Clase modificada exitosamente. |
 | /clases/(id_clase) | DELETE | - | 400: Error interno <br> 401: Clase no encontrada <br> 402/403: No se puede eliminar (tiene reservas asociadas) <br> 404: Error en base de datos al eliminar <br> 200: Clase eliminada exitosamente. |
