@@ -95,7 +95,7 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
         return control
     
     # actuaizar estado del pago
-    res_actualizar = actualizar_estado_pago(id_pago, respuesta['data'], cursor)
+    res_actualizar = actualizar_estado_pago(id_pago, respuesta['data']['status'], cursor)
     
     control = _controlar_errores_query_sin_none(res_actualizar, 500, "Error al actualizar el estado del pago.", 400, cursor)
     if control is not None:
@@ -118,7 +118,6 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
         }, 400
     
     clase = consultar_clase_por_id(clase_id, cursor)
-    
     control = _controlar_errores_query(clase, 500, "No se encontro la clase.", 400, cursor)
     if control is not None:
         return control
@@ -151,13 +150,14 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
     }
     
     respuesta_json = crear_orden_qr_mp(id_pago, clase['data']['monto'], descripcion, item)
-    
+   
     # aca no estoy seguro si es con o sin none
     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
     if control is not None:
         return control
     
     respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
+    
     control = _controlar_errores_query(respuesta, 500, "Error al consultar los datos de la orden de pago en MercadoPago.", 400, cursor)
     if control is not None:
         return control
@@ -179,14 +179,15 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
         }, 400    
     
     resultado = insertar_pago_pagar_clase(id_pago, clase_id, cursor)
+    print("resultado: ", resultado)
     
     control = _controlar_errores_query(resultado, 500, "No se pudo crear el pago pagar clase.", 400, cursor)
     if control is not None:
         return control
     
     # actuaizar estado del pago
-    res_actualizar = actualizar_estado_pago(id_pago, respuesta['data'], cursor)
-    
+    res_actualizar = actualizar_estado_pago(id_pago, respuesta['data']['status'], cursor)
+
     control = _controlar_errores_query_sin_none(res_actualizar, 500, "Error al actualizar el estado del pago.", 400, cursor)
     if control is not None:
         return control
