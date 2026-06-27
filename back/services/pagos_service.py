@@ -1,11 +1,13 @@
 import time
 
+from db.operaciones.clase_tener_mensualidad.consultar_db import consultar_montos_mensualidad
+from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
 from db.operaciones.pago_pagar_clase.insertar_db import insertar_pago_pagar_clase
 from db.operaciones.pago_pagar_mensualidad.insertar_db import insertar_pago_pagar_mensualidad
 from db.operaciones.pagos.borrar_db import borrar_pago
 from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
 from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp
-from db.operaciones import listar_pagos, consultar_clase_por_id
+from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad
 from db.operaciones.conectar_db import conectarse_db
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
@@ -31,10 +33,20 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
             "error": "Faltan datos requeridos para crear el pago."
         }, 400
     
-    #verificar existancia de la mensualidad
+    # verificar que el usuario tenga esa mensualidad
+    verificacion = verificar_usuario_tenga_mensualidad(usuario_id, id_mensualidad, cursor)
+    control = _controlar_errores_query(verificacion, 500, "El usuario no tiene esta mensualidad.", 400, cursor)
+    if control is not None:
+        return control
+
+    # verificar montos de clases de la mensualidad
+    montos_mensualidad = consultar_montos_mensualidad(id_mensualidad, cursor)
+    control = _controlar_errores_query(montos_mensualidad, 500, "No se pudo consultar los montos de la mensualidad.", 400, cursor)
+    if control is not None:
+        return control
     
     # Crear el pago en la base de datos con estado "pending"
-    pago = insertar_pago(10000, usuario_id, cursor)
+    pago = insertar_pago(montos_mensualidad['data']['total'], usuario_id, cursor)
     
     control = _controlar_errores_query(pago, 500, "No se pudo crear el pago.", 400, cursor)
     if control is not None:
@@ -52,7 +64,7 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
     
     item = {
         "title": "Mensualidad",
-        "unit_price": 10000.00,
+        "unit_price": str(montos_mensualidad['data']['total'] * 0.7), # se le descuenta el 30% por tener la mensualidad
         "quantity": 1,
         "unit_measure": "unit",
         "external_categories": [
@@ -61,7 +73,7 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
     }
     
     # aca no estoy seguro si es con o sin none
-    respuesta_json = crear_orden_qr_mp(id_pago, 10000, descripcion, item)
+    respuesta_json = crear_orden_qr_mp(id_pago, montos_mensualidad['data']['total'] * 0.7, descripcion, item)
     
     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
     if control is not None:
@@ -117,13 +129,18 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
             "error": "Faltan datos requeridos para crear el pago."
         }, 400
     
-    clase = consultar_clase_por_id(clase_id, cursor)
+    clase = consultar_instancia_clase_por_id(clase_id, cursor)
     control = _controlar_errores_query(clase, 500, "No se encontro la clase.", 400, cursor)
     if control is not None:
         return control
     
+    clase_detalles = consultar_clase_por_id(clase['data']['clase_id'], cursor)
+    control = _controlar_errores_query(clase_detalles, 500, "No se encontro la clase.", 400, cursor)
+    if control is not None:
+        return control
+    
     # Crear el pago en la base de datos con estado "pending"
-    pago = insertar_pago(clase['data']['monto'], usuario_id, cursor)
+    pago = insertar_pago(clase_detalles['data']['monto'], usuario_id, cursor)
     control = _controlar_errores_query(pago, 500, "No se pudo crear el pago.", 400, cursor)
     if control is not None:
         return control
@@ -141,7 +158,7 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
     
     item = {
         "title": "Clase particular",
-        "unit_price": str(clase['data']['monto']),
+        "unit_price": str(clase_detalles['data']['monto']),
         "quantity": 1,
         "unit_measure": "unit",
         "external_categories": [
@@ -149,7 +166,7 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
         ]
     }
     
-    respuesta_json = crear_orden_qr_mp(id_pago, clase['data']['monto'], descripcion, item)
+    respuesta_json = crear_orden_qr_mp(id_pago, clase_detalles['data']['monto'], descripcion, item)
    
     # aca no estoy seguro si es con o sin none
     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
