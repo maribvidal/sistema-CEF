@@ -100,7 +100,7 @@
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     v-if="userRole === 3 && !clase.yaReservada"
-                    @click="reservarClase(clase)"
+                    @click="abrirDialogoReserva(clase)"
                   >
                     Reservar Clase
                   </v-btn>
@@ -272,6 +272,23 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="reservaDialog" max-width="500px" persistent>
+      <v-card rounded="lg">
+        <v-card-title class="pa-4 bg-black text-white">
+          <span class="text-h5">Confirmar Reserva</span>
+        </v-card-title>
+        <v-card-text class="pt-4 text-body-1">
+          ¿Cómo deseas reservar la clase de <strong>{{ claseParaReservar?.categoria }}</strong>?
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-btn color="grey-darken-1" variant="text" @click="reservaDialog = false">Cancelar</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="elevated" @click="hacerReserva('particular')">Clase Particular</v-btn>
+          <v-btn color="green-darken-1" variant="elevated" @click="hacerReserva('mensualidad')">Con Mensualidad</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -286,6 +303,9 @@ const { userProfile, userRole } = useAuth()
 const isEditing = ref(false)
 const dialog = ref(false)
 const notificationStore = useNotificationStore()
+const reservaDialog = ref(false)
+const claseParaReservar = ref(null)
+
 const horas = Array.from({ length: 14 }, (_, i) => (i + 8).toString().padStart(2, '0'))
 const horaSel = ref(null)
 
@@ -506,31 +526,43 @@ const cancelarClase = async (clase) => {
   }
 }
 
-const reservarClase = async (clase) => {
+const abrirDialogoReserva = (clase) => {
+  claseParaReservar.value = clase
+  reservaDialog.value = true
+}
+
+const hacerReserva = async (tipo) => {
+  const clase = claseParaReservar.value
+  if (!clase) return
+
+  // Aquí puedes diferenciar la lógica en el futuro
+  console.log(`Iniciando reserva tipo: ${tipo} para la clase ${clase.id}`)
+
   try {
     const payload = {
       id_usuario: userProfile.value.id,
       fecha: clase.dia,
       hora: clase.hora,
     }
-    
+
     const response = await ClasesService.reservarClase(clase.id, payload)
-    
+
     // Recargamos el estado para actualizar los botones
     await fetchClasesUsuario()
     await fetchClases()
-    if(response && response.status === 200){
+    if (response && response.status === 200) {
       notificationStore.showNotification('Clase reservada exitosamente', 'success')
-    } else if(response && response.status === 407){ {
-      notificationStore.showNotification('El usuario ya posee una clase reservada para este horario', 'danger')   
-    }}
-    else{
+    } else if (response && response.status === 407) {
+      notificationStore.showNotification('El usuario ya posee una clase reservada para este horario', 'danger')
+    } else {
       notificationStore.showNotification('No se pudo reservar la clase', 'danger')
     }
-
   } catch (error) {
     console.error('Error al reservar clase:', error)
     notificationStore.showNotification(error.message || 'Error al reservar clase', 'danger')
+  } finally {
+    reservaDialog.value = false
+    claseParaReservar.value = null
   }
 }
 
