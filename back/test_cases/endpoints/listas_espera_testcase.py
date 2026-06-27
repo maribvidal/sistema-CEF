@@ -36,14 +36,14 @@ class ListasEsperaTestcase(EndpointTestCase):
         id_sala2 = insertar_sala("Sala 2", 10, self.cursor)["data"]
 
         # Crear clases
-        id_cla1 = insertar_clase("Activa", id_act1, id_prof1, id_sala1, "Lunes", "10:00", 3, self.cursor)["data"]
-        id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala2, "Martes", "12:00", 3, self.cursor)["data"]
+        id_cla1 = insertar_clase("Activa", id_act1, id_prof1, id_sala1, "Lunes", "10:00", 3, 300.0, self.cursor)["data"]
+        id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala2, "Martes", "12:00", 3, 400.0, self.cursor)["data"]
 
         # Crear instancia_clase
-        id_ic1 = insertar_instancia_clase(id_cla1, "2026-12-02", self.cursor)["data"]
-        id_ic2 = insertar_instancia_clase(id_cla1, "2026-02-02", self.cursor)["data"]
-        id_ic3 = insertar_instancia_clase(id_cla2, "2026-12-03", self.cursor)["data"]
-        id_ic4 = insertar_instancia_clase(id_cla2, "2026-02-03", self.cursor)["data"]
+        id_ic1 = insertar_instancia_clase(id_cla1, "2026-12-02", 100.0, self.cursor)["data"]
+        id_ic2 = insertar_instancia_clase(id_cla1, "2026-02-02", 150.0, self.cursor)["data"]
+        id_ic3 = insertar_instancia_clase(id_cla2, "2026-12-03", 200.0, self.cursor)["data"]
+        id_ic4 = insertar_instancia_clase(id_cla2, "2026-02-03", 250.0, self.cursor)["data"]
 
         # Crear usuarios
         id_usuarios_reservaron = []

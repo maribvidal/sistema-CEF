@@ -134,13 +134,8 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
     if control is not None:
         return control
     
-    clase_detalles = consultar_clase_por_id(clase['data']['clase_id'], cursor)
-    control = _controlar_errores_query(clase_detalles, 500, "No se encontro la clase.", 400, cursor)
-    if control is not None:
-        return control
-    
     # Crear el pago en la base de datos con estado "pending"
-    pago = insertar_pago(clase_detalles['data']['monto'], usuario_id, cursor)
+    pago = insertar_pago(clase['data']['monto'], usuario_id, cursor)
     control = _controlar_errores_query(pago, 500, "No se pudo crear el pago.", 400, cursor)
     if control is not None:
         return control
@@ -158,7 +153,7 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
     
     item = {
         "title": "Clase particular",
-        "unit_price": str(clase_detalles['data']['monto']),
+        "unit_price": str(clase['data']['monto']),
         "quantity": 1,
         "unit_measure": "unit",
         "external_categories": [
@@ -166,7 +161,7 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
         ]
     }
     
-    respuesta_json = crear_orden_qr_mp(id_pago, clase_detalles['data']['monto'], descripcion, item)
+    respuesta_json = crear_orden_qr_mp(id_pago, clase['data']['monto'], descripcion, item)
    
     # aca no estoy seguro si es con o sin none
     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
@@ -196,7 +191,6 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
         }, 400    
     
     resultado = insertar_pago_pagar_clase(id_pago, clase_id, cursor)
-    print("resultado: ", resultado)
     
     control = _controlar_errores_query(resultado, 500, "No se pudo crear el pago pagar clase.", 400, cursor)
     if control is not None:

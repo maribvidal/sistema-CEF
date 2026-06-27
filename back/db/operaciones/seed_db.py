@@ -1,3 +1,4 @@
+from db.operaciones.clase_tener_mensualidad.insertar_db import insertar_clase_tener_mensualidad
 from db.operaciones.mensualidades.insertar_db import insertar_mensualidad
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.profesores.insertar_db import insertar_profesor
@@ -64,9 +65,9 @@ def insertar_datos(cursor):
     insertar_sala('Sala 3', 5, cursor)
 
     # Crear clase
-    id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, 200.0, cursor)
+    id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, 300.0, cursor)
     id_clas = id_clas['data']
-    res_inst_clase = insertar_instancia_clase(id_clas, '2026-06-01', cursor)
+    res_inst_clase = insertar_instancia_clase(id_clas, '2026-06-01', 200.0, cursor)
     
     # Crear listas de espera para la clase
     inst_clase_id = res_inst_clase['data']
@@ -86,9 +87,11 @@ def insertar_datos(cursor):
     insertar_pago_pagar_clase(1, 1, cursor)
 
     # Crear una clase adicional programada para martes y su instancia (martes)
-    id_clas_martes = insertar_clase('Programada Martes', 1, id_prof1, 2, "Martes", "11:00", 8, 100.0, cursor)
+    id_clas_martes = insertar_clase('Programada Martes', 1, id_prof1, 2, "Martes", "11:00", 8, 1000.0, cursor)
     id_clas_martes = id_clas_martes['data']
     # Fecha ejemplo que corresponde a un martes
-    insertar_instancia_clase(id_clas_martes, '2026-06-02', cursor)
+    insertar_instancia_clase(id_clas_martes, '2026-06-02', 100.0, cursor)
 
+    insertar_clase_tener_mensualidad(2, 2, cursor)
     
+    insertar_instancia_clase(2, '2026-11-03', 1500.0, cursor)

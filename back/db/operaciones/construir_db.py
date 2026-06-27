@@ -314,7 +314,7 @@ def construir_tabla_pago_pagar_clase(cursor: sqlite.Cursor):
                             FOREIGN KEY (pago_id) REFERENCES Pago(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
-                            FOREIGN KEY (clase_id) REFERENCES Clase(id)
+                            FOREIGN KEY (clase_id) REFERENCES Instancia_Clase(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")

@@ -60,6 +60,7 @@ class MetricasServiceTestCase(EndpointTestCase):
             "Lunes",
             "10:00",
             10,
+            300.0,
             self.cursor
         )["data"]
         id_clase_pilates = insertar_clase(
@@ -70,11 +71,12 @@ class MetricasServiceTestCase(EndpointTestCase):
             "Martes",
             "12:00",
             10,
+            400.0,
             self.cursor
         )["data"]
 
-        id_inst_yoga = insertar_instancia_clase(id_clase_yoga, "2026-06-10", self.cursor)["data"]
-        id_inst_pilates = insertar_instancia_clase(id_clase_pilates, "2026-06-11", self.cursor)["data"]
+        id_inst_yoga = insertar_instancia_clase(id_clase_yoga, "2026-06-10", 150.0, self.cursor)["data"]
+        id_inst_pilates = insertar_instancia_clase(id_clase_pilates, "2026-06-11", 200.0, self.cursor)["data"]
 
         self._insertar_cancelacion("2026-06-01", id_usuario_1, id_inst_yoga)
         self._insertar_cancelacion("2026-06-03", id_usuario_2, id_inst_yoga)

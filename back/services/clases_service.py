@@ -42,6 +42,7 @@ def publicar_clase_service(
     dia: str,
     hora: str,
     cupo_maximo: int,
+    monto: float,
     primera_fecha = None
 ):
     """Service que publica una clase"""
@@ -100,7 +101,7 @@ def publicar_clase_service(
 
     # Intentar insertar la clase
 
-    respuesta = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, cursor)
+    respuesta = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, monto, cursor)
     control = _controlar_errores_query(respuesta, 412, "Esa clase ya se encontraba insertada en el sistema.", 413, cursor)
     if control is not None:
         return control
@@ -128,7 +129,7 @@ def publicar_clase_service(
     if control is not None:
         return control
 
-    respuesta = insertar_instancia_clase(clase_id, fecha_actual, cursor)
+    respuesta = insertar_instancia_clase(clase_id, fecha_actual, monto, cursor)
     control = _controlar_errores_query(respuesta, 416, "No se pudo insertar la instancia de la clase.", 417, cursor)
     if control is not None:
         return control
