@@ -247,7 +247,7 @@
                   density="compact"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" v-if="!isEditing">
+              <v-col cols="12" sm="6">
                 <v-text-field
                   v-model.number="nuevaClase.monto"
                   label="Precio"
@@ -467,7 +467,8 @@ const actualizarClase = async () => {
     const payload = {
       estado: 'Activa',
       id_profesor: nuevaClase.value.id_profesor,
-      id_sala: nuevaClase.value.id_sala
+      id_sala: nuevaClase.value.id_sala,
+      monto: nuevaClase.value.monto
     }
     
     await ClasesService.modificarClase(nuevaClase.value.id, payload)
