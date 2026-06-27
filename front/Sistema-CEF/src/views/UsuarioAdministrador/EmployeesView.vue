@@ -153,12 +153,23 @@
             <v-text-field v-model="nuevoProfesor.nombre" label="Nombre" variant="outlined" density="comfortable" class="mb-2"></v-text-field>
             <v-text-field v-model="nuevoProfesor.apellido" label="Apellido" variant="outlined" density="comfortable" class="mb-2"></v-text-field>
             <v-text-field v-model="nuevoProfesor.dni" label="DNI" variant="outlined" density="comfortable" type="number"></v-text-field>
+            <v-text-field v-model="nuevoProfesor.telefono" label="Teléfono" variant="outlined" density="comfortable" type="text" class="mt-2"></v-text-field>
             <v-select
               v-model="nuevoProfesor.genero"
               :items="opcionesGenero"
               label="Género"
               variant="outlined"
               density="comfortable"
+              class="mt-2"
+            ></v-select>
+            <v-select
+              v-model="nuevoProfesor.actividades"
+              :items="actividades"
+              item-title="nombre"
+              item-value="id"
+              label="Actividades que puede dar"
+              multiple
+              chips
               class="mt-2"
             ></v-select>
           </v-form>
@@ -228,8 +239,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { EmployeesService } from '@/services/EmployeesService'
+import { ClasesService } from '@/services/ClasesServices'
 import EditEmployee from './EditEmployee.vue'
 import { useNotificationStore } from '@/stores/notificationStore.js'
+import { consoleError } from 'vuetify/lib/util/console.js'
 
 const empleados = ref([])
 const profesores = ref([])
@@ -255,7 +268,9 @@ const nuevoProfesor = ref({
   nombre: '',
   apellido: '',
   dni: '',
-  genero: ''
+  genero: '',
+  telefono: '',
+  actividades: []
 })
 const nuevoRecepcionista = ref({
   nombre: '',
@@ -265,11 +280,13 @@ const nuevoRecepcionista = ref({
   contraseña: '',
   genero: ''
 })
+const actividades = ref([])
 
 const headers = [
   { title: 'DNI', key: 'dni', sortable: true },
   { title: 'Nombre', key: 'nombre' },
   { title: 'Apellido', key: 'apellido' },
+  { title: 'Teléfono', key: 'telefono' },
   { title: 'Correo', key: 'correo' },
   { title: 'Género', key: 'genero', align: 'center' },
   { title: 'Rol Actual', key: 'rol_id', align: 'center' },
@@ -311,7 +328,8 @@ const cargarEmpleados = async () => {
       genero: e.genero ?? e[3],
       id: e.id ?? e[4],
       nombre: e.nombre ?? e[5],
-      rol_id: e.rol_id ?? e[6]
+      rol_id: e.rol_id ?? e[6],
+      telefono: e.telefono ?? e[7]
     }))
 
     empleados.value = fetched
@@ -324,19 +342,30 @@ const cargarEmpleados = async () => {
   }
 }
 
+const fetchActividades = async () => {
+  try {
+    const resAct = await ClasesService.listarActividades()
+    if (Array.isArray(resAct)) {
+      actividades.value = resAct.map(a => ({ id: a.id ?? a[0], nombre: a.nombre ?? a[1] }))
+    }
+  } catch (error) {
+    console.error('Error al cargar actividades:', error)
+  }
+}
 
 const crearProfesor = () => {
-  nuevoProfesor.value = { nombre: '', apellido: '', dni: '', genero: '' }
+  nuevoProfesor.value = { nombre: '', apellido: '', dni: '', genero: '', telefono: '', actividades: [] }
   dialogProfesor.value = true
 }
 
 const guardarProfesor = async () => {
   try {
-    if (!nuevoProfesor.value.nombre || !nuevoProfesor.value.dni || !nuevoProfesor.value.genero) {
+    if (!nuevoProfesor.value.nombre || !nuevoProfesor.value.dni || !nuevoProfesor.value.genero || !nuevoProfesor.value.telefono) {
       notificationStore.showNotification('Por favor complete los campos obligatorios', 'warning')
       return
     }
-    await EmployeesService.createProfessor(nuevoProfesor.value)
+    console.log(nuevoProfesor.value.actividades)
+    await EmployeesService.createProfessor(nuevoProfesor.value) // El payload ya incluye las actividades
     notificationStore.showNotification('El profesor fue creado con éxito', 'success')
     dialogProfesor.value = false
     await cargarEmpleados()
@@ -474,6 +503,7 @@ const confirmarCambioRol = async () => {
 
 onMounted(() => {
   cargarEmpleados()
+  fetchActividades()
 })
 </script>
 
