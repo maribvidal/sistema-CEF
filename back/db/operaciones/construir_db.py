@@ -141,6 +141,7 @@ def construir_tabla_instancia_clase(cursor: sqlite.Cursor):
                             id        INTEGER PRIMARY KEY,
                             fecha     DATE NOT NULL,
                             clase_id  INTEGER,
+                            monto     REAL,
                             FOREIGN KEY (clase_id) REFERENCES Clase(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
