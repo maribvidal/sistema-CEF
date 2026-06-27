@@ -31,12 +31,22 @@ export const EmployeesService = {
   },
 
   updateEmployeeInfo: async (dni_viejo, dni_nuevo, data) => {
-    console.log(data)
     const response = await apiClient.put(`/empleados/${dni_viejo}`, {
       dni_nuevo: dni_nuevo,
       nombre: data.nombre,
       apellido: data.apellido,
       correo: data.correo,
+      genero: data.genero,
+      rol_id: data.rol_id
+    })
+    return response.data
+  },
+
+  updateProfesorInfo: async (dni_viejo, dni_nuevo, data) => {
+    const response = await apiClient.put(`/empleados/${dni_viejo}`, {
+      dni_nuevo: dni_nuevo,
+      nombre: data.nombre,
+      apellido: data.apellido,
       genero: data.genero,
       rol_id: data.rol_id
     })

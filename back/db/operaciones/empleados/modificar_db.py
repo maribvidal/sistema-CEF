@@ -41,17 +41,20 @@ def modificar_empleado(
     dni_final = empleado_dni if (dni_nuevo is None) else dni_nuevo
     nombre_final = nombre if nombre is not None else datos_actuales["nombre"]
     apellido_final = apellido if apellido is not None else datos_actuales["apellido"]
-    correo_final = correo if correo is not None else datos_actuales["correo"]
     genero_final = genero if genero is not None else datos_actuales["genero"]
     rol_id_final = rol_id if rol_id is not None else datos_actuales["rol_id"]
     
+    # CONTROL AD-HOC: Si no es un profesor y su correo es el mismo, se va a recibir en
+    # el modificar_empleado_service.
+
     query_update = f"""
         UPDATE Usuario
         SET dni = {dni_final},
             nombre = '{nombre_final}',
-            apellido = '{apellido_final}',
-            correo = '{correo_final}',
-            genero = '{genero_final}',
+            apellido = '{apellido_final}',"""
+    if correo is not None:
+        query_update += f"correo = '{correo}',"
+    query_update += f"""genero = '{genero_final}',
             rol_id = {rol_id_final}
         WHERE dni = {empleado_dni}
     """

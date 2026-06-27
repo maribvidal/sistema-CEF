@@ -220,15 +220,22 @@
     </v-dialog>
 
     <v-dialog v-model="dialogEditarEmpleado" max-width="600px">
-      <EditEmployee :empleado="empleadoSeleccionado" @close="dialogEditarEmpleado = false" @updated="cargarEmpleados" />
+      <component
+        :is="componenteEdicion"
+        :empleado="empleadoSeleccionado"
+        @close="dialogEditarEmpleado = false"
+        @updated="cargarEmpleados"
+        :key="empleadoSeleccionado?.dni || 'nuevo'"
+      />
     </v-dialog>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { EmployeesService } from '@/services/EmployeesService'
 import EditEmployee from './EditEmployee.vue'
+import EditProfesor from './EditProfesor.vue'
 import { useNotificationStore } from '@/stores/notificationStore.js'
 
 const empleados = ref([])
@@ -298,6 +305,14 @@ const getRoleColor = (id) => {
   if (id === 4) return 'red-darken-1' // Empleado eliminado
   return 'light-blue-darken-1' // Color para Profesor
 }
+
+const componenteEdicion = computed(() => {
+  const rol = empleadoSeleccionado.value?.rol_id
+  const esProfesor = empleadoSeleccionado.value?.esProfesor === true ||
+    (rol === 5)
+
+  return esProfesor ? EditProfesor : EditEmployee
+})
 
 const cargarEmpleados = async () => {
   loading.value = true
@@ -380,7 +395,10 @@ const guardarRecepcionista = async () => {
 }
 
 const modificarEmpleado = (empleado) => {
-  empleadoSeleccionado.value = { ...empleado }
+  const esProfesor = profesores.value.some(p => p.dni === empleado.dni) ||
+    (empleado.rol_id === 5)
+
+  empleadoSeleccionado.value = { ...empleado, esProfesor }
   dialogEditarEmpleado.value = true
 }
 
