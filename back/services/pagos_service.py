@@ -46,7 +46,7 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
         return control
     
     # Crear el pago en la base de datos con estado "pending"
-    pago = insertar_pago(montos_mensualidad['data']['total'], usuario_id, cursor)
+    pago = insertar_pago(montos_mensualidad['data']['total'] * 0.7, usuario_id, cursor)
     
     control = _controlar_errores_query(pago, 500, "No se pudo crear el pago.", 400, cursor)
     if control is not None:
