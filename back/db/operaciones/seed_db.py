@@ -24,7 +24,7 @@ def insertar_datos(cursor):
     insertar_usuario(110101010, 'Admin', 'Ejemplo', '12345678', '2000-01-01', 'admin@gmail.com', "5678",'M', 1, cursor)
 
     # Usuario de prueba
-    insertar_usuario(01010101, 'Usuario', 'Ejemplo', '12345678', '2000-01-01', 'usuario@yopmail.com', "5678",'M', 3, cursor)
+    insertar_usuario(101010101, 'Usuario', 'Ejemplo', '12345678', '2000-01-01', 'usuario@yopmail.com', "5678",'M', 3, cursor)
 
     # Agregar 10 usuarios nuevos
     insertar_usuario(20000001, 'Lucia', 'Fernandez', '11111111', '1990-01-01', 'lucia.fernandez@yopmail.com', 'pwd01','F', 3, cursor)
