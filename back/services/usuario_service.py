@@ -381,7 +381,7 @@ def restablecer_contraseña_service(correo: str):
 
     link = f"http://localhost:5173/ConfirmarNuevaContrasena?correo={correo}"
     mensaje = f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}"
-    enviar_mail(correo, mensaje)
+    enviar_mail(correo, "Reestablecer contraseña", mensaje)
     
     cursor.connection.close()
     return {
