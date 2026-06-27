@@ -61,7 +61,7 @@ def insertar_datos(cursor):
     # Crear salas
     insertar_sala('Sala 1', 10, cursor)
     insertar_sala('Sala 2', 25, cursor)
-    insertar_sala('Sala 3', 20, cursor)
+    insertar_sala('Sala 3', 5, cursor)
 
     # Crear clase
     id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, 200.0, cursor)

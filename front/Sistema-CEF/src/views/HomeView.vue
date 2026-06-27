@@ -6,7 +6,7 @@
         
         </v-container>
 
-        <v-card-text class="elige-planes">
+        <v-card-text class="elige-planes" v-if="userRole === 3">
         <h2 class="text-center mb-4">Elige tu forma de pago</h2>
         <v-row class="justify-center">
           <v-col cols="12" md="4">
@@ -46,6 +46,9 @@
 
 <script setup>
 import SlideShow from '@/components/SlideShow.vue'
+import { useAuth } from '@/services/UsuariosServices.js'
+
+const { userRole } = useAuth()
 </script>
 
 <style scoped>

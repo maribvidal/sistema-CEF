@@ -167,6 +167,7 @@ def modificar_clase_service(
     dia_clase = respuesta['data']['dia']
     hora_clase = respuesta['data']['hora']
     id_profe_orig = respuesta['data']['profesor_id']
+    cupo_maximo = respuesta['data']['cupo_maximo']
 
     # Ahora realizamos una validación nueva: Verificar si el profesor puede dar la actividad fija de esta clase
     res_habilitado = verificar_actividad_profesor(id_profesor, id_actividad_actual, cursor)
@@ -187,6 +188,12 @@ def modificar_clase_service(
             cursor.connection.close()
             return _msj_error_helper("La sala ya se encuentra ocupada en ese día y hora.", cursor), 405
 
+    # Comprobar que la sala cuente con capacidad suficiente
+    respuesta = consultar_sala_por_id(sala, cursor)
+    capacidad_sala = int(respuesta["data"]['capacidad'])
+    if (cupo_maximo > capacidad_sala):
+        return _msj_error_helper("El cupo máximo ingresado supera la capacidad de la sala.", cursor), 408
+
     # Comprobar que el profesor no se encuentre ocupado en ese día y hora
     respuesta = consultar_clases_profesor_dia_hora(id_profesor, dia_clase, hora_clase, cursor)
     if respuesta['status'] == 'error':
@@ -204,7 +211,7 @@ def modificar_clase_service(
         return _msj_error_helper(respuesta["message"], cursor), 402
     if respuesta['status'] == 'success' and respuesta['data']['id'] is not None:
         cursor.connection.close()
-        return _msj_error_helper("No se pudo eliminar la clase porque existían reservas asociadas.", cursor), 403
+        return _msj_error_helper("No se puede actualizar la clase porque existen reservas asociadas.", cursor), 403
 
     # Tercero, intentamos modificar la clase
     respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor)
