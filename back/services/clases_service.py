@@ -211,7 +211,7 @@ def modificar_clase_service(
         return _msj_error_helper(respuesta["message"], cursor), 402
     if respuesta['status'] == 'success' and respuesta['data']['id'] is not None:
         cursor.connection.close()
-        return _msj_error_helper("No se pudo eliminar la clase porque existían reservas asociadas.", cursor), 403
+        return _msj_error_helper("No se puede actualizar la clase porque existen reservas asociadas.", cursor), 403
 
     # Tercero, intentamos modificar la clase
     respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor)
