@@ -64,7 +64,7 @@ def insertar_datos(cursor):
     insertar_sala('Sala 3', 20, cursor)
 
     # Crear clase
-    id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, cursor)
+    id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, 200.0, cursor)
     id_clas = id_clas['data']
     res_inst_clase = insertar_instancia_clase(id_clas, '2026-06-01', cursor)
     
@@ -86,7 +86,7 @@ def insertar_datos(cursor):
     insertar_pago_pagar_clase(1, 1, cursor)
 
     # Crear una clase adicional programada para martes y su instancia (martes)
-    id_clas_martes = insertar_clase('Programada Martes', 1, id_prof1, 2, "Martes", "11:00", 8, cursor)
+    id_clas_martes = insertar_clase('Programada Martes', 1, id_prof1, 2, "Martes", "11:00", 8, 100.0, cursor)
     id_clas_martes = id_clas_martes['data']
     # Fecha ejemplo que corresponde a un martes
     insertar_instancia_clase(id_clas_martes, '2026-06-02', cursor)

@@ -117,18 +117,20 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
     usuario = ejecutar_fetchone(query_verificacion, cursor)
     print("IMPRIMIENDO RESPUESTA DEL FETCHONEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",usuario)
 
-    if not usuario:
+    if usuario.get("status") == "error" or not usuario.get("data"):
         return {
             "status": "error",
             "message": "Empleado no encontrado"
         }
-    elif usuario['data']["rol_id"] not in (0, 1, 2, 5): # o sea si el usuario no es ni gerente ni administrador ni profesor
+    rol_actual = usuario["data"]["rol_id"]
+
+    # FIX 2,  Agarrar si ya estaba eliminado
+    if rol_actual == 4:  # o sea si el usuario ya estaba eliminado
         return {
             "status": "error",
-            "message": "El usuario no es un empleado"
+            "message": "El empleado ya estaba eliminado"
         }
-    elif usuario["data"]['rol_id'] == 5: # o sea si el usuario es un profesor
-        ## Aca hay que mejorar la logica y verificar si el profesor tiene clases a su cargo, y en ese caso no permitir el borrado
+    elif rol_actual == 5: # o sea si el usuario es un profesor
         print("El usuario es un profesor, se procede a verificar si tiene clases a su cargo")
         profesor_id = usuario["data"]["id"]
         query_clases_profesor = f"""
@@ -146,16 +148,35 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
                 "message": f"No se puede eliminar al profesor. Tiene {resultado_clases['data']['total_clases']} clase/s asignada/s"
             }
 
-    
     # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
     # AHORA ES BORRADO FISICO
     # SI QUEREMOS HACER BORRADO TAMBIÉN EN SUS REFERENCIAS (FOREIGN KEYS), HAY QUE UTILIZAR DELETE ON CASCADE. PERO POR LAS DUDAS LO DEJO COMO DELETE NORMAL
-    query_delete = f"""
-        DELETE FROM Usuario
-        WHERE dni = {empleado_dni}
-    """
+    # query_delete = f"""
+    #     DELETE FROM Usuario
+    #     WHERE dni = {empleado_dni}
+    # """
+    # AHORA ES LÓGICO LA RREPUTAMADRE DECIDANSÉ MATERIA DE LA REVERENDA CONCHA
+    # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
+    # AHORA PARECE QUE EN REALIDAD EL FÍSICO ES PARA LOS CLIENTES. ME QUIEREN VOLVER LOCO
 
-    return ejecutar_query(query_delete, cursor)
+    # BIFURCACIÓN DE BORRADO (FÍSICO VS LÓGICO)
+    # Si NO es un empleado (0, 1, 2 = admins/gerentes, 5 = profe), asumimos que es CLIENTE
+    if rol_actual not in (0, 1, 2, 5): 
+        # BORRADO FÍSICO
+        query_delete = f"""
+            DELETE FROM Usuario
+            WHERE dni = {empleado_dni}
+        """
+        return ejecutar_query(query_delete, cursor)
+    else:
+        # BORRADO LÓGICO (Es un empleado)
+        query_update = f"""
+            UPDATE Usuario
+            SET rol_id = 4
+            WHERE dni = {empleado_dni}
+        """
+        return ejecutar_query(query_update, cursor)
+
 
 def desactivar_empleado(empleado_dni: int, cursor) -> dict:
     """Desactiva un empleado específico de la base de datos, utilizando su DNI como referencia.
