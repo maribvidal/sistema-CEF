@@ -1,4 +1,7 @@
+from db.operaciones.asistencias.insertar_db import registrar_asistencia
+from db.operaciones.pago_pagar_mensualidad.insertar_db import insertar_pago_pagar_mensualidad
 from db.operaciones.clase_tener_mensualidad.insertar_db import insertar_clase_tener_mensualidad
+from db.operaciones.cancelaciones.insertar_db import insertar_cancelacion
 from db.operaciones.mensualidades.insertar_db import insertar_mensualidad
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.profesores.insertar_db import insertar_profesor
@@ -82,12 +85,18 @@ def insertar_datos(cursor):
     # Crear pagos
     insertar_pago(50.0, 1, cursor)
     insertar_pago(60.0, 2, cursor)
+    insertar_pago(70.0, 2, cursor)
 
     # Crear pagos pagar clase
     insertar_pago_pagar_clase(1, 1, cursor)
+    
+    insertar_pago_pagar_mensualidad(2, 1, cursor)
+    insertar_pago_pagar_mensualidad(3, 2, cursor)
+    
+    insertar_clase_tener_mensualidad(1, 1, cursor)
 
     # Crear una clase adicional programada para martes y su instancia (martes)
-    id_clas_martes = insertar_clase('Programada Martes', 1, id_prof1, 2, "Martes", "11:00", 8, 1000.0, cursor)
+    id_clas_martes = insertar_clase('Programada Martes', 2, id_prof1, 2, "Martes", "11:00", 8, 1000.0, cursor)
     id_clas_martes = id_clas_martes['data']
     # Fecha ejemplo que corresponde a un martes
     insertar_instancia_clase(id_clas_martes, '2026-06-02', 100.0, cursor)
@@ -95,3 +104,49 @@ def insertar_datos(cursor):
     insertar_clase_tener_mensualidad(2, 2, cursor)
     
     insertar_instancia_clase(2, '2026-11-03', 1500.0, cursor)
+    
+    cursor.execute("""
+        UPDATE Pago
+        SET fecha = '2026-01-01'
+        WHERE id = 3               
+    """)
+    
+    registrar_asistencia(2, 2, cursor)
+
+    # Datos de referencia para métricas
+    id_clase_ref = insertar_clase('Programada', 3, id_prof1, 3, "Miércoles", "18:00", 12, 450.0, cursor)
+    id_clase_ref = id_clase_ref['data']
+
+    inst_clase_ref_1 = insertar_instancia_clase(id_clase_ref, '2026-06-10', 450.0, cursor)
+    inst_clase_ref_1 = inst_clase_ref_1['data']
+    inst_clase_ref_2 = insertar_instancia_clase(id_clase_ref, '2026-06-17', 450.0, cursor)
+    inst_clase_ref_2 = inst_clase_ref_2['data']
+
+    insertar_clase_tener_mensualidad(1, id_clase_ref, cursor)
+
+    insertar_reserva(3, inst_clase_ref_1, cursor)
+    insertar_reserva(5, inst_clase_ref_2, cursor)
+
+    registrar_asistencia(3, inst_clase_ref_1, cursor)
+    registrar_asistencia(5, inst_clase_ref_1, cursor)
+    registrar_asistencia(7, inst_clase_ref_2, cursor)
+    registrar_asistencia(8, inst_clase_ref_2, cursor)
+
+    insertar_cancelacion(1, inst_clase_id, cursor)
+    insertar_cancelacion(3, inst_clase_ref_1, cursor)
+    insertar_cancelacion(5, inst_clase_ref_1, cursor)
+
+    pago_ref_clase = insertar_pago(450.0, 3, cursor)
+    pago_ref_clase = pago_ref_clase['data']
+    insertar_pago_pagar_clase(pago_ref_clase, inst_clase_ref_1, cursor)
+
+    pago_ref_mensualidad = insertar_pago(315.0, 4, cursor)
+    pago_ref_mensualidad = pago_ref_mensualidad['data']
+    insertar_pago_pagar_mensualidad(pago_ref_mensualidad, 1, cursor)
+
+    cursor.execute(f"""
+        UPDATE Pago
+        SET fecha = '2026-06-10'
+        WHERE id IN ({pago_ref_clase}, {pago_ref_mensualidad})
+    """)
+    
