@@ -79,6 +79,12 @@
                     <span class="text-body-1 font-weight-bold">Cupo Máximo:</span>
                     <span class="text-body-1 ml-2">{{ clase.cupo_maximo }} personas</span>
                   </div>
+
+                  <div class="d-flex align-center mt-1" v-if="clase.monto > 0">
+                    <v-icon size="small" class="mr-2" color="green-darken-2">mdi-cash</v-icon>
+                    <span class="text-body-1 font-weight-bold">Precio:</span>
+                    <span class="text-body-1 ml-2">${{ clase.monto }}</span>
+                  </div>
                 </v-col>
 
                 <v-divider vertical class="hidden-sm-and-down"></v-divider>
@@ -232,6 +238,25 @@
                   density="compact"
                 ></v-select>
               </v-col>
+              <v-col cols="12" sm="6" v-if="!isEditing">
+                <v-text-field
+                  v-model.number="nuevaClase.cupo_maximo"
+                  label="Cupo Máximo"
+                  type="number"
+                  variant="outlined"
+                  density="compact"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" v-if="!isEditing">
+                <v-text-field
+                  v-model.number="nuevaClase.monto"
+                  label="Precio"
+                  type="number"
+                  prefix="$"
+                  variant="outlined"
+                  density="compact"
+                ></v-text-field>
+              </v-col>
             </v-row>
           </v-form>
         </v-card-text>
@@ -261,8 +286,8 @@ const { userProfile, userRole } = useAuth()
 const isEditing = ref(false)
 const dialog = ref(false)
 const notificationStore = useNotificationStore()
-const horas = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
-const horaSel = ref('08')
+const horas = Array.from({ length: 14 }, (_, i) => (i + 8).toString().padStart(2, '0'))
+const horaSel = ref(null)
 
 const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del usuario
 
@@ -276,14 +301,15 @@ const nuevaClase = ref({
   id_sala: '', 
   dia: '',
   hora: '',
-  cupo_maximo: ''
+  cupo_maximo: '',
+  monto: ''
 })
 
 const clases = ref([])
 const actividades = ref([])
 const profesores = ref([])
 const salas = ref([])
-const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
 const fetchAuxData = async () => {
   try {
@@ -345,6 +371,7 @@ const fetchClases = async () => {
         id_profesor: c.profesor_id ?? c[3], // Ensure this is id_profesor
         sala: c.sala_id ?? c[6],
         cupo_maximo: c.cupo_maximo ?? c[7],
+        monto: c.monto ?? c[8],
         categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
                    || `ID Act: ${c.actividad_id ?? c[2]}`,
         profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
@@ -369,14 +396,13 @@ onMounted(async () => {
 
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', id_sala: '', cupo_maximo: '' }
-  horaSel.value = '08'
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '', monto: '' }
   dialog.value = true
 }
 
 const cerrarDialog = () => {
-  dialog.value = false // Close the dialog
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '' } // Reset form fields
+  dialog.value = false
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '', monto: '' }
   isEditing.value = false
 }
 
@@ -389,7 +415,8 @@ const crearClase = async () => {
       id_sala: nuevaClase.value.id_sala,
       dia: nuevaClase.value.dia,
       hora: nuevaClase.value.hora,
-      cupo_maximo: 1 // lo hardcodeo, despues lo vemos 
+      cupo_maximo: nuevaClase.value.cupo_maximo,
+      monto: nuevaClase.value.monto
     }
     
     await ClasesService.publicarClase(payload)
