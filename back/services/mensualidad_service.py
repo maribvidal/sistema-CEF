@@ -3,7 +3,7 @@ from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, verificar_usuario_tiene_mensualidad
 from db.operaciones.usuarios import consultar_usuario_por_dni
-from db.operaciones.mensualidades import configurar_fin_mensualidad
+from db.operaciones.mensualidades import configurar_fin_mensualidad, cancelar_mensualidad
 from db.operaciones.clase_tener_mensualidad import borrar_clase_tener_mensualidad
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_exito_helper, _msj_error_helper
@@ -61,15 +61,15 @@ def ver_estado_mensualidad_service(dni_cliente, id_mensualidad):
             "error": "No se encontró el usuario."
         }, 404
     
-    # validar si el usuario tiene una mensualidad activa
+    # validar si el usuario tiene una mensualidad con fechas dentro de la vigencia de la misma
     tiene_mensualidad = verificar_usuario_tiene_mensualidad(usuario["data"]["id"], id_mensualidad, cursor)
     if not tiene_mensualidad:
         cursor.connection.close()
         return {
-            "error": "El usuario no tiene una mensualidad activa."
+            "error": "El usuario no tiene una mensualidad con vigencia."
         }, 400
     
-    # obtener si la mensualidad esta activa y en caso afirmativo devuelve la fecha de fin
+    # obtener si la mensualidad esta vigente
     mensualidad_activa = obtener_mensualidad_activa(usuario["data"]["id"], id_mensualidad, cursor)
     
     cursor.connection.close()
@@ -103,13 +103,18 @@ def cancelar_mensualidad_service(dni_cliente, id_mensualidad):
     if not tiene_mensualidad:
         return _msj_error_helper("El usuario no tiene esa mensualidad.", cursor), 400
     
-    respuesta = borrar_clase_tener_mensualidad(id_mensualidad, cursor)
-    control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la relación de la mensualidad con las clases.", 400, cursor)
-    if control is not None:
-        return control
+    # respuesta = borrar_clase_tener_mensualidad(id_mensualidad, cursor)
+    # control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la relación de la mensualidad con las clases.", 400, cursor)
+    # if control is not None:
+    #     return control
     
-    respuesta = borrar_mensualidad(id_mensualidad, cursor)
-    control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
+    # respuesta = borrar_mensualidad(id_mensualidad, cursor)
+    # control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
+    # if control is not None:
+    #     return control
+    
+    respuesta = cancelar_mensualidad(id_mensualidad, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 500, "Error al cancelar la mensualidad.", 400, cursor)
     if control is not None:
         return control
 

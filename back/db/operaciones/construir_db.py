@@ -279,6 +279,9 @@ def construir_tabla_pago(cursor: sqlite.Cursor):
                                         ON DELETE SET NULL
                         )""")
 
+# Estado es para saber si una mensualidad esta cancelada con lo cual no se le informa al cliente que se le esta acabando al mail para la renovacion 
+# pero sigue teniendo los beneficios de la mensualidad hasta que se le acabe el plazo de la misma
+# Estados posibles: 0 -> Activa, 1 -> Cancelada
 def construir_tabla_mensualidad(cursor: sqlite.Cursor):
     """Construye la tabla Mensualidad"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Mensualidad (
@@ -286,6 +289,7 @@ def construir_tabla_mensualidad(cursor: sqlite.Cursor):
                             fecha_ini  DATE NOT NULL,
                             fecha_fin  DATE,
                             usuario_id INTEGER NOT NULL,
+                            estado BOOLEAN NOT NULL DEFAULT 0, 
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
