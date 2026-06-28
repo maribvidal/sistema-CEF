@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from back.services.pagos_service import verificar_poder_pagar_mensualidad_service
+from services.pagos_service import verificar_poder_pagar_mensualidad_service
 from services.mensualidad_service import configurar_fin_mensualidad_service
 
 mensualidad_bp = Blueprint('mensualidad', __name__)
