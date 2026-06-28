@@ -12,7 +12,7 @@ from db.operaciones.salas.consultar_db import consultar_sala_profe_por_dia_hora,
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
-from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase
+from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase, listar_instancias_clases_semana, obtener_instancia_clase_por_clase_id_semana
 from db.operaciones.instancias_clases import insertar_instancia_clase
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
@@ -33,6 +33,18 @@ def listar_clases_service():
         return control
 
     return _msj_exito_helper("Se devolvió una lista de clases con éxito.", cursor, respuesta["data"])
+
+def listar_instancias_clases_semana_service():
+    """Service que lista las instancias de la clase de la semana"""
+
+    cursor = conectarse_db()
+
+    respuesta = listar_instancias_clases_semana(cursor)
+    control = _controlar_errores_query(respuesta, 400, "No se encontró ninguna instancia de clase en el sistema.", 401, cursor)
+    if control is not None:
+        return control
+
+    return _msj_exito_helper("Se devolvió una lista de instancias de clase con éxito.", cursor, respuesta["data"])
 
 def publicar_clase_service(
     estado: str,
@@ -324,6 +336,8 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     cons_clase = consultar_clase_por_id(id_clase, cursor)
     cupo_clase = cons_clase["data"]["cupo_maximo"]
     tuplas_reservas_ic = obtener_reservas_instancia_clase(id_ins_clase, cursor)
+
+    print(cupo_clase, tuplas_reservas_ic)
     
     if (tuplas_reservas_ic["data"] is not None):
         cant_reservas = len(tuplas_reservas_ic["data"])
@@ -498,3 +512,24 @@ def obtener_instancias_clases_service(id_clase):
 
     return _msj_exito_helper("Instancias obtenidas exitosamente.", cursor, respuesta["data"])
     
+def obtener_instancia_clases_semana_clase_id_service(id_clase):
+    """Service que permite obtener la instancia de la clase para la semana."""
+    cursor = conectarse_db()
+
+    # Controlar que exista la clase
+
+    respuesta = consultar_clase_por_id(id_clase, cursor)
+    control = _controlar_errores_query(respuesta, 400, "No se encontró la clase.", 401, cursor)
+    if control is not None:
+        return control
+    
+    # Obtener la instancia
+
+    respuesta = obtener_instancia_clase_por_clase_id_semana(id_clase, cursor)
+    control = _controlar_errores_query(respuesta, 402, "No se encontró una instancia para la clase en esta semana.", 403, cursor)
+    if control is not None:
+        return control
+    
+    print(respuesta)
+    
+    return _msj_exito_helper("Instancia obtenida exitosamente.", cursor, respuesta["data"])

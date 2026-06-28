@@ -21,28 +21,15 @@ def obtener_qr_mp():
     
     return jsonify(QR), 200
 
-# Para la hu pagar mensualidad voy a suponer que la ruta /verificar_mensualidad se ejecuta para verificar que ya se puede pagar con mp la mensualidad y luego ejecutan esta
-# este endpoint se puede llamar para pagar una mensualidad cuando todas las condiciones se cumplen, para renovar la mensualidad, 
-# y para pagar una mensualidad cuando el usuario salga de la lista de espera de abonados (ultima escenario en hu pagar mensualidad)
-@pagos_bp.route("/pagos/mensualidad", methods=["POST"])
-def crear_pago_mensualidad():
-    data = request.get_json()
-    usuario_id = data.get("usuario_id")
-    descripcion = data.get("descripcion")
-    id_mensualidad = data.get("id_mensualidad")
-    
-    respuesta, status = crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad)
-
-    return jsonify(respuesta), status
-
 @pagos_bp.route("/pagos/particular", methods=["POST"])
 def crear_pago_particular():
     data = request.get_json()
     usuario_id = data.get("usuario_id")
     descripcion = data.get("descripcion")
-    clase_id = data.get("clase_id")
+    # instancia de clase_id
+    instancia_clase_id = data.get("instancia_clase_id")
 
-    respuesta, status = crear_pago_service_particular(usuario_id, descripcion, clase_id)
+    respuesta, status = crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id)
 
     return jsonify(respuesta), status
 

@@ -21,3 +21,12 @@ def verificar_usuario_tenga_mensualidad(usuario_id: int, clase_id: int, cursor) 
         WHERE ctm.usuario_id = {usuario_id} AND ctm.clase_id = {clase_id}
     """
     return ejecutar_fetchone(query, cursor)
+
+def obtener_mensualidad_activa(usuario_id: int, id_mensualidad: int, cursor) -> dict:
+    """Hace una consulta para obtener la mensualidad activa de un usuario"""
+    query = f"""
+        SELECT m.fecha_fin
+        FROM Mensualidades m
+        WHERE m.usuario_id = {usuario_id} AND m.id = {id_mensualidad} AND DATETIME('now') BETWEEN (m.fecha_ini AND m.fecha_fin)
+    """
+    return ejecutar_fetchone(query, cursor)

@@ -3,7 +3,8 @@ from services.clases_service import (
     cancelar_clase_service, listar_clases_service, modificar_clase_service, publicar_clase_service,
     reservar_clase_service, verificar_inscripcion_usuario_clase_service,
     eliminar_clase_service, anotarse_lista_espera_service, listar_clases_service, publicar_clase_service,
-    reservar_clase_service, registrar_asistencia_clase_service, rechazar_asistencia_clase_service, obtener_instancias_clases_service
+    reservar_clase_service, registrar_asistencia_clase_service, rechazar_asistencia_clase_service, obtener_instancias_clases_service,
+    obtener_instancia_clases_semana_clase_id_service
 )
 
 clases_bp = Blueprint('clases', __name__)
@@ -174,5 +175,12 @@ def obtener_instancias_clases(id_clase):
         que existan de una clase."""
 
     respuesta, status = obtener_instancias_clases_service(id_clase)
+
+    return jsonify(respuesta), status
+
+@clases_bp.route("/clases/<int:id_clase>/instancias/semana", methods=["GET"])
+def obtener_instancia_clases_semana_clase_id(id_clase):
+    """Este endpoint permite obtener una instancia de la clase para la semana."""
+    respuesta, status = obtener_instancia_clases_semana_clase_id_service(id_clase)
 
     return jsonify(respuesta), status
