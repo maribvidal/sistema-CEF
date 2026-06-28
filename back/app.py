@@ -65,6 +65,13 @@ scheduler.add_job(
     minute=0
 )
 
+# Esto deberia de funcionar para probar que funciona el scheduler:
+# scheduler.add_job(
+#     verificar_mensualidades_por_vencer,
+#     trigger="interval",
+#     minutes=1
+# )
+
 if __name__ == "__main__":
     app = create_app()
     scheduler.start()

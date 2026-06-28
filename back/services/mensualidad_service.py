@@ -140,7 +140,7 @@ def verificar_mensualidades_por_vencer():
 
         cursor.execute(f"""
             SELECT correo
-            FROM Usuarios
+            FROM Usuario
             WHERE id = {usuario_id}
         """)
 

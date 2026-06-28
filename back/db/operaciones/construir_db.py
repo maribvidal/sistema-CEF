@@ -65,6 +65,8 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_usuario_pertenece_lista_espera_abonados(cursor)
     construir_tabla_usuario_pertenece_lista_espera_individual(cursor)
     construir_tabla_profesor_actividad(cursor)
+    
+    construir_tabla_proximas_notificaciones(cursor)
 
 ## FUNCIONES QUE CREAN TABLAS
 # En este apartado aparecen todas las funciones que crean
