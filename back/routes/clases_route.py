@@ -178,9 +178,9 @@ def obtener_instancias_clases(id_clase):
 
     return jsonify(respuesta), status
 
-@clases_bp.route("/clases/<int:id_clase>/instancias", methods=["OPTIONS"])
+@clases_bp.route("/clases/<int:id_clase>/instancias/semana", methods=["GET"])
 def obtener_instancia_clases_semana_clase_id(id_clase):
     """Este endpoint permite obtener una instancia de la clase para la semana."""
-    respuesta, status = obtener_instancia_clases_semana_clase_id_service(id_clase,)
+    respuesta, status = obtener_instancia_clases_semana_clase_id_service(id_clase)
 
     return jsonify(respuesta), status

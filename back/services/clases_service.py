@@ -530,4 +530,6 @@ def obtener_instancia_clases_semana_clase_id_service(id_clase):
     if control is not None:
         return control
     
+    print(respuesta)
+    
     return _msj_exito_helper("Instancia obtenida exitosamente.", cursor, respuesta["data"])

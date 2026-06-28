@@ -14,6 +14,7 @@ from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clas
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.usuarios.insertar_db import insertar_usuario_lista_espera_abonados, insertar_usuario_lista_espera_individual
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
+from utils.modulo_fechas import generar_fecha_actual
 
 # necesito insertarle mensualidades con actividades a los usuarios
 def insertar_datos(cursor):  
@@ -70,7 +71,7 @@ def insertar_datos(cursor):
     # Crear clase
     id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, 300.0, cursor)
     id_clas = id_clas['data']
-    res_inst_clase = insertar_instancia_clase(id_clas, '2026-06-01', 200.0, cursor)
+    res_inst_clase = insertar_instancia_clase(id_clas, generar_fecha_actual("Lunes"), 200.0, cursor)
     
     # Crear listas de espera para la clase
     inst_clase_id = res_inst_clase['data']
@@ -99,7 +100,7 @@ def insertar_datos(cursor):
     id_clas_martes = insertar_clase('Programada Martes', 2, id_prof1, 2, "Martes", "11:00", 8, 1000.0, cursor)
     id_clas_martes = id_clas_martes['data']
     # Fecha ejemplo que corresponde a un martes
-    inst_clase_martes = insertar_instancia_clase(id_clas_martes, '2026-06-02', 100.0, cursor)
+    inst_clase_martes = insertar_instancia_clase(id_clas_martes, generar_fecha_actual("Martes"), 100.0, cursor)
     inst_clase_martes = inst_clase_martes['data']
 
     insertar_cancelacion(2, inst_clase_martes, cursor)
