@@ -400,7 +400,12 @@ const fetchClases = async () => {
                   || `Sala ID: ${c.sala_id ?? c[6]}`, // Ensure this is sala_nombre
         // Comparamos el ID actual con el array de reservas
         yaReservada: clasesReservadasIds.value.includes(claseId), 
-        imagen: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'
+        imagen: (() => {
+          const nombre = actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre ?? '';
+          if (nombre === 'Yoga') return 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=500';
+          if (nombre === 'Pilates') return 'https://plus.unsplash.com/premium_photo-1737321091046-ae81c7360cf0?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+          return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'; // Funcional por defecto
+        })()
       }
     })
   } catch (error) {
