@@ -55,8 +55,8 @@ def insertar_datos(cursor):
 
     id_prof1 = id_prof1['data']
 
-    insertar_mensualidad('2026-01-01', '2026-12-01', 1, cursor)
-    insertar_mensualidad('2026-02-02', '2026-12-02', 2, cursor)
+    insertar_mensualidad(1, cursor, '2026-01-01')
+    insertar_mensualidad(2, cursor, '2026-02-02')
 
     # Crear roles
     insertar_rol('Administrador', cursor)

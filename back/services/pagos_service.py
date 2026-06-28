@@ -1,5 +1,7 @@
 import time
 
+from back.db.operaciones.mensualidades.insertar_db import insertar_mensualidad
+from back.utils.modulo_manejo_listas import revisar_cupos_disponible_abonado, revisar_si_hay_cupos
 from db.operaciones.clase_tener_mensualidad.consultar_db import consultar_montos_mensualidad
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
 from db.operaciones.pago_pagar_clase.insertar_db import insertar_pago_pagar_clase
@@ -7,10 +9,57 @@ from db.operaciones.pago_pagar_mensualidad.insertar_db import insertar_pago_paga
 from db.operaciones.pagos.borrar_db import borrar_pago
 from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
 from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp
-from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad
+from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad, borrar_mensualidad
 from db.operaciones.conectar_db import conectarse_db
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
+
+def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
+    cursor = conectarse_db()
+    
+    if not usuario_id or not clase_id:
+        cursor.connection.close()
+        return {
+            "error": "Faltan datos requeridos para verificar el pago de la mensualidad."
+        }, 400
+    
+    # verificar que el usuario tenga esa mensualidad
+    verificacion = verificar_usuario_tenga_mensualidad(usuario_id, clase_id, cursor)
+    control = _controlar_errores_query_sin_none(verificacion, 500, "El usuario ya se encuentra registrado en esa clase a ese mismo horario.", 401, cursor)
+    if control is not None:
+        return control
+    
+    clase = consultar_clase_por_id(clase_id, cursor)
+    control = _controlar_errores_query(clase, 500, "No se encontro la clase asociada a la mensualidad.", 404, cursor)
+    if control is not None:
+        return control
+
+    dict_cupos = revisar_si_hay_cupos(clase['data']['id'], cursor)
+    hay_cupos = revisar_cupos_disponible_abonado(dict_cupos)
+    
+    if not hay_cupos:
+        # aca lo tendria que mandar el front un mensaje diciendo que no hay cupos disponibles que si quiere incribirse a la lista de espera de abonados y de ahi que llame al otro endpoint
+        cursor.connection.close()
+        return {
+            "error": "No hay cupos disponibles para la clase asociada a la mensualidad."
+        }, 402
+    
+    # generar mensualidad y mandar el id como retorno
+    respuesta = insertar_mensualidad(usuario_id, cursor)
+    control = _controlar_errores_query(respuesta, 500, "No se pudo crear la mensualidad.", 400, cursor)
+    if control is not None:
+        return control
+
+    cursor.connection.close()
+    
+    id_mensualidad = int(respuesta['data'])
+    
+    respuesta, status = crear_pago_service_mensualidad(usuario_id, "Pago de mensualidad", id_mensualidad)
+    
+    if status != 200:
+        borrar_mensualidad(id_mensualidad, cursor)
+        
+    return respuesta, status
 
 def obtener_pagos_service():
     cursor = conectarse_db()
