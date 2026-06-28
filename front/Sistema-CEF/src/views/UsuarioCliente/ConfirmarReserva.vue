@@ -1,6 +1,6 @@
 <template>
     <v-container fluid class="fill-height d-flex align-center justify-center" style="min-height: 100dvh;">
-        <v-card class="pa-6 login-card" width="420" elevation="8" color="background" rounded="lg">
+        <v-card class="pa-6 login-card" width="420" elevation="8" color="bg-card" rounded="lg">
 
             <h1>Confirmar Reserva</h1>
             <p>
