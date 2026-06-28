@@ -15,7 +15,10 @@
             <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/">Inicio</v-btn>
             <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/sobre-nosotros">Nosotros</v-btn>
             <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/clases">Clases</v-btn>
-            <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/administracionEmpleados" v-if="userProfile?.rol === 1 || userRole === 1">Administracion de empleados</v-btn>
+            <template v-if="userProfile?.rol === 1 || userRole === 1">
+              <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/administracionEmpleados">Administracion Empleados</v-btn>
+              <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/administracionUsuarios">Administracion Usuarios</v-btn>
+            </template>
             <!-- Botón de Registro modificado -->
             <v-btn variant="flat" color="blue-darken-3" class="text-none text-subtitle-1 ml-4 mr-2" to="/inicioSesion" v-if="!isLoggedIn">
                  <v-icon start>mdi-login</v-icon>
