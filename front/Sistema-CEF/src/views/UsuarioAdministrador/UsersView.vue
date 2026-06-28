@@ -21,29 +21,31 @@
             </v-card-title>
           </div>
 
-        
+          <template v-if="users.length > 0">
             <v-data-table
               :headers="headers"
               :items="users"
               :search="search"
               :loading="loading"
+              :header-props="{ class: 'font-weight-bold' }"
               loading-text="Cargando usuarios..."
               no-data-text="No se encontraron usuarios"
             >
-              <template v-slot:[`item.rol_id`]="{ item }">
-                <v-chip :color="getRoleColor(item.rol_id)" size="small" class="font-weight-bold">
-                  {{ getRoleName(item.rol_id) }}
-                </v-chip>
-              </template>
-
               <template v-slot:[`item.acciones`]="{ item }">
                 <div class="d-flex justify-end">
-                  <v-btn
-                    icon="mdi-pencil"
+                   <v-btn 
+                    icon="mdi-calendar-month"
                     variant="text"
-                    color="blue-darken-1"
+                    color="orange-darken-2"
                     size="small"
-                    title="Modificar Datos"
+                    title="Cambiar fecha de mensualidad"
+                  ></v-btn>
+                   <v-btn 
+                    icon="mdi-account-off"
+                    variant="text"
+                    color="grey-darken-1"
+                    size="small"
+                    title="Desactivar"
                   ></v-btn>
                   <v-btn
                     icon="mdi-delete"
@@ -55,6 +57,15 @@
                 </div>
               </template>
             </v-data-table>
+          </template>
+          <template v-else>
+            <v-row justify="center" class="mt-10 mb-10">
+              <v-col cols="12" md="8" class="text-center">
+                <v-icon size="64" color="grey-lighten-1" class="mb-4">mdi-account-off</v-icon>
+                <div class="text-h5 text-grey-darken-1 font-weight-medium">No existen usuarios registrados</div>
+              </v-col>
+            </v-row>
+          </template>
         </v-card>
       </v-col>
     </v-row>
@@ -75,38 +86,31 @@ const headers = [
   { title: 'DNI', key: 'dni', sortable: true },
   { title: 'Nombre', key: 'nombre' },
   { title: 'Apellido', key: 'apellido' },
+  { title: 'Teléfono', key: 'telefono' },
   { title: 'Correo', key: 'correo' },
-  { title: 'Rol', key: 'rol_id', align: 'center' },
+  { title: 'Género', key: 'genero', align: 'center' },
   { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
 ]
-
-const roles = [
-  { id: 0, label: 'Desactivado' },
-  { id: 1, label: 'Administrador' },
-  { id: 2, label: 'Recepcionista' },
-  { id: 3, label: 'Usuario' },
-  { id: 4, label: 'Eliminado' },
-  { id: 5, label: 'Profesor' }
-]
-
-const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Desconocido'
-const getRoleColor = (id) => {
-  if (id === 3) return 'blue-darken-1' // Usuario
-  if (id === 1) return 'green-darken-1' // Admin
-  if (id === 2) return 'purple-darken-1' // Recepcionista
-  if (id === 5) return 'light-blue-darken-1' // Profesor
-  if (id === 4) return 'red-darken-1' // Eliminado
-  return 'grey-darken-1' // Desactivado o desconocido
-}
 
 const loadUsers = async () => {
   loading.value = true
   try {
-    const response = await UsersAdminService.getUsers()
-    if (response.status === 'success') {
-      // Los datos ya vienen como un array de objetos, solo necesitamos filtrar.
-      users.value = response.data.filter(user => user.rol_id === 3)
-    }
+    const response = await UsersAdminService.getUsers();
+    const data = response || [];
+    console.log(response)
+    const fetchedUsers = data.map(u => ({
+      apellido: u.apellido ?? u[0],
+      correo: u.correo ?? u[1],
+      dni: u.dni ?? u[2],
+      fecha_nac: u.fecha_nac ?? u[3],
+      genero: u.genero ?? u[4],
+      id: u.id ?? u[5],
+      nombre: u.nombre ?? u[6],
+      rol_id: u.rol_id ?? u[7],
+      telefono: u.telefono ?? u[8]
+    }));
+
+    users.value = fetchedUsers.filter(user => user.rol_id === 3);
   } catch (error) {
     notificationStore.showNotification('Error al cargar los usuarios.', 'danger')
     console.error('Error cargando usuarios:', error)
