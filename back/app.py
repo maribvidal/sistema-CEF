@@ -6,6 +6,8 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.seed_db import insertar_datos
 from routes import *
 from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
+from services.mensualidad_service import verificar_mensualidades_por_vencer, verificar_notificaciones_viejas
  
 load_dotenv()
 
@@ -44,6 +46,26 @@ def create_app(testing=False, db_name="database.db"):
 
     return app
 
+scheduler = BackgroundScheduler()
+
+# Ejecuta el verificar_mensualidades_por_vencer todos los días a las 9:00
+scheduler.add_job(
+    verificar_mensualidades_por_vencer,
+    trigger="cron",
+    hour=9,
+    minute=0
+)
+
+# Ejecuta el verificar_notificaciones_viejas el día 1 de cada mes a las 00:00
+scheduler.add_job(
+    verificar_notificaciones_viejas,
+    trigger="cron",
+    day=1,
+    hour=0,
+    minute=0
+)
+
 if __name__ == "__main__":
     app = create_app()
+    scheduler.start()
     app.run(debug=False)

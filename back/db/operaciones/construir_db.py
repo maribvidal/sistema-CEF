@@ -357,3 +357,16 @@ def construir_tabla_profesor_actividad(cursor: sqlite.Cursor):
                                          ON UPDATE CASCADE
                                          ON DELETE CASCADE
                         )""")
+    
+# tabla para no mandar mas de una notificacion al mismo usuario por la misma mensualidad
+# se borran las notificaciones pasadas la semana, 1 vez al mes
+def construir_tabla_proximas_notificaciones(cursor: sqlite.Cursor):
+    """Construye la tabla Notificaciones_Enviadas"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Notificaciones_Enviadas (
+                            id             INTEGER PRIMARY KEY,
+                            mensualidad_id INTEGER NOT NULL UNIQUE,
+                            fecha_envio     DATE,
+                            FOREIGN KEY (mensualidad_id) REFERENCES Mensualidad(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                        )""")
