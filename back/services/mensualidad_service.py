@@ -1,4 +1,4 @@
-from back.utils.envio_mails import enviar_mail
+from utils.envio_mails import enviar_mail
 from db.operaciones.mensualidades.borrar_db import borrar_mensualidad
 from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa
 from db.operaciones.conectar_db import conectarse_db
