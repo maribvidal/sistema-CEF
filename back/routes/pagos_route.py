@@ -26,9 +26,10 @@ def crear_pago_particular():
     data = request.get_json()
     usuario_id = data.get("usuario_id")
     descripcion = data.get("descripcion")
-    clase_id = data.get("clase_id")
+    # instancia de clase_id
+    instancia_clase_id = data.get("instancia_clase_id")
 
-    respuesta, status = crear_pago_service_particular(usuario_id, descripcion, clase_id)
+    respuesta, status = crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id)
 
     return jsonify(respuesta), status
 

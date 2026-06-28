@@ -1,5 +1,6 @@
 import time
 
+from back.db.operaciones.clases.consultar_db import consultar_clase_por_id_instancia
 from back.db.operaciones.mensualidades.insertar_db import insertar_mensualidad
 from back.utils.modulo_manejo_listas import revisar_cupos_disponible_abonado, revisar_si_hay_cupos
 from db.operaciones.clase_tener_mensualidad.consultar_db import consultar_montos_mensualidad
@@ -169,22 +170,22 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
         "status_mp": respuesta_json.get("status")
     }, 200    
     
-def crear_pago_service_particular(usuario_id, descripcion, clase_id):
+def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     cursor = conectarse_db()
     
-    if not clase_id or not usuario_id or not descripcion:
+    if not instancia_clase_id or not usuario_id or not descripcion:
         cursor.connection.close()
         return {
             "error": "Faltan datos requeridos para crear el pago."
         }, 400
     
-    clase = consultar_instancia_clase_por_id(clase_id, cursor)
-    control = _controlar_errores_query(clase, 500, "No se encontro la clase.", 400, cursor)
+    instancia_clase = consultar_instancia_clase_por_id(instancia_clase_id, cursor)
+    control = _controlar_errores_query(instancia_clase, 500, "No se encontro la instancia de clase.", 400, cursor)
     if control is not None:
         return control
     
     # Crear el pago en la base de datos con estado "pending"
-    pago = insertar_pago(clase['data']['monto'], usuario_id, cursor)
+    pago = insertar_pago(instancia_clase['data']['monto'], usuario_id, cursor)
     control = _controlar_errores_query(pago, 500, "No se pudo crear el pago.", 400, cursor)
     if control is not None:
         return control
@@ -202,7 +203,7 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
     
     item = {
         "title": "Clase particular",
-        "unit_price": str(clase['data']['monto']),
+        "unit_price": str(instancia_clase['data']['monto']),
         "quantity": 1,
         "unit_measure": "unit",
         "external_categories": [
@@ -210,7 +211,7 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
         ]
     }
     
-    respuesta_json = crear_orden_qr_mp(id_pago, clase['data']['monto'], descripcion, item)
+    respuesta_json = crear_orden_qr_mp(id_pago, instancia_clase['data']['monto'], descripcion, item)
    
     # aca no estoy seguro si es con o sin none
     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
@@ -239,7 +240,13 @@ def crear_pago_service_particular(usuario_id, descripcion, clase_id):
             "error": f"La orden de pago con id {respuesta_json['data']['id']} ha expirado o fue cancelada."
         }, 400    
     
-    resultado = insertar_pago_pagar_clase(id_pago, clase_id, cursor)
+    
+    clase = consultar_clase_por_id_instancia(instancia_clase_id, cursor)
+    control = _controlar_errores_query(clase, 500, "No se encontro la clase asociada a la instancia de clase.", 404, cursor)
+    if control is not None:
+        return control
+    
+    resultado = insertar_pago_pagar_clase(id_pago, clase['data']['id'], cursor)
     
     control = _controlar_errores_query(resultado, 500, "No se pudo crear el pago pagar clase.", 400, cursor)
     if control is not None:

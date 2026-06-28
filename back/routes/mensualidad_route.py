@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from back.services.pagos_service import crear_pago_service_mensualidad, verificar_poder_pagar_mensualidad_service
-from services.mensualidad_service import configurar_fin_mensualidad_service
+from services.mensualidad_service import configurar_fin_mensualidad_service, ver_estado_mensualidad_service
 
 mensualidad_bp = Blueprint('mensualidad', __name__)
 
@@ -52,3 +52,29 @@ def crear_pago_mensualidad():
     return jsonify({
         "message": "Pago de mensualidad realizado y fecha de fin configurada correctamente."
     }), 200
+    
+@mensualidad_bp.route("/mensualidad/ver_estado", methods=["GET"])
+def ver_estado_mensualidad():
+    """
+        Endpoint para verificar el estado de la mensualidad de un usuario.
+    """
+    dni_cliente = request.args.get("dni_cliente")
+    id_mensualidad = request.args.get("id_mensualidad")
+
+    respuesta, status = ver_estado_mensualidad_service(dni_cliente, id_mensualidad)
+    
+    return jsonify(respuesta), status
+
+
+@mensualidad_bp.route("/mensualidad/cancelar_mensualidad", methods=["POST"])
+def cancelar_mensualidad_route():
+    """
+        Endpoint para cancelar la mensualidad de un usuario.
+    """
+    data = request.get_json()
+    dni_cliente = data.get("dni_cliente")
+    id_mensualidad = data.get("id_mensualidad")
+
+    respuesta, status = cancelar_mensualidad_service(dni_cliente, id_mensualidad)
+    
+    return jsonify(respuesta), status
