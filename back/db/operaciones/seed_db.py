@@ -69,7 +69,7 @@ def insertar_datos(cursor):
     insertar_sala('Sala 3', 5, cursor)
 
     # Crear clase
-    id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, 300.0, cursor)
+    id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 0, 300.0, cursor)
     id_clas = id_clas['data']
     res_inst_clase = insertar_instancia_clase(id_clas, generar_fecha_actual("Lunes"), 200.0, cursor)
     
@@ -154,4 +154,9 @@ def insertar_datos(cursor):
         SET fecha = '2026-06-10'
         WHERE id IN ({pago_ref_clase}, {pago_ref_mensualidad})
     """)
+    
+    # Datos para probar el scheduler de notificaciones
+    id_usuario = insertar_usuario(20000001, 'a', 'a', '11111111', '1990-01-01', 'tucorreo@ymail.com', 'pwd01','F', 3, cursor)
+    
+    mensualidad = insertar_mensualidad(id_usuario['data'], cursor, '2026-05-30')
     

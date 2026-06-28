@@ -1,4 +1,5 @@
 from db.operaciones.exception_handler import ejecutar_fetchone, ejecutar_query
+from db.operaciones.reservas.borrar_db import eliminar_reservas_usuario
 
 # falta implementar & testear
 def modificar_empleado(
@@ -112,27 +113,23 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
         Recibe el DNI del empleado a borrar.
         Devuelve un diccionario con el resultado de la operación."""
 
-    query_verificacion = f"""
-        SELECT id, rol_id
-        FROM Usuario
-        WHERE dni = {empleado_dni}
-    """
+    query_verificacion = f"SELECT id, rol_id FROM Usuario WHERE dni = {empleado_dni}"
+
     usuario = ejecutar_fetchone(query_verificacion, cursor)
     print("IMPRIMIENDO RESPUESTA DEL FETCHONEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",usuario)
 
     if usuario.get("status") == "error" or not usuario.get("data"):
-        return {
-            "status": "error",
-            "message": "Empleado no encontrado"
-        }
+        return { "status": "error", "message": "Empleado no encontrado" }
+
     rol_actual = usuario["data"]["rol_id"]
 
-    # FIX 2,  Agarrar si ya estaba eliminado
-    if rol_actual == 4:  # o sea si el usuario ya estaba eliminado
+    # validar si ya es un usuario eliminardo (rol >= 20)
+    if rol_actual >= 20:  
         return {
             "status": "error",
             "message": "El empleado ya estaba eliminado"
         }
+    # Lógica del profesor
     elif rol_actual == 5: # o sea si el usuario es un profesor
         print("El usuario es un profesor, se procede a verificar si tiene clases a su cargo")
         profesor_id = usuario["data"]["id"]
@@ -150,38 +147,27 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
                 "status": "clases_asignadas",
                 "message": f"No se puede eliminar al profesor. Tiene {resultado_clases['data']['total_clases']} clase/s asignada/s"
             }
+    elif rol_actual == 3:
+        print("hola?")
+        resultado_limpieza = eliminar_reservas_usuario(usuario["data"]["id"], cursor)
+        if resultado_limpieza.get("status") == "error":
+            return {
+                "status": "error",
+                "message": "Error al intentar limpiar las reservas del usuario."
+            }
 
-    # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
-    # AHORA ES BORRADO FISICO
-    # SI QUEREMOS HACER BORRADO TAMBIÉN EN SUS REFERENCIAS (FOREIGN KEYS), HAY QUE UTILIZAR DELETE ON CASCADE. PERO POR LAS DUDAS LO DEJO COMO DELETE NORMAL
-    # query_delete = f"""
-    #     DELETE FROM Usuario
-    #     WHERE dni = {empleado_dni}
-    # """
-    # AHORA ES LÓGICO LA RREPUTAMADRE DECIDANSÉ MATERIA DE LA REVERENDA CONCHA
-    # Borrado lógico: se modifica el rol a 4 (eliminado) conservando los datos personales
-    # AHORA PARECE QUE EN REALIDAD EL FÍSICO ES PARA LOS CLIENTES. ME QUIEREN VOLVER LOCO
+    # Tras una consulta del profesor y charla con el equipo, se decidió que todos los empleados (incluido también clientes) sean de borrado lógico
+    # si es un +20, es borrado lógico, 
+    rol_actual += 20
 
-    # BIFURCACIÓN DE BORRADO (FÍSICO VS LÓGICO)
-    # Si NO es un empleado (0, 1, 2 = admins/gerentes, 5 = profe), asumimos que es CLIENTE
-    if rol_actual not in (0, 1, 2, 5): 
-        # BORRADO FÍSICO
-        query_delete = f"""
-            DELETE FROM Usuario
-            WHERE dni = {empleado_dni}
-        """
-        return ejecutar_query(query_delete, cursor)
-    else:
-        # BORRADO LÓGICO (Es un empleado)
-        query_update = f"""
-            UPDATE Usuario
-            SET rol_id = 4
-            WHERE dni = {empleado_dni}
-        """
-        return ejecutar_query(query_update, cursor)
+    query_update = f"""
+        UPDATE Usuario
+        SET rol_id = {rol_actual}
+        WHERE dni = {empleado_dni}
+    """
+    return ejecutar_query(query_update, cursor)
 
-
-def desactivar_empleado(empleado_dni: int, cursor) -> dict:
+def desactivar_empleado(usuario_dni: int, cursor) -> dict:
     """Desactiva un empleado específico de la base de datos, utilizando su DNI como referencia.
         Recibe el DNI del empleado a desactivar.
         Devuelve un diccionario con el resultado de la operación."""
@@ -189,29 +175,27 @@ def desactivar_empleado(empleado_dni: int, cursor) -> dict:
     query_verificacion = f"""
         SELECT rol_id
         FROM Usuario
-        WHERE dni = {empleado_dni}
+        WHERE dni = {usuario_dni}
     """
     usuario = ejecutar_fetchone(query_verificacion, cursor)
 
     if not usuario:
         return {
             "status": "error",
-            "message": "Empleado no encontrado"
+            "message": "Usuario no encontrado"
         }
-    elif usuario["data"]["rol_id"] not in (1, 2): # o sea si el usuario no es ni gerente ni administrador
+    
+    rol_actual = usuario["data"]["rol_id"]
+    if 10 <= rol_actual < 20:
         return {
             "status": "error",
-            "message": "El usuario no es un empleado"
+            "message": "El empleado ya estaba desactivado"
         }
+    if rol_actual >= 20:
+        return {"status": "error", "message": "No se puede desactivar un usuario eliminado"}
     
-    print("Se encontró el usuario creo")
-    
-    query_update = f"""
-        UPDATE Usuario
-        SET rol_id = 0
-        WHERE dni = {empleado_dni}
-    """
-
-    print(query_update)
+    # Aplicamos la desactivación
+    nuevo_rol = rol_actual + 10
+    query_update = f"UPDATE Usuario SET rol_id = {nuevo_rol} WHERE dni = {usuario_dni}"
 
     return ejecutar_query(query_update, cursor)

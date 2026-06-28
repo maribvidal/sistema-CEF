@@ -101,15 +101,16 @@ const AuthApiService = {
 }
 
 
-export const AdminApiService = {
-  userList: async () => {
-    try {
-      const response = await apiClient.get('/Usuarios/ObtenerListaUsuarios')
-      return response.data
-    } catch (error) {
-      console.error('Error al obtener la lista de usuarios:', error)
-      throw error
-    }
+/**
+ * ----------------------------------------------------------------
+ * SERVICIO DE API PARA ADMINISTRACIÓN DE USUARIOS
+ * ----------------------------------------------------------------
+ */
+export const UsersAdminService = {
+  getUsers: async () => {
+    // La ruta en el backend es /usuarios/ObtenerListaUsuarios
+    const response = await apiClient.get('/usuarios/ObtenerListaUsuarios')
+    return response.data
   }
 }
 /**

@@ -21,44 +21,46 @@
         </v-btn>
       </v-list-item>
 
-    
-
       <v-list-item class="menu-link-item" to="/clases">
         <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
           <v-icon start>{{ appMenuIcons.classes }}</v-icon>
           Clases
         </v-btn>
       </v-list-item>
-
+      
       <v-list-item class="menu-link-item" to="/sobre-nosotros">
         <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
           <v-icon start>{{ appMenuIcons.about }}</v-icon>
           Nosotros
         </v-btn>
       </v-list-item>
-      <v-btn variant="flat" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" color="blue-darken-3" to="/inicioSesion" v-if="!isLoggedIn">
-          <v-icon start>{{ appMenuIcons.login }}</v-icon>
-          Iniciar Sesión
-        </v-btn>
-      <v-btn variant="flat" color="red-darken-2" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" to="/registro" v-if="!isLoggedIn">
-        <v-icon start>mdi-account-plus</v-icon>
-        Registrarse
-      </v-btn>
-      <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/clases">
-        <v-icon start>{{ appMenuIcons.classes }}</v-icon>
-        Clases
-      </v-btn>
-      <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/administracionEmpleados" v-if="userProfile?.rol === 1 || userRole === 1">Administracion de empleados</v-btn>
-      
+
+      <!-- Sección de Administrador -->
+      <template v-if="userRole === 1">
+        <v-divider class="my-2"></v-divider>
+        <v-list-subheader>ADMINISTRACIÓN</v-list-subheader>
+        <v-list-item class="menu-link-item" to="/administracionEmpleados">
+          <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
+            <v-icon start>{{ appMenuIcons.employees }}</v-icon>
+            Adm. Empleados
+          </v-btn>
+        </v-list-item>
+        <v-list-item class="menu-link-item" to="/administracionUsuarios">
+          <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
+            <v-icon start>{{ appMenuIcons.users }}</v-icon>
+            Adm. Usuarios
+          </v-btn>
+        </v-list-item>
+        <v-divider class="my-2"></v-divider>
+      </template>
 
       <!-- Mostrar nombre de usuario si está autenticado -->
-            <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3"  :to="{ name: 'perfil', params: { id: userProfile?.id } }" v-if="isLoggedIn">
-                <v-avatar size="32" class="mr-2" v-if="userProfile?.avatarUrl">
-                    <v-img :src="userProfile?.avatarUrl" alt="Foto de perfil" cover></v-img>
-                </v-avatar>
-                <v-icon size="32" class="mr-2" v-else>mdi-account-circle</v-icon>
-                Mi Perfil: {{ userProfile?.nombre || 'Usuario' }}
-            </v-btn>
+      <v-list-item class="menu-link-item" :to="{ name: 'perfil', params: { id: userProfile?.id } }" v-if="isLoggedIn">
+        <v-btn variant="text" class="menu-link menu-button text-none text-subtitle-1" color="blue-darken-3">
+          <v-icon start>mdi-account-circle</v-icon>
+          Mi Perfil
+        </v-btn>
+      </v-list-item>
 
       <v-btn variant="flat" color="red-darken-2" class="menu-register text-none text-subtitle-1 mt-2 ml-1 px-6" @click="handleLogout" v-if="isLoggedIn">
         <v-icon start>mdi-logout</v-icon>

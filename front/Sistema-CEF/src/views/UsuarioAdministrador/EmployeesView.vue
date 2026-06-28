@@ -3,47 +3,73 @@
     <v-row justify="center">
       <v-col cols="12" md="10">
         <v-card elevation="2" rounded="lg">
-          <v-card-title class="d-flex align-center pa-4 bg-black text-white">
-            <v-icon icon="mdi-account-group" class="mr-3"></v-icon>
-            <span class="text-h5">Administración de Empleados</span>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="white"
-              variant="outlined"
-              prepend-icon="mdi-account-tie"
-              class="mr-2 text-none"
-              density="comfortable"
-              @click="crearProfesor"
-            >
-              Crear Profesor
-            </v-btn>
-            <v-btn
-              color="white"
-              variant="outlined"
-              prepend-icon="mdi-account-star"
-              class="mr-4 text-none"
-              density="comfortable"
-              @click="crearRecepcionista"
-            >
-              Crear Recepcionista
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-text-field
-              v-model="search"
-              prepend-inner-icon="mdi-magnify"
-              label="Buscar por nombre o DNI"
-              variant="solo"
-              hide-details
-              density="compact"
-              class="search-field"
-              style="max-width: 300px;"
-            ></v-text-field>
-          </v-card-title>
+          <div class="bg-black text-white">
+            <v-card-title class="d-flex align-center pa-4">
+              <v-icon icon="mdi-account-group" class="mr-3"></v-icon>
+              <span class="text-h5">Administración de Empleados</span>
+              <v-spacer></v-spacer>
+              <v-btn
+                color="white"
+                variant="outlined"
+                prepend-icon="mdi-account-tie"
+                class="mr-2 text-none"
+                density="comfortable"
+                @click="crearProfesor"
+              >
+                Crear Profesor
+              </v-btn>
+              <v-btn
+                color="white"
+                variant="outlined"
+                prepend-icon="mdi-account-star"
+                class="mr-4 text-none"
+                density="comfortable"
+                @click="crearRecepcionista"
+              >
+                Crear Recepcionista
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="search"
+                prepend-inner-icon="mdi-magnify"
+                label="Buscar por nombre o DNI"
+                variant="solo"
+                hide-details
+                density="compact"
+                class="search-field"
+                style="max-width: 300px;"
+              ></v-text-field>
+            </v-card-title>
+            <v-card-text class="py-0 d-flex">
+              <v-chip-group
+                v-model="filtroRol"
+                mandatory
+                selected-class="text-black bg-white"
+                class="mr-4"
+              >
+                <v-chip value="todos" size="small">Todos</v-chip>
+                <v-chip value="admin" size="small">Administradores</v-chip>
+                <v-chip value="recepcionista" size="small">Recepcionistas</v-chip>
+                <v-chip value="profesor" size="small">Profesores</v-chip>
+              </v-chip-group>
+              <v-divider vertical></v-divider>
+              <v-chip-group
+                v-model="filtroEstado"
+                mandatory
+                selected-class="text-black bg-white"
+                class="ml-4"
+              >
+                <v-chip value="activos" size="small">Activos</v-chip>
+                <v-chip value="desactivados" size="small">Desactivados</v-chip>
+                <v-chip value="borrados" size="small">Borrados</v-chip>
+              </v-chip-group>
+            </v-card-text>
+          </div>
 
           <template v-if="empleados.length > 0 || profesores.length > 0">
             <v-data-table
               :headers="headers"
-              :items="empleados.concat(profesores)"
+              :items="personalFiltrado"
               :search="search"
               :loading="loading"
               loading-text="Cargando personal..."
@@ -72,7 +98,7 @@
                     variant="text"
                     color="orange-darken-2"
                     size="small"
-                    :disabled="item.rol_id === 0"
+                    :disabled="item.rol_id === 0 || item.rol_id === 5"
                     @click="abrirEditorRol(item)"
                     title="Cambiar Permisos/Rol"
                   ></v-btn>
@@ -256,6 +282,8 @@ const profesores = ref([])
 const search = ref('')
 const loading = ref(false)
 const dialog = ref(false)
+const filtroRol = ref('todos')
+const filtroEstado = ref('activos')
 const dialogEditarEmpleado = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
@@ -322,6 +350,39 @@ const getRoleColor = (id) => {
   if (id === 4) return 'red-darken-1' // Empleado eliminado
   return 'light-blue-darken-1' // Color para Profesor
 }
+
+const personalFiltrado = computed(() => {
+  let listaFiltrada = empleados.value
+
+  // 1. Filtrar por estado
+  if (filtroEstado.value === 'activos') {
+    // Roles activos son 1 (Admin), 2 (Recepcionista), 5 (Profesor)
+    const rolesActivos = [1, 2, 5]
+    listaFiltrada = listaFiltrada.filter(e => rolesActivos.includes(e.rol_id))
+  } else if (filtroEstado.value === 'desactivados') {
+    // Rol desactivado es 0
+    listaFiltrada = listaFiltrada.filter(e => e.rol_id === 0)
+  } else if (filtroEstado.value === 'borrados') {
+    // Rol borrado es 4
+    listaFiltrada = listaFiltrada.filter(e => e.rol_id === 4)
+  }
+
+  // 2. Filtrar por rol sobre la lista ya filtrada por estado
+  if (filtroRol.value === 'todos') {
+    return listaFiltrada
+  }
+  if (filtroRol.value === 'admin') {
+    return listaFiltrada.filter(e => e.rol_id === 1)
+  }
+  if (filtroRol.value === 'recepcionista') {
+    return listaFiltrada.filter(e => e.rol_id === 2)
+  }
+  if (filtroRol.value === 'profesor') {
+    return listaFiltrada.filter(e => e.rol_id === 5)
+  }
+
+  return listaFiltrada
+})
 
 const componenteEdicion = computed(() => {
   const rol = empleadoSeleccionado.value?.rol_id

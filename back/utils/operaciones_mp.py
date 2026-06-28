@@ -156,8 +156,6 @@ def crear_orden_qr_mp(external_reference, total_amount, description, item):
             ]
         }
         respuesta = requests.post(url, json=datos, headers=headers)
-
-        print(respuesta.json())
         
         return {
             "status": "success",
