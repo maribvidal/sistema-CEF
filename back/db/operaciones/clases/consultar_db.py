@@ -66,3 +66,16 @@ def consultar_instancias_por_clase_id(id_clase: int, cursor) -> dict:
     """
 
     return ejecutar_fetchall(query, cursor)
+
+def consultar_clase_por_id_instancia(instancia_id: int, cursor) -> dict:
+    """Hace una consulta que devuelve la clase a la que pertenece
+        una instancia de clase, y hace la consulta con el id de
+        la instancia recibido."""
+    query = f"""
+        SELECT c.id, c.actividad_id, c.sala_id, c.profesor_id, c.dia, c.hora, c.cupo_maximo, c.monto, c.estado
+        FROM Clase c
+            INNER JOIN Instancia_Clase ic ON c.id = ic.clase_id
+        WHERE ic.id = {instancia_id}
+    """
+
+    return ejecutar_fetchone(query, cursor)
