@@ -71,6 +71,11 @@ const router = createRouter({
       name: 'confirmarReserva',
       component: () => import('../views/UsuarioCliente/ConfirmarReserva.vue'),
       props: true,
+    },
+    {
+      path: '/metricas',
+      name: 'metricas',
+      component: () => import('../views/UsuarioAdministrador/MetricasView.vue'),
     }
   ],
 })

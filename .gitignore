@@ -212,3 +212,4 @@ poetry.lock
 __pycache__
 package-lock.json
 copy.py
+node_modules/
