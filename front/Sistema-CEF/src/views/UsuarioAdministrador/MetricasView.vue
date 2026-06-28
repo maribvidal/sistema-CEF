@@ -40,10 +40,14 @@
         <v-card class="pa-4" elevation="2">
           <v-card-title class="text-h5">{{ metricaActual.titulo }}</v-card-title>
           <v-card-subtitle>{{ metricaActual.subtitulo }}</v-card-subtitle>
+          <v-card-subtitle v-if="fechaInicio && fechaFin" class="justify-end">
+            <span class="text-caption grey--text">Mostrando datos desde {{ fechaInicio }} hasta {{ fechaFin }}</span>
+          </v-card-subtitle>
           <!-- si se selecciona una fecha, mostrarla -->
           
           <v-card-text>
             <BarChart :chartData="metricaActual.datos" />
+            <var v-if="metricaActual.datos.labels.length === 0" class="text-center text-subtitle-1 mt-4">No hay datos para mostrar.</var>
           </v-card-text>
         </v-card>
 
@@ -68,7 +72,7 @@ const clasesCanceladas     = ref({ ...empty });
 const clasesConMensualidad = ref({ ...empty });
 const fechaInicio = ref('');
 const fechaFin = ref('');
-
+const errorMessage = ref('');
 // Mostrar el filtro solo en métricas que lo soporten
 const mostrarFiltroFecha = computed(() =>
   ['clasesCanceladas', 'plataRecaudada', 'clasesConMensualidad'].includes(metricaSeleccionada.value)
@@ -76,11 +80,11 @@ const mostrarFiltroFecha = computed(() =>
 
 const cargarConFiltro = async () => {
   if (metricaSeleccionada.value === 'clasesCanceladas') {
-    await clasesMasCanceladasPorFecha(fechaInicio.value, fechaFin.value);
+    await cargarMetricasClasesFecha(fechaInicio.value, fechaFin.value);
   } else if (metricaSeleccionada.value === 'plataRecaudada') {
-    await plataRecaudadaPorFecha(fechaInicio.value, fechaFin.value);
+    await cargarPlataRecaudadaFecha(fechaInicio.value, fechaFin.value);
   } else if (metricaSeleccionada.value === 'clasesConMensualidad') {
-    await clasesConMensualidadPorFecha(fechaInicio.value, fechaFin.value);
+    await cargarClasesConMensualidadFecha(fechaInicio.value, fechaFin.value);
   }
 };
 
@@ -154,27 +158,24 @@ const cargarMetricasClasesConMensualidad = async () => {
   } catch (e) { console.error(e); }
 };
 
+
 const cargarMetricasClasesFecha = async (fecha_inicio, fecha_fin) => {
   try {
-    const { data } = await MetricasService.clasesMasCanceladas(fecha_inicio, fecha_fin);
-    clasesCanceladas.value = {
-      labels: data.map(i => `${i.actividad} (${i.dia} ${i.hora})`),
-      datasets: [{ label: 'Clases canceladas', data: data.map(i => i.cancelaciones), backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 }],
-    };
-  } catch (e) { console.error(e); }
-};
-
-const clasesMasCanceladasPorFecha = async (fecha_inicio, fecha_fin) => {
-  try {
     const { data } = await MetricasService.clasesMasCanceladasPorFecha(fecha_inicio, fecha_fin);
+    console.log('data con fecha:', data); // 👈 agregá esto
     clasesCanceladas.value = {
       labels: data.map(i => `${i.actividad} (${i.dia} ${i.hora})`),
       datasets: [{ label: 'Clases canceladas', data: data.map(i => i.cancelaciones), backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1 }],
     };
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    errorMessage.value = e.message; // "No se encontraron clases canceladas."
+    clasesCanceladas.value = { labels: [], datasets: [] }; // limpiar el gráfico
+  }
+
+  
 };
 
-const plataRecaudadaPorFecha = async (fecha_inicio, fecha_fin) => {
+const cargarPlataRecaudadaFecha = async (fecha_inicio, fecha_fin) => {
   try {
     const { data } = await MetricasService.plataRecaudadaPorFecha(fecha_inicio, fecha_fin);
     const por = data.reduce((acc, i) => { acc[i.actividad_nombre] = (acc[i.actividad_nombre] || 0) + i.monto; return acc; }, {});
@@ -182,10 +183,13 @@ const plataRecaudadaPorFecha = async (fecha_inicio, fecha_fin) => {
       labels: Object.keys(por),
       datasets: [{ label: 'Plata recaudada', data: Object.values(por), backgroundColor: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgba(54, 162, 235, 1)', borderWidth: 1 }],
     };
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    errorMessage.value = e.message; // "No se encontraron clases canceladas."
+    plataRecaudada.value = { labels: [], datasets: [] }; // limpiar el gráfico
+  }
 };
 
-const clasesConMensualidadPorFecha = async (fecha_inicio, fecha_fin) => {
+const cargarClasesConMensualidadFecha = async (fecha_inicio, fecha_fin) => {
   try {
     const clasesID = { 1: 'Yoga', 2: 'Funcional', 3: 'Pilates' };
     const { data } = await MetricasService.clasesConMensualidadPorFecha(fecha_inicio, fecha_fin);
@@ -194,6 +198,9 @@ const clasesConMensualidadPorFecha = async (fecha_inicio, fecha_fin) => {
       labels: Object.keys(por).map(id => clasesID[id]),
       datasets: [{ label: 'Clases con mensualidad', data: Object.values(por), backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1 }],
     };
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    errorMessage.value = e.message; // "No se encontraron clases canceladas."
+    clasesConMensualidad.value = { labels: [], datasets: [] }; // limpiar el gráfico
+  }
 };
 </script>

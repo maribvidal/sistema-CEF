@@ -4,24 +4,24 @@ export const MetricasService = {
   clasesMasCanceladas: async () => 
     apiClient.get('/metricas/clases_mas_canceladas'),
     
-  clasesMasCanceladasPorFecha: async (fechaInicio, fechaFin) => 
-    apiClient.get('/metricas/clases_mas_canceladas', { 
-      params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin } 
+  clasesMasCanceladasPorFecha: async (fecha_inicio, fecha_fin) => 
+    apiClient.get('/metricas/clases_mas_canceladas/con_fechas', { 
+    params: { fecha_inicio: fecha_inicio, fecha_fin: fecha_fin } 
     }),
 
   clasesConMensualidad: async () => 
     apiClient.get('/metricas/clases_con_mensualidad'),
     
-  clasesConMensualidadPorFecha: async (fechaInicio, fechaFin) => 
-    apiClient.get('/metricas/clases_con_mensualidad', { 
-      params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin } 
+  clasesConMensualidadPorFecha: async (fecha_inicio, fecha_fin) => 
+    apiClient.get('/metricas/clases_con_mensualidad/con_fechas', { 
+      params: { fecha_inicio: fecha_inicio, fecha_fin: fecha_fin } 
     }),
 
   plataRecaudada: async () => 
     apiClient.get('/metricas/plata_recaudada'),
     
-  plataRecaudadaPorFecha: async (fechaInicio, fechaFin) => 
-    apiClient.get('/metricas/plata_recaudada', { 
-      params: { fecha_inicio: fechaInicio, fecha_fin: fechaFin } 
+  plataRecaudadaPorFecha: async (fecha_inicio, fecha_fin) => 
+    apiClient.get('/metricas/plata_recaudada/con_fechas', { 
+      params: { fecha_inicio: fecha_inicio, fecha_fin: fecha_fin } 
     }),
 }

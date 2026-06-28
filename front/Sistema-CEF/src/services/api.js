@@ -12,8 +12,12 @@ const API_BASE_URL = 'http://127.0.0.1:5000'
  * @param {object} data - Datos a enviar en el cuerpo (opcional)
  * @returns {Promise} Respuesta del servidor
  */
-async function request(endpoint, method = 'GET', data = null) {
-  const url = `${API_BASE_URL}${endpoint}`
+async function request(endpoint, method = 'GET', data = null, params = null) {
+  let url = `${API_BASE_URL}${endpoint}`
+  if (params) {
+    const query = new URLSearchParams(params).toString()
+    url = `${url}?${query}`
+  }
   const options = {
     method,
     headers: {
@@ -72,7 +76,7 @@ async function request(endpoint, method = 'GET', data = null) {
  * Cliente API con métodos auxiliares
  */
 const apiClient = {
-  get: (endpoint) => request(endpoint, 'GET'),
+  get: (endpoint, options = {}) => request(endpoint, 'GET', null, options.params),
   post: (endpoint, data) => request(endpoint, 'POST', data),
   put: (endpoint, data) => request(endpoint, 'PUT', data),
   patch: (endpoint, data) => request(endpoint, 'PATCH', data),
