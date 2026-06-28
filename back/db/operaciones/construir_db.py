@@ -65,6 +65,8 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_usuario_pertenece_lista_espera_abonados(cursor)
     construir_tabla_usuario_pertenece_lista_espera_individual(cursor)
     construir_tabla_profesor_actividad(cursor)
+    
+    construir_tabla_proximas_notificaciones(cursor)
 
 ## FUNCIONES QUE CREAN TABLAS
 # En este apartado aparecen todas las funciones que crean
@@ -279,6 +281,9 @@ def construir_tabla_pago(cursor: sqlite.Cursor):
                                         ON DELETE SET NULL
                         )""")
 
+# Estado es para saber si una mensualidad esta cancelada con lo cual no se le informa al cliente que se le esta acabando al mail para la renovacion 
+# pero sigue teniendo los beneficios de la mensualidad hasta que se le acabe el plazo de la misma
+# Estados posibles: 0 -> Activa, 1 -> Cancelada
 def construir_tabla_mensualidad(cursor: sqlite.Cursor):
     """Construye la tabla Mensualidad"""
     cursor.execute("""CREATE TABLE IF NOT EXISTS Mensualidad (
@@ -286,6 +291,7 @@ def construir_tabla_mensualidad(cursor: sqlite.Cursor):
                             fecha_ini  DATE NOT NULL,
                             fecha_fin  DATE,
                             usuario_id INTEGER NOT NULL,
+                            estado BOOLEAN NOT NULL DEFAULT 0, 
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
@@ -352,4 +358,17 @@ def construir_tabla_profesor_actividad(cursor: sqlite.Cursor):
                             FOREIGN KEY (actividad_id) REFERENCES Actividad(id)
                                          ON UPDATE CASCADE
                                          ON DELETE CASCADE
+                        )""")
+    
+# tabla para no mandar mas de una notificacion al mismo usuario por la misma mensualidad
+# se borran las notificaciones pasadas la semana, 1 vez al mes
+def construir_tabla_proximas_notificaciones(cursor: sqlite.Cursor):
+    """Construye la tabla Notificaciones_Enviadas"""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Notificaciones_Enviadas (
+                            id             INTEGER PRIMARY KEY,
+                            mensualidad_id INTEGER NOT NULL UNIQUE,
+                            fecha_envio     DATE,
+                            FOREIGN KEY (mensualidad_id) REFERENCES Mensualidad(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
                         )""")
