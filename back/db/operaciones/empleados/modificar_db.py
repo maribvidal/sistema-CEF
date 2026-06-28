@@ -1,4 +1,5 @@
 from db.operaciones.exception_handler import ejecutar_fetchone, ejecutar_query
+from db.operaciones.reservas.borrar_db import eliminar_reservas_usuario
 
 # falta implementar & testear
 def modificar_empleado(
@@ -145,6 +146,14 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
             return {
                 "status": "clases_asignadas",
                 "message": f"No se puede eliminar al profesor. Tiene {resultado_clases['data']['total_clases']} clase/s asignada/s"
+            }
+    elif rol_actual == 3:
+        print("hola?")
+        resultado_limpieza = eliminar_reservas_usuario(usuario["data"]["id"], cursor)
+        if resultado_limpieza.get("status") == "error":
+            return {
+                "status": "error",
+                "message": "Error al intentar limpiar las reservas del usuario."
             }
 
     # Tras una consulta del profesor y charla con el equipo, se decidió que todos los empleados (incluido también clientes) sean de borrado lógico
