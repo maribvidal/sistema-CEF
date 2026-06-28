@@ -3,7 +3,7 @@ from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, veri
 from db.operaciones.usuarios import consultar_usuario_por_dni
 from db.operaciones.mensualidades import configurar_fin_mensualidad
 
-def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin):
+def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin = None):
     cursor = conectarse_db()
     
     # validar si el usuario existe
@@ -28,7 +28,7 @@ def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin):
             "error": "El usuario no tiene esa mensualidad."
         }, 400
     
-    respuesta = configurar_fin_mensualidad(id_mensualidad, fecha_fin, cursor)
+    respuesta = configurar_fin_mensualidad(id_mensualidad, cursor, fecha_fin = fecha_fin)
 
     cursor.connection.close()
     if respuesta['status'] == 'error':
