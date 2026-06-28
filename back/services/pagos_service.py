@@ -73,17 +73,20 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
     respuesta, status = crear_pago_service_mensualidad(usuario_id, "Pago de mensualidad", id_mensualidad)
     
     if status != 200:
-        respuesta = borrar_clase_tener_mensualidad(id_mensualidad, cursor)
-        control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la clase tener mensualidad.", 400, cursor)
+        cursor_cleanup = conectarse_db()
+        
+        respuesta = borrar_clase_tener_mensualidad(id_mensualidad, cursor_cleanup)
+        control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la clase tener mensualidad.", 400, cursor_cleanup)
         if control is not None:
             return control
         
-        respuesta = borrar_mensualidad(id_mensualidad, cursor)
+        respuesta = borrar_mensualidad(id_mensualidad, cursor_cleanup)
         
-        control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
+        control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor_cleanup)
         if control is not None:
             return control
         
+        cursor_cleanup.connection.close()
     return respuesta, status
 
 def obtener_pagos_service():
