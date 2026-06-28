@@ -2,13 +2,13 @@ import smtplib
 from email.mime.text import MIMEText
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id
 
-def enviar_mail(correo: str, mensaje: str):
+def enviar_mail(correo: str, sujeto: str, mensaje: str):
     """Función que envía un correo electrónico al usuario para restablecer su contraseña."""
     servidor_smtp = "smtp.gmail.com"
     puerto = 587
 
-    msg = MIMEText(mensaje)
-    msg['Subject'] = "Restablecer contraseña"
+    msg = MIMEText(mensaje, 'html')
+    msg['Subject'] = sujeto
     msg['From'] = "sistemacef@gmail.com"
     msg['To'] = correo
 
@@ -31,4 +31,13 @@ def enviar_mail_confirmacion_asistencia(id_usuario: int, cursor):
     consulta = consultar_usuario_por_id(id_usuario, cursor)
     correo = consulta["data"]["correo"]
 
-    enviar_mail(correo, "Buenos días, tiene la posibilidad de reservar si lo desea.\nHaga click en este enlace para confirmar.")
+    enviar_mail(correo, "Confirmación de asistencia", "Buenos días, tiene la posibilidad de reservar si lo desea.\nHaga click en este enlace para confirmar.")
+
+def enviar_mail_confirmacion_nuevo_correo(id_usuario: int, enlace: str, cursor):
+    """Función que envía un correo electrónico al usuario para avisarle que
+        su correo ha sido cambiado exitosamente."""
+    consulta = consultar_usuario_por_id(id_usuario, cursor)
+    correo = consulta["data"]["correo"]
+
+    html = f"Le contactamos desde el equipo del Sistema CEF para que confirme su nuevo correo \ntocando <a href=\"{enlace}\">este enlace.</a>\nSi no fue usted quien realizó este cambio, por favor contacte con el soporte técnico."
+    enviar_mail(correo, "Confirmación de cambio de correo", html)

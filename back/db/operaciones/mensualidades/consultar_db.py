@@ -12,3 +12,12 @@ from db.operaciones.exception_handler import ejecutar_fetchone
 # luego se consulta si se pisa con otra reserva en posterior checkeo
 def consultar_mensualidad_cubre_clase(usuario_id: int, clase_id: int, cursor) -> dict:
     pass
+
+def verificar_usuario_tenga_mensualidad(usuario_id: int, clase_id: int, cursor) -> dict:
+    """Hace una consulta para verificar si un usuario tiene una mensualidad"""
+    query = f"""
+        SELECT 1
+        FROM Clase_tener_Mensualidad ctm
+        WHERE ctm.usuario_id = {usuario_id} AND ctm.clase_id = {clase_id}
+    """
+    return ejecutar_fetchone(query, cursor)

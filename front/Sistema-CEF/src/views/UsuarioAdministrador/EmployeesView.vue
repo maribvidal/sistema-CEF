@@ -153,12 +153,23 @@
             <v-text-field v-model="nuevoProfesor.nombre" label="Nombre" variant="outlined" density="comfortable" class="mb-2"></v-text-field>
             <v-text-field v-model="nuevoProfesor.apellido" label="Apellido" variant="outlined" density="comfortable" class="mb-2"></v-text-field>
             <v-text-field v-model="nuevoProfesor.dni" label="DNI" variant="outlined" density="comfortable" type="number"></v-text-field>
+            <v-text-field v-model="nuevoProfesor.telefono" label="Teléfono" variant="outlined" density="comfortable" type="text" class="mt-2"></v-text-field>
             <v-select
               v-model="nuevoProfesor.genero"
               :items="opcionesGenero"
               label="Género"
               variant="outlined"
               density="comfortable"
+              class="mt-2"
+            ></v-select>
+            <v-select
+              v-model="nuevoProfesor.actividades"
+              :items="actividades"
+              item-title="nombre"
+              item-value="id"
+              label="Actividades que puede dar"
+              multiple
+              chips
               class="mt-2"
             ></v-select>
           </v-form>
@@ -220,16 +231,25 @@
     </v-dialog>
 
     <v-dialog v-model="dialogEditarEmpleado" max-width="600px">
-      <EditEmployee :empleado="empleadoSeleccionado" @close="dialogEditarEmpleado = false" @updated="cargarEmpleados" />
+      <component
+        :is="componenteEdicion"
+        :empleado="empleadoSeleccionado"
+        @close="dialogEditarEmpleado = false"
+        @updated="cargarEmpleados"
+        :key="empleadoSeleccionado?.dni || 'nuevo'"
+      />
     </v-dialog>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { EmployeesService } from '@/services/EmployeesService'
+import { ClasesService } from '@/services/ClasesServices'
 import EditEmployee from './EditEmployee.vue'
+import EditProfesor from './EditProfesor.vue'
 import { useNotificationStore } from '@/stores/notificationStore.js'
+import { consoleError } from 'vuetify/lib/util/console.js'
 
 const empleados = ref([])
 const profesores = ref([])
@@ -255,7 +275,9 @@ const nuevoProfesor = ref({
   nombre: '',
   apellido: '',
   dni: '',
-  genero: ''
+  genero: '',
+  telefono: '',
+  actividades: []
 })
 const nuevoRecepcionista = ref({
   nombre: '',
@@ -265,11 +287,13 @@ const nuevoRecepcionista = ref({
   contraseña: '',
   genero: ''
 })
+const actividades = ref([])
 
 const headers = [
   { title: 'DNI', key: 'dni', sortable: true },
   { title: 'Nombre', key: 'nombre' },
   { title: 'Apellido', key: 'apellido' },
+  { title: 'Teléfono', key: 'telefono' },
   { title: 'Correo', key: 'correo' },
   { title: 'Género', key: 'genero', align: 'center' },
   { title: 'Rol Actual', key: 'rol_id', align: 'center' },
@@ -299,6 +323,14 @@ const getRoleColor = (id) => {
   return 'light-blue-darken-1' // Color para Profesor
 }
 
+const componenteEdicion = computed(() => {
+  const rol = empleadoSeleccionado.value?.rol_id
+  const esProfesor = empleadoSeleccionado.value?.esProfesor === true ||
+    (rol === 5)
+
+  return esProfesor ? EditProfesor : EditEmployee
+})
+
 const cargarEmpleados = async () => {
   loading.value = true
   try {
@@ -311,7 +343,8 @@ const cargarEmpleados = async () => {
       genero: e.genero ?? e[3],
       id: e.id ?? e[4],
       nombre: e.nombre ?? e[5],
-      rol_id: e.rol_id ?? e[6]
+      rol_id: e.rol_id ?? e[6],
+      telefono: e.telefono ?? e[7]
     }))
 
     empleados.value = fetched
@@ -324,40 +357,36 @@ const cargarEmpleados = async () => {
   }
 }
 
-const cargarProfesores = async () => {
+const fetchActividades = async () => {
   try {
-    const resp = await EmployeesService.getProfessors()
-    const resData = resp.data && Array.isArray(resp.data) ? resp.data : (Array.isArray(resp) ? resp : [])
-    profesores.value = resData.map(p => ({
-      dni: p.dni,
-      nombre: p.nombre,
-      apellido: p.apellido,
-      genero: p.genero || 'N/A'
-    }))
+    const resAct = await ClasesService.listarActividades()
+    if (Array.isArray(resAct)) {
+      actividades.value = resAct.map(a => ({ id: a.id ?? a[0], nombre: a.nombre ?? a[1] }))
+    }
   } catch (error) {
-    console.error('Error cargando profesores:', error)
-    profesores.value = []
+    console.error('Error al cargar actividades:', error)
   }
 }
 
 const crearProfesor = () => {
-  nuevoProfesor.value = { nombre: '', apellido: '', dni: '', genero: '' }
+  nuevoProfesor.value = { nombre: '', apellido: '', dni: '', genero: '', telefono: '', actividades: [] }
   dialogProfesor.value = true
 }
 
 const guardarProfesor = async () => {
   try {
-    if (!nuevoProfesor.value.nombre || !nuevoProfesor.value.dni || !nuevoProfesor.value.genero) {
+    if (!nuevoProfesor.value.nombre || !nuevoProfesor.value.dni || !nuevoProfesor.value.genero || !nuevoProfesor.value.telefono) {
       notificationStore.showNotification('Por favor complete los campos obligatorios', 'warning')
       return
     }
-    await EmployeesService.createProfessor(nuevoProfesor.value)
+    console.log(nuevoProfesor.value.actividades)
+    await EmployeesService.createProfessor(nuevoProfesor.value) // El payload ya incluye las actividades
     notificationStore.showNotification('El profesor fue creado con éxito', 'success')
     dialogProfesor.value = false
     await cargarEmpleados()
   } catch (error) {
     console.error('Error al crear profesor:', error)
-    const statusCode = error.response?.status
+    const statusCode = error.status
     if (statusCode === 401) {
       notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
     } else {
@@ -383,19 +412,22 @@ const guardarRecepcionista = async () => {
     await cargarEmpleados()
   } catch (error) {
     console.error('Error al crear recepcionista:', error)
-    const statusCode = error.response?.status
+    const statusCode = error.status
     if (statusCode === 401) {
       notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
     } else if (statusCode === 403) {
       notificationStore.showNotification('Ya existe un empleado con ese correo', 'danger')
     } else {
-      notificationStore.showNotification('No se pudo crear el recepcionista: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+      notificationStore.showNotification('No se pudo crear el recepcionista: ' + ('Error desconocido'), 'danger')
     }
   }
 }
 
 const modificarEmpleado = (empleado) => {
-  empleadoSeleccionado.value = { ...empleado }
+  const esProfesor = profesores.value.some(p => p.dni === empleado.dni) ||
+    (empleado.rol_id === 5)
+
+  empleadoSeleccionado.value = { ...empleado, esProfesor }
   dialogEditarEmpleado.value = true
 }
 
@@ -454,7 +486,7 @@ const eliminarEmpleado = (empleado) => {
         notificationStore.showNotification('El empleado fue eliminado con éxito', 'success')
       } catch (error) {
         console.error('Error al eliminar empleado:', error)
-        const statusCode = error.response?.status
+        const statusCode = error.status
         if (statusCode === 400) {
           notificationStore.showNotification('El empleado no puede eliminarse si esta asociado a una clase', 'danger')
         } else {
@@ -478,18 +510,18 @@ const confirmarCambioRol = async () => {
     dialog.value = false
     notificationStore.showNotification('Los permisos fueron modificados exitosamente', 'success')
   } catch (error) {
-    const statusCode = error.response?.status
+    const statusCode = error.status
     if (statusCode === 402) {
       notificationStore.showNotification('El empleado ya posee esos permisos', 'danger')
     } else {
-      notificationStore.showNotification('Error al actualizar el rol: ' + (error.response?.data?.error || 'Error desconocido'), 'danger')
+      notificationStore.showNotification('Error al actualizar el rol: ' + ('Error desconocido'), 'danger')
     }
   }
 }
 
 onMounted(() => {
   cargarEmpleados()
-  cargarProfesores()
+  fetchActividades()
 })
 </script>
 

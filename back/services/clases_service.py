@@ -3,12 +3,12 @@ from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_ind
 from db.operaciones.usuarios.consultar_db import obtener_usuario_esta_en_instancia_clase
 from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora, consultar_instancias_por_clase_id
+from db.operaciones.clases.consultar_db import listar_clases, consultar_clase_por_id, consultar_clase_por_sala_dia_hora, consultar_instancias_por_clase_id, consultar_reservas_total_por_clase
 from db.operaciones.clases.insertar_db import insertar_clase
 from db.operaciones.clases import modificar_clase_estado, modificar_clase, borrar_clase
 from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
-from db.operaciones.profesores.consultar_db import consultar_profesor_por_id
-from db.operaciones.salas.consultar_db import consultar_sala_por_id
+from db.operaciones.profesores.consultar_db import consultar_profesor_por_id, consultar_clases_profesor_dia_hora
+from db.operaciones.salas.consultar_db import consultar_sala_profe_por_dia_hora, consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
@@ -42,6 +42,7 @@ def publicar_clase_service(
     dia: str,
     hora: str,
     cupo_maximo: int,
+    monto: float,
     primera_fecha = None
 ):
     """Service que publica una clase"""
@@ -90,11 +91,18 @@ def publicar_clase_service(
 
     if (capacidad_sala < cupo_maximo):
         return _msj_error_helper("El cupo máximo ingresado supera la capacidad de la sala.", cursor), 408
+    
+    # Comprobar que el profesor no se encuentre ocupado en ese día y hora
+
+    respuesta = consultar_clases_profesor_dia_hora(id_profesor, dia, hora, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 410, "El profesor ya se encuentra ocupado en ese día y hora.", 411, cursor)
+    if control is not None:
+        return control
 
     # Intentar insertar la clase
 
-    respuesta = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, cursor)
-    control = _controlar_errores_query(respuesta, 410, "Esa clase ya se encontraba insertada en el sistema.", 411, cursor)
+    respuesta = insertar_clase(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, monto, cursor)
+    control = _controlar_errores_query(respuesta, 412, "Esa clase ya se encontraba insertada en el sistema.", 413, cursor)
     if control is not None:
         return control
 
@@ -110,18 +118,18 @@ def publicar_clase_service(
             if (res_validar_dia):
                 fecha_actual = primera_fecha
             else:
-                return _msj_error_helper("La fecha que se intentó utilizar no trascurre el día de la semana para la clase.", cursor), 412
+                return _msj_error_helper("La fecha que se intentó utilizar no trascurre el día de la semana para la clase.", cursor), 414
         else:
-            return _msj_error_helper("La fecha que se recibió no es válida o no cumple con el formato (YYY-mm-dd).", cursor), 413
+            return _msj_error_helper("La fecha que se recibió no es válida o no cumple con el formato (YYY-mm-dd).", cursor), 415
 
     # Insertar instancia de clase e listas de esperas
 
     respuesta = insertar_lista_espera_abonados(clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la lista de espera de abonados.", 415, cursor)
+    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la lista de espera de abonados.", 416, cursor)
     if control is not None:
         return control
 
-    respuesta = insertar_instancia_clase(clase_id, fecha_actual, cursor)
+    respuesta = insertar_instancia_clase(clase_id, fecha_actual, monto, cursor)
     control = _controlar_errores_query(respuesta, 416, "No se pudo insertar la instancia de la clase.", 417, cursor)
     if control is not None:
         return control
@@ -132,7 +140,7 @@ def publicar_clase_service(
         return _msj_error_helper("No se pudo obtener un id válido para la instancia de la clase.", cursor), 418
 
     respuesta = insertar_lista_espera_individual(id_ins_clase, cursor)
-    control = _controlar_errores_query(respuesta, 418, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 419, cursor)
+    control = _controlar_errores_query(respuesta, 419, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 420, cursor)
     if control is not None:
         return control
 
@@ -155,21 +163,56 @@ def modificar_clase_service(
     if control is not None:
         return control
     
-    # Como la clase existe, extraemos su actividad actual
+    # Como la clase existe, extraemos su actividad actual y otros datos
     id_actividad_actual = respuesta['data']['actividad_id']
+    dia_clase = respuesta['data']['dia']
+    hora_clase = respuesta['data']['hora']
+    id_profe_orig = respuesta['data']['profesor_id']
+    cupo_maximo = respuesta['data']['cupo_maximo']
 
     # Ahora realizamos una validación nueva: Verificar si el profesor puede dar la actividad fija de esta clase
     res_habilitado = verificar_actividad_profesor(id_profesor, id_actividad_actual, cursor)
     if res_habilitado['status'] == 'error':
         return _msj_error_helper("Error interno al verificar las actividades del profesor.", cursor), 500
     if not res_habilitado['data']:
-        return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 400 # 400: Bad Request
+        return _msj_error_helper("El profesor no está habilitado para dar esa actividad.", cursor), 412 # 400: Bad Request
 
-    # Segundo verificamos que no haya ninguna instancia de la clase que queremos modificar, ya que como instancia_clase apunta directamente a Clase, pues todo cambio que hagamos en la clase repercute en la instancia de la misma
-    respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
-    control = _controlar_errores_query_sin_none(respuesta, 402, "No se puede modificar la clase porque ya tiene una instancia asociada.", 403, cursor)
-    if control is not None:
-        return control
+    # Comprobar que la sala no está ocupada ya para ese día y hora por ese profe
+    respuesta = consultar_sala_profe_por_dia_hora(dia_clase, hora_clase, cursor)
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return _msj_error_helper(respuesta["message"], cursor), 406
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+        salas = [sal for sal in respuesta["data"] if sal["id"] == sala and sal["profesor_id"] != id_profe_orig]
+        print(salas)
+        if len(salas) > 0:
+            cursor.connection.close()
+            return _msj_error_helper("La sala ya se encuentra ocupada en ese día y hora.", cursor), 405
+
+    # Comprobar que la sala cuente con capacidad suficiente
+    respuesta = consultar_sala_por_id(sala, cursor)
+    capacidad_sala = int(respuesta["data"]['capacidad'])
+    if (cupo_maximo > capacidad_sala):
+        return _msj_error_helper("El cupo máximo ingresado supera la capacidad de la sala.", cursor), 408
+
+    # Comprobar que el profesor no se encuentre ocupado en ese día y hora
+    respuesta = consultar_clases_profesor_dia_hora(id_profesor, dia_clase, hora_clase, cursor)
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return _msj_error_helper(respuesta["message"], cursor), 410
+    if respuesta['status'] == 'success' and respuesta['data'] is not None:
+        clases = [clase for clase in respuesta["data"] if clase["id"] != clase_id]
+        if len(clases) > 0:
+            cursor.connection.close()
+            return _msj_error_helper("El profesor ya se encuentra ocupado en ese día y hora.", cursor), 411
+
+    respuesta = consultar_reservas_total_por_clase(clase_id, cursor)
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return _msj_error_helper(respuesta["message"], cursor), 402
+    if respuesta['status'] == 'success' and respuesta['data']['id'] is not None:
+        cursor.connection.close()
+        return _msj_error_helper("No se puede actualizar la clase porque existen reservas asociadas.", cursor), 403
 
     # Tercero, intentamos modificar la clase
     respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor)
@@ -193,16 +236,20 @@ def eliminar_clase_service(clase_id: int):
     if control is not None:
         return control
 
-    # nos aseguramos de que no exista ninguna instancia de la clase
-    respuesta = consultar_instancia_clase_por_id(clase_id, cursor)
+    # nos aseguramos de que no exista ninguna reserva
+    respuesta = consultar_reservas_total_por_clase(clase_id, cursor)
     
     # Le agregamos "control =" y mantenemos el _sin_none con 402/403
-    control = _controlar_errores_query_sin_none(respuesta, 402, "No se puede eliminar la clase porque ya tiene una instancia asociada.", 403, cursor)
-    if control is not None:
-        return control
+    if respuesta['status'] == 'error':
+        cursor.connection.close()
+        return _msj_error_helper(respuesta["message"], cursor), 402
+    if respuesta['status'] == 'success' and respuesta['data']['id'] is not None:
+        cursor.connection.close()
+        return _msj_error_helper("No se pudo eliminar la clase porque existían reservas asociadas.", cursor), 403
 
     # si todo eso se cumple, entonces eliminamos la clase.
     respuesta = borrar_clase(clase_id, cursor)
+    print(respuesta)
 
     if respuesta['status'] == 'error':
         return _msj_error_helper(respuesta["message"], cursor), 404

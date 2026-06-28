@@ -22,16 +22,6 @@
               required
             ></v-text-field>
           </v-col>
-          <v-col cols="12" class="py-1">
-            <v-text-field
-              v-model="employee.correo"
-              label="Correo Electrónico"
-              variant="outlined"
-              density="comfortable"
-              prepend-inner-icon="mdi-email"
-              required
-            ></v-text-field>
-          </v-col>
           <v-col cols="12" sm="6" class="py-1">
             <v-text-field
               v-model="employee.nuevo_dni"
@@ -89,7 +79,7 @@ watch(() => props.empleado, (newVal) => {
 }, { deep: true, immediate: true })
 
 const updateEmployee = async () => {
-  if (!employee.value.nombre || !employee.value.apellido || !employee.value.correo || !employee.value.dni || !employee.value.genero) {
+  if (!employee.value.nombre || !employee.value.apellido || !employee.value.dni || !employee.value.genero) {
     notificationStore.showNotification('Por favor, complete todos los campos obligatorios.', 'warning')
     return
   }
@@ -97,18 +87,16 @@ const updateEmployee = async () => {
   loading.value = true
   try {
     // Cuando integrés tu API puedes llamar a:
-    await EmployeesService.updateEmployeeInfo(employee.value.dni, employee.value.nuevo_dni, employee.value)
+    await EmployeesService.updateProfesorInfo(employee.value.dni, employee.value.nuevo_dni, employee.value)
 
-    notificationStore.showNotification('El empleado fue modificado correctamente', 'success')
+    notificationStore.showNotification('El profesor fue modificado correctamente', 'success')
     emit('updated')
     emit('close')
   } catch (error) {
-    console.error('Error al actualizar empleado:', error)
+    console.error('Error al actualizar profesor:', error)
     const statusCode = error.status
     if (statusCode === 409) {
       notificationStore.showNotification('Ya existe un empleado con ese DNI', 'danger')
-    } else if (statusCode === 410) {
-      notificationStore.showNotification('Ya existe un empleado con ese correo', 'danger')
     } else {
       notificationStore.showNotification('Hubo un error al actualizar los datos.', 'danger')
     }

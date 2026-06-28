@@ -4,7 +4,7 @@ def verificar_asistencia_usuario_clase(id_usuario: int, id_clase: int, cursor):
     """Operación que consulta por asistencias según el id del usuario y el id de la clase
         asociada a la asistencia."""
     query = f"""SELECT 1
-                FROM Asistencia a 
+                FROM Asistencias_Clase a 
                 WHERE a.usuario_id = {id_usuario} AND a.inst_clase_id = {id_clase};"""
     return ejecutar_fetchone(query, cursor);
 
@@ -15,7 +15,7 @@ def obtener_clases_con_mensualidad_mas_concurridas(fecha_inicio, fecha_fin, curs
         FROM Asistencias_Clase a
         INNER JOIN Instancia_Clase ic ON a.inst_clase_id = ic.id
         INNER JOIN Clase c ON ic.clase_id = c.id
-        WHERE a.con_mensualidad = TRUE
+        WHERE a.con_mensualidad = 1
     """
 
     if fecha_inicio is not None and fecha_fin is not None:
@@ -25,5 +25,5 @@ def obtener_clases_con_mensualidad_mas_concurridas(fecha_inicio, fecha_fin, curs
         GROUP BY c.id
         ORDER BY cantidad_asistencias DESC;
     """
-
+    
     return ejecutar_fetchall(query, cursor);

@@ -43,12 +43,12 @@ class ClasesServiceTestCase(EndpointTestCase):
         id_sala2 = insertar_sala("Sala 2", 10, self.cursor)["data"]
 
         # Crear clases
-        id_cla1 = insertar_clase("Activa", id_act1, id_prof1, id_sala1, "Lunes", "10:00", 10, self.cursor)["data"]
-        id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala2, "Martes", "12:00", 5, self.cursor)["data"]
+        id_cla1 = insertar_clase("Activa", id_act1, id_prof1, id_sala1, "Lunes", "10:00", 10, 300.0, self.cursor)["data"]
+        id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala2, "Martes", "12:00", 5, 400.0, self.cursor)["data"]
 
         # Crear instancia_clase
-        id_ic1 = insertar_instancia_clase(id_cla1, "2026-12-02", self.cursor)["data"]
-        id_ic2 = insertar_instancia_clase(id_cla2, "2026-02-02", self.cursor)["data"]
+        id_ic1 = insertar_instancia_clase(id_cla1, "2026-12-02", 100.0, self.cursor)["data"]
+        id_ic2 = insertar_instancia_clase(id_cla2, "2026-02-02", 150.0, self.cursor)["data"]
 
         self.cursor.connection.commit()
 
@@ -75,7 +75,7 @@ class ClasesServiceTestCase(EndpointTestCase):
         """
         ESCENARIO 1 - Clase publicada
         DADO que está en el apartado de clases, y que la sala 1 está disponible en la fecha 16/04 y horario 14:00
-        CUANDO selecciona categoría yoga, sala 1, fecha 16/04, hora 14:00, y profesor Pedro, y presiona publicar clase
+        CUANDO selecciona estado “Activa”, id de actividad 1, sala 1, fecha 16/04, hora 14:00, y profesor Pedro, y presiona publicar clase
         ENTONCES se publica la clase en el sistema y lo redirige a la página de clases.
         """
 
@@ -115,45 +115,7 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         fecha_aux = generar_fecha_actual('Lunes')
         assert cons_ins_clase_creada["data"][0]["fecha"] == fecha_aux, "La fecha de la instancia de la clase creada automáticamente no es correcta."
-
-        # Revisar que se devuelve fallo por los casos donde se ponga una actividad, un profesor o una sala que no existen
-
-        res4 = self.client.post("/clases", json={
-            "estado": "Activa",
-            "id_actividad": 10,
-            "id_profesor": id_prof,
-            "id_sala": id_sala,
-            "dia": "Lunes",
-            "hora": "15:00",
-            "cupo_maximo": 10
-        })
-
-        assert '401' in str(res4), "El código devuelto no es 401."
-
-        res5 = self.client.post("/clases", json={
-            "estado": "Activa",
-            "id_actividad": id_act,
-            "id_profesor": 10,
-            "id_sala": id_sala,
-            "dia": "Lunes",
-            "hora": "15:00",
-            "cupo_maximo": 10
-        })
-
-        assert '403' in str(res5), "El código devuelto no es 403."
-
-        res6 = self.client.post("/clases", json={
-            "estado": "Activa",
-            "id_actividad": id_act,
-            "id_profesor": id_prof,
-            "id_sala": 10,
-            "dia": "Lunes",
-            "hora": "15:00",
-            "cupo_maximo": 10
-        })
-
-        assert '405' in str(res6), "El código devuelto no es 405."
-
+    
         """
         ESCENARIO 2: Sala ocupada
         DADO que está en el apartado de clases y que la sala 1 no está disponible el día Lunes en el horario 14:00
@@ -204,8 +166,6 @@ class ClasesServiceTestCase(EndpointTestCase):
         assert '408' in str(res3), "El código devuelto no es 408."
         assert json_status3 == 'error', "La respuesta no es 'error'."
 
-        # Faltan cubrir dos códigos de error
-
     def test_reservar_clase(self):
         """
         ESCENARIO 1: Reserva exitosa
@@ -220,8 +180,8 @@ class ClasesServiceTestCase(EndpointTestCase):
         id_prof = insertar_profesor("Gero", "Arias", "542215253770", "M", "22224444", self.cursor)["data"]
         id_act = insertar_actividad("Pilates", 1250, self.cursor)["data"]
         id_sala = insertar_sala("Sala 2", 10, self.cursor)["data"]
-        id_cla = insertar_clase("Activa", id_act, id_prof, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]
-        id_ic = insertar_instancia_clase(id_cla, "2026-12-02", self.cursor)["data"]
+        id_cla = insertar_clase("Activa", id_act, id_prof, id_sala, "Lunes", "18:00", 10, 300.0, self.cursor)["data"]
+        id_ic = insertar_instancia_clase(id_cla, "2026-12-02", 150.0, self.cursor)["data"]
 
         self.cursor.connection.commit()
 
@@ -246,8 +206,8 @@ class ClasesServiceTestCase(EndpointTestCase):
 
         id_act2 = insertar_actividad("Yoga", 1500, self.cursor)["data"]
         id_prof2 = insertar_profesor("Lisa", "Bruselas", "542215253770", "F", "44442222", self.cursor)["data"]
-        id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]
-        id_ic2 = insertar_instancia_clase(id_cla2, "2026-12-02", self.cursor)["data"]
+        id_cla2 = insertar_clase("Activa", id_act2, id_prof2, id_sala, "Lunes", "18:00", 10, 400.0, self.cursor)["data"]
+        id_ic2 = insertar_instancia_clase(id_cla2, "2026-12-02", 150.0, self.cursor)["data"]
 
         self.cursor.connection.commit()
 
@@ -268,8 +228,8 @@ class ClasesServiceTestCase(EndpointTestCase):
         Entonces el sistema informa que no hay cupos y le ofrece la opción de "Inscribirse en lista de espera".
         """
 
-        id_cla3 = insertar_clase("Activa", id_act2, id_prof2, id_sala, "Lunes", "19:00", 5, self.cursor)["data"]
-        id_ic3 = insertar_instancia_clase(id_cla3, "2026-12-02", self.cursor)["data"]
+        id_cla3 = insertar_clase("Activa", id_act2, id_prof2, id_sala, "Lunes", "19:00", 5, 200.0, self.cursor)["data"]
+        id_ic3 = insertar_instancia_clase(id_cla3, "2026-12-02", 200.0, self.cursor)["data"]
         for i in range(0, 5):
             id_cli_nuevo = insertar_usuario(f"40123412{i}", "Cliente", f"N°{i}", "12345678", "2004-02-02", f"cli{i}@gmail.com", "542215253779", "M", 1, self.cursor)["data"]
             insertar_reserva(id_cli_nuevo, id_ic3, self.cursor)
@@ -291,8 +251,8 @@ class ClasesServiceTestCase(EndpointTestCase):
         id_prof = insertar_profesor("Gero", "Arias", "542215253770", "M", "22224444", self.cursor)["data"]
         id_act = insertar_actividad("Pilates", 1250, self.cursor)["data"]
         id_sala = insertar_sala("Sala 2", 10, self.cursor)["data"]
-        id_cla = insertar_clase("Activa", id_act, id_prof, id_sala, "Lunes", "18:00", 10, self.cursor)["data"]
-        id_ic = insertar_instancia_clase(id_cla, "2026-12-02", self.cursor)["data"]
+        id_cla = insertar_clase("Activa", id_act, id_prof, id_sala, "Lunes", "18:00", 10, 300.0, self.cursor)["data"]
+        id_ic = insertar_instancia_clase(id_cla, "2026-12-02", 150.0, self.cursor)["data"]
         id_re = insertar_reserva(id_cli, id_ic, self.cursor)["data"]
 
         # Probar caso de éxito

@@ -4,9 +4,10 @@ from db.operaciones import obtener_clases_mas_canceladas
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.asistencias import obtener_clases_con_mensualidad_mas_concurridas
 
-def listar_clases_mas_canceladas_service(actividad, fecha_inicio = None, fecha_fin = None):
+def listar_clases_mas_canceladas_service(actividad= None, fecha_inicio = None, fecha_fin = None):
     cursor = conectarse_db()
-    clases_mas_canceladas = obtener_clases_mas_canceladas(cursor, actividad, fecha_inicio, fecha_fin)
+    print(actividad, fecha_inicio, fecha_fin)
+    clases_mas_canceladas = obtener_clases_mas_canceladas(cursor, actividad = actividad, fecha_inicio = fecha_inicio, fecha_fin = fecha_fin)
     control = _controlar_errores_query(clases_mas_canceladas, 400, "No se encontraron clases canceladas.", 401, cursor)
     
     if control is not None:
@@ -18,7 +19,7 @@ def listar_clases_mas_canceladas_service(actividad, fecha_inicio = None, fecha_f
 
 def listar_clases_con_mensualidad_mas_concurridas_service(fecha_inicio = None, fecha_fin = None):
     cursor = conectarse_db()
-    clases_con_mensualidad_mas_concurridas = obtener_clases_con_mensualidad_mas_concurridas(fecha_inicio, fecha_fin, cursor)
+    clases_con_mensualidad_mas_concurridas = obtener_clases_con_mensualidad_mas_concurridas(fecha_inicio = fecha_inicio, fecha_fin = fecha_fin, cursor = cursor)
 
     control = _controlar_errores_query(clases_con_mensualidad_mas_concurridas, 400, "No se encontraron clases concurridas con mensualidad.", 401, cursor)
     if control is not None:

@@ -2,6 +2,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.empleados.insertar_db import insertar_recepcionista
 from db.operaciones.empleados.modificar_db import modificar_empleado, borrar_empleado, desactivar_empleado, modificar_empleado_con_dni
 from db.operaciones.empleados.consultar_db import listar_empleados, listar_correos_empleados, listar_dnis_empleados, obtener_empleado_por_dni
+from utils.envio_mails import enviar_mail_confirmacion_nuevo_correo
 
 def listar_empleados_service():
     """Service que lista los empleados."""
@@ -33,6 +34,9 @@ def modificar_empleado_service(
     ):
     """Service que modifica un empleado."""
 
+    # Variable que sirve para saber si hay que tener en cuenta controles relacionados con el correo o no
+    correo_cambiado = True
+
     # Aca verificamos de antemano si mandaron la key "actividades" en el JSON. Y si lo hicieron, que no sea una lista vacía
     if actividades is not None and len(actividades) == 0:
         return {
@@ -54,6 +58,9 @@ def modificar_empleado_service(
         return {
             "error": "No existe un empleado con dicho dni."
         }, 404 # O sea Not Found
+    
+    empl_id = res_empl['data']['id']
+    correo_viejo = res_empl['data']['correo']
 
     # Estas validaciónes las dejo como están ya que ta bien
     if dni_nuevo is None:
@@ -62,7 +69,8 @@ def modificar_empleado_service(
         nombre = res_empl['data']['nombre']
     if apellido is None:
         apellido = res_empl['data']['apellido']
-    if correo is None:
+    if correo is None or correo == correo_viejo:
+        correo_cambiado = False
         correo = res_empl['data']['correo']
     if genero is None:
         genero = res_empl['data']['genero']
@@ -86,6 +94,15 @@ def modificar_empleado_service(
             cursor.connection.close()
             return {"error": "El DNI ya se encuentra registrado."}, 409 # Error de conflicto
 
+    if correo_cambiado:
+        # Revisar si el correo no está siendo utilizado por otro empleado
+        correos = listar_correos_empleados(cursor)
+        if correos['status'] == 'success' and correos['data'] is not None:
+            lista_correos = [item['correo'] for item in correos['data']]
+            if correo in lista_correos and correo != res_empl['data']['correo']:
+                cursor.connection.close()
+                return {"error": "El correo ya se encuentra registrado."}, 410 # Error de conflicto
+
     # Ahora inyectamos actividades a la BD
     respuesta = modificar_empleado(cursor, empleado_dni, dni_nuevo, nombre, apellido, correo, genero, rol_id, actividades)
 
@@ -98,6 +115,10 @@ def modificar_empleado_service(
 
     # Con esto guardo los cambios en la base de datos
     cursor.connection.commit()
+
+    # Enviarle un correo de aviso si es que cambió su correo
+    if correo_cambiado:
+        enviar_mail_confirmacion_nuevo_correo(empl_id, f"https://www.google.com", cursor)
     cursor.connection.close()
 
     return respuesta, 200

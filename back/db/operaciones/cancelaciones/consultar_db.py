@@ -13,7 +13,7 @@ def obtener_cancelaciones_por_usuario_inst_clase(id_ins_clase: int, id_usuario: 
                 WHERE usuario_id = {id_usuario} AND inst_clase_id = {id_ins_clase};"""
     return ejecutar_fetchall(query, cursor)
 
-def obtener_clases_mas_canceladas(cursor, limite, actividad=None, fecha_inicio=None, fecha_fin=None):
+def obtener_clases_mas_canceladas(cursor, actividad=None, fecha_inicio=None, fecha_fin=None):
     """Operación que consulta por todas las clases más canceladas."""
     query = f"""
                 SELECT cl.dia, cl.hora, a.nombre as actividad, COUNT(*) as cancelaciones
@@ -26,11 +26,15 @@ def obtener_clases_mas_canceladas(cursor, limite, actividad=None, fecha_inicio=N
     condiciones = []
     if actividad:
         condiciones.append(f"a.id = {actividad}")
-    if fecha_inicio:
-        condiciones.append(f"c.fecha >= '{fecha_inicio}'")
-    if fecha_fin:
-        condiciones.append(f"c.fecha <= '{fecha_fin}'")
-
+    
+    # esto lo filtraria por fecha de cancelacion o por la fecha de la instancia de la clase?
+    if fecha_inicio and fecha_fin:
+        # por cancelacion: 
+        # condiciones.append(f"c.fecha >= '{fecha_inicio}' AND c.fecha <= '{fecha_fin}'")
+        
+        # por instancia de clase:s
+        condiciones.append(f"ic.fecha >= '{fecha_inicio}' AND ic.fecha <= '{fecha_fin}'")
+   
     if condiciones:
         query += "WHERE "
         query += " AND ".join(condiciones)

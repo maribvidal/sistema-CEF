@@ -79,6 +79,12 @@
                     <span class="text-body-1 font-weight-bold">Cupo Máximo:</span>
                     <span class="text-body-1 ml-2">{{ clase.cupo_maximo }} personas</span>
                   </div>
+
+                  <div class="d-flex align-center mt-1" v-if="clase.monto > 0">
+                    <v-icon size="small" class="mr-2" color="green-darken-2">mdi-cash</v-icon>
+                    <span class="text-body-1 font-weight-bold">Precio:</span>
+                    <span class="text-body-1 ml-2">${{ clase.monto }}</span>
+                  </div>
                 </v-col>
 
                 <v-divider vertical class="hidden-sm-and-down"></v-divider>
@@ -94,7 +100,7 @@
                     block
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     v-if="userRole === 3 && !clase.yaReservada"
-                    @click="reservarClase(clase)"
+                    @click="abrirDialogoReserva(clase)"
                   >
                     Reservar Clase
                   </v-btn>
@@ -232,6 +238,25 @@
                   density="compact"
                 ></v-select>
               </v-col>
+              <v-col cols="12" sm="6" v-if="!isEditing">
+                <v-text-field
+                  v-model.number="nuevaClase.cupo_maximo"
+                  label="Cupo Máximo"
+                  type="number"
+                  variant="outlined"
+                  density="compact"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model.number="nuevaClase.monto"
+                  label="Precio"
+                  type="number"
+                  prefix="$"
+                  variant="outlined"
+                  density="compact"
+                ></v-text-field>
+              </v-col>
             </v-row>
           </v-form>
         </v-card-text>
@@ -244,6 +269,23 @@
             variant="elevated" 
             @click="isEditing ? actualizarClase() : crearClase()"
           >Guardar Clase</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="reservaDialog" max-width="500px" persistent>
+      <v-card rounded="lg">
+        <v-card-title class="pa-4 bg-black text-white">
+          <span class="text-h5">Confirmar Reserva</span>
+        </v-card-title>
+        <v-card-text class="pt-4 text-body-1">
+          ¿Cómo deseas reservar la clase de <strong>{{ claseParaReservar?.categoria }}</strong>?
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-btn color="grey-darken-1" variant="text" @click="reservaDialog = false">Cancelar</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="elevated" @click="hacerReserva('particular')">Clase Particular</v-btn>
+          <v-btn color="green-darken-1" variant="elevated" @click="hacerReserva('mensualidad')">Con Mensualidad</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -261,8 +303,11 @@ const { userProfile, userRole } = useAuth()
 const isEditing = ref(false)
 const dialog = ref(false)
 const notificationStore = useNotificationStore()
-const horas = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
-const horaSel = ref('08')
+const reservaDialog = ref(false)
+const claseParaReservar = ref(null)
+
+const horas = Array.from({ length: 14 }, (_, i) => (i + 8).toString().padStart(2, '0'))
+const horaSel = ref(null)
 
 const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del usuario
 
@@ -276,14 +321,15 @@ const nuevaClase = ref({
   id_sala: '', 
   dia: '',
   hora: '',
-  cupo_maximo: ''
+  cupo_maximo: '',
+  monto: ''
 })
 
 const clases = ref([])
 const actividades = ref([])
 const profesores = ref([])
 const salas = ref([])
-const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 
 const fetchAuxData = async () => {
   try {
@@ -345,6 +391,7 @@ const fetchClases = async () => {
         id_profesor: c.profesor_id ?? c[3], // Ensure this is id_profesor
         sala: c.sala_id ?? c[6],
         cupo_maximo: c.cupo_maximo ?? c[7],
+        monto: c.monto ?? c[8],
         categoria: actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre 
                    || `ID Act: ${c.actividad_id ?? c[2]}`,
         profesor: profesores.value.find(p => p.id == (c.profesor_id ?? c[3]))?.nombre 
@@ -369,14 +416,13 @@ onMounted(async () => {
 
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', id_sala: '', cupo_maximo: '' }
-  horaSel.value = '08'
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '', monto: '' }
   dialog.value = true
 }
 
 const cerrarDialog = () => {
-  dialog.value = false // Close the dialog
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '' } // Reset form fields
+  dialog.value = false
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '', monto: '' }
   isEditing.value = false
 }
 
@@ -389,7 +435,8 @@ const crearClase = async () => {
       id_sala: nuevaClase.value.id_sala,
       dia: nuevaClase.value.dia,
       hora: nuevaClase.value.hora,
-      cupo_maximo: 1 // lo hardcodeo, despues lo vemos 
+      cupo_maximo: nuevaClase.value.cupo_maximo,
+      monto: nuevaClase.value.monto
     }
     
     await ClasesService.publicarClase(payload)
@@ -398,17 +445,16 @@ const crearClase = async () => {
     cerrarDialog()
   } catch (error) {
     console.error('Error al publicar la clase:', error)
-    console.log(error)
     const statusCode = error.status
-    console.log(statusCode)
     if (statusCode === 406 || statusCode === 407) {
       notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
     } else if (statusCode === 408) {
       notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
     } else if (statusCode === 400) {
       notificationStore.showNotification('Este profesor no puede dar una clase de esa categoría', 'danger');
-    }
-    else {
+    } else if (statusCode === 411) {
+      notificationStore.showNotification('El profesor ya se encuentra ocupado en ese día y hora', 'danger');
+    } else {
       // Mensaje genérico para otros errores
       notificationStore.showNotification('Hubo un error al publicar la clase', 'danger');
     }
@@ -421,7 +467,8 @@ const actualizarClase = async () => {
     const payload = {
       estado: 'Activa',
       id_profesor: nuevaClase.value.id_profesor,
-      id_sala: nuevaClase.value.id_sala
+      id_sala: nuevaClase.value.id_sala,
+      monto: nuevaClase.value.monto
     }
     
     await ClasesService.modificarClase(nuevaClase.value.id, payload)
@@ -429,8 +476,18 @@ const actualizarClase = async () => {
     await fetchClases()
     cerrarDialog()
   } catch (error) {
+    const statusCode = error.status
     console.error('Error al actualizar clase:', error)
-    notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
+    
+    if (statusCode === 405) {
+      notificationStore.showNotification('Esa sala está ocupada en ese horario y fecha', 'danger')
+    } else if (statusCode === 411) {
+      notificationStore.showNotification('Ese profesor ya tiene una clase asignada en ese día y horario', 'danger')
+    } else if (statusCode === 412) {
+      notificationStore.showNotification('El profesor no está habilitado para dar esa actividad', 'danger')
+    } else {
+      notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
+    }
   }
 }
 
@@ -448,7 +505,7 @@ const eliminarClase = async (clase) => {
       await fetchClases()
     } catch (error) {
       console.error('Error al eliminar clase:', error)
-      const statusCode = error.response?.status;
+      const statusCode = error.status;
       if (statusCode === 402 || statusCode === 403) {
         notificationStore.showNotification('No se puede eliminar una clase con usuarios inscriptos en alguna de sus instancias', 'danger');
       } else {
@@ -470,31 +527,43 @@ const cancelarClase = async (clase) => {
   }
 }
 
-const reservarClase = async (clase) => {
+const abrirDialogoReserva = (clase) => {
+  claseParaReservar.value = clase
+  reservaDialog.value = true
+}
+
+const hacerReserva = async (tipo) => {
+  const clase = claseParaReservar.value
+  if (!clase) return
+
+  // Aquí puedes diferenciar la lógica en el futuro
+  console.log(`Iniciando reserva tipo: ${tipo} para la clase ${clase.id}`)
+
   try {
     const payload = {
       id_usuario: userProfile.value.id,
       fecha: clase.dia,
       hora: clase.hora,
     }
-    
+
     const response = await ClasesService.reservarClase(clase.id, payload)
-    
+
     // Recargamos el estado para actualizar los botones
     await fetchClasesUsuario()
     await fetchClases()
-    if(response && response.status === 200){
+    if (response && response.status === 200) {
       notificationStore.showNotification('Clase reservada exitosamente', 'success')
-    } else if(response && response.status === 407){ {
-      notificationStore.showNotification('El usuario ya posee una clase reservada para este horario', 'danger')   
-    }}
-    else{
+    } else if (response && response.status === 407) {
+      notificationStore.showNotification('El usuario ya posee una clase reservada para este horario', 'danger')
+    } else {
       notificationStore.showNotification('No se pudo reservar la clase', 'danger')
     }
-
   } catch (error) {
     console.error('Error al reservar clase:', error)
     notificationStore.showNotification(error.message || 'Error al reservar clase', 'danger')
+  } finally {
+    reservaDialog.value = false
+    claseParaReservar.value = null
   }
 }
 

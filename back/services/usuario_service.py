@@ -10,11 +10,10 @@ from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar
 from db.operaciones.mensualidades.consultar_db import consultar_mensualidad_cubre_clase
 from db.operaciones.empleados.consultar_db import listar_dnis_empleados
+from utils.envio_mails import enviar_mail, enviar_mail_confirmacion_nuevo_correo
 
 from dotenv import load_dotenv
 load_dotenv()
-
-from utils.envio_mails import enviar_mail
 
 import datetime
 
@@ -218,8 +217,6 @@ def editar_perfil_usuario_service(
             "message": "El correo electrónico ya se encuentra registrado."
         }, 406
 
-
-
     datos_a_actualizar = []
     
     if dni is not None:
@@ -254,7 +251,6 @@ def editar_perfil_usuario_service(
         cursor.connection.close()
         return {"message": "El usuario debe ser mayor de 14 años"}, 403
 
-    print("COMIENZO MODIFICACION DE PERFIL DE USUARIOOOOOOOO")
     res = modificar_perfil_usuario(
         cursor,
         usuario_id,
@@ -273,10 +269,26 @@ def editar_perfil_usuario_service(
         }, 500
 
     cursor.connection.commit()
-    cursor.connection.close()
-    return {
-        "message": "Perfil actualizado exitosamente."
-    }, 200
+    if correo is None:
+        cursor.connection.close()
+        return {
+            "message": "Perfil actualizado exitosamente."
+        }, 200
+    else:
+        enviar_mail_confirmacion_nuevo_correo(usuario_id, f"https://www.google.com", cursor) #El link está como placeholder mientras vemos que hacer
+        cursor.connection.close()
+        return {
+            "message": "Perfil actualizado exitosamente. Se ha enviado un correo de aviso al nuevo correo electrónico."
+        }, 200
+
+def confirmar_nuevo_correo_service(usuario_id: int, correo: str):
+    cursor = conectarse_db()
+    modificar_perfil_usuario(
+        cursor=cursor,
+        usuario_id=usuario_id,
+        correo=correo
+    )
+    print("Correo cambiado con éxito.")
 
 # Servicios para las HUs de contraseñas
 
@@ -381,7 +393,7 @@ def restablecer_contraseña_service(correo: str):
 
     link = f"http://localhost:5173/ConfirmarNuevaContrasena?correo={correo}"
     mensaje = f"Hacé click en el siguiente enlace para restablecer tu contraseña: {link}"
-    enviar_mail(correo, mensaje)
+    enviar_mail(correo, "Reestablecer contraseña", mensaje)
     
     cursor.connection.close()
     return {
@@ -529,7 +541,7 @@ def subir_avatar_usuario_service(usuario_id, avatar):
             "error": res2['message']
         }, 500
     
-    if res2['status'] == 'success':
+    if res2['status'] == 'success' and res2['data'] is not None:
         cursor.connection.close()
         return {
             "error": "Ocurrió un error al intentar asociar la imagen al usuario."

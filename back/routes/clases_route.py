@@ -46,10 +46,11 @@ def publicar_clase():
     dia = body.get("dia")
     hora = body.get("hora")
     cupo_maximo = body.get("cupo_maximo")
+    monto = body.get("monto") 
 
     # Este campo no lo controlo porque es opcional
     primera_fecha = None if (body.get("primera_fecha") is None) else body.get("primera_fecha")
-    respuesta, status = publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, primera_fecha)
+    respuesta, status = publicar_clase_service(estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, monto, primera_fecha)
     return jsonify(respuesta), status
 
 @clases_bp.route("/clases/<int:id_clase>", methods=["DELETE"])

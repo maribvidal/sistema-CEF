@@ -211,3 +211,4 @@ database.db
 poetry.lock
 __pycache__
 package-lock.json
+copy.py

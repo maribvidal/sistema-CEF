@@ -7,9 +7,8 @@ metricas_bp = Blueprint('metricas', __name__)
 def listar_clases_mas_canceladas():
     """Este endpoint permite listar todas las clases más canceladas 
         en el sistema."""
-    actividad = request.args.get("id_actividad")
 
-    respuesta, status = listar_clases_mas_canceladas_service(actividad)
+    respuesta, status = listar_clases_mas_canceladas_service()
     
     return jsonify(respuesta), status
 
@@ -17,11 +16,20 @@ def listar_clases_mas_canceladas():
 def listar_clases_mas_canceladas_fechas():
     """Este endpoint permite listar todas las clases más canceladas 
         en el sistema."""
-    actividad = request.args.get("id_actividad")
     fecha_inicio = request.args.get("fecha_inicio")
     fecha_fin = request.args.get("fecha_fin")
 
-    respuesta, status = listar_clases_mas_canceladas_service(actividad, fecha_inicio, fecha_fin)
+    respuesta, status = listar_clases_mas_canceladas_service(fecha_inicio = fecha_inicio, fecha_fin = fecha_fin)
+    
+    return jsonify(respuesta), status
+
+#filtrado por actividad
+@metricas_bp.route('/metricas/clases_mas_canceladas/<int:actividad>', methods=['GET'])
+def listar_clases_mas_canceladas_actividad(actividad):
+    """Este endpoint permite listar todas las clases más canceladas 
+        en el sistema."""
+
+    respuesta, status = listar_clases_mas_canceladas_service(actividad = actividad)
     
     return jsonify(respuesta), status
 
