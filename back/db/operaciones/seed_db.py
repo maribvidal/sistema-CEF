@@ -69,7 +69,7 @@ def insertar_datos(cursor):
     insertar_sala('Sala 3', 5, cursor)
 
     # Crear clase
-    id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 5, 300.0, cursor)
+    id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 0, 300.0, cursor)
     id_clas = id_clas['data']
     res_inst_clase = insertar_instancia_clase(id_clas, generar_fecha_actual("Lunes"), 200.0, cursor)
     

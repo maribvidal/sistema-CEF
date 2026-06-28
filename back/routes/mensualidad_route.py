@@ -18,8 +18,8 @@ def configurar_fin_mensualidad():
     return jsonify(respuesta), status
 
 # HU pagar mensualidad
-@mensualidad_bp.route('/mensualidad/verificar_mensualidad', methods=['POST'])
-def verificar_mensualidad():
+@mensualidad_bp.route('/mensualidad/pagar_mensualidad', methods=['POST'])
+def pagar_mensualidad():
     """
         Endpoint para verificar poder pagar una mensualidad (verifica que no se den los escenarios fallidos de la hu pagar mensualidad), 
         si no se da caso fallido se ejecuta el pago con mp.
