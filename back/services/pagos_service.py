@@ -1,7 +1,7 @@
 import time
 
-from back.db.operaciones.mensualidades.insertar_db import insertar_mensualidad
-from back.utils.modulo_manejo_listas import revisar_cupos_disponible_abonado, revisar_si_hay_cupos
+from db.operaciones.mensualidades.insertar_db import insertar_mensualidad
+from utils.modulo_manejo_listas import revisar_cupos_disponible_abonado, revisar_si_hay_cupos
 from db.operaciones.clase_tener_mensualidad.consultar_db import consultar_montos_mensualidad
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
 from db.operaciones.pago_pagar_clase.insertar_db import insertar_pago_pagar_clase
