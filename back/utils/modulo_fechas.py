@@ -23,7 +23,7 @@ def generar_fecha_hora_actual(dia: str = None) -> str:
 
 def obtener_fecha_dia_semana(dia: str) -> str:
     hoy = date.today()
-    dias_a_sumar = (Dias[dia].value - hoy.weekday()) % 6 + 1
+    dias_a_sumar = Dias[dia].value - hoy.weekday()
     return (hoy + timedelta(days=dias_a_sumar)).strftime(FORMATO_FECHA)
 
 def comprobar_dia_pertenece_fecha(dia: str, fecha: str):
@@ -32,9 +32,9 @@ def comprobar_dia_pertenece_fecha(dia: str, fecha: str):
         return fecha_normalizada.weekday() == Dias[dia].value
     return False
 
-def convertir_fecha_a_obj(fecha: str):
+def convertir_fecha_a_obj(fecha: str) -> datetime:
     try:
-        return dateparser.parse(fecha, FORMATO_FECHA)
+        return dateparser.parse(fecha, date_formats=['%Y %m %d'])
     except:
         print(f" >> convertir_fecha: La fecha {fecha} no es válida.")
         return False

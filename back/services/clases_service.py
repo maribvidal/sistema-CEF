@@ -14,7 +14,7 @@ from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase, listar_instancias_clases_semana, obtener_instancia_clase_por_clase_id_semana
-from db.operaciones.instancias_clases import insertar_instancia_clase
+from db.operaciones.instancias_clases import insertar_instancia_clase, crear_instancias_clase_por_un_año
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
 from utils.modulo_fechas import generar_fecha_actual, validar_fecha, validar_dia_fecha
@@ -135,29 +135,22 @@ def publicar_clase_service(
         else:
             return _msj_error_helper("La fecha que se recibió no es válida o no cumple con el formato (YYY-mm-dd).", cursor), 415
 
-    # Insertar instancia de clase e listas de esperas
+    # Insertar instancias de la clase e listas de esperas
 
     respuesta = insertar_lista_espera_abonados(clase_id, cursor)
     control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la lista de espera de abonados.", 416, cursor)
     if control is not None:
         return control
-
-    respuesta = insertar_instancia_clase(clase_id, fecha_actual, monto, cursor)
-    control = _controlar_errores_query(respuesta, 416, "No se pudo insertar la instancia de la clase.", 417, cursor)
-    if control is not None:
-        return control
-    id_ins_clase = respuesta["data"]
-
-    if not isinstance(id_ins_clase, int):
-        cursor.connection.close()
-        return _msj_error_helper("No se pudo obtener un id válido para la instancia de la clase.", cursor), 418
-
-    respuesta = insertar_lista_espera_individual(id_ins_clase, cursor)
-    control = _controlar_errores_query(respuesta, 419, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 420, cursor)
-    if control is not None:
-        return control
+    
+    lista_ids = crear_instancias_clase_por_un_año(clase_id, monto, cursor, dia)
+    for idi in lista_ids:
+        respuesta = insertar_lista_espera_individual(idi, cursor)
+        control = _controlar_errores_query(respuesta, 419, "No se pudo insertar la lista de espera individual para la instancia de la clase recien creada.", 420, cursor)
+        if control is not None:
+            return control
 
     cursor.connection.commit()
+
     return _msj_exito_helper("Clase publicada exitosamente.", cursor, respuesta['data'])
 
 def modificar_clase_service(
