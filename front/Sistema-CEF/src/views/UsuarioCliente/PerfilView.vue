@@ -23,12 +23,29 @@
                 <v-col cols="12" sm="6">
                   <v-btn color="error" block variant="flat" @click="goToChangePassword">Cambiar contraseña</v-btn>
                 </v-col>
+                <v-col cols="12" sm="6">
+                  <v-btn color="secondary" block variant="flat" @click="handleGenerateQR">Generar QR</v-btn>
+                </v-col>
               </v-row>
             </v-col>
           </v-row>
         </v-card>
       </v-col>
     </v-row>
+    <v-dialog v-model="dialogQR" max-width="400px">
+      <v-card>
+        <v-card-title class="text-h5">Código QR</v-card-title>
+        <v-card-text>
+          <div class="d-flex justify-center">
+            <v-img :src="qrSrc" alt="QR Code" max-width="300" />
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text @click="dialogQR = false">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -40,6 +57,7 @@ import DateFormatterService from '@/services/DateFormatterService.js'
 // 1. Importamos la nueva función unificada
 import { getValidImageSrc } from '@/services/ImageFormatterService.js' 
 import defaultLogo from '@/assets/logoLargo.png'
+import UsuariosService from '@/services/UsuariosServices.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -100,6 +118,45 @@ const goToEdit = () => {
 
 const goToChangePassword = () => {
   router.push(`/cambiarContraseña/${route.params.id}`)
+}
+
+const dialogQR = ref(false)
+const qrSrc = ref(null)
+
+// 1. Renombramos la función local (ej: handleGenerateQR o downloadQR)
+
+
+const handleGenerateQR = async () => {
+  try {
+    
+    const resultado = await UsuariosService.generarQR(route.params.id) 
+    
+    dialogQR.value = true
+
+    
+    if (resultado instanceof Blob) {
+      
+      const url = URL.createObjectURL(resultado)
+      qrSrc.value = url
+      
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      
+    } else if (resultado && typeof resultado === 'string') {
+      
+      console.log('Recibimos un string. Intentando abrir...')
+      window.open(resultado, '_blank')
+      
+    } else if (resultado && typeof resultado === 'object') {
+      
+      console.log('Recibimos un JSON. Revisa las propiedades del objeto arriba.')
+      
+    } else {
+      console.error('El formato recibido no es reconocido y no se puede crear el QR.')
+    }
+
+  } catch (error) {
+    console.error('Error al generar el QR:', error)
+  }
 }
 </script>
 
