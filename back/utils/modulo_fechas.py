@@ -12,6 +12,9 @@ def generar_fecha_actual(dia: str = None) -> str:
         return obtener_fecha_dia_semana(dia)
     return datetime.today().strftime(FORMATO_FECHA)
 
+def convertir_fecha_a_formato(fecha: datetime) -> str:
+    return fecha.strftime(FORMATO_FECHA)
+
 def generar_fecha_hora_actual(dia: str = None) -> str:
     """Genera la fecha del día de hoy con el formato FORMATO_FECHA_2."""
     if (dia is not None):
@@ -24,12 +27,12 @@ def obtener_fecha_dia_semana(dia: str) -> str:
     return (hoy + timedelta(days=dias_a_sumar)).strftime(FORMATO_FECHA)
 
 def comprobar_dia_pertenece_fecha(dia: str, fecha: str):
-    fecha_normalizada = convertir_fecha(fecha)
+    fecha_normalizada = convertir_fecha_a_obj(fecha)
     if fecha_normalizada:
         return fecha_normalizada.weekday() == Dias[dia].value
     return False
 
-def convertir_fecha(fecha: str):
+def convertir_fecha_a_obj(fecha: str):
     try:
         return dateparser.parse(fecha, FORMATO_FECHA)
     except:
@@ -48,14 +51,14 @@ def validar_fecha(fecha: str) -> bool:
 
 def validar_dia_fecha(fecha: str, dia: str):
     """Valida si una fecha corresponde al día de la semana indicado."""
-    fecha_normalizada = convertir_fecha(fecha)
+    fecha_normalizada = convertir_fecha_a_obj(fecha)
     if fecha_normalizada:
         return fecha_normalizada.weekday() == Dias[dia].value
     return False
 
 def comprobar_fecha_anterior(fecha1: str, fecha2: str) -> bool:
     """Valida si la fecha1 es anterior a la fecha2 o no."""
-    fecha1_normalizada = convertir_fecha(fecha1)
-    fecha2_normalizada = convertir_fecha(fecha2)
+    fecha1_normalizada = convertir_fecha_a_obj(fecha1)
+    fecha2_normalizada = convertir_fecha_a_obj(fecha2)
 
     return fecha1_normalizada < fecha2_normalizada
