@@ -13,7 +13,9 @@ def obtener_mensualidad_service():
     cursor = conectarse_db()
     
     mensualidades_activas = obtener_mensualidades_activa(cursor)
+    print(mensualidades_activas)
     control = _controlar_errores_query(mensualidades_activas, 500, "Error al obtener mensualidades activas.", 400, cursor)
+    print(control)
     if control is not None:
         return control
 
