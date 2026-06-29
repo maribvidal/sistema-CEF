@@ -105,7 +105,7 @@ const loading = ref(false)
 const notificationStore = useNotificationStore()
 
 const dialog = ref(false)
-const fecha_fin = ref('')
+const fechaFin = ref('')
 const formValid = ref(false)
 const form = ref(null)
 const usuarioSeleccionado = ref(null)
@@ -157,7 +157,7 @@ const handleChangeMonthlyPayment = async (item) => {
     }
     fechaFin.value = ''
     dialog.value = true
-  } catch (error) {
+  } catch (responseError) {
     notificationStore.showNotification('Este usuario no tiene una mensualidad activa.', 'danger')
   }
 }
