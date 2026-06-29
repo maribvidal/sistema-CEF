@@ -1,6 +1,7 @@
 from datetime import datetime
 from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_individual, consultar_lista_espera_abonado
-from db.operaciones.listas_espera.borrar_db import borrar_listas_espera_clase
+from db.operaciones.listas_espera.borrar_db import borrar_listas_espera_individuales_clase, borrar_listas_espera_abonados_clase
+from db.operaciones.instancias_clases.borrar_db import borrar_instancias_clases_por_clase
 from db.operaciones.usuarios.consultar_db import obtener_usuario_esta_en_instancia_clase
 from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
@@ -254,8 +255,19 @@ def eliminar_clase_service(clase_id: int):
         return _msj_error_helper("No se pudo eliminar la clase porque existían reservas asociadas.", cursor), 403
 
     # antes de borrar la clase, intentar borrar las listas de espera
-    respuesta = borrar_listas_espera_clase(clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 404, "No se pudieron eliminar las listas de espera de la clase.", 405)
+    respuesta = borrar_listas_espera_individuales_clase(clase_id, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 404, "No se pudieron eliminar las listas de espera de la clase.", 405, cursor)
+    if control is not None:
+        return control
+    
+    respuesta = borrar_listas_espera_abonados_clase(clase_id, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 406, "No se pudieron eliminar las listas de espera de la clase.", 407, cursor)
+    if control is not None:
+        return control
+    
+    # y, por último, tratamos de borrar las instancias de la clase
+    respuesta = borrar_instancias_clases_por_clase(clase_id, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 408, "No se pudieron eliminar las listas de espera de la clase.", 410, cursor)
     if control is not None:
         return control
 
@@ -264,7 +276,7 @@ def eliminar_clase_service(clase_id: int):
     print(respuesta)
 
     if respuesta['status'] == 'error':
-        return _msj_error_helper(respuesta["message"], cursor), 406
+        return _msj_error_helper(respuesta["message"], cursor), 411
 
     cursor.connection.commit()
     return _msj_exito_helper("Clase eliminada exitosamente.", cursor)
