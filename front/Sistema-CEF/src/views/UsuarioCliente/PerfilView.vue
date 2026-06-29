@@ -65,10 +65,13 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(payment, index) in payments" :key="index">
+              <tr v-for="payment in payments" :key="payment?.id" v-if="payments?.length">
                 <td>{{ payment.actividad_nombre }}</td>
                 <td>{{ formatSpanishDate(payment.fecha) }}</td>
                 <td>${{ payment.monto }}</td> 
+              </tr>
+              <tr v-else>
+               <td colspan="3" class="text-center">Sin pagos registrados</td>
               </tr>
             </tbody>
           </v-table>
@@ -223,6 +226,10 @@ const showPayments = async () => {
   try {
     const result = await PaymentsService.getUserPayments(route.params.id)
     payments.value = result.data || result
+    if (!payments.value || payments.value.length === 0) {
+      notificationStore.showNotification('Este usuario no tiene pagos asociados', 'danger')
+      return
+    }
     console.log('Pagos obtenidos:', payments.value.data)
     dialogPayments.value = true
   } catch (error) {
