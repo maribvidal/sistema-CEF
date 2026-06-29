@@ -25,8 +25,8 @@ def cancelar_reserva_service(reserva_id):
 
     # Cancelar reserva (insertar una cancelación)
     res_elim_reserva = borrar_reserva(reserva_id, cursor)
-    id_usuario = res_reserva["data"]["usuario_id"]
-    id_ins_clase = res_reserva["data"]["inst_clase_id"]
+    id_usuario = res_elim_reserva["data"]["usuario_id"]
+    id_ins_clase = res_elim_reserva["data"]["inst_clase_id"]
     res_ins_cancelacion = insertar_cancelacion(id_usuario, id_ins_clase, cursor)
     if res_ins_cancelacion['status'] == 'error':
         return _msj_error_helper(res_ins_cancelacion['message'], cursor), 402
