@@ -48,7 +48,7 @@ Clases
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
 | /clases | GET | - | 400: Error interno de consulta <br> 401: No se encontraron clases <br> 200: Se devuelve la lista de clases disponibles. |
-| /clases | POST | estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, (opcional: primera_fecha) | 400: Actividad no encontrada / Profesor inhabilitado <br> 402: Profesor no encontrado <br> 404: Sala no encontrada <br> 406: Sala ya ocupada <br> 408: Cupo supera capacidad <br> 410: Profesor ocupado <br> 412: Clase ya insertada <br> 414: Fecha no transcurre en el día correcto <br> 415: Formato de fecha inválido <br> 500: Error interno <br> 200: Clase publicada exitosamente. |
+| /clases | POST | estado, id_actividad, id_profesor, id_sala, dia, hora, cupo_maximo, monto, (opcional: primera_fecha) | 400: Actividad no encontrada / Profesor inhabilitado <br> 402: Profesor no encontrado <br> 404: Sala no encontrada <br> 406: Sala ya ocupada <br> 408: Cupo supera capacidad <br> 410: Profesor ocupado <br> 412: Clase ya insertada <br> 414: Fecha no transcurre en el día correcto <br> 415: Formato de fecha inválido <br> 500: Error interno <br> 200: Clase publicada exitosamente. |
 | /clases/(id_clase) | PUT | estado, id_sala, id_profesor | 400: Clase no encontrada / Falta campo <br> 402: Existen reservas asociadas <br> 405: Sala ocupada <br> 408: Cupo supera capacidad <br> 411: Profesor ocupado <br> 412: Profesor inhabilitado para la actividad <br> 500: Error interno de DB <br> 200: Clase modificada exitosamente. |
 | /clases/(id_clase) | DELETE | - | 400: Error interno <br> 401: Clase no encontrada <br> 402/403: No se puede eliminar (tiene reservas asociadas) <br> 404: Error en base de datos al eliminar <br> 200: Clase eliminada exitosamente. |
 | /clases/(id_clase) | PATCH | - | 400: Error de consulta <br> 401: Clase no encontrada <br> 402/403: No se puede cancelar (tiene instancia asociada) <br> 404: Error en base de datos al cambiar estado <br> 200: Clase cancelada exitosamente. |
@@ -58,6 +58,7 @@ Clases
 | /clases/(id_clase)/confirmar_asistencia | POST | id_usuario | 400/401: Error o Usuario no encontrado <br> 402/403: Error o Clase no encontrada <br> 200: Asistencia registrada con éxito. |
 | /clases/(id_clase)/rechazar_asistencia | POST | id_usuario | 400/401: Error o Usuario no encontrado <br> 402/403: Error o Clase no encontrada <br> 200: Asistencia rechazada con éxito. |
 | /clases/(id_clase)/instancias | GET | - | 400/401: Clase no encontrada <br> 402/403: No se encontraron instancias <br> 200: Instancias obtenidas exitosamente. |
+| /clases/(id_clase)/instancias/semana | GET | - | 400/401: Clase no encontrada <br> 402/403: No se encontró instancia en la semana <br> 200: Instancia obtenida exitosamente. |
 
 Reservas y Cancelaciones
 
@@ -71,14 +72,21 @@ Mensualidad
 
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
-| /configurar_fin_mensualidad | POST | dni_cliente, id_mensualidad, fecha_fin | 400: El usuario no tiene esa mensualidad <br> 404: No se encontró el usuario <br> 500: Error interno <br> 200: Fin de mensualidad configurado exitosamente. |
+| /mensualidad | GET | - | 400: Error al obtener mensualidades activas <br> 500: Error de servidor <br> 200: Se devuelve la lista global de mensualidades. |
+| /mensualidad/(dni_cliente) | GET | - | 400: Error interno <br> 500: No se encontró el usuario / error de BD <br> 200: Se devuelve la mensualidad del usuario. |
+| /mensualidad/configurar_fin_mensualidad | POST | dni_cliente, id_mensualidad, fecha_fin | 400: El usuario no tiene esa mensualidad <br> 404: No se encontró el usuario <br> 500: Error interno <br> 200: Fin de mensualidad configurado exitosamente. |
+| /mensualidad/pagar_mensualidad | POST | dni_cliente, clase_id | 401: Usuario ya registrado en ese horario <br> 402: No hay cupos disponibles <br> 404: Clase no encontrada <br> 400/500: Error interno o de MP <br> 200: Orden creada y mensualidad generada. |
+| /mensualidad/renovar_mensualidad | POST | dni_cliente, descripcion, id_mensualidad | 400/406/500: Error al renovar o en MercadoPago <br> 200: Mensualidad renovada y fin configurado. |
+| /mensualidad/ver_estado | GET | dni_cliente, id_mensualidad (Query Params) | 400: Usuario no tiene vigencia <br> 404: No se encontró usuario o mensualidad activa <br> 500: Error interno <br> 200: Se devuelve el estado y fecha de fin. |
+| /mensualidad/cancelar_mensualidad | POST | dni_cliente, id_mensualidad | 400: Usuario no tiene mensualidad o fallos de BD <br> 500: Error general <br> 200: Mensualidad cancelada exitosamente. |
 
 Métricas
 
 | **Dirección** | **Método** | **Datos necesarios (Query Params)** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
-| /metricas/clases_mas_canceladas | GET | id_actividad | 400: No se encontraron clases canceladas <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
-| /metricas/clases_mas_canceladas/con_fechas | GET | id_actividad, fecha_inicio, fecha_fin | 400: No se encontraron clases canceladas <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
+| /metricas/clases_mas_canceladas | GET | - | 400: No se encontraron clases canceladas <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
+| /metricas/clases_mas_canceladas/con_fechas | GET | fecha_inicio, fecha_fin | 400: No se encontraron clases canceladas <br> 500: Error interno <br> 200: Se devuelve la lista de métricas filtrada por fechas. |
+| /metricas/clases_mas_canceladas/(actividad) | GET | - | 400: No se encontraron clases canceladas <br> 500: Error interno <br> 200: Se devuelve la lista de métricas filtrada por actividad. |
 | /metricas/clases_con_mensualidad | GET | - | 400: No se encontraron clases <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
 | /metricas/clases_con_mensualidad/con_fechas | GET | fecha_inicio, fecha_fin | 400: No se encontraron clases <br> 500: Error interno <br> 200: Se devuelve la lista de métricas. |
 | /metricas/plata_recaudada | GET | - | 400: No hay información <br> 500: Error interno <br> 200: Se devuelve la plata recaudada global. |
@@ -125,13 +133,13 @@ Pagos
 | --- | --- | --- | --- |
 | /pagos | GET | - | 400: No se encontraron pagos en el sistema <br> 500: Error interno del servidor <br> 200: Se devuelve una lista global con los pagos registrados. |
 | /pagos/obtenerQR | GET | - | 200: Devuelve string del QR guardado en el archivo de entorno. |
-| /pagos/mensualidad | POST | usuario_id, descripcion, id_mensualidad | 400: Faltan datos requeridos o error al instanciar orden / MP / expirada <br> 500: Error interno de DB o MercadoPago <br> 200: Orden de pago creada exitosamente. |
-| /pagos/particular | POST | usuario_id, descripcion, clase_id | 400: Faltan datos requeridos o error al instanciar / expirada <br> 500: Error interno de DB o MercadoPago <br> 200: Orden de pago creada exitosamente. |
+| /pagos/particular | POST | usuario_id, descripcion, instancia_clase_id | 400: Faltan datos requeridos o error al instanciar / expirada <br> 500: Error interno de DB o MercadoPago <br> 200: Orden de pago creada exitosamente. |
 
 Usuarios
 
 | **Dirección** | **Método** | **Datos necesarios** | **Códigos de respuesta** |
 | --- | --- | --- | --- |
+| /usuarios | POST | dni, nombre, apellido, contraseña, fecha_nac, correo, telefono, genero, rol_id | 400: Errores lógicos de validación <br> 401: Rol inválido <br> 402: Fecha de nacimiento no válida <br> 403: El usuario debe ser mayor de 14 años <br> 404: Error al obtener listado de DNIs <br> 405: El DNI ya se encuentra registrado <br> 406: Correo ya registrado <br> 500: Error al intentar insertar <br> 200: Usuario registrado exitosamente. |
 | /usuarios/(usuario_id)/pagos | GET | - | 400: Error interno de consulta <br> 500: Error del servidor al consultar facturación <br> 200: Se devuelven las transacciones de pago. |
 | /usuarios/(usuario_id)/perfil | GET | - | 400: Error interno de consulta <br> 200: Se devuelve la información del perfil del usuario. |
 | /usuarios/(usuario_id)/perfil | PUT | dni, nombre, apellido, fecha_nac, correo, telefono | 400: Errores de validación de campos enviados o en DB <br> 402: Error en servidor al comprobar duplicación de correos <br> 403: Validación estricta de edad (< 14 años) <br> 406: El correo electrónico ya se encuentra registrado <br> 500: Error del servidor al procesar modificación <br> 200: Perfil actualizado exitosamente (con o sin envío de mail). |
@@ -140,7 +148,7 @@ Usuarios
 | /usuarios/ConfirmarNuevaContrasena | PUT | nueva_contraseña, correo | 400: Validación de formato incorrecta o campo requerido vacío <br> 401: Error interno de base de datos / usuario no encontrado <br> 402: Nueva contraseña igual a la actual <br> 500: Error interno de base de datos <br> 200: Nueva contraseña confirmada exitosamente. |
 | /usuarios/ObtenerListaUsuarios | GET | - | 500: Error de servidor al consultar los registros <br> 200: Se devuelve la lista de usuarios. |
 | /usuarios/(usuario_id)/clases | GET | - | 200: "En remodelación." |
-| /usuarios/(usuario_id)/avatar | POST | avatar | 400: El parámetro 'avatar' está vacío <br> 401: Error de consulta de usuario <br> 402: Error de servidor al intentar insertar imagen <br> 403: Error al intentar asociar la imagen al usuario <br> 500: Error de vinculación o de tipo de dato en DB <br> 200: Avatar subido exitosamente. |
+| /usuarios/(usuario_id)/avatar | POST | avatar | 400: El parámetro 'avatar' está vacío <br> 401: Error de consulta de usuario <br> 402: Error de servidor al intentar insertar imagen <br> 403: Error de vinculación nula <br> 500: Error de vinculación en DB <br> 200: Avatar subido exitosamente. |
 | /usuarios/(usuario_id)/avatar | GET | - | 400: Error interno de consulta de usuario <br> 401: Error de servidor al consultar la imagen <br> 200: Se devuelve el string/data del avatar del usuario. |
 
 ## Modelo lógico de la Base de Datos
