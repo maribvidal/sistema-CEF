@@ -84,9 +84,9 @@
         <v-card-title class="text-h5">Estado de Mensualidad</v-card-title>
         <v-card-text>
           <div v-if="membershipStatus">
-            <p>Estado: <strong>{{ membershipStatus.estado }}</strong></p>
-            <p>Fecha de inicio: <strong>{{ formatSpanishDate(membershipStatus.fecha_inicio) }}</strong></p>
-            <p>Fecha de fin: <strong>{{ formatSpanishDate(membershipStatus.fecha_fin) }}</strong></p>
+            
+            
+            <p>Fecha de fin: <strong>{{ formatSpanishDate(membershipStatus.data) }}</strong></p>
           </div>
           <div v-else>
             <p>No se pudo obtener el estado de la mensualidad.</p>
@@ -235,11 +235,16 @@ const membershipStatus = ref(null)
 
 const showMembershipStatus = async () => {
   try {
-    const result = await UsersAdminService.getEstadoMensualidad(userDNI.value)
-    membershipStatus.value = result.data || result
+    // Primero obtenés la mensualidad para conseguir el id
+    const mensualidad = await UsersAdminService.getMensualidadUsuario(userDNI.value)
+    const id_mensualidad = mensualidad.message[0].id
+
+    // Luego consultás el estado pasando ambos params
+    const result = await UsersAdminService.getEstadoMensualidad(userDNI.value, id_mensualidad)
+    membershipStatus.value = result
     dialogMembershipStatus.value = true
   } catch (error) {
-    notificationStore.showNotification('No se pudo obtener el estado de la mensualidad', 'danger')
+    notificationStore.showNotification('El usuario no posee mensualidades activas', 'danger')
   }
 }
 </script>

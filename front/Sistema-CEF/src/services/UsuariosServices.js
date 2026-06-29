@@ -142,12 +142,12 @@ export const UsersAdminService = {
   return response.data
 },
 
-  getEstadoMensualidad: async (dni_cliente) => {
+  getEstadoMensualidad: async (dni_cliente, id_mensualidad) => {
   const response = await apiClient.get('/mensualidad/ver_estado', { 
-    params: { dni_cliente } 
+    params: { dni_cliente, id_mensualidad } 
   })
   return response.data
-  },
+},
 
   getMensualidadUsuario: async (dni_cliente) => {
   const response = await apiClient.get(`/mensualidad/${dni_cliente}`)
