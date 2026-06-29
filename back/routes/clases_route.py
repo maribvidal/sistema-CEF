@@ -47,7 +47,7 @@ def publicar_clase():
     dia = body.get("dia")
     hora = body.get("hora")
     cupo_maximo = body.get("cupo_maximo")
-    monto = body.get("monto") 
+    monto = body.get("monto")
 
     # Este campo no lo controlo porque es opcional
     primera_fecha = None if (body.get("primera_fecha") is None) else body.get("primera_fecha")
@@ -74,7 +74,8 @@ def modificar_clase(id_clase):
     campos = [
         "estado",
         "id_sala",
-        "id_profesor"
+        "id_profesor",
+        "monto"
     ]
 
     for campo in campos:
@@ -83,8 +84,9 @@ def modificar_clase(id_clase):
     estado = body.get("estado")
     id_sala = body.get("id_sala")
     id_profesor = body.get("id_profesor")
+    monto = body.get("monto")
 
-    return modificar_clase_service(id_clase, estado, id_profesor, id_sala)
+    return modificar_clase_service(id_clase, estado, id_profesor, id_sala, monto)
 
 ## Habría que ver si a una clase cancelada hay que hacerle otra
 ## cosa que no sea cambiarle el estado.

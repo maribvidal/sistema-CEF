@@ -10,7 +10,7 @@ def modificar_instancias_clases_montos_proximo_mes_por_clase(id_clase: int, mont
             SELECT ic.id
             FROM Instancia_Clase ic
             WHERE ic.clase_id = {id_clase} AND  
-                DATE('ic.fecha') > DATE('now', 'start of month', '+1 month')
+                DATE(ic.fecha) > DATE('now', 'start of month', '+1 month')
         );
     """
     return ejecutar_query(query, cursor)
