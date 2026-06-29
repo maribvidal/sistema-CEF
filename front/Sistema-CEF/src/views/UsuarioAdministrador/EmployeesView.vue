@@ -106,12 +106,12 @@
                   <v-btn 
                     v-if="item.rol_id !== 0"
                     icon="mdi-account-off"
-                    variant="text"
-                    color="grey-darken-1"
+                    :variant="item.rol_id < 10 ? 'text' : 'tonal'"
+                    :color="item.rol_id < 10 ? 'grey-darken-1' : 'green-darken-1'"
                     size="small"
-                    @click="desactivarEmpleado(item)"
-                    title="Desactivar"
-                  ></v-btn>
+                    @click="item.rol_id < 10 ? desactivarEmpleado(item) : activarEmpleado(item)"
+                    :title="item.rol_id < 10 ? 'Desactivar' : 'Reactivar Empleado'"
+                  >{{ item.rol_id < 10 ? '' : 'Reactivar' }}</v-btn>
 
                   <v-btn 
                     v-else
@@ -350,43 +350,41 @@ const headers = [
   { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
 ]
 
-const roles = [
-  { id: 0, label: 'Desactivado' },
-  { id: 1, label: 'Administrador' },
-  { id: 2, label: 'Recepcionista' },
-  { id: 3, label: 'Usuario' },
-  { id: 4, label: 'Eliminado' }
-]
-
 const rolesASeleccionar = [
   { id: 1, label: 'Administrador' },
   { id: 2, label: 'Recepcionista' },
   { id: 3, label: 'Usuario' }
 ]
 
-const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Profesor'
+const getRoleName = (id) => {
+  const baseRole = id % 10
+  if (baseRole === 1) return 'Administrador'
+  if (baseRole === 2) return 'Recepcionista'
+  if (baseRole === 5) return 'Profesor'
+  if (baseRole === 3) return 'Usuario'
+  return 'Desconocido'
+}
 const getRoleColor = (id) => {
-  if (id === 0) return 'grey-darken-1' // Empleado desactivado
-  if (id === 1) return 'green-darken-1'
-  if (id === 2) return 'purple-darken-1'
-  if (id === 4) return 'red-darken-1' // Empleado eliminado
-  return 'light-blue-darken-1' // Color para Profesor
+  if (id >= 20) return 'red-darken-1' // Eliminado
+  if (id >= 10) return 'grey-darken-1' // Desactivado
+
+  const baseRole = id % 10
+  if (baseRole === 1) return 'green-darken-1'
+  if (baseRole === 2) return 'purple-darken-1'
+  if (baseRole === 5) return 'light-blue-darken-1'
+  return 'grey'
 }
 
 const personalFiltrado = computed(() => {
   let listaFiltrada = empleados.value
 
   // 1. Filtrar por estado
-  if (filtroEstado.value === 'activos') {
-    // Roles activos son 1 (Admin), 2 (Recepcionista), 5 (Profesor)
-    const rolesActivos = [1, 2, 5]
-    listaFiltrada = listaFiltrada.filter(e => rolesActivos.includes(e.rol_id))
+  if (filtroEstado.value === 'activos') { // Roles < 10
+    listaFiltrada = listaFiltrada.filter(e => e.rol_id > 0 && e.rol_id < 10)
   } else if (filtroEstado.value === 'desactivados') {
-    // Rol desactivado es 0
-    listaFiltrada = listaFiltrada.filter(e => e.rol_id === 0)
+    listaFiltrada = listaFiltrada.filter(e => e.rol_id >= 10 && e.rol_id < 20)
   } else if (filtroEstado.value === 'borrados') {
-    // Rol borrado es 4
-    listaFiltrada = listaFiltrada.filter(e => e.rol_id === 4)
+    listaFiltrada = listaFiltrada.filter(e => e.rol_id >= 20)
   }
 
   // 2. Filtrar por rol sobre la lista ya filtrada por estado
@@ -394,13 +392,13 @@ const personalFiltrado = computed(() => {
     return listaFiltrada
   }
   if (filtroRol.value === 'admin') {
-    return listaFiltrada.filter(e => e.rol_id === 1)
+    return listaFiltrada.filter(e => e.rol_id % 10 === 1)
   }
   if (filtroRol.value === 'recepcionista') {
-    return listaFiltrada.filter(e => e.rol_id === 2)
+    return listaFiltrada.filter(e => e.rol_id % 10 === 2)
   }
   if (filtroRol.value === 'profesor') {
-    return listaFiltrada.filter(e => e.rol_id === 5)
+    return listaFiltrada.filter(e => e.rol_id % 10 === 5)
   }
 
   return listaFiltrada
@@ -542,12 +540,13 @@ const desactivarEmpleado = (empleado) => {
 const activarEmpleado = (empleado) => {
   const dni = empleado?.dni ?? empleado?.raw?.dni
   if (!dni) return
-  
-  // Asumiendo que el flujo sea simplemente restaurar el rol (o puedes llamar a tu endpoint correspondiente)
+
   empleadoSeleccionado.value = empleado
-  nuevoRolId.value = 2 // Puedes asignar un rol por defecto o abrir el modal de roles
-  dialog.value = true
-  notificationStore.showNotification('Por favor asigne un nuevo rol para reactivar al empleado.', 'info')
+  // El nuevo rol será el rol base (desactivado - 10)
+  nuevoRolId.value = empleado.rol_id - 10
+  // Llamamos directamente a la confirmación, ya que el rol está decidido
+  confirmarCambioRol()
+  notificationStore.showNotification(`Reactivando a ${empleado.nombre}...`, 'info')
 }
 
 const motivoEliminacion = ref('')
