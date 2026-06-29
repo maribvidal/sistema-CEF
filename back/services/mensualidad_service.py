@@ -1,6 +1,6 @@
 from utils.envio_mails import enviar_mail
 from db.operaciones.mensualidades.borrar_db import borrar_mensualidad
-from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa
+from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidades_activa
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, verificar_usuario_tiene_mensualidad
 from db.operaciones.usuarios import consultar_usuario_por_dni
@@ -8,6 +8,34 @@ from db.operaciones.mensualidades import configurar_fin_mensualidad, cancelar_me
 from db.operaciones.clase_tener_mensualidad import borrar_clase_tener_mensualidad
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_exito_helper, _msj_error_helper
+
+def obtener_mensualidad_service():
+    cursor = conectarse_db()
+    
+    mensualidades_activas = obtener_mensualidades_activa(cursor)
+    print(mensualidades_activas)
+    control = _controlar_errores_query(mensualidades_activas, 500, "Error al obtener mensualidades activas.", 400, cursor)
+    print(control)
+    if control is not None:
+        return control
+
+    return _msj_exito_helper(mensualidades_activas['data'], cursor)
+
+def obtener_mensualidad_usuario_service(dni_cliente):
+    cursor = conectarse_db()
+    
+    # validar si el usuario existe
+    usuario = consultar_usuario_por_dni(dni_cliente, cursor)
+    control = _controlar_errores_query(usuario, 500, "No se encontró el usuario.", 400, cursor)
+    if control is not None:
+        return control
+    
+    mensualidades_activas = obtener_mensualidad_activa_por_usuario(usuario["data"]["id"], cursor)
+    control = _controlar_errores_query(mensualidades_activas, 500, "Error al obtener mensualidades activas.", 400, cursor)
+    if control is not None:
+        return control
+
+    return _msj_exito_helper(mensualidades_activas['data'], cursor)
 
 def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin = None):
     cursor = conectarse_db()

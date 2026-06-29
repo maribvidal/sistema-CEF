@@ -1,4 +1,4 @@
-from db.operaciones.exception_handler import ejecutar_fetchone
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
 # REGLAS EXPUESTAS POR EL PROFESOR:
 # las mensualidades son de un tipo de actividad, una fecha especifica 1 dia a la semana
@@ -37,6 +37,25 @@ def obtener_mensualidad_activa(usuario_id: int, id_mensualidad: int, cursor) -> 
     query = f"""
         SELECT m.fecha_fin
         FROM Mensualidad m
-        WHERE m.usuario_id = {usuario_id} AND m.id = {id_mensualidad} AND DATETIME('now') BETWEEN (m.fecha_ini AND m.fecha_fin)
+        WHERE m.usuario_id = {usuario_id} AND m.id = {id_mensualidad} AND DATETIME('now') BETWEEN m.fecha_ini AND m.fecha_fin
     """
     return ejecutar_fetchone(query, cursor)
+
+
+def obtener_mensualidades_activa(cursor) -> dict:
+    """Hace una consulta para obtener todas las mensualidades activas"""
+    query = f"""
+        SELECT m.id, m.fecha_fin
+        FROM Mensualidad m
+        WHERE DATETIME('now') BETWEEN m.fecha_ini AND m.fecha_fin
+    """
+    return ejecutar_fetchall(query, cursor)
+
+def obtener_mensualidad_activa_por_usuario(usuario_id: int, cursor) -> dict:
+    """Hace una consulta para obtener la mensualidad activa de un usuario"""
+    query = f"""
+        SELECT m.id, m.fecha_fin
+        FROM Mensualidad m
+        WHERE m.usuario_id = {usuario_id} AND DATETIME('now') BETWEEN m.fecha_ini AND m.fecha_fin
+    """
+    return ejecutar_fetchall(query, cursor)
