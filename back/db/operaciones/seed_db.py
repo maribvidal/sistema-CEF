@@ -156,7 +156,7 @@ def insertar_datos(cursor):
     """)
     
     # Datos para probar el scheduler de notificaciones
-    id_usuario = insertar_usuario(20000001, 'a', 'a', '11111111', '1990-01-01', 'tucorreo@ymail.com', 'pwd01','F', 3, cursor)
+    id_usuario = insertar_usuario(20010101, 'a', 'a', '11111111', '1990-01-01', 'tucorreo@ymail.com', 'pwd01','F', 3, cursor)
     
     mensualidad = insertar_mensualidad(id_usuario['data'], cursor, '2026-05-30')
     
