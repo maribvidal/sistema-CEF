@@ -68,7 +68,7 @@
 
           <template v-if="empleados.length > 0 || profesores.length > 0">
             <v-data-table
-              :headers="headers"
+              :headers="dynamicHeaders"
               :items="personalFiltrado"
               :search="search"
               :loading="loading"
@@ -330,16 +330,35 @@ const nuevoRecepcionista = ref({
 })
 const actividades = ref([])
 
-const headers = [
+const allHeaders = [
   { title: 'DNI', key: 'dni', sortable: true },
   { title: 'Nombre', key: 'nombre' },
   { title: 'Apellido', key: 'apellido' },
   { title: 'Teléfono', key: 'telefono' },
   { title: 'Correo', key: 'correo' },
   { title: 'Género', key: 'genero', align: 'center' },
-  { title: 'Rol Actual', key: 'rol_id', align: 'center' },
-  { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
+  { title: 'Rol Actual', key: 'rol_id', align: 'center' }
 ]
+const actionsHeader = { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
+
+const dynamicHeaders = computed(() => {
+  const rol = filtroRol.value
+  if (rol === 'todos') {
+    return [
+      allHeaders.find(h => h.key === 'dni'),
+      allHeaders.find(h => h.key === 'nombre'),
+      allHeaders.find(h => h.key === 'apellido'),
+      allHeaders.find(h => h.key === 'genero'),
+      allHeaders.find(h => h.key === 'rol_id'),
+      actionsHeader
+    ]
+  } else if (rol === 'profesor') {
+    return [...allHeaders.filter(h => h.key !== 'correo'), actionsHeader]
+  } else if (rol === 'admin' || rol === 'recepcionista') {
+    return [...allHeaders.filter(h => h.key !== 'telefono'), actionsHeader]
+  }
+  return [...allHeaders, actionsHeader] // Fallback para 'todos' y otros casos
+})
 
 const rolesASeleccionar = [
   { id: 1, label: 'Administrador' },
