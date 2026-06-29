@@ -5,9 +5,9 @@ from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.imagenes.insertar_db import insertar_imagen
 from db.operaciones.imagenes.consultar_db import consultar_imagen_actual_usuario
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario, listar_dnis_usuarios
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario, listar_dnis_usuarios, obtener_estado_usuario
 from db.operaciones.usuarios.insertar_db import insertar_usuario
-from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar
+from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario
 from db.operaciones.mensualidades.consultar_db import consultar_mensualidad_cubre_clase
 from db.operaciones.empleados.consultar_db import listar_dnis_empleados
 from utils.envio_mails import enviar_mail, enviar_mail_confirmacion_nuevo_correo
@@ -100,7 +100,6 @@ def registrar_usuario_service(
     cursor = conectarse_db()
 
     # Comprobaciónes del DNI
-    
     res_dnis = listar_dnis_usuarios(cursor)
 
     if res_dnis['status'] == 'error':
@@ -570,7 +569,6 @@ def obtener_avatar_usuario_service(usuario_id):
         }, 400
 
     # Obtener el avatar asociado al usuario
-
     res = consultar_imagen_actual_usuario(usuario_id, cursor)
 
     if res['status'] == 'error':
@@ -582,4 +580,51 @@ def obtener_avatar_usuario_service(usuario_id):
     cursor.connection.close()
     return {
         "avatar": res['data']
+    }, 200
+
+def verificar_correo_usuario_service(usuario_id):
+    """Service que permite verificar el correo de un usuario dado. Cambiando su estado de 0 a 1 en la bade de datos"""
+
+    cursor = conectarse_db()
+
+    # Validar si el usuario existe
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 400
+    print("el usuario existe")
+
+    usuario = obtener_estado_usuario(usuario_id, cursor)
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": usuario['message']
+        }, 400
+    print("se encontró el estado del usuario usuario")
+    print("Imprimiendo estado del usuario: ", usuario['data'])
+
+    estado = usuario['data']['estado']
+    if estado == 1:
+        cursor.connection.close()
+        return {
+            "message": "El correo del usuario ya está verificado."
+        }, 401
+    print("el correo del usuario no está verificado, se procede a verificarlo")
+
+    # Ahora seteamos su campo "estado" a 1, indicando que su correo está verificado
+    resultado = modificar_estado_usuario(usuario_id, cursor)
+
+    if resultado['status'] == 'error':
+        cursor.connection.close()
+        return {
+            "error": "No se pudo verificar el correo del usuario."
+        }, 401
+    print("Se pudo modificar el estado del usuario en 1, indicando que su correo está verificado")
+
+    cursor.connection.close()
+    return {
+        "message": "Correo verificado exitosamente."
     }, 200
