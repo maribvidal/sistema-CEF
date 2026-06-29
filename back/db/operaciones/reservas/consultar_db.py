@@ -9,10 +9,9 @@ def consultar_reserva_por_id(reserva_id: int, cursor):
 def obtener_reservas_usuario_dia_hora(id_usuario: int, dia: str, hora: str, cursor):
     """Operación que consulta por reservas según el id del usuario, y el dia y hora
         de la instancia de la clase asociada con la reserva."""
-    query = f"""SELECT r.usuario_id, r.inst_clase_id, r.fecha
+    query = f"""SELECT r.usuario_id, r.inst_clase_id, r.fecha, c.dia, c.hora
                 FROM Reserva r INNER JOIN Instancia_Clase ic ON (r.inst_clase_id = ic.id)
                                 INNER JOIN Clase c ON (ic.clase_id = c.id)
-                                INNER JOIN Usuario u ON (r.usuario_id = u.id)
                 WHERE r.usuario_id = {id_usuario} AND c.dia = '{dia}' AND c.hora = '{hora}';"""
     return ejecutar_fetchall(query, cursor)
  
