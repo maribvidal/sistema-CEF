@@ -1,16 +1,14 @@
 from db.operaciones.exception_handler import ejecutar_query 
 
-def configurar_fin_mensualidad(id_mensualidad: int, cursor, fecha_fin = None):
+def configurar_fin_mensualidad(id_mensualidad: int, cursor, fecha_fin=None):
     """Permite configurar la fecha de fin de una mensualidad."""
-    query = f"""UPDATE Mensualidad"""
     
-    if fecha_fin is None:
-        seteo=f"""SET fecha_fin = '{fecha_fin}'"""
+    if fecha_fin is not None:  # 👈 condición corregida
+        seteo = f"SET fecha_fin = '{fecha_fin}' "  # 👈 espacio al final
     else:
-        seteo=f"""SET fecha_fin = (DATETIME(fecha_fin, '+1 month'))"""
+        seteo = "SET fecha_fin = (DATETIME(fecha_fin, '+1 month')) "  # 👈 espacio al final
         
-    query += seteo
-    query += f"""WHERE id = {id_mensualidad};"""
+    query = f"UPDATE Mensualidad {seteo}WHERE id = {id_mensualidad};"
     return ejecutar_query(query, cursor)
 
 def cancelar_mensualidad(id_mensualidad: int, cursor):

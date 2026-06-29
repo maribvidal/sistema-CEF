@@ -26,6 +26,9 @@
                 <v-col cols="12" sm="6">
                   <v-btn color="secondary" block variant="flat" @click="handleGenerateQR">Generar QR</v-btn>
                 </v-col>
+                <v-col cols="12" sm="6">
+                  <v-btn color="success" block variant="flat" @click="showPayments">Ver Pagos</v-btn>
+                </v-col>
               </v-row>
             </v-col>
           </v-row>
@@ -46,6 +49,33 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="paymentsData" max-width="600px">
+      <v-card>
+        <v-card-title class="text-h5">Historial de Pagos</v-card-title>
+        <v-card-text>
+          <v-simple-table>
+            <thead>
+              <tr>
+                <th class="text-left">Fecha</th>
+                <th class="text-left">Monto</th>
+                <th class="text-left">Método de Pago</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="payment in paymentsData" :key="payment?.id">
+                <td>{{ formatSpanishDate(payment.fecha) }}</td>
+                <td>{{ payment.monto }}</td>
+                <td>{{ payment.metodo_pago }}</td>
+              </tr>
+            </tbody>
+          </v-simple-table>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text @click="dialogPayments = false">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+      </v-dialog>
   </v-container>
 </template>
 
@@ -58,6 +88,7 @@ import DateFormatterService from '@/services/DateFormatterService.js'
 import { getValidImageSrc } from '@/services/ImageFormatterService.js' 
 import defaultLogo from '@/assets/logoLargo.png'
 import UsuariosService from '@/services/UsuariosServices.js'
+import { PaymentsService } from '@/services/PaymentsService.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -156,6 +187,19 @@ const handleGenerateQR = async () => {
 
   } catch (error) {
     console.error('Error al generar el QR:', error)
+  }
+}
+
+const dialogPayments = ref(false)
+const paymentsData = ref([])
+
+const showPayments = async () => {
+  try {
+    const payments = await PaymentsService.getUserPayments(route.params.id)
+    paymentsData.value = payments
+    dialogPayments.value = false
+  } catch (error) {
+    notificationStore.showNotification('Este usuario no tiene pagos asociados', 'danger')
   }
 }
 </script>
