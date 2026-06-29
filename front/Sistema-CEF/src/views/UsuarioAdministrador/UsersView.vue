@@ -150,10 +150,9 @@ const loadUsers = async () => {
 const handleChangeMonthlyPayment = async (item) => {
   try {
     const mensualidad = await UsersAdminService.getMensualidadUsuario(item.dni)
-    console.log('mensualidad:', mensualidad) // para ver la estructura y confirmar el campo id
     usuarioSeleccionado.value = {
       ...item,
-      id_mensualidad: mensualidad.id // ajustá el campo según lo que devuelva el log
+      id_mensualidad: mensualidad.message[0].id // 👈 corrección
     }
     fechaFin.value = ''
     dialog.value = true

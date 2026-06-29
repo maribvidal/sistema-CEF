@@ -77,6 +77,7 @@ async function request(endpoint, method = 'GET', data = null, params = null) {
  */
 const apiClient = {
   get: (endpoint, options = {}) => request(endpoint, 'GET', null, options.params),
+  getWithoutParams: (endpoint) => request(endpoint, 'GET'),
   post: (endpoint, data) => request(endpoint, 'POST', data),
   put: (endpoint, data) => request(endpoint, 'PUT', data),
   patch: (endpoint, data) => request(endpoint, 'PATCH', data),
