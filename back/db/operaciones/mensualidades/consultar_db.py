@@ -1,4 +1,4 @@
-from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone, ejecutar_query
 
 # REGLAS EXPUESTAS POR EL PROFESOR:
 # las mensualidades son de un tipo de actividad, una fecha especifica 1 dia a la semana
