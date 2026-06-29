@@ -1,5 +1,6 @@
 from datetime import datetime
 from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_individual, consultar_lista_espera_abonado
+from db.operaciones.listas_espera.borrar_db import borrar_listas_espera_clase
 from db.operaciones.usuarios.consultar_db import obtener_usuario_esta_en_instancia_clase
 from db.operaciones.asistencias import verificar_asistencia_usuario_clase, registrar_asistencia
 from db.operaciones.conectar_db import conectarse_db
@@ -259,12 +260,18 @@ def eliminar_clase_service(clase_id: int):
         cursor.connection.close()
         return _msj_error_helper("No se pudo eliminar la clase porque existían reservas asociadas.", cursor), 403
 
+    # antes de borrar la clase, intentar borrar las listas de espera
+    respuesta = borrar_listas_espera_clase(clase_id, cursor)
+    control = _controlar_errores_query(respuesta, 404, "No se pudieron eliminar las listas de espera de la clase.", 405)
+    if control is not None:
+        return control
+
     # si todo eso se cumple, entonces eliminamos la clase.
     respuesta = borrar_clase(clase_id, cursor)
     print(respuesta)
 
     if respuesta['status'] == 'error':
-        return _msj_error_helper(respuesta["message"], cursor), 404
+        return _msj_error_helper(respuesta["message"], cursor), 406
 
     cursor.connection.commit()
     return _msj_exito_helper("Clase eliminada exitosamente.", cursor)
