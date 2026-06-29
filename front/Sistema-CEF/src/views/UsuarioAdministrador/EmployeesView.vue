@@ -83,47 +83,38 @@
 
               <template v-slot:[`item.acciones`]='{ item }'>
                 <div class="d-flex justify-end">
-                  <v-btn 
+                  <v-btn
+                    v-if="item.rol_id < 20" 
                     icon="mdi-pencil"
                     variant="text"
                     color="blue-darken-1"
                     size="small"
-                    :disabled="item.rol_id === 0"
                     @click="modificarEmpleado(item)"
                     title="Modificar Datos"
                   ></v-btn>
                   
-                  <v-btn 
+                  <v-btn
+                    v-if="item.rol_id < 20"
                     icon="mdi-shield-key"
                     variant="text"
                     color="orange-darken-2"
                     size="small"
-                    :disabled="item.rol_id === 0 || item.rol_id === 5"
                     @click="abrirEditorRol(item)"
                     title="Cambiar Permisos/Rol"
                   ></v-btn>
                   
                   <v-btn 
-                    v-if="item.rol_id !== 0"
+                    v-if="item.rol_id < 20"
                     icon="mdi-account-off"
                     :variant="item.rol_id < 10 ? 'text' : 'tonal'"
                     :color="item.rol_id < 10 ? 'grey-darken-1' : 'green-darken-1'"
                     size="small"
                     @click="item.rol_id < 10 ? desactivarEmpleado(item) : activarEmpleado(item)"
                     :title="item.rol_id < 10 ? 'Desactivar' : 'Reactivar Empleado'"
-                  >{{ item.rol_id < 10 ? '' : 'Reactivar' }}</v-btn>
-
-                  <v-btn 
-                    v-else
-                    icon="mdi-account-check"
-                    variant="text"
-                    color="green-darken-1"
-                    size="small"
-                    @click="activarEmpleado(item)"
-                    title="Reactivar Empleado"
                   ></v-btn>
 
                   <v-btn
+                    v-if="item.rol_id < 20"
                     icon="mdi-delete"
                     variant="text"
                     color="red-darken-1"
