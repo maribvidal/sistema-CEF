@@ -8,5 +8,5 @@ def consultar_montos_mensualidad(id_mensualidad: int, cursor) -> dict:
             INNER JOIN Mensualidad m ON cm.mensualidad_id = m.id
             INNER JOIN Clase c ON cm.clase_id = c.id
             INNER JOIN Instancia_Clase ic ON c.id = ic.clase_id
-            WHERE m.id = {id_mensualidad} and ic.fecha BETWEEN m.fecha_ini AND m.fecha_fin
+            WHERE m.id = {id_mensualidad} and ic.fecha >= DATE('now') AND ic.fecha BETWEEN m.fecha_ini AND m.fecha_fin 
         """, cursor)

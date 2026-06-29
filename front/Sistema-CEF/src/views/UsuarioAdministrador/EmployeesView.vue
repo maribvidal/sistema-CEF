@@ -68,7 +68,7 @@
 
           <template v-if="empleados.length > 0 || profesores.length > 0">
             <v-data-table
-              :headers="headers"
+              :headers="dynamicHeaders"
               :items="personalFiltrado"
               :search="search"
               :loading="loading"
@@ -83,47 +83,38 @@
 
               <template v-slot:[`item.acciones`]='{ item }'>
                 <div class="d-flex justify-end">
-                  <v-btn 
+                  <v-btn
+                    v-if="item.rol_id < 10" 
                     icon="mdi-pencil"
                     variant="text"
                     color="blue-darken-1"
                     size="small"
-                    :disabled="item.rol_id === 0"
                     @click="modificarEmpleado(item)"
                     title="Modificar Datos"
                   ></v-btn>
                   
-                  <v-btn 
+                  <v-btn
+                    v-if="item.rol_id < 10 && item.rol_id !== 5"
                     icon="mdi-shield-key"
                     variant="text"
                     color="orange-darken-2"
                     size="small"
-                    :disabled="item.rol_id === 0 || item.rol_id === 5"
                     @click="abrirEditorRol(item)"
                     title="Cambiar Permisos/Rol"
                   ></v-btn>
                   
                   <v-btn 
-                    v-if="item.rol_id !== 0"
+                    v-if="item.rol_id < 20"
                     icon="mdi-account-off"
-                    variant="text"
-                    color="grey-darken-1"
+                    :variant="item.rol_id < 10 ? 'text' : 'tonal'"
+                    :color="item.rol_id < 10 ? 'grey-darken-1' : 'green-darken-1'"
                     size="small"
-                    @click="desactivarEmpleado(item)"
-                    title="Desactivar"
-                  ></v-btn>
-
-                  <v-btn 
-                    v-else
-                    icon="mdi-account-check"
-                    variant="text"
-                    color="green-darken-1"
-                    size="small"
-                    @click="activarEmpleado(item)"
-                    title="Reactivar Empleado"
+                    @click="item.rol_id < 10 ? desactivarEmpleado(item) : activarEmpleado(item)"
+                    :title="item.rol_id < 10 ? 'Desactivar' : 'Reactivar Empleado'"
                   ></v-btn>
 
                   <v-btn
+                    v-if="item.rol_id < 20"
                     icon="mdi-delete"
                     variant="text"
                     color="red-darken-1"
@@ -339,54 +330,70 @@ const nuevoRecepcionista = ref({
 })
 const actividades = ref([])
 
-const headers = [
+const allHeaders = [
   { title: 'DNI', key: 'dni', sortable: true },
   { title: 'Nombre', key: 'nombre' },
   { title: 'Apellido', key: 'apellido' },
   { title: 'Teléfono', key: 'telefono' },
   { title: 'Correo', key: 'correo' },
   { title: 'Género', key: 'genero', align: 'center' },
-  { title: 'Rol Actual', key: 'rol_id', align: 'center' },
-  { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
+  { title: 'Rol Actual', key: 'rol_id', align: 'center' }
 ]
+const actionsHeader = { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
 
-const roles = [
-  { id: 0, label: 'Desactivado' },
-  { id: 1, label: 'Administrador' },
-  { id: 2, label: 'Recepcionista' },
-  { id: 3, label: 'Usuario' },
-  { id: 4, label: 'Eliminado' }
-]
+const dynamicHeaders = computed(() => {
+  const rol = filtroRol.value
+  if (rol === 'todos') {
+    return [
+      allHeaders.find(h => h.key === 'dni'),
+      allHeaders.find(h => h.key === 'nombre'),
+      allHeaders.find(h => h.key === 'apellido'),
+      allHeaders.find(h => h.key === 'genero'),
+      allHeaders.find(h => h.key === 'rol_id'),
+      actionsHeader
+    ]
+  } else if (rol === 'profesor') {
+    return [...allHeaders.filter(h => h.key !== 'correo'), actionsHeader]
+  } else if (rol === 'admin' || rol === 'recepcionista') {
+    return [...allHeaders.filter(h => h.key !== 'telefono'), actionsHeader]
+  }
+  return [...allHeaders, actionsHeader] // Fallback para 'todos' y otros casos
+})
 
 const rolesASeleccionar = [
   { id: 1, label: 'Administrador' },
-  { id: 2, label: 'Recepcionista' },
-  { id: 3, label: 'Usuario' }
+  { id: 2, label: 'Recepcionista' }
 ]
 
-const getRoleName = (id) => roles.find(r => r.id === id)?.label || 'Profesor'
+const getRoleName = (id) => {
+  const baseRole = id % 10
+  if (baseRole === 1) return 'Administrador'
+  if (baseRole === 2) return 'Recepcionista'
+  if (baseRole === 5) return 'Profesor'
+  if (baseRole === 3) return 'Usuario'
+  return 'Desconocido'
+}
 const getRoleColor = (id) => {
-  if (id === 0) return 'grey-darken-1' // Empleado desactivado
-  if (id === 1) return 'green-darken-1'
-  if (id === 2) return 'purple-darken-1'
-  if (id === 4) return 'red-darken-1' // Empleado eliminado
-  return 'light-blue-darken-1' // Color para Profesor
+  if (id >= 20) return 'red-darken-1' // Eliminado
+  if (id >= 10) return 'grey-darken-1' // Desactivado
+
+  const baseRole = id % 10
+  if (baseRole === 1) return 'green-darken-1'
+  if (baseRole === 2) return 'purple-darken-1'
+  if (baseRole === 5) return 'light-blue-darken-1'
+  return 'grey'
 }
 
 const personalFiltrado = computed(() => {
   let listaFiltrada = empleados.value
 
   // 1. Filtrar por estado
-  if (filtroEstado.value === 'activos') {
-    // Roles activos son 1 (Admin), 2 (Recepcionista), 5 (Profesor)
-    const rolesActivos = [1, 2, 5]
-    listaFiltrada = listaFiltrada.filter(e => rolesActivos.includes(e.rol_id))
+  if (filtroEstado.value === 'activos') { // Roles < 10
+    listaFiltrada = listaFiltrada.filter(e => e.rol_id > 0 && e.rol_id < 10)
   } else if (filtroEstado.value === 'desactivados') {
-    // Rol desactivado es 0
-    listaFiltrada = listaFiltrada.filter(e => e.rol_id === 0)
+    listaFiltrada = listaFiltrada.filter(e => e.rol_id >= 10 && e.rol_id < 20)
   } else if (filtroEstado.value === 'borrados') {
-    // Rol borrado es 4
-    listaFiltrada = listaFiltrada.filter(e => e.rol_id === 4)
+    listaFiltrada = listaFiltrada.filter(e => e.rol_id >= 20)
   }
 
   // 2. Filtrar por rol sobre la lista ya filtrada por estado
@@ -394,13 +401,13 @@ const personalFiltrado = computed(() => {
     return listaFiltrada
   }
   if (filtroRol.value === 'admin') {
-    return listaFiltrada.filter(e => e.rol_id === 1)
+    return listaFiltrada.filter(e => e.rol_id % 10 === 1)
   }
   if (filtroRol.value === 'recepcionista') {
-    return listaFiltrada.filter(e => e.rol_id === 2)
+    return listaFiltrada.filter(e => e.rol_id % 10 === 2)
   }
   if (filtroRol.value === 'profesor') {
-    return listaFiltrada.filter(e => e.rol_id === 5)
+    return listaFiltrada.filter(e => e.rol_id % 10 === 5)
   }
 
   return listaFiltrada
@@ -542,12 +549,13 @@ const desactivarEmpleado = (empleado) => {
 const activarEmpleado = (empleado) => {
   const dni = empleado?.dni ?? empleado?.raw?.dni
   if (!dni) return
-  
-  // Asumiendo que el flujo sea simplemente restaurar el rol (o puedes llamar a tu endpoint correspondiente)
+
   empleadoSeleccionado.value = empleado
-  nuevoRolId.value = 2 // Puedes asignar un rol por defecto o abrir el modal de roles
-  dialog.value = true
-  notificationStore.showNotification('Por favor asigne un nuevo rol para reactivar al empleado.', 'info')
+  // El nuevo rol será el rol base (desactivado - 10)
+  nuevoRolId.value = empleado.rol_id - 10
+  // Llamamos directamente a la confirmación, ya que el rol está decidido
+  confirmarCambioRol()
+  notificationStore.showNotification(`Reactivando a ${empleado.nombre}...`, 'info')
 }
 
 const motivoEliminacion = ref('')

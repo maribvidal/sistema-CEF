@@ -137,7 +137,7 @@ def crear_orden_qr_mp(external_reference, total_amount, description, item):
             "total_amount": str(total_amount),
             "description": description,
             "external_reference": str(external_reference),
-            "expiration_time": "PT2M",
+            "expiration_time": "PT1M",
             "config": {
                 "qr": {
                     "external_pos_id": "CAJA001",

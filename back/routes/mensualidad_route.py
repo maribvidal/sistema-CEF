@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
+from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
+from services import _controlar_errores_query
 from services.pagos_service import crear_pago_service_mensualidad, verificar_poder_pagar_mensualidad_service
-from services.mensualidad_service import cancelar_mensualidad_service, configurar_fin_mensualidad_service, obtener_mensualidad_service, obtener_mensualidad_usuario_service, ver_estado_mensualidad_service
+from services.mensualidad_service import cancelar_mensualidad_service, configurar_fin_mensualidad_service, obtener_mensualidad_service, obtener_mensualidad_usuario_service, renovar_mensualidad_service, ver_estado_mensualidad_service
 
 mensualidad_bp = Blueprint('mensualidad', __name__)
 
@@ -24,7 +27,7 @@ def get_mensualidad_usuario(dni_cliente):
     
     return jsonify(respuesta), status
 
-@mensualidad_bp.route('/mensualidad/configurar_fin_mensualidad', methods=['POST'])
+@mensualidad_bp.route('/mensualidad/configurar_fin_mensualidad', methods=['PUT'])
 def configurar_fin_mensualidad():
     """Endpoint para configurar el fin de la mensualidad."""
     data = request.get_json()
@@ -32,6 +35,11 @@ def configurar_fin_mensualidad():
     dni_cliente = data.get("dni_cliente")    
     fecha_fin = data.get("fecha_fin")    
     mensualidad_id = data.get("id_mensualidad")
+    
+    if not mensualidad_id:
+        return jsonify({
+            "error": "Debe proporcionar el id de la mensualidad."
+        }), 407
     
     respuesta, status = configurar_fin_mensualidad_service(dni_cliente, mensualidad_id, fecha_fin)
     
@@ -53,25 +61,16 @@ def pagar_mensualidad():
     return jsonify(respuesta), status
 
 # HU renovar mensualidad
-@mensualidad_bp.route("/mensualidad/renovar_mensualidad", methods=["POST"])
+@mensualidad_bp.route("/mensualidad/renovar_mensualidad", methods=["PUT"])
 def crear_pago_mensualidad():
     data = request.get_json()
     dni_cliente = data.get("dni_cliente")
     descripcion = data.get("descripcion")
     id_mensualidad = data.get("id_mensualidad")
     
-    respuesta, status = crear_pago_service_mensualidad(dni_cliente, descripcion, id_mensualidad)
-    if status != 200:
-        return jsonify(respuesta), status
+    respuesta, status = renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion)
     
-    respuesta, status = configurar_fin_mensualidad_service(dni_cliente, id_mensualidad)
-    
-    if status != 200:
-        return jsonify(respuesta), status
-    
-    return jsonify({
-        "message": "Pago de mensualidad realizado y fecha de fin configurada correctamente."
-    }), 200
+    return jsonify(respuesta), status
     
 @mensualidad_bp.route("/mensualidad/ver_estado", methods=["GET"])
 def ver_estado_mensualidad():
