@@ -317,6 +317,9 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     dia = res_clase["data"]["dia"]
     hora = res_clase["data"]["hora"]
 
+    print(respuesta)
+    print(res_clase)
+
     # Comprobar si el usuario ya tenía reservas hechas de la misma instancia de clase
 
     respuesta = obtener_reservas_usuario_inst_clase(id_ins_clase, id_usuario, cursor)
@@ -327,6 +330,7 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
     # Comprobar si el usuario ya tenía reservas hechas de otra clase para ese día a esa hora
 
     respuesta = obtener_reservas_usuario_dia_hora(id_usuario, dia, hora, cursor)
+    print(respuesta)
     control = _controlar_errores_query_sin_none(respuesta, 404, "El usuario ya tenía una reserva hecha para otra clase en ese mismo día y hora.", 405, cursor)
     if control is not None:
         return control
