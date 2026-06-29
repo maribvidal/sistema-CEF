@@ -9,7 +9,20 @@
             "request": "attach",
             "type": "editor-browser",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "Launch Firefox against localhost",
+            "type": "firefox",
+            "request": "launch",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}",
+            "pathMappings": [
+                {
+                    "url": "http://localhost:5173/src",
+                    "path": "${workspaceFolder}/front/Sistema-CEF/src"
+                },
+                
+            ]
         }
-
     ]
 }
