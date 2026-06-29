@@ -9,7 +9,7 @@ def listar_empleados(cursor) -> dict:
     """Lista todos los usuarios que son empleados."""
     # UN PROFESOR TAMBIÉN ES UN EMPLEADOOOOOOO
     query = """
-        SELECT id, nombre, apellido, rol_id, dni, correo, genero
+        SELECT id, nombre, apellido, rol_id, dni, correo, genero, telefono
         FROM Usuario
         WHERE rol_id IN (0, 1, 2, 4, 5)
     """

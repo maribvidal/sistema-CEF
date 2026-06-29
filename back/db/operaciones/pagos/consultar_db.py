@@ -22,12 +22,18 @@ def consultar_pagos_de_usuario(usuario_id: int, cursor) -> dict:
        y devuelve una lista de tuplas."""
     query = f"""
         SELECT
-            p.id,
             p.monto,
-            c.id
+            p.fecha,
+            u.correo,
+            a.nombre AS actividad_nombre
         FROM Pago p
-        INNER JOIN Pago_Pagar_Clase ppc ON p.id = ppc.pago_id
-        INNER JOIN Clase c ON ppc.clase_id = c.id
+        INNER JOIN Usuario u ON p.usuario_id = u.id
+        LEFT JOIN Pago_Pagar_Clase ppc ON p.id = ppc.pago_id
+        LEFT JOIN Pago_Pagar_Mensualidad ppm ON p.id = ppm.pago_id
+        LEFT JOIN Clase c ON ppc.clase_id = c.id
+        LEFT JOIN Clase_tener_Mensualidad ctm ON ppm.mensualidad_id = ctm.mensualidad_id
+        LEFT JOIN Clase c2 ON ctm.clase_id = c2.id
+        INNER JOIN Actividad a ON a.id = COALESCE(c.actividad_id, c2.actividad_id)
         WHERE p.usuario_id = {usuario_id};
     """
     return ejecutar_fetchall(query, cursor)
