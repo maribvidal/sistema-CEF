@@ -15,7 +15,7 @@ export const ClasesService = {
   cancelarClase: (id) => apiClient.patch(`/clases/${id}`),
   reservarClase: (id, payload) => apiClient.put(`/clases/${id}/reservar`, payload),
   obtenerClase: (idUser) => apiClient.get(`/usuarios/${idUser}/clases`),
-  generarQR: (id) => apiClient.get(`/clases/${id}/qr`, { responseType: 'blob' }),
+  
 
   listarActividades: async () => {
     const response = await apiClient.get('/actividades')

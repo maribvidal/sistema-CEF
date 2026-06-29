@@ -98,6 +98,26 @@ const AuthApiService = {
       correo: correo
     })
   },
+
+  generarQR: async (id) => {
+    // 1. Obtenemos el token si tu backend lo requiere para esta ruta
+    const token = TokenService.getToken()
+    
+    // 2. Usamos fetch nativo para que api.js no interfiera y rompa el Blob
+    const response = await fetch(`http://127.0.0.1:5000/clientes/${id}/qr`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}` // Quita esta línea si la ruta es pública
+      }
+    })
+
+    if (!response.ok) throw new Error('Error al descargar el QR')
+
+    // 3. Extraemos el Blob de forma nativa
+    return await response.blob()
+  }
+
+
 }
 
 
@@ -330,6 +350,7 @@ export const useAuth = () => {
     restorePassword,
     confirmNewPassword,
     fetchUserProfileById,
+    generarQR: AuthApiService.generarQR,
 
     // También exponemos los métodos de la API para uso directo si es necesario
     // (ej. en vistas de edición de perfil).
@@ -353,6 +374,7 @@ export const useAuth = () => {
 const UsuariosService = {
   actualizarPerfil: AuthApiService.updateProfile,
   subirAvatar: AuthApiService.uploadAvatar,
+  generarQR: AuthApiService.generarQR,
   // ... Añadir otros métodos si son importados directamente en otros archivos.
 }
 export default UsuariosService
