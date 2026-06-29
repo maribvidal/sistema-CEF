@@ -90,3 +90,12 @@ def verificar_usuario_tiene_mensualidad(id_usuario: int, id_mensualidad: int, cu
         WHERE Usuario.id = {id_usuario} AND m.id = {id_mensualidad}"""
     resultado = ejecutar_fetchone(query, cursor)
     return resultado is not None
+
+def obtener_mensualidad_usuario(usuario_id: int, id_mensualidad: int, cursor) -> dict:
+    query = f"""
+        SELECT m.id, m.fecha_ini, m.fecha_fin, m.estado, m.usuario_id
+        FROM Usuario
+        INNER JOIN Mensualidad m ON Usuario.id = m.usuario_id
+        WHERE Usuario.id = {usuario_id} AND m.id = {id_mensualidad}"""
+    resultado = ejecutar_fetchone(query, cursor)
+    return resultado

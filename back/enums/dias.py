@@ -6,7 +6,7 @@ class Dias(Enum):
     MARTES = 1
     Martes = 1
     MIERCOLES = 2
-    Miercoles = 3
+    Miercoles = 2
     JUEVES = 3
     Jueves = 3
     VIERNES = 4

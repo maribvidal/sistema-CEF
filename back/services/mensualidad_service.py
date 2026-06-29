@@ -1,10 +1,13 @@
+import time
+
+from services.pagos_service import crear_pago_service_mensualidad
 from utils.envio_mails import enviar_mail
 from db.operaciones.mensualidades.borrar_db import borrar_mensualidad
 from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidades_activa
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, verificar_usuario_tiene_mensualidad
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, obtener_mensualidad_usuario, verificar_usuario_tiene_mensualidad
 from db.operaciones.usuarios import consultar_usuario_por_dni
-from db.operaciones.mensualidades import configurar_fin_mensualidad, cancelar_mensualidad
+from db.operaciones.mensualidades import configurar_fin_mensualidad, cancelar_mensualidad, configurar_datos_mensualidad
 from db.operaciones.clase_tener_mensualidad import borrar_clase_tener_mensualidad
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_exito_helper, _msj_error_helper
@@ -13,9 +16,7 @@ def obtener_mensualidad_service():
     cursor = conectarse_db()
     
     mensualidades_activas = obtener_mensualidades_activa(cursor)
-    print(mensualidades_activas)
     control = _controlar_errores_query(mensualidades_activas, 500, "Error al obtener mensualidades activas.", 400, cursor)
-    print(control)
     if control is not None:
         return control
 
@@ -42,17 +43,9 @@ def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin = 
     
     # validar si el usuario existe
     usuario = consultar_usuario_por_dni(dni_cliente, cursor)
-    if usuario["status"] == 'error':
-        cursor.connection.close()
-        return {
-            "error": usuario['message']
-        }, 500
-        
-    if usuario["status"] == 'success' and usuario["data"] is None:
-        cursor.connection.close()
-        return {
-            "error": "No se encontró el usuario."
-        }, 404
+    control = _controlar_errores_query(usuario, 500, "No se encontró el usuario.", 400, cursor)
+    if control is not None:
+        return control
         
     # validar si el usuario tiene esa mensualidad
     tiene_mensualidad = verificar_usuario_tiene_mensualidad(usuario["data"]["id"], id_mensualidad, cursor)
@@ -60,35 +53,57 @@ def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin = 
         cursor.connection.close()
         return {
             "error": "El usuario no tiene esa mensualidad."
-        }, 400
+        }, 401
     
     respuesta = configurar_fin_mensualidad(id_mensualidad, cursor, fecha_fin = fecha_fin)
+    control = _controlar_errores_query_sin_none(respuesta, 500, "Error al configurar fin de mensualidad.", 402, cursor)
+    if control is not None:
+        return control
 
     cursor.connection.close()
-    if respuesta['status'] == 'error':
-        return {
-            "error": "Error al configurar fin de mensualidad.",
-            "message": respuesta['message']
-        }, 500
+    return _msj_exito_helper("Fin de mensualidad configurado exitosamente.", cursor)
 
-    return respuesta['data'], 200
+def renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion):
+    cursor = conectarse_db()
+    
+    # validar si el usuario existe
+    usuario = consultar_usuario_por_dni(dni_cliente, cursor)
+    control = _controlar_errores_query(usuario, 500, "No se encontró el usuario.", 400, cursor)
+    if control is not None:
+        return control
+        
+    # obtener la mensualidad del usuario
+    mensualidad = obtener_mensualidad_usuario(usuario["data"]["id"], id_mensualidad, cursor)
+    control = _controlar_errores_query(mensualidad, 500, "No se encontró la mensualidad del usuario.", 400, cursor)
+    if control is not None:
+        return control
+        
+    datos_mensualidad = mensualidad['data']
+    
+    respuesta = configurar_fin_mensualidad(id_mensualidad, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 500, "Error al renovar la mensualidad.", 402, cursor)
+    if control is not None:
+        return control
+    
+    respuesta, status = crear_pago_service_mensualidad(usuario['data']['id'], descripcion, id_mensualidad)
+    if status != 200:
+        roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
+        control = _controlar_errores_query_sin_none(roll_back, 500, "Error al restaurar la mensualidad.", 402, cursor)
+        if control is not None:
+            return control
+        return respuesta, status
+
+    cursor.connection.close()
+    return _msj_exito_helper("Mensualidad renovada exitosamente.", cursor)  
 
 def ver_estado_mensualidad_service(dni_cliente, id_mensualidad):
     cursor = conectarse_db()
     
     # validar si el usuario existe
     usuario = consultar_usuario_por_dni(dni_cliente, cursor)
-    if usuario["status"] == 'error':
-        cursor.connection.close()
-        return {
-            "error": usuario['message']
-        }, 500
-        
-    if usuario["status"] == 'success' and usuario["data"] is None:
-        cursor.connection.close()
-        return {
-            "error": "No se encontró el usuario."
-        }, 404
+    control = _controlar_errores_query(usuario, 500, "No se encontró el usuario.", 400, cursor)
+    if control is not None:
+        return control
     
     # validar si el usuario tiene una mensualidad con fechas dentro de la vigencia de la misma
     tiene_mensualidad = verificar_usuario_tiene_mensualidad(usuario["data"]["id"], id_mensualidad, cursor)
@@ -96,27 +111,17 @@ def ver_estado_mensualidad_service(dni_cliente, id_mensualidad):
         cursor.connection.close()
         return {
             "error": "El usuario no tiene una mensualidad con vigencia."
-        }, 400
+        }, 401
     
     # obtener si la mensualidad esta vigente
     mensualidad_activa = obtener_mensualidad_activa(usuario["data"]["id"], id_mensualidad, cursor)
+    control = _controlar_errores_query(mensualidad_activa, 500, "Error al obtener estado de mensualidad.", 402, cursor)
+    if control is not None:
+        return control
     
     cursor.connection.close()
-    if mensualidad_activa['status'] == 'error':
-        return {
-            "error": "Error al obtener estado de mensualidad.",
-            "message": mensualidad_activa['message']
-        }, 500
-        
-    if mensualidad_activa['data'] is None:
-        return {
-            "error": "No se encontró una mensualidad activa para el usuario."
-        }, 404
 
-    return {
-        "message": "Mensualidad activa encontrada.",
-        "fecha_fin": mensualidad_activa['data']['fecha_fin']        
-    }, 200
+    return _msj_exito_helper("Mensualidad activa encontrada.", cursor, mensualidad_activa['data']['fecha_fin'])
     
 def cancelar_mensualidad_service(dni_cliente, id_mensualidad):
     cursor = conectarse_db()

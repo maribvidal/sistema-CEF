@@ -127,7 +127,10 @@ def insertar_datos(cursor):
     inst_clase_ref_2 = insertar_instancia_clase(id_clase_ref, '2026-06-17', 450.0, cursor)
     inst_clase_ref_2 = inst_clase_ref_2['data']
 
-    insertar_clase_tener_mensualidad(1, id_clase_ref, cursor)
+    insertar_mensualidad(3, cursor, '2026-02-02')
+    insertar_pago(70.0, 3, cursor)
+    insertar_pago_pagar_mensualidad(4, 3, cursor)
+    insertar_clase_tener_mensualidad(3, id_clase_ref, cursor)
 
     insertar_reserva(3, inst_clase_ref_1, cursor)
     insertar_reserva(5, inst_clase_ref_2, cursor)
