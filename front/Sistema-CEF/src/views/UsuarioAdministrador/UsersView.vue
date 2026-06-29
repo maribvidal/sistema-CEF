@@ -39,6 +39,7 @@
                     color="orange-darken-2"
                     size="small"
                     title="Cambiar fecha de mensualidad"
+                    @click="handleChangeMonthlyPayment(item)"
                   ></v-btn>
                    <v-btn 
                     icon="mdi-account-off"
@@ -67,6 +68,27 @@
             </v-row>
           </template>
         </v-card>
+        <v-dialog v-model="dialog" max-width="500px">
+          <v-card>
+            <v-card-title class="text-h5">Cambiar Fecha de Mensualidad</v-card-title>
+            <v-card-text>
+              <v-form ref="form" v-model="formValid">
+                <v-text-field
+                  v-model="fechaFin"
+                  label="Nueva Fecha de Fin"
+                  type="date"
+                  :rules="[value => !!value || 'La fecha es requerida']"
+                  required
+                ></v-text-field>
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn text @click="dialog = false">Cancelar</v-btn>
+              <v-btn color="primary" :disabled="!formValid" @click="submitChange">Guardar</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
     </v-row>
   </v-container>
@@ -81,6 +103,12 @@ const users = ref([])
 const search = ref('')
 const loading = ref(false)
 const notificationStore = useNotificationStore()
+
+const dialog = ref(false)
+const fecha_fin = ref('')
+const formValid = ref(false)
+const form = ref(null)
+const usuarioSeleccionado = ref(null)
 
 const headers = [
   { title: 'DNI', key: 'dni', sortable: true },
@@ -119,8 +147,38 @@ const loadUsers = async () => {
   }
 }
 
+const handleChangeMonthlyPayment = async (item) => {
+  try {
+    const mensualidad = await UsersAdminService.getMensualidadUsuario(item.dni)
+    console.log('mensualidad:', mensualidad) // para ver la estructura y confirmar el campo id
+    usuarioSeleccionado.value = {
+      ...item,
+      id_mensualidad: mensualidad.id // ajustá el campo según lo que devuelva el log
+    }
+    fechaFin.value = ''
+    dialog.value = true
+  } catch (error) {
+    notificationStore.showNotification('Este usuario no tiene una mensualidad activa.', 'danger')
+  }
+}
+
+const submitChange = async () => {
+  try {
+    await UsersAdminService.configureMonthlyPayment(
+      usuarioSeleccionado.value.dni,
+      usuarioSeleccionado.value.id_mensualidad, // 👈 ahora viene del endpoint
+      fechaFin.value
+    )
+    notificationStore.showNotification('Fecha de mensualidad actualizada correctamente.', 'success')
+    dialog.value = false
+  } catch (error) {
+    notificationStore.showNotification('Error al actualizar la fecha de mensualidad.', 'danger')
+  }
+}
+
 onMounted(() => {
   loadUsers()
+
 })
 </script>
 

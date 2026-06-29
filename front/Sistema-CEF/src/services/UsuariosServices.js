@@ -111,7 +111,29 @@ export const UsersAdminService = {
     // La ruta en el backend es /usuarios/ObtenerListaUsuarios
     const response = await apiClient.get('/usuarios/ObtenerListaUsuarios')
     return response.data
-  }
+  },
+
+  configureMonthlyPayment: async (dni_cliente, id_mensualidad, fecha_fin) => {
+    const response = await apiClient.post('/mensualidad/configurar_fin_mensualidad', {
+      dni_cliente,
+      id_mensualidad,
+      fecha_fin
+    })
+    return response.data
+    
+  },
+
+  getEstadoMensualidad: async (dni_cliente) => {
+  const response = await apiClient.get('/mensualidad/ver_estado', { 
+    params: { dni_cliente } 
+  })
+  return response.data
+  },
+
+  getMensualidadUsuario: async (dni_cliente) => {
+  const response = await apiClient.get(`/mensualidad/${dni_cliente}`)
+  return response.data
+}
 }
 /**
  * ----------------------------------------------------------------

@@ -265,6 +265,28 @@
         :key="empleadoSeleccionado?.dni || 'nuevo'"
       />
     </v-dialog>
+
+    <v-dialog v-model="dialogMotivoElimincacionEmpleado" max-width="500px">
+      <v-card rounded="lg">
+        <v-card-title class="bg-grey-lighten-3">Motivo de Eliminación</v-card-title>
+        <v-card-text class="pt-4">
+          <v-form ref="formMotivoEliminacion">
+            <v-textarea
+              v-model="motivoEliminacion"
+              label="Ingrese el motivo de eliminación del empleado"
+              variant="outlined"
+              density="comfortable"
+              rows="4"
+            ></v-textarea>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="dialogMotivoElimincacionEmpleado = false">Cancelar</v-btn>
+          <v-btn color="red-darken-1" variant="elevated" @click="confirmarEliminacionEmpleado">Eliminar</v-btn>
+        </v-card-actions>
+      </v-card> 
+    </v-dialog>
   </v-container>
 </template>
 
@@ -296,7 +318,7 @@ const notificationStore = useNotificationStore()
 // Estados para creación de personal
 const dialogProfesor = ref(false)
 const dialogRecepcionista = ref(false)
-
+const dialogMotivoElimincacionEmpleado = ref(false)
 const opcionesGenero = ['M', 'F', 'O']
 
 const nuevoProfesor = ref({
@@ -528,28 +550,41 @@ const activarEmpleado = (empleado) => {
   notificationStore.showNotification('Por favor asigne un nuevo rol para reactivar al empleado.', 'info')
 }
 
+const motivoEliminacion = ref('')
+const empleadoAEliminar = ref(null)
 const eliminarEmpleado = (empleado) => {
-  console.log(empleado)
-  const dni = empleado?.dni
-  if (!dni) {
+  if (!empleado?.dni) {
     notificationStore.showNotification('No se pudo identificar el DNI del empleado', 'danger')
     return
   }
+  empleadoAEliminar.value = empleado
+  motivoEliminacion.value = ''
+  dialogMotivoElimincacionEmpleado.value = true  // solo abre el dialog
+}
+
+const confirmarEliminacionEmpleado = async () => {
+  if (!motivoEliminacion.value.trim()) {
+    notificationStore.showNotification('Por favor ingrese un motivo de eliminación', 'warning')
+    return
+  }
+
+  // Cierra el dialog y pide confirmación final
+  dialogMotivoElimincacionEmpleado.value = false
 
   notificationStore.showNotification(
-    `Eliminar a ${empleado.nombre} ${empleado.apellido}?`,
+    `¿Eliminar a ${empleadoAEliminar.value.nombre} ${empleadoAEliminar.value.apellido}?`,
     'danger',
     0,
     async () => {
       try {
-        await EmployeesService.deleteEmployee(dni)
+        await EmployeesService.deleteEmployee(empleadoAEliminar.value.dni, motivoEliminacion.value)
         await cargarEmpleados()
         notificationStore.showNotification('El empleado fue eliminado con éxito', 'success')
+        empleadoAEliminar.value = null
       } catch (error) {
-        console.error('Error al eliminar empleado:', error)
         const statusCode = error.status
         if (statusCode === 400) {
-          notificationStore.showNotification('El empleado no puede eliminarse si esta asociado a una clase', 'danger')
+          notificationStore.showNotification('El empleado no puede eliminarse si está asociado a una clase', 'danger')
         } else {
           notificationStore.showNotification('Hubo un error al eliminar el empleado', 'danger')
         }
@@ -557,6 +592,8 @@ const eliminarEmpleado = (empleado) => {
     }
   )
 }
+
+
 
 const abrirEditorRol = (empleado) => {
   empleadoSeleccionado.value = empleado
