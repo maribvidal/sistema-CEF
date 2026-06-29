@@ -540,6 +540,8 @@ const abrirDialogoReserva = (clase) => {
 const hacerReserva = async (tipo) => {
   const clase = claseParaReservar.value
   if (!clase) return
+  const inst_clase = await ClasesService.obtenerInstClaseSem(clase.id);
+  if (!inst_clase) return
 
   // Aquí puedes diferenciar la lógica en el futuro
   console.log(`Iniciando reserva tipo: ${tipo} para la clase ${clase.id}`)
@@ -551,7 +553,9 @@ const hacerReserva = async (tipo) => {
       hora: clase.hora,
     }
 
-    const response = await ClasesService.reservarClase(clase.id, payload)
+    const id_inst_clase = inst_clase.data.data.id
+
+    const response = await ClasesService.reservarClase(id_inst_clase, payload)
 
     // Recargamos el estado para actualizar los botones
     await fetchClasesUsuario()
