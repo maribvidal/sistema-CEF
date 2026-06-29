@@ -84,7 +84,7 @@
               <template v-slot:[`item.acciones`]='{ item }'>
                 <div class="d-flex justify-end">
                   <v-btn
-                    v-if="item.rol_id < 20" 
+                    v-if="item.rol_id < 10" 
                     icon="mdi-pencil"
                     variant="text"
                     color="blue-darken-1"
@@ -94,7 +94,7 @@
                   ></v-btn>
                   
                   <v-btn
-                    v-if="item.rol_id < 20"
+                    v-if="item.rol_id < 10 && item.rol_id !== 5"
                     icon="mdi-shield-key"
                     variant="text"
                     color="orange-darken-2"
@@ -343,8 +343,7 @@ const headers = [
 
 const rolesASeleccionar = [
   { id: 1, label: 'Administrador' },
-  { id: 2, label: 'Recepcionista' },
-  { id: 3, label: 'Usuario' }
+  { id: 2, label: 'Recepcionista' }
 ]
 
 const getRoleName = (id) => {
