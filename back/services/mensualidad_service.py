@@ -31,7 +31,7 @@ def obtener_mensualidad_usuario_service(dni_cliente):
         return control
     
     mensualidades_activas = obtener_mensualidad_activa_por_usuario(usuario["data"]["id"], cursor)
-    control = _controlar_errores_query(mensualidades_activas, 500, "Error al obtener mensualidades activas.", 400, cursor)
+    control = _controlar_errores_query(mensualidades_activas, 500, "No se encontraron mensualidades activas para este usuario.", 401, cursor)
     if control is not None:
         return control
 
