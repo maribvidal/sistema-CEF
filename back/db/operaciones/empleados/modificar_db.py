@@ -196,7 +196,6 @@ def desactivar_empleado(usuario_dni: int, cursor) -> dict:
     
     # Aplicamos la desactivación
     nuevo_rol = rol_actual + 10
-    nuevo_rol = (rol_actual % 10) + 10
     query_update = f"UPDATE Usuario SET rol_id = {nuevo_rol} WHERE dni = {usuario_dni}"
 
     return ejecutar_query(query_update, cursor)
