@@ -134,21 +134,20 @@ export const UsersAdminService = {
   },
 
   configureMonthlyPayment: async (dni_cliente, id_mensualidad, fecha_fin) => {
-    const response = await apiClient.post('/mensualidad/configurar_fin_mensualidad', {
-      dni_cliente,
-      id_mensualidad,
-      fecha_fin
-    })
-    return response.data
-    
-  },
-
-  getEstadoMensualidad: async (dni_cliente) => {
-  const response = await apiClient.get('/mensualidad/ver_estado', { 
-    params: { dni_cliente } 
+  const response = await apiClient.put('/mensualidad/configurar_fin_mensualidad', {
+    dni_cliente,
+    id_mensualidad,
+    fecha_fin
   })
   return response.data
-  },
+},
+
+  getEstadoMensualidad: async (dni_cliente, id_mensualidad) => {
+  const response = await apiClient.get('/mensualidad/ver_estado', { 
+    params: { dni_cliente, id_mensualidad } 
+  })
+  return response.data
+},
 
   getMensualidadUsuario: async (dni_cliente) => {
   const response = await apiClient.get(`/mensualidad/${dni_cliente}`)

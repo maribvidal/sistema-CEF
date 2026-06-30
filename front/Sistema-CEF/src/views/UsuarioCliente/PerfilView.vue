@@ -29,6 +29,9 @@
                 <v-col cols="12" sm="6">
                   <v-btn color="success" block variant="flat" @click="showPayments">Ver Pagos</v-btn>
                 </v-col>
+                <v-col cols="12" sm="6">
+                  <v-btn color="primary" block variant="flat" @click="showMembershipStatus">Ver Estado de Mensualidad</v-btn>
+                </v-col>
               </v-row>
             </v-col>
           </v-row>
@@ -49,33 +52,55 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="paymentsData" max-width="600px">
+    <v-dialog v-model="dialogPayments" max-width="600px">
       <v-card>
         <v-card-title class="text-h5">Historial de Pagos</v-card-title>
         <v-card-text>
-          <v-simple-table>
+          <v-table>
             <thead>
               <tr>
+                <th class="text-left">Actividad</th>
                 <th class="text-left">Fecha</th>
                 <th class="text-left">Monto</th>
-                <th class="text-left">Método de Pago</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="payment in paymentsData" :key="payment?.id">
+              <tr v-for="payment in payments" :key="payment?.id" v-if="payments?.length">
+                <td>{{ payment.actividad_nombre }}</td>
                 <td>{{ formatSpanishDate(payment.fecha) }}</td>
-                <td>{{ payment.monto }}</td>
-                <td>{{ payment.metodo_pago }}</td>
+                <td>${{ payment.monto }}</td> 
+              </tr>
+              <tr v-else>
+               <td colspan="3" class="text-center">Sin pagos registrados</td>
               </tr>
             </tbody>
-          </v-simple-table>
+          </v-table>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn text @click="dialogPayments = false">Cerrar</v-btn>
         </v-card-actions>
       </v-card>
-      </v-dialog>
+    </v-dialog>
+    <v-dialog v-model="dialogMembershipStatus" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5">Estado de Mensualidad</v-card-title>
+        <v-card-text>
+          <div v-if="membershipStatus">
+            
+            
+            <p>Fecha de fin: <strong>{{ formatSpanishDate(membershipStatus.data) }}</strong></p>
+          </div>
+          <div v-else>
+            <p>No se pudo obtener el estado de la mensualidad.</p>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text @click="dialogMembershipStatus = false">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -89,6 +114,10 @@ import { getValidImageSrc } from '@/services/ImageFormatterService.js'
 import defaultLogo from '@/assets/logoLargo.png'
 import UsuariosService from '@/services/UsuariosServices.js'
 import { PaymentsService } from '@/services/PaymentsService.js'
+import { useNotificationStore } from '@/stores/notificationStore.js'
+import {UsersAdminService} from '@/services/UsuariosServices.js'
+
+const notificationStore = useNotificationStore()
 
 const router = useRouter()
 const route = useRoute()
@@ -135,7 +164,7 @@ const userName = computed(() => profileData.value?.nombre || 'Usuario')
 const lastName = computed(() => profileData.value?.apellido || '')
 const userEmail = computed(() => profileData.value?.correo || '')
 const userBirthDate = computed(() => formatSpanishDate(profileData.value?.fecha_nac))
-
+const userDNI = computed(() => profileData.value?.dni || '')
 const isOwnProfile = computed(() => currentUser.value?.id == route.params.id)
 
 const onLogout = async () => {
@@ -191,15 +220,38 @@ const handleGenerateQR = async () => {
 }
 
 const dialogPayments = ref(false)
-const paymentsData = ref([])
+const payments   = ref([])
 
 const showPayments = async () => {
   try {
-    const payments = await PaymentsService.getUserPayments(route.params.id)
-    paymentsData.value = payments
-    dialogPayments.value = false
+    const result = await PaymentsService.getUserPayments(route.params.id)
+    payments.value = result.data || result
+    if (!payments.value || payments.value.length === 0) {
+      notificationStore.showNotification('Este usuario no tiene pagos asociados', 'danger')
+      return
+    }
+    console.log('Pagos obtenidos:', payments.value.data)
+    dialogPayments.value = true
   } catch (error) {
     notificationStore.showNotification('Este usuario no tiene pagos asociados', 'danger')
+  }
+}
+
+const dialogMembershipStatus = ref(false)
+const membershipStatus = ref(null)
+
+const showMembershipStatus = async () => {
+  try {
+    // Primero obtenés la mensualidad para conseguir el id
+    const mensualidad = await UsersAdminService.getMensualidadUsuario(userDNI.value)
+    const id_mensualidad = mensualidad.message[0].id
+
+    // Luego consultás el estado pasando ambos params
+    const result = await UsersAdminService.getEstadoMensualidad(userDNI.value, id_mensualidad)
+    membershipStatus.value = result
+    dialogMembershipStatus.value = true
+  } catch (error) {
+    notificationStore.showNotification('El usuario no posee mensualidades activas', 'danger')
   }
 }
 </script>
