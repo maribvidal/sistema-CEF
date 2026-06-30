@@ -41,11 +41,11 @@ def revisar_validez_cupos(dict_cupos: dict, cursor, fecha_fin_mensualidad = None
             WHERE ic.id = {key} AND ic.fecha BETWEEN DATE('now') 
         """
         if fecha_fin_mensualidad is not None:
-            # query += f""" AND DATE('{fecha_fin_mensualidad}')"""
-            # le sumo 10 dias para que se agreguen las reservas de la mensualidad en el periodo de gracia, luego en el renovar mensualidad solo se le suma 1 mes a la fecha de fin
-            query += f""" AND DATE('{fecha_fin_mensualidad}', '+10 days')"""
+            # query += f""" AND DATE('{fecha_fin_mensualidad}', '+10 days')"""
+            query += f""" AND DATE('{fecha_fin_mensualidad}', '+1 month')"""
         else:
-            query += f""" AND DATE('now', '+1 month')"""
+            # query += f""" AND DATE('now', '+1 month')"""
+            query += f""" AND DATE('now', '+2 month')"""
         
         resultado = ejecutar_fetchone(query, cursor)
         if resultado['status'] == "success" and resultado['data'] is not None:

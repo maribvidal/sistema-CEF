@@ -1,5 +1,6 @@
 import time
 
+from db.operaciones.reservas.borrar_db import borrar_reserva
 from db.operaciones.mensualidades.insertar_db import agregar_nuevas_reservas_mensualidad
 from services.pagos_service import crear_pago_service_mensualidad
 from utils.envio_mails import enviar_mail
@@ -61,13 +62,20 @@ def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin = 
     if control is not None:
         return control
     
-    respuesta = agregar_nuevas_reservas_mensualidad(id_mensualidad, usuario['data']['id'], cursor)
-    
-    if respuesta['status'] != "success":
+    reservas_agregadas = agregar_nuevas_reservas_mensualidad(id_mensualidad, usuario['data']['id'], cursor)
+    if reservas_agregadas['status'] != "success":
         roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
         control2 = _controlar_errores_query_sin_none(roll_back, 500, "Error al restaurar la mensualidad.", 402, cursor)
         if control2 is not None:
             return control2
+        
+        # en este caso no sabria como manejarlo, preguntarle a los chicos porq lo fuerza la recepcionista a que sea hasta un fin de mensualidad especifico, por ahi
+        # simplemente agregarlo a la lista de espera directamente sin retornar nada
+        if reservas_agregadas['status'] == "no_cupos":
+            return {
+                "status": "no_cupos",
+                "message": "No se pudieron agregar nuevas reservas por falta de cupos."
+            }, 201
         
         return {
             "error": "Error al agregar nuevas reservas de la mensualidad."
@@ -98,28 +106,16 @@ def renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion):
     if control is not None:
         return control
     
-    respuesta, status = crear_pago_service_mensualidad(usuario['data']['id'], descripcion, id_mensualidad)
-    #status = 200
-    if status != 200:
-        roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
-        control = _controlar_errores_query_sin_none(roll_back, 500, "Error al restaurar la mensualidad.", 402, cursor)
-        if control is not None:
-            return control
-        return respuesta, status
-
-    respuesta = agregar_nuevas_reservas_mensualidad(id_mensualidad, usuario['data']['id'], cursor)
-    
-    if respuesta['status'] != "success":
+    reservas_agregadas = agregar_nuevas_reservas_mensualidad(id_mensualidad, usuario['data']['id'], cursor)
+    if reservas_agregadas['status'] != "success":
         roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
         control2 = _controlar_errores_query_sin_none(roll_back, 500, "Error al restaurar la mensualidad.", 402, cursor)
         if control2 is not None:
             return control2
         
-        # no se si se usarian los endpoints de reserva para confirmacion de abonados en este caso, pensarlo bien
-        # tambien pensar bien como haria para volver a hacer los pasos anteriores de configurar fin de mensualidad y crear pago
-        # creo que podria utilizar la misma funcion para renovar mensualidad y configurar fin de mensualidad pasandole un parametro que indique que quiere hacer
-        # tambien le podria pasar para otro endpoint de confirmacion y que en vez de hacer el pago se agregue a la lista de espera de abonados para esa clase especifica
-        if respuesta['status'] == "no_cupos":
+        # aca en front simplemente preguntan si es que quiere entrar a la lista de espera de abonados (voy a crear un route confirmarListaEsperaAbonados)
+        # luego se maneja con la funcion que hizo marian
+        if reservas_agregadas['status'] == "no_cupos":
             return {
                 "status": "no_cupos",
                 "message": "No se pudieron agregar nuevas reservas por falta de cupos."
@@ -128,6 +124,22 @@ def renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion):
         return {
             "error": "Error al agregar nuevas reservas de la mensualidad."
         }, 402
+    
+    respuesta, status = crear_pago_service_mensualidad(usuario['data']['id'], descripcion, id_mensualidad)
+    #status = 200
+    if status != 200:
+        roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
+        control = _controlar_errores_query_sin_none(roll_back, 500, "Error al hacer rollback.", 402, cursor)
+        if control is not None:
+            return control
+        
+        for reserva in reservas_agregadas['data']:
+            roll_back = borrar_reserva(reserva, cursor)
+            control = _controlar_errores_query_sin_none(roll_back, 500, "Error al borrar reservas de la mensualidad.", 402, cursor)
+            if control is not None:
+                return control
+        
+        return respuesta, status
         
     cursor.connection.close()
     return _msj_exito_helper("Mensualidad renovada exitosamente.", cursor)  

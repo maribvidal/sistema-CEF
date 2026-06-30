@@ -10,13 +10,13 @@ def configurar_fin_mensualidad(id_mensualidad: int, cursor, fecha_fin=None):
         seteo=f""" 
             SET
                 fecha_ini = CASE
-                    WHEN DATE(fecha_fin) < DATE('now')
+                    WHEN DATE(fecha_fin, '+10 days') < DATE('now')
                         THEN DATE('now')
                     ELSE fecha_ini
                 END,
                 
                 fecha_fin = CASE
-                    WHEN DATE(fecha_fin) < DATE('now')
+                    WHEN DATE(fecha_fin, '+10 days') < DATE('now')
                         THEN DATE('now', '+1 month')
                     ELSE DATE(fecha_fin, '+1 month')
                 END
