@@ -8,6 +8,7 @@ from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
+from db.operaciones.usuarios.consultar_db import obtener_estado_usuario
 
 import jwt
 
@@ -43,13 +44,31 @@ def login_service(correo: str, contraseña: str) -> tuple:
     print("Consultando usuario por correo...")
     
     usuario = consultar_usuario_por_correo(correo, cursor)
-    
     print(" resultado consulta usuario: ", dict(usuario['data']) if usuario['data'] else None)
     if usuario["status"] == "error":
         cursor.connection.close()
         return {
             "error": usuario["message"]
         }, 500
+
+
+    # ------------- VERIFICACIÓN DE ESTADO DEL USUARIO (CORREO VERIFICADO) -------------
+    usuario_id = usuario['data']['id']
+    estado_usuario = obtener_estado_usuario(usuario_id, cursor)
+    if estado_usuario['status'] == 'error':
+        print("Error al obtener el estado del usuario: ", estado_usuario['message'])
+        cursor.connection.close()
+        return {
+            "error": estado_usuario['message']
+        }, 500
+    elif estado_usuario['data']['estado'] == 0:
+        cursor.connection.close()
+        print("El usuario existe pero el correo no está verificado")
+        return {
+            "error": "El correo del usuario no está verificado."
+        }, 401
+    print("El usuario existe y su correo está verificado")
+    # ------------- FIN VERIFICACIÓN ESTADO DE USUARIO (CORREO VERIFICADO) -------------
 
     if usuario['status'] == 'success' and usuario['data'] is not None:
         if usuario['data']['contraseña'] != contraseña:

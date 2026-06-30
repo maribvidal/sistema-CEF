@@ -7,6 +7,12 @@ def insertar_usuario(dni: int, nombre: str, apellido: str, contraseña: str, fec
                 VALUES ({dni}, '{nombre}', '{apellido}', '{contraseña}', '{fecha_nac}', '{correo}', '{telefono}', '{genero}', {rol});"""
     return ejecutar_insertar(query, cursor)
 
+def insertar_usuario_verificado(dni: int, nombre: str, apellido: str, contraseña: str, fecha_nac: str, correo: str, telefono: str, genero: str, rol: int, cursor):
+    """Permite insertar una fila para la tabla Usuario"""
+    query = f"""INSERT INTO Usuario (dni, nombre, apellido, contraseña, fecha_nac, correo, telefono, genero, rol_id, estado)
+                VALUES ({dni}, '{nombre}', '{apellido}', '{contraseña}', '{fecha_nac}', '{correo}', '{telefono}', '{genero}', {rol}, {1});"""
+    return ejecutar_insertar(query, cursor)
+
 def insertar_usuario_lista_espera_abonados(id_lea: int, id_usuario: int, cursor):
     """Permite insertar a un usuario en una lista de espera de abonados."""
     fecha = generar_fecha_hora_actual()

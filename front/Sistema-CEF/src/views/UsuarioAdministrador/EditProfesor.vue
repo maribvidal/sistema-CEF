@@ -110,7 +110,7 @@ watch(() => props.empleado, (newVal) => {
 const fetchProfesorActivities = async () => {
   if (!employee.value.id) return
   try {
-    const resAct = await ClasesService.listarActividadesProfesor(employee.value.id)
+    const resAct = await EmployeesService.listarActividadesProfesor(employee.value.id)
     if (Array.isArray(resAct)) {
       employee.value.actividades = resAct.map(a => a.id ?? a[0])
     }
@@ -133,7 +133,7 @@ const updateEmployee = async () => {
   loading.value = true
   try {
     const payload = { ...employee.value }
-    await EmployeesService.updateEmployeeInfo(employee.value.dni, payload)
+    await EmployeesService.updateProfesorInfo(employee.value.dni, employee.value.nuevo_dni, payload)
 
     notificationStore.showNotification('El profesor fue modificado correctamente', 'success')
     emit('updated')

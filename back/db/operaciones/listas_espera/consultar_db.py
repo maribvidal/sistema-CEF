@@ -1,13 +1,26 @@
 from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
 
+def consultar_lista_espera_abonado_usuario_por_idClase(idClase: int, dniUsuario: int, cursor):
+    """Operación que consulta si un usuario pertenece a la lista de espera de abonados de una clase específica."""
+    query = f"""
+        SELECT 1
+        FROM Lista_Espera_Abonados l
+        INNER JOIN Usuario_Pertenece_Lista_Espera_Abonados up ON l.id = up.lea_id
+        INNER JOIN Usuarios u ON up.usuario_id = u.id
+        WHERE l.clase_id = {idClase}
+          AND u.dni = {dniUsuario};
+    """
+    return ejecutar_fetchone(query, cursor);
+
 def consultar_lista_espera_abonado(id_usuario: int, id_lea: int, cursor):
     """Operación que consulta por listas de espera según el id del usuario y el id de la clase
         asociada a la lista de espera."""
     query = f"""
         SELECT 1
-        FROM Lista_Espera_Abonados
-        WHERE usuario_id = {id_usuario}
-          AND lea_id = {id_lea}
+        FROM Lista_Espera_Abonados l
+        INNER JOIN Usuario_Pertenece_Lista_Espera_Abonados up ON l.id = up.lea_id
+        WHERE up.usuario_id = {id_usuario}
+          AND l.id = {id_lea}
     """
     return ejecutar_fetchone(query, cursor);
   
@@ -16,9 +29,10 @@ def consultar_lista_espera_individual(id_usuario: int, id_lei: int, cursor):
         asociada a la lista de espera."""
     query = f"""
         SELECT 1
-        FROM Lista_Espera_Individual
-        WHERE usuario_id = {id_usuario}
-          AND lei_id = {id_lei}
+        FROM Lista_Espera_Individual lei
+        INNER JOIN Usuario_Pertenece_Lista_Espera_Individual up ON lei.id = up.lei_id
+        WHERE up.usuario_id = {id_usuario}
+          AND lei.id = {id_lei}
     """
     return ejecutar_fetchone(query, cursor);
   

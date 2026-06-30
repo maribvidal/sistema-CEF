@@ -102,9 +102,11 @@ export const EmployeesService = {
     return response.data
   },
 
+  /**
+   * Lista actividades del profesor
+   */
   listarActividadesProfesor: async (data) => {
-    const response = await apiClient.post('/empleados/listarActividadesProfesor', {id: data})
+    const response = await apiClient.get(`/empleados/listarActividadesProfesor/${data}`)
     return response.data
   }
-
 }
