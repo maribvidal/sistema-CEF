@@ -110,8 +110,7 @@ watch(() => props.empleado, (newVal) => {
 const fetchProfesorActivities = async () => {
   if (!employee.value.id) return
   try {
-    const resAct = await EmployeesService.listarActividadesProfesor(employee.value.id) 
-    console.log(resAct)
+    const resAct = await EmployeesService.listarActividadesProfesor(employee.value.id)
     if (Array.isArray(resAct)) {
       employee.value.actividades = resAct.map(a => a.id ?? a[0])
     }

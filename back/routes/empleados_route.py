@@ -74,13 +74,9 @@ def crear_recepcionista():
 
     return jsonify(respuesta), status
 
-@empleados_bp.route('/empleados/listarActividadesProfesor', methods=['GET'])
-def listar_actividades_profesor():
+@empleados_bp.route('/empleados/listarActividadesProfesor/<int:id_profesor>', methods=['GET'])
+def listar_actividades_profesor(id_profesor):
     """Endpoint para recibir una lista de actividades de un profesor."""
-
-    data = request.get_json()
-
-    id_profesor = data.get("id")
 
     respuesta, status = listar_actividades_profesor_service(id_profesor)
 
