@@ -53,10 +53,10 @@ def pagar_mensualidad():
         si no se da caso fallido se ejecuta el pago con mp.
     """
     data = request.get_json()
-    dni_cliente = data.get("dni_cliente")
+    usuario_id = data.get("usuario_id")
     clase_id = data.get("clase_id")
 
-    respuesta, status = verificar_poder_pagar_mensualidad_service(dni_cliente, clase_id)
+    respuesta, status = verificar_poder_pagar_mensualidad_service(usuario_id, clase_id)
     
     return jsonify(respuesta), status
 

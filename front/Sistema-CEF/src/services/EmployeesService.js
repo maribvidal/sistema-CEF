@@ -109,5 +109,4 @@ export const EmployeesService = {
     const response = await apiClient.get(`/empleados/listarActividadesProfesor/${data}`)
     return response.data
   }
-
 }

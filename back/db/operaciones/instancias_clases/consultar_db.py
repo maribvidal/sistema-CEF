@@ -33,11 +33,6 @@ def obtener_instancia_clase_por_clase_id_semana(clase_id: int, cursor) -> dict:
     return ejecutar_fetchone(query, cursor)
 
 def revisar_validez_cupos(dict_cupos: dict, cursor, fecha_fin_mensualidad = None):
-    """Función que itera sobre todas las instancias de clases que
-        figuran en dict_cupos, y comprueba que en todas haya
-        cupos disponibles. Devuelve un diccionario con los cupos
-        disponibles por cada instancia de clase."""
-    
     dict_cupos_validos = {}
     for key in dict_cupos.keys():
         query = f"""
@@ -46,9 +41,11 @@ def revisar_validez_cupos(dict_cupos: dict, cursor, fecha_fin_mensualidad = None
             WHERE ic.id = {key} AND ic.fecha BETWEEN DATE('now') 
         """
         if fecha_fin_mensualidad is not None:
-            query += f""" AND DATE('{fecha_fin_mensualidad}')"""
+            # query += f""" AND DATE('{fecha_fin_mensualidad}', '+10 days')"""
+            query += f""" AND DATE('{fecha_fin_mensualidad}', '+1 month')"""
         else:
-            query += f""" AND DATE('now', '+1 month')"""
+            # query += f""" AND DATE('now', '+1 month')"""
+            query += f""" AND DATE('now', '+2 month')"""
         
         resultado = ejecutar_fetchone(query, cursor)
         if resultado['status'] == "success" and resultado['data'] is not None:
