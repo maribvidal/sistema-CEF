@@ -246,7 +246,7 @@
                   min="0"
                   variant="outlined"
                   density="compact"
-                  @input="(value) => (nuevaClase.cupo_maximo = normalizarNoNegativo(value))"
+                  @update:modelValue="(value) => (nuevaClase.cupo_maximo = normalizarNoNegativo(value))"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
@@ -258,7 +258,7 @@
                   prefix="$"
                   variant="outlined"
                   density="compact"
-                  @input="(value) => (nuevaClase.monto = normalizarNoNegativo(value))"
+                  @update:modelValue="(value) => (nuevaClase.monto = normalizarNoNegativo(value))"
                 ></v-text-field>
               </v-col>
             </v-row>

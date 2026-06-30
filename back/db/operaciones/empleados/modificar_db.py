@@ -54,11 +54,7 @@ def modificar_empleado(
             nombre = '{nombre_final}',
             apellido = '{apellido_final}',"""
     if correo is not None:
-<<<<<<< HEAD
-        query_update += f"correo = '{correo}',"   
-=======
         query_update += f"correo = '{correo}',"
->>>>>>> 0406601b8ff7e7ecb23471ac74d50fcb7b03fcea
     query_update += f"""genero = '{genero_final}',
             rol_id = {rol_id_final}
         WHERE dni = {empleado_dni}
