@@ -10,7 +10,10 @@ from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario
 from db.operaciones.mensualidades.consultar_db import consultar_mensualidad_cubre_clase
 from db.operaciones.empleados.consultar_db import listar_dnis_empleados
+from db.operaciones.usuarios.consultar_db import obtener_clases_usuario
+
 from utils.envio_mails import enviar_mail, enviar_mail_confirmacion_nuevo_correo, enviar_mail_verificacion_registro
+from services import _controlar_errores_query, _msj_exito_helper
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -649,3 +652,22 @@ def verificar_correo_usuario_service(usuario_id):
     return {
         "message": "Correo verificado exitosamente."
     }, 200
+
+def obtener_clases_usuario_service(usuario_id):
+    """Service que permite obtener las clases."""
+
+    cursor = conectarse_db()
+
+    # Controlar que exista el usuario
+    respuesta = usuario = consultar_usuario_por_id(usuario_id, cursor)
+    control = _controlar_errores_query(respuesta, 400, "El usuario no existe.", 401, cursor)
+    if control is not None:
+        return control
+
+    respuesta = obtener_clases_usuario(usuario_id, cursor)
+    control = _controlar_errores_query(respuesta, 402, "No se pudieron obtener las clases de usuario.", 403, cursor)
+    if control is not None:
+        return control
+    
+    cursor.connection.close()
+    return _msj_exito_helper("Se devolvieron las clases a las cuales el usuario está inscript con éxito.", cursor, respuesta["data"])
