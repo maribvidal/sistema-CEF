@@ -13,5 +13,6 @@ class Dias(Enum):
     Viernes = 4
     SABADO = 5
     Sabado = 5
+    Sábado = 5
     DOMINGO = 6
     Domingo = 6

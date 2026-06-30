@@ -68,6 +68,7 @@ def crear_reserva_abonado_service(usuario_id: int, clase_id: int):
     # Obtener las instancias de las clases
 
     respuesta = consultar_instancias_por_clase_id(clase_id, cursor)
+    print(respuesta)
     control = _controlar_errores_query(respuesta, 400, "La consulta por las instancias de la clase falló.", 401, cursor)
     if control is not None:
         return control
