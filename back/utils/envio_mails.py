@@ -41,3 +41,16 @@ def enviar_mail_confirmacion_nuevo_correo(id_usuario: int, enlace: str, cursor):
 
     html = f"Le contactamos desde el equipo del Sistema CEF para que confirme su nuevo correo \ntocando <a href=\"{enlace}\">este enlace.</a>\nSi no fue usted quien realizó este cambio, por favor contacte con el soporte técnico."
     enviar_mail(correo, "Confirmación de cambio de correo", html)
+
+def enviar_mail_verificacion_registro(id_usuario: int, correo: str, enlace: str):
+    """Función que envía un correo electrónico al usuario recién registrado
+       para que verifique su cuenta."""
+    
+    html = f"""
+    <h3>¡Bienvenido al Sistema CEF!</h3>
+    <p>Gracias por registrarte. Para poder utilizar su cuenta, necesitamos que confirme su dirección de correo electrónico.</p>
+    <p>Por favor, haga clic en <a href="{enlace}">este enlace para verificar su cuenta.</a></p>
+    <p>Si usted no solicitó este registro, ignore este correo.</p>
+    """
+    
+    enviar_mail(correo, "Verifique su cuenta en el Sistema CEF", html)

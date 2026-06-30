@@ -60,3 +60,15 @@ def modificar_avatar(usuario_id: int, imagen_id: int, cursor):
     """
 
     return ejecutar_query(query,cursor)
+
+def modificar_estado_usuario(usuario_id: int, cursor):
+    """Recibe el id de un usuario y lo actualiza cambiando
+        su estado a inactivo (0) o activo (1)."""
+
+    query = f"""
+        UPDATE Usuario
+        SET estado = 1
+        WHERE id = {usuario_id};
+    """
+
+    return ejecutar_query(query,cursor)
