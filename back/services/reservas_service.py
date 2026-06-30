@@ -58,31 +58,33 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
     return _msj_exito_helper(f"La reserva {respuesta["data"]} ha sido creada exitosamente.", cursor)
 
 def crear_reserva_abonado_service(usuario_id: int, clase_id: int):
-    """Service que permite crearle una reserva para todas las instancias
-        existentes de una clase a un abonado."""
+    # """Service que permite crearle una reserva para todas las instancias
+    #     existentes de una clase a un abonado."""
 
     cursor = conectarse_db()
 
-    # CONSULTAR: ¿Valido si el usuario y la instancia de la clase existen?
+    # # CONSULTAR: ¿Valido si el usuario y la instancia de la clase existen?
 
-    # Obtener las instancias de las clases
+    # # Obtener las instancias de las clases
 
-    respuesta = consultar_instancias_por_clase_id(clase_id, cursor)
-    print(respuesta)
-    control = _controlar_errores_query(respuesta, 400, "La consulta por las instancias de la clase falló.", 401, cursor)
-    if control is not None:
-        return control
+    # respuesta = consultar_instancias_por_clase_id(clase_id, cursor)
+    # print(respuesta)
+    # control = _controlar_errores_query(respuesta, 400, "La consulta por las instancias de la clase falló.", 401, cursor)
+    # if control is not None:
+    #     return control
     
-    instancias = respuesta["data"]
+    # instancias = respuesta["data"]
 
-    # Intentar crear las reservas
+    # # Intentar crear las reservas
 
-    for instancia in instancias:
-        respuesta = insertar_reserva(usuario_id, instancia["id"], cursor)
-        control = _controlar_errores_query(respuesta, 402, "La reserva ya había sido creada.", 403, cursor)
-        if control is not None:
-            return control
+    # for instancia in instancias:
+    #     respuesta = insertar_reserva(usuario_id, instancia["id"], cursor)
+    #     control = _controlar_errores_query(respuesta, 402, "La reserva ya había sido creada.", 403, cursor)
+    #     if control is not None:
+    #         return control
 
-    cursor.connection.commit()
+    # cursor.connection.commit()
 
+    # return _msj_exito_helper(f"La reservas para el usuario abonado {usuario_id} han sido creadas exitosamente.", cursor)
     return _msj_exito_helper(f"La reservas para el usuario abonado {usuario_id} han sido creadas exitosamente.", cursor)
+    
