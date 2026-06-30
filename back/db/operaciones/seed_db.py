@@ -122,9 +122,9 @@ def insertar_datos(cursor):
     id_clase_ref = insertar_clase('Programada', 3, id_prof1, 3, "Miércoles", "18:00", 12, 450.0, cursor)
     id_clase_ref = id_clase_ref['data']
 
-    inst_clase_ref_1 = insertar_instancia_clase(id_clase_ref, '2026-06-10', 450.0, cursor)
+    inst_clase_ref_1 = insertar_instancia_clase(id_clase_ref, '2026-07-10', 450.0, cursor)
     inst_clase_ref_1 = inst_clase_ref_1['data']
-    inst_clase_ref_2 = insertar_instancia_clase(id_clase_ref, '2026-06-17', 450.0, cursor)
+    inst_clase_ref_2 = insertar_instancia_clase(id_clase_ref, '2026-09-17', 450.0, cursor)
     inst_clase_ref_2 = inst_clase_ref_2['data']
 
     insertar_mensualidad(3, cursor, '2026-02-02')

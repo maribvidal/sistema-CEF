@@ -1,14 +1,15 @@
 import time
 
+from db.operaciones.mensualidades.borrar_db import borrar_reservas_mensualidad
 from db.operaciones.clase_tener_mensualidad.borrar_db import borrar_clase_tener_mensualidad
 from db.operaciones.mensualidades.consultar_db import verificar_usuario_tenga_mensualidad_clase
 from db.operaciones.clase_tener_mensualidad.insertar_db import insertar_clase_tener_mensualidad
 from db.operaciones.pago_pagar_clase.borrar_db import borrar_pago_pagar_clase
 from db.operaciones.clases.consultar_db import consultar_clase_por_id_instancia
-from db.operaciones.mensualidades.insertar_db import insertar_mensualidad
+from db.operaciones.mensualidades.insertar_db import insertar_mensualidad, insertar_reservas_mensualidad
 from utils.modulo_manejo_listas import revisar_cupos_disponible_abonado, revisar_si_hay_cupos
 from db.operaciones.clase_tener_mensualidad.consultar_db import consultar_montos_mensualidad
-from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
+from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, revisar_validez_cupos
 from db.operaciones.pago_pagar_clase.insertar_db import insertar_pago_pagar_clase
 from db.operaciones.pago_pagar_mensualidad.insertar_db import insertar_pago_pagar_mensualidad
 from db.operaciones.pagos.borrar_db import borrar_pago
@@ -19,6 +20,7 @@ from db.operaciones.conectar_db import conectarse_db
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
 
+# esto lo podria replantear como que las inserciones se hagan luego del pago asi no tengo que andar haciendo rollbacks
 def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
     cursor = conectarse_db()
     
@@ -39,7 +41,18 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
     if control is not None:
         return control
 
-    dict_cupos = revisar_si_hay_cupos(clase['data']['id'], cursor)
+    dict_cupos = revisar_si_hay_cupos(clase['data']['id'], cursor) # me devuelve { inst_clase_id: numero_cupos }
+    # revisar que las instancias de clase que me manda este dentro del rango de la mensualidad que se va a crear
+    print("dict_cupos", dict_cupos)
+    
+    dict_cupos = revisar_validez_cupos(dict_cupos, cursor)
+    print("dict_cupos despues de revisar validez", dict_cupos)
+    # valores de prueba en postman:
+    # {
+    #     "dni_cliente": 8,
+    #     "clase_id": 3
+    # }
+    
     hay_cupos = revisar_cupos_disponible_abonado(dict_cupos)
     
     if not hay_cupos:
@@ -67,13 +80,36 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
             return control2
         
         return control
+    
+    respuesta = insertar_reservas_mensualidad(usuario_id, dict_cupos, cursor)
+    control = _controlar_errores_query(respuesta, 500, "No se pudo insertar las reservas de la mensualidad.", 400, cursor)
+    if control is not None:
+        respuesta = borrar_clase_tener_mensualidad(id_mensualidad, cursor)
+        control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la clase tener mensualidad.", 400, cursor)
+        if control2 is not None:
+            return control2
+        
+        respuesta = borrar_mensualidad(id_mensualidad, cursor)
+        control3 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
+        if control3 is not None:
+            return control3
+        
+        return control
 
     cursor.connection.close()
     
     respuesta, status = crear_pago_service_mensualidad(usuario_id, "Pago de mensualidad", id_mensualidad)
+    # para pruebas:
+    # status = 401
+    # time.sleep(10)
     
     if status != 200:
         cursor_cleanup = conectarse_db()
+        
+        respuesta = borrar_reservas_mensualidad(id_mensualidad, cursor_cleanup)
+        control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar las reservas de la mensualidad.", 400, cursor_cleanup)
+        if control is not None:
+            return control
         
         respuesta = borrar_clase_tener_mensualidad(id_mensualidad, cursor_cleanup)
         control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la clase tener mensualidad.", 400, cursor_cleanup)
