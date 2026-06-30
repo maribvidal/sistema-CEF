@@ -9,13 +9,9 @@ def listar_empleados(cursor) -> dict:
     """Lista todos los usuarios que son empleados."""
     # UN PROFESOR TAMBIÉN ES UN EMPLEADOOOOOOO
     query = """
-        SELECT id, nombre, apellido, rol_id, dni, correo, genero, telefono
+        SELECT id, nombre, apellido, rol_id, dni, genero, telefono
         FROM Usuario
-        WHERE rol_id IN (0, 1, 2, 4, 10, 11, 12, 14, 20, 21, 22, 24)
-        UNION
-        SELECT p.id, p.nombre, p.apellido, p.rol_id, p.dni, p.genero, p.telefono, a.actividad_id
-        FROM Usuario p INNER JOIN Profesor_Actividad pa ON (p.id = pa.profesor_id)
-        WHERE p.rol_id IN (5, 15, 25)
+        WHERE rol_id IN (0, 1, 2, 4, 5, 10, 11, 12, 14, 15, 20, 21, 22, 24, 25)
     """
     return ejecutar_fetchall(query, cursor)
 
