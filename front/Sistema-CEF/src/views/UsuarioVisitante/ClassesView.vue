@@ -246,7 +246,7 @@
                   min="0"
                   variant="outlined"
                   density="compact"
-                  @input="(value) => (nuevaClase.cupo_maximo = normalizarNoNegativo(value))"
+                  @update:modelValue="(value) => (nuevaClase.cupo_maximo = normalizarNoNegativo(value))"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
@@ -258,7 +258,7 @@
                   prefix="$"
                   variant="outlined"
                   density="compact"
-                  @input="(value) => (nuevaClase.monto = normalizarNoNegativo(value))"
+                  @update:modelValue="(value) => (nuevaClase.monto = normalizarNoNegativo(value))"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -503,6 +503,8 @@ const actualizarClase = async () => {
       notificationStore.showNotification('Ese profesor ya tiene una clase asignada en ese día y horario', 'danger')
     } else if (statusCode === 412) {
       notificationStore.showNotification('El profesor no está habilitado para dar esa actividad', 'danger')
+    } else if (statusCode === 408) {
+      notificationStore.showNotification('La clase no se pudo modificar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger')
     } else {
       notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
     }
