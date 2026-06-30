@@ -23,6 +23,30 @@ def verificar_usuario_tenga_mensualidad_clase(usuario_id: int, clase_id: int, cu
     """
     return ejecutar_fetchone(query, cursor)
 
+def verificar_disponibilidad_usuario(usuario_id: int, clase_id: int, cursor) -> dict:
+    """Hace una consulta para verificar si un usuario tiene disponibilidad para inscribirse en una clase"""
+    query = f"""
+        SELECT 1
+        FROM Usuario u
+        INNER JOIN Reserva r ON r.usuario_id = u.id
+        INNER JOIN Instancia_Clase ic ON ic.id = r.inst_clase_id
+        INNER JOIN Clase c ON c.id = ic.clase_id
+        WHERE u.id = {usuario_id} AND c.dia = (
+            SELECT c2.dia
+            FROM Clase c2
+            WHERE c2.id = {clase_id}
+        ) AND c.hora = (
+            SELECT c3.hora
+            FROM Clase c3
+            WHERE c3.id = {clase_id}
+        ) AND ic.fecha = (
+            SELECT ic2.fecha
+            FROM Instancia_Clase ic2
+            WHERE ic2.clase_id = {clase_id}
+        )
+    """
+    return ejecutar_fetchone(query, cursor)
+
 def verificar_usuario_tenga_mensualidad(usuario_id: int, id_mensualidad: int, cursor) -> dict:
     """Hace una consulta para verificar si un usuario tiene una mensualidad"""
     query = f"""

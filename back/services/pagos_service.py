@@ -2,7 +2,7 @@ import time
 
 from db.operaciones.mensualidades.borrar_db import borrar_reservas_mensualidad
 from db.operaciones.clase_tener_mensualidad.borrar_db import borrar_clase_tener_mensualidad
-from db.operaciones.mensualidades.consultar_db import verificar_usuario_tenga_mensualidad_clase
+from db.operaciones.mensualidades.consultar_db import verificar_usuario_tenga_mensualidad_clase, verificar_disponibilidad_usuario
 from db.operaciones.clase_tener_mensualidad.insertar_db import insertar_clase_tener_mensualidad
 from db.operaciones.pago_pagar_clase.borrar_db import borrar_pago_pagar_clase
 from db.operaciones.clases.consultar_db import consultar_clase_por_id_instancia
@@ -36,7 +36,14 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
     if control is not None:
         return control
     
+    verificacion = verificar_disponibilidad_usuario(usuario_id, clase_id, cursor)
+    print("verificacion", verificacion)
+    control = _controlar_errores_query_sin_none(verificacion, 500, "El usuario no tiene disponibilidad para inscribirse en esa clase.", 401, cursor)
+    if control is not None:
+        return control
+
     clase = consultar_clase_por_id(clase_id, cursor)
+    print("clase", clase)
     control = _controlar_errores_query(clase, 500, "No se encontro la clase asociada a la mensualidad.", 404, cursor)
     if control is not None:
         return control
@@ -59,8 +66,9 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
         # aca lo tendria que mandar el front un mensaje diciendo que no hay cupos disponibles que si quiere incribirse a la lista de espera de abonados y de ahi que llame al otro endpoint
         cursor.connection.close()
         return {
-            "error": "No hay cupos disponibles para la clase asociada a la mensualidad."
-        }, 402
+            "status": "no_cupos",
+            "message": "No se pudieron agregar nuevas reservas por falta de cupos."
+        }, 501
     
     # generar mensualidad y mandar el id como retorno
     respuesta = insertar_mensualidad(usuario_id, cursor)
@@ -100,7 +108,7 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
     
     respuesta, status = crear_pago_service_mensualidad(usuario_id, "Pago de mensualidad", id_mensualidad)
     # para pruebas:
-    # status = 401
+    #status = 200
     # time.sleep(10)
     
     if status != 200:

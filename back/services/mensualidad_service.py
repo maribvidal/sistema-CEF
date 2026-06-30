@@ -107,6 +107,7 @@ def renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion):
         return control
     
     reservas_agregadas = agregar_nuevas_reservas_mensualidad(id_mensualidad, usuario['data']['id'], cursor)
+    print("reservas_agregadas", reservas_agregadas)
     if reservas_agregadas['status'] != "success":
         roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
         control2 = _controlar_errores_query_sin_none(roll_back, 500, "Error al restaurar la mensualidad.", 402, cursor)
@@ -119,14 +120,15 @@ def renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion):
             return {
                 "status": "no_cupos",
                 "message": "No se pudieron agregar nuevas reservas por falta de cupos."
-            }, 201
+            }, 501
         
         return {
             "error": "Error al agregar nuevas reservas de la mensualidad."
         }, 402
     
     respuesta, status = crear_pago_service_mensualidad(usuario['data']['id'], descripcion, id_mensualidad)
-    #status = 200
+    # time.sleep(10)
+    # status = 200
     if status != 200:
         roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
         control = _controlar_errores_query_sin_none(roll_back, 500, "Error al hacer rollback.", 402, cursor)
