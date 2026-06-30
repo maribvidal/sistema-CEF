@@ -11,7 +11,11 @@ def listar_empleados(cursor) -> dict:
     query = """
         SELECT id, nombre, apellido, rol_id, dni, correo, genero, telefono
         FROM Usuario
-        WHERE rol_id IN (0, 1, 2, 4, 5)
+        WHERE rol_id IN (0, 1, 2, 4, 10, 11, 12, 14, 20, 21, 22, 24)
+        UNION
+        SELECT p.id, p.nombre, p.apellido, p.rol_id, p.dni, p.genero, p.telefono, a.actividad_id
+        FROM Usuario p INNER JOIN Profesor_Actividad pa ON (p.id = pa.profesor_id)
+        WHERE p.rol_id IN (5, 15, 25)
     """
     return ejecutar_fetchall(query, cursor)
 
@@ -20,7 +24,7 @@ def listar_correos_empleados(cursor) -> dict:
     query = """
         SELECT correo
         FROM Usuario
-        WHERE rol_id IN (0, 1, 2, 4, 5)
+        WHERE rol_id IN (0, 1, 2, 4, 5, 10, 11, 12, 14, 15, 20, 21, 22, 24, 25)
     """
     return ejecutar_fetchall(query, cursor)
 
@@ -29,6 +33,6 @@ def listar_dnis_empleados(cursor) -> dict:
     query = """
         SELECT dni
         FROM Usuario
-        WHERE rol_id = 0 OR rol_id = 1 OR rol_id = 2 OR rol_id = 4
+        WHERE rol_id IN (0, 1, 2, 4, 5, 10, 11, 12, 14, 15, 20, 21, 22, 24, 25)
     """
     return ejecutar_fetchall(query, cursor)
