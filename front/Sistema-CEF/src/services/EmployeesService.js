@@ -79,7 +79,9 @@ export const EmployeesService = {
       dni: data.dni,
       nombre: data.nombre,
       apellido: data.apellido,
-      genero: data.genero
+      genero: data.genero,
+      telefono: data.telofono,
+      actividades: data.actividades
     })
     return response.data
   },
