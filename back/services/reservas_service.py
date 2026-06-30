@@ -73,12 +73,11 @@ def crear_reserva_abonado_service(usuario_id: int, clase_id: int):
         return control
     
     instancias = respuesta["data"]
-    print(instancias)
 
     # Intentar crear las reservas
 
     for instancia in instancias:
-        respuesta = insertar_reserva(usuario_id, instancia["inst_clase_id"], cursor)
+        respuesta = insertar_reserva(usuario_id, instancia["id"], cursor)
         control = _controlar_errores_query(respuesta, 402, "La reserva ya había sido creada.", 403, cursor)
         if control is not None:
             return control
