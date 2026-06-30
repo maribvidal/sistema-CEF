@@ -503,6 +503,8 @@ const actualizarClase = async () => {
       notificationStore.showNotification('Ese profesor ya tiene una clase asignada en ese día y horario', 'danger')
     } else if (statusCode === 412) {
       notificationStore.showNotification('El profesor no está habilitado para dar esa actividad', 'danger')
+    } else if (statusCode === 408) {
+      notificationStore.showNotification('La clase no se pudo modificar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger')
     } else {
       notificationStore.showNotification('Hubo un error al actualizar la clase', 'danger')
     }
