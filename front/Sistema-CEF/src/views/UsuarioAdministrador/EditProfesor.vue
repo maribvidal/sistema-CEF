@@ -134,7 +134,7 @@ const updateEmployee = async () => {
   loading.value = true
   try {
     const payload = { ...employee.value }
-    await EmployeesService.updateEmployeeInfo(employee.value.dni, payload)
+    await EmployeesService.updateProfesorInfo(employee.value.dni, payload)
 
     notificationStore.showNotification('El profesor fue modificado correctamente', 'success')
     emit('updated')
