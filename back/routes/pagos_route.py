@@ -23,40 +23,41 @@ def obtener_qr_mp():
     
     return jsonify(QR), 200
 
-@pagos_bp.route("/pagos/particular", methods=["POST"])
-def crear_pago_particular():
-    data = request.get_json()
-    usuario_id = data.get("usuario_id")
-    descripcion = data.get("descripcion")
-    # instancia de clase_id
-    instancia_clase_id = data.get("instancia_clase_id")
+# esto se hace en el endpoint de reservas, cuando se crea la reserva individual
+# @pagos_bp.route("/pagos/particular", methods=["POST"])
+# def crear_pago_particular():
+#     data = request.get_json()
+#     usuario_id = data.get("usuario_id")
+#     descripcion = data.get("descripcion")
+#     # instancia de clase_id
+#     instancia_clase_id = data.get("instancia_clase_id")
 
-    respuesta, status = crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id)
+#     respuesta, status = crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id)
 
-    return jsonify(respuesta), status
+#     return jsonify(respuesta), status
 
-@pagos_bp.route("/webhook/pagoNormal", methods=["POST"])
-def crear_pago_particular():
-    payload = request.get_json(silent=True) or {}
-    data = payload.get("data") or {}
-    payment_id = data.get("id")
-    if not payment_id:
-        return 
+# @pagos_bp.route("/webhook/pagoNormal", methods=["POST"])
+# def crear_pago_particular():
+#     payload = request.get_json(silent=True) or {}
+#     data = payload.get("data") or {}
+#     payment_id = data.get("id")
+#     if not payment_id:
+#         return 
 
-    r = requests.get(
-        f"https://api.mercadopago.com/v1/payments/{payment_id}",
-        headers={"Authorization": f"Bearer {Access_Token}"}
-    )
-    payment = r.json()
+#     r = requests.get(
+#         f"https://api.mercadopago.com/v1/payments/{payment_id}",
+#         headers={"Authorization": f"Bearer {Access_Token}"}
+#     )
+#     payment = r.json()
 
-    external_reference = payment.get("external_reference")
-    status = payment.get("status")  # approved / pending / rejected 
+#     external_reference = payment.get("external_reference")
+#     status = payment.get("status")  # approved / pending / rejected 
 
-    #id_pago, nuevo_estado, cursor
-    cursor = conectarse_db()
-    actualizar_estado_pago(external_reference, status, cursor)
+#     #id_pago, nuevo_estado, cursor
+#     cursor = conectarse_db()
+#     actualizar_estado_pago(external_reference, status, cursor)
 
-    return 
+#     return 
 
 
 #
