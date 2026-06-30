@@ -79,3 +79,19 @@ def consultar_clase_por_id_instancia(instancia_id: int, cursor) -> dict:
     """
 
     return ejecutar_fetchone(query, cursor)
+
+def comprobar_vigencia_clases(tuplas: list, cursor) -> list:
+    """Recibe una lista de tuplas de clases y devuelve una lista filtrada
+        con las clases que tengan instancias vigentes (fecha >= hoy)"""
+    clases_vigentes = []
+    for tup in tuplas:
+        id_instancia = tup["inst_clase_id"]
+        query = f"""
+            SELECT fecha
+            FROM Instancia_Clase
+            WHERE id = {id_instancia} AND fecha >= DATE('now');
+        """
+        resultado = ejecutar_fetchone(query, cursor)
+        if resultado['data'] is not None:
+            clases_vigentes.append(tup)
+    return clases_vigentes

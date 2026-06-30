@@ -1,4 +1,4 @@
-from db.operaciones.clases.consultar_db import consultar_reservas_instancias_por_clase, consultar_clase_por_id
+from db.operaciones.clases.consultar_db import comprobar_vigencia_clases, consultar_reservas_instancias_por_clase, consultar_clase_por_id
 from db.operaciones.listas_espera.consultar_db import obtener_lista_espera_abonados_por_id_clase, obtener_usuarios_lista_espera_abonados, obtener_lista_espera_individual_por_id_ins_clase, obtener_usuarios_lista_espera_individual
 from db.operaciones.usuario_pertenece_lista_espera_abonados.borrar_db import borrar_usuario_pertenece_lista_espera_abonados_por_id, borrar_usuario_pertenece_lista_espera_individual_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
@@ -108,8 +108,12 @@ def revisar_si_hay_cupos(clase_id, cursor) -> dict:
     # las instancias de la clase.
 
     consulta2 = consultar_reservas_instancias_por_clase(clase_id, cursor)
+    
+    # falta filtrar por las clases vigentes porq actualmente te tira una clase de 2014 que tenga cupo por ejemplo 
     tuplas = consulta2["data"]
     
+    # se puede meter una condicion en la consulta anterior pero si queres sacarlo directamente borra esta funcion
+    tuplas = comprobar_vigencia_clases(tuplas, cursor)
     for tup in tuplas:
         key_name = f"{tup["inst_clase_id"]}"
         dict_cupos[key_name] = cupo_maximo - tup["cantidad_reservas"]
@@ -135,6 +139,10 @@ def manejar_cupos_disponibles_individual(dict_cupos, dict_individual, cursor):
         avisar_individual(id_lei, lista_individual_ins_clase, cupos_disponibles_individuales, cursor)
         lista_ids = lista_ids.remove(item)
 
+# aca no le pueden llegar 100 instancias de clase con distintos cupos?
+# deberia de tener un limite superior para que solo revise los cupos de las instancias que le corresponde a cada uno
+# ej: un usuario tiene una mensualidad del mes de enero de 2027 para la clase x y nosotros tenemos instancias de la clase x por todo 2027,
+# si no hay cupos en una instancia de marzo de 2027 no deberia de afectar a la persona que tiene la mensualidad de enero de 2027
 def revisar_cupos_disponible_abonado(dict_cupos: dict) -> bool:
     """Función que itera sobre todas las instancias de clases que
         figuran en dict_cupos, y comprueba que en todas haya

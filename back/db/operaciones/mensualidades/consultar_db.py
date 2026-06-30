@@ -41,7 +41,6 @@ def obtener_mensualidad_activa(usuario_id: int, id_mensualidad: int, cursor) -> 
     """
     return ejecutar_fetchone(query, cursor)
 
-
 def obtener_mensualidades_activa(cursor) -> dict:
     """Hace una consulta para obtener todas las mensualidades activas"""
     query = f"""
@@ -59,3 +58,21 @@ def obtener_mensualidad_activa_por_usuario(usuario_id: int, cursor) -> dict:
         WHERE m.usuario_id = {usuario_id} AND DATETIME('now') BETWEEN m.fecha_ini AND m.fecha_fin
     """
     return ejecutar_fetchall(query, cursor)
+
+def obtener_mensualidad_por_id(id_mensualidad: int, cursor) -> dict:
+    """Hace una consulta para obtener la mensualidad por su ID"""
+    query = f"""
+        SELECT *
+        FROM Mensualidad m
+        WHERE m.id = {id_mensualidad}
+    """
+    return ejecutar_fetchone(query, cursor)
+
+def obtener_clase_mensualidad(id_mensualidad: int, cursor) -> dict:
+    """Hace una consulta para obtener la clase de una mensualidad"""
+    query = f"""
+        SELECT ctm.clase_id
+        FROM Clase_tener_Mensualidad ctm
+        WHERE ctm.mensualidad_id = {id_mensualidad}
+    """
+    return ejecutar_fetchone(query, cursor)

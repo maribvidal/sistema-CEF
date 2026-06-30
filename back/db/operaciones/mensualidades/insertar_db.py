@@ -1,4 +1,9 @@
-from db.operaciones.exception_handler import ejecutar_insertar
+from db.operaciones.reservas.consultar_db import consultar_reserva_por_usuario_clase
+from db.operaciones.instancias_clases.consultar_db import revisar_validez_cupos
+from db.operaciones.mensualidades.consultar_db import obtener_clase_mensualidad, obtener_mensualidad_por_id
+from services import _controlar_errores_query
+from db.operaciones.exception_handler import ejecutar_insertar, ejecutar_query
+from utils.modulo_manejo_listas import revisar_cupos_disponible_abonado, revisar_si_hay_cupos
 
 import datetime
 from datetime import date
@@ -32,3 +37,67 @@ def insertar_mensualidad(usuario_id: int, cursor, fecha_ini = None):
     
     query += valores
     return ejecutar_insertar(query, cursor)
+
+def insertar_reservas_mensualidad(usuario_id: int, instancias_clase: dict, cursor):
+    """Permite insertar las reservas de una mensualidad"""
+    ids = []
+    for key in instancias_clase.keys():
+        query = f"""
+            INSERT INTO Reserva (usuario_id, inst_clase_id, fecha) VALUES ({usuario_id}, {key}, DATE('now'));
+        """
+        respuesta = ejecutar_insertar(query, cursor)
+        control = _controlar_errores_query(respuesta, 500, "No se pudo insertar la reserva de la mensualidad.", 400, cursor)
+        if control is not None:
+            # revertir las reservas insertadas hasta el momento
+            for inst_id in ids:
+                query = f"""
+                    DELETE FROM Reserva
+                    WHERE usuario_id = {usuario_id}
+                    AND inst_clase_id = {inst_id};
+                """
+                ejecutar_query(query, cursor)
+
+            return control
+        ids.append(respuesta['data'])
+    return {
+        "status": "success",
+        "data": ids
+    }
+    
+def agregar_nuevas_reservas_mensualidad(id_mensualidad: int, usuario_id: int, cursor):
+    """Permite agregar nuevas reservas de una mensualidad"""
+    # obtener la clase de la mensualidad
+    clase = obtener_clase_mensualidad(id_mensualidad, cursor)
+    control = _controlar_errores_query(clase, 500, "No se pudo obtener la clase de la mensualidad.", 400, cursor)
+    if control is not None:
+        return control
+    
+    clase_id = clase['data']
+    
+    mensualidad = obtener_mensualidad_por_id(id_mensualidad, cursor)
+    control = _controlar_errores_query(mensualidad, 500, "No se encontró la mensualidad.", 400, cursor)
+    if control is not None:
+        return control
+    
+    fecha_fin = mensualidad['data']['fecha_fin']
+    
+    # verificar todas las reservas que necesita la mensualidad
+    # primero obtenemos todas las instancias de clase
+    
+    
+    dict_cupos = revisar_si_hay_cupos(clase_id['clase_id'], cursor) 
+    dict_cupos = revisar_validez_cupos(dict_cupos, cursor, fecha_fin)
+    
+    # aca tambien verifico los cupos disponibles en las instancias???
+    # hay_cupos = revisar_cupos_disponible_abonado(dict_cupos)
+    
+    # de esas reservas filtrar por las que ya tiene el usuario
+    for key in list(dict_cupos.keys()):
+        existe_reserva = consultar_reserva_por_usuario_clase(usuario_id, key, cursor)
+        
+        if existe_reserva['data'] is not None:
+            del dict_cupos[key]
+    
+    # utilizar insertar_reservas_mensualidad 
+    return insertar_reservas_mensualidad(usuario_id, dict_cupos, cursor)
+    
