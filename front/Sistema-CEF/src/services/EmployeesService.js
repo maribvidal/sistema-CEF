@@ -47,8 +47,9 @@ export const EmployeesService = {
       dni_nuevo: dni_nuevo,
       nombre: data.nombre,
       apellido: data.apellido,
+      telefono: data.telofono,
       genero: data.genero,
-      rol_id: data.rol_id
+      actividades: data.actividades
     })
     return response.data
   },
@@ -76,11 +77,11 @@ export const EmployeesService = {
    */
   createProfessor: async (data) => {
     const response = await apiClient.post('/profesores', {
-      dni: data.dni,
       nombre: data.nombre,
       apellido: data.apellido,
+      dni: data.dni,
       genero: data.genero,
-      telefono: data.telofono,
+      telefono: data.telefono,
       actividades: data.actividades
     })
     return response.data
@@ -99,5 +100,11 @@ export const EmployeesService = {
       genero: data.genero
     })
     return response.data
+  },
+
+  listarActividadesProfesor: async (data) => {
+    const response = await apiClient.post('/empleados/listarActividadesProfesor', {id: data})
+    return response.data
   }
+
 }

@@ -10,6 +10,7 @@ def modificar_empleado(
         apellido = None, 
         correo = None, 
         genero = None, 
+        telefono = None,
         rol_id = None,
         actividades = None
     ) -> dict:
@@ -55,6 +56,11 @@ def modificar_empleado(
             apellido = '{apellido_final}',"""
     if correo is not None:
         query_update += f"correo = '{correo}',"
+        query_update += f"correo = '{correo}', "
+    
+    if telefono is not None:
+        query_update += f"telefono = '{telefono}', "
+
     query_update += f"""genero = '{genero_final}',
             rol_id = {rol_id_final}
         WHERE dni = {empleado_dni}
@@ -196,6 +202,7 @@ def desactivar_empleado(usuario_dni: int, cursor) -> dict:
     
     # Aplicamos la desactivación
     nuevo_rol = rol_actual + 10
+    nuevo_rol = (rol_actual % 10) + 10
     query_update = f"UPDATE Usuario SET rol_id = {nuevo_rol} WHERE dni = {usuario_dni}"
 
     return ejecutar_query(query_update, cursor)
