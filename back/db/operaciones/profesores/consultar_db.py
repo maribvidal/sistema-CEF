@@ -53,3 +53,12 @@ def verificar_actividad_profesor(id_profesor: int, id_actividad: int, cursor) ->
 #     
 #     # Si devuelve algo, es porque existe el registro (es apto). Si es None, no lo es.
 #     return resultado is not None
+
+def consultar_actividades_profesor(id_profesor: int, cursor):
+    """Hace una consulta para devolver las actividades que da un profesor."""
+    query = f"""
+        SELECT actividad_id
+        FROM Profesor_Actividad
+        WHERE profesor_id = {id_profesor}
+    """
+    return ejecutar_fetchall(query, cursor)

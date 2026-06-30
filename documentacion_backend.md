@@ -107,6 +107,7 @@ Empleados
 | /empleados/(empleado_dni) | PUT | dni_nuevo, nombre, apellido, correo, genero, rol_id, actividades | 400: La lista de actividades está vacía / Falla general <br> 404: No existe un empleado con dicho DNI <br> 409: El DNI nuevo ya se encuentra registrado <br> 410: Correo ya registrado por otro empleado <br> 500: Error al intentar modificar <br> 200: Empleado modificado exitosamente. |
 | /empleados/(empleado_dni) | DELETE | - | 400: Tiene clases asignadas <br> 500: Error al intentar borrar empleado <br> 200: Empleado borrado exitosamente. |
 | /empleados/(empleado_dni)/desactivar | PATCH | - | 500: Error al intentar borrar/desactivar empleado <br> 200: Empleado desactivado exitosamente. |
+| /empleados/listarActividadesProfesor | GET | id | 400: Error de consulta en BD <br> 401: El profesor no existe <br> 402: Error listando actividades <br> 403: No se encontraron actividades del profesor <br> 200: Se devuelven las actividades con éxito. |
 
 Permisos
 

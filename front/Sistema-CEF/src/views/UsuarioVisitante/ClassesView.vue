@@ -243,8 +243,10 @@
                   v-model.number="nuevaClase.cupo_maximo"
                   label="Cupo Máximo"
                   type="number"
+                  min="0"
                   variant="outlined"
                   density="compact"
+                  @input="(value) => (nuevaClase.cupo_maximo = normalizarNoNegativo(value))"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
@@ -252,9 +254,11 @@
                   v-model.number="nuevaClase.monto"
                   label="Precio"
                   type="number"
+                  min="0"
                   prefix="$"
                   variant="outlined"
                   density="compact"
+                  @input="(value) => (nuevaClase.monto = normalizarNoNegativo(value))"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -330,6 +334,15 @@ const actividades = ref([])
 const profesores = ref([])
 const salas = ref([])
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+
+const normalizarNoNegativo = (value) => {
+  if (value === '' || value === null || value === undefined) return ''
+
+  const numero = Number(value)
+  if (!Number.isFinite(numero)) return ''
+
+  return Math.max(0, numero)
+}
 
 const fetchAuxData = async () => {
   try {

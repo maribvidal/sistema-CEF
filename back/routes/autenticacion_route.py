@@ -28,6 +28,7 @@ def login():
 
 @autenticacion_bp.route("/registro", methods=["POST"])
 def registro():
+    print("ENTRÓ AL ENDPOINT")
     """Este endpoint registra un nuevo usuario en el sistema. 
         Recibe los datos del usuario en formato JSON, incluyendo 
         su DNI, nombre, apellido, contraseña, fecha de nacimiento, 
@@ -57,7 +58,6 @@ def registro():
         genero,
         rol_id 
     )
-
     return jsonify(respuesta), status
 
 # Implementar validar QR no es necesario, ya que existe en clases_route una verificación de validar.

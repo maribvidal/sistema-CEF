@@ -99,3 +99,12 @@ def obtener_mensualidad_usuario(usuario_id: int, id_mensualidad: int, cursor) ->
         WHERE Usuario.id = {usuario_id} AND m.id = {id_mensualidad}"""
     resultado = ejecutar_fetchone(query, cursor)
     return resultado
+
+
+def obtener_estado_usuario(usuario_id: int, cursor) -> dict:
+    """Hace una consulta para obtener el estado de un usuario, y devuelve una tupla"""
+    query = f"""
+        SELECT estado
+        FROM Usuario
+        WHERE id = {usuario_id}"""
+    return ejecutar_fetchone(query, cursor)

@@ -9,7 +9,8 @@ from services.usuario_service import (
     restablecer_contraseña_service,
     confirmar_nueva_contrasena_service,
     subir_avatar_usuario_service,
-    obtener_avatar_usuario_service
+    obtener_avatar_usuario_service,
+    verificar_correo_usuario_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -154,5 +155,16 @@ def obtener_avatar_usuario(usuario_id):
         asociado a ese usuario como fue codificado cuando se recibió."""
 
     respuesta, status = obtener_avatar_usuario_service(usuario_id)
+
+    return jsonify(respuesta), status
+
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/verificar_correo", methods=["GET"])
+def verificar_correo_usuario(usuario_id):
+    """Este endpoint permite verificar el correo de un usuario dado.
+        Recibe el ID del usuario a través de la URL, y devuelve una respuesta
+        indicando si el correo está verificado."""
+
+    respuesta, status = verificar_correo_usuario_service(usuario_id)
 
     return jsonify(respuesta), status
