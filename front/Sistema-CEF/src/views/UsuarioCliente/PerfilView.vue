@@ -88,11 +88,12 @@
         <v-card-text>
           <div v-if="membershipStatus">
             
-            
+            <p>La mensualidad está activa.</p>
             <p>Fecha de fin: <strong>{{ formatSpanishDate(membershipStatus.data) }}</strong></p>
           </div>
           <div v-else>
-            <p>No se pudo obtener el estado de la mensualidad.</p>
+            <p>La mensualidad debe renovarse.</p>
+            <button>Renovar Mensualidad</button>
           </div>
         </v-card-text>
         <v-card-actions>
@@ -115,7 +116,7 @@ import defaultLogo from '@/assets/logoLargo.png'
 import UsuariosService from '@/services/UsuariosServices.js'
 import { PaymentsService } from '@/services/PaymentsService.js'
 import { useNotificationStore } from '@/stores/notificationStore.js'
-import {UsersAdminService} from '@/services/UsuariosServices.js'
+
 
 const notificationStore = useNotificationStore()
 
@@ -243,16 +244,20 @@ const membershipStatus = ref(null)
 const showMembershipStatus = async () => {
   try {
     // Primero obtenés la mensualidad para conseguir el id
-    const mensualidad = await UsersAdminService.getMensualidadUsuario(userDNI.value)
+    const mensualidad = await PaymentsService.getMensualidadUsuario(userDNI.value)
     const id_mensualidad = mensualidad.message[0].id
 
     // Luego consultás el estado pasando ambos params
-    const result = await UsersAdminService.getEstadoMensualidad(userDNI.value, id_mensualidad)
+    const result = await PaymentsService.getEstadoMensualidad(userDNI.value, id_mensualidad)
     membershipStatus.value = result
     dialogMembershipStatus.value = true
   } catch (error) {
     notificationStore.showNotification('El usuario no posee mensualidades activas', 'danger')
   }
+}
+
+const renewMembership = async (userId, id_mensualidad) => {
+
 }
 </script>
 
