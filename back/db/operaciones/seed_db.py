@@ -10,7 +10,7 @@ from db.operaciones.salas.insertar_db import insertar_sala
 from db.operaciones.roles.insertar_db import insertar_rol
 from db.operaciones import insertar_pago, insertar_clase
 from db.operaciones import insertar_pago_pagar_clase
-from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase
+from db.operaciones.instancias_clases.insertar_db import insertar_instancia_clase, crear_instancias_clase_por_un_año
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.usuarios.insertar_db import insertar_usuario_lista_espera_abonados, insertar_usuario_lista_espera_individual
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
@@ -72,17 +72,19 @@ def insertar_datos(cursor):
     # Crear clase
     id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 0, 300.0, cursor)
     id_clas = id_clas['data']
-    res_inst_clase = insertar_instancia_clase(id_clas, generar_fecha_actual("Lunes"), 200.0, cursor)
+    lista_ids_cla_1 = crear_instancias_clase_por_un_año(id_clas, 300, cursor, "Lunes")
+    # Crear listas de espera individuales
+    for idi in lista_ids_cla_1:
+        insertar_lista_espera_individual(idi, cursor)
     
-    # Crear listas de espera para la clase
-    inst_clase_id = res_inst_clase['data']
+    # Crear la lista de espera de abonados para la clase
+    inst_clase_id = lista_ids_cla_1[0]
     id_lea = insertar_lista_espera_abonados(id_clas, cursor)["data"]
-    id_lei = insertar_lista_espera_individual(inst_clase_id, cursor)["data"]
 
     # Inscribir usuario a clase
     insertar_reserva(1, inst_clase_id, cursor)
     insertar_usuario_lista_espera_abonados(id_lea, 2, cursor)
-    insertar_usuario_lista_espera_individual(id_lei, 4, cursor)
+    insertar_usuario_lista_espera_individual(lista_ids_cla_1[0], 4, cursor)
 
     # Crear pagos
     insertar_pago(50.0, 1, cursor)
@@ -100,12 +102,13 @@ def insertar_datos(cursor):
     # Crear una clase adicional programada para martes y su instancia (martes)
     id_clas_martes = insertar_clase('Programada Martes', 2, id_prof1, 2, "Martes", "11:00", 8, 1000.0, cursor)
     id_clas_martes = id_clas_martes['data']
-    # Fecha ejemplo que corresponde a un martes
-    inst_clase_martes = insertar_instancia_clase(id_clas_martes, generar_fecha_actual("Martes"), 100.0, cursor)
-    inst_clase_martes = inst_clase_martes['data']
+    lista_ids_cla_2 = crear_instancias_clase_por_un_año(id_clas_martes, 1000, cursor, "Martes")
+    for idi in lista_ids_cla_2:
+        insertar_lista_espera_individual(idi, cursor)
+    insertar_lista_espera_abonados(id_clas_martes, cursor)
 
-    insertar_cancelacion(2, inst_clase_martes, cursor)
-    insertar_cancelacion(4, inst_clase_martes, cursor)
+    insertar_cancelacion(2, lista_ids_cla_2[0], cursor)
+    insertar_cancelacion(4, lista_ids_cla_2[0], cursor)
 
     insertar_clase_tener_mensualidad(2, 2, cursor)
     
@@ -127,6 +130,10 @@ def insertar_datos(cursor):
     inst_clase_ref_1 = inst_clase_ref_1['data']
     inst_clase_ref_2 = insertar_instancia_clase(id_clase_ref, '2026-09-17', 450.0, cursor)
     inst_clase_ref_2 = inst_clase_ref_2['data']
+
+    insertar_lista_espera_abonados(id_clase_ref, cursor)
+    insertar_lista_espera_individual(inst_clase_ref_1, cursor)
+    insertar_lista_espera_individual(inst_clase_ref_2, cursor)
 
     insertar_mensualidad(3, cursor, '2026-02-02')
     insertar_pago(70.0, 3, cursor)

@@ -11,7 +11,8 @@ from services.usuario_service import (
     subir_avatar_usuario_service,
     obtener_avatar_usuario_service,
     verificar_correo_usuario_service,
-    obtener_clases_usuario_service
+    obtener_clases_usuario_service,
+    desactivar_usuario_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -162,5 +163,15 @@ def verificar_correo_usuario(usuario_id):
         indicando si el correo está verificado."""
 
     respuesta, status = verificar_correo_usuario_service(usuario_id)
+
+    return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/desactivar", methods=["PUT"])
+def desactivar_usuario(usuario_id):
+    """Este endpoint permite desactivar un usuario.
+        Recibe el ID del usuario a través de la URL, y devuelve
+        una respuesta de confirmación si todo salió bien."""
+    
+    respuesta, status = desactivar_usuario_service(usuario_id)
 
     return jsonify(respuesta), status

@@ -59,7 +59,7 @@ def consultar_instancias_por_clase_id(id_clase: int, cursor) -> dict:
         de clases que posea una clase, y hace la consulta con el
         id de la clase recibido."""
     query = f"""
-        SELECT c.id, ic.id, ic.fecha
+        SELECT ic.id, ic.fecha
         FROM Clase c
             INNER JOIN Instancia_Clase ic ON c.id = ic.clase_id
         WHERE c.id = {id_clase}
