@@ -7,13 +7,13 @@ from db.operaciones.imagenes.insertar_db import insertar_imagen
 from db.operaciones.imagenes.consultar_db import consultar_imagen_actual_usuario
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario, listar_dnis_usuarios, obtener_estado_usuario
 from db.operaciones.usuarios.insertar_db import insertar_usuario
-from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario
+from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario, desactivar_usuario
 from db.operaciones.mensualidades.consultar_db import consultar_mensualidad_cubre_clase
 from db.operaciones.empleados.consultar_db import listar_dnis_empleados
 from db.operaciones.usuarios.consultar_db import obtener_clases_usuario
 
 from utils.envio_mails import enviar_mail, enviar_mail_confirmacion_nuevo_correo, enviar_mail_verificacion_registro
-from services import _controlar_errores_query, _msj_exito_helper
+from services import _controlar_errores_query, _msj_exito_helper, _controlar_errores_query_sin_none
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -659,7 +659,7 @@ def obtener_clases_usuario_service(usuario_id):
     cursor = conectarse_db()
 
     # Controlar que exista el usuario
-    respuesta = usuario = consultar_usuario_por_id(usuario_id, cursor)
+    respuesta = consultar_usuario_por_id(usuario_id, cursor)
     control = _controlar_errores_query(respuesta, 400, "El usuario no existe.", 401, cursor)
     if control is not None:
         return control
@@ -671,3 +671,27 @@ def obtener_clases_usuario_service(usuario_id):
     
     cursor.connection.close()
     return _msj_exito_helper("Se devolvieron las clases a las cuales el usuario está inscript con éxito.", cursor, respuesta["data"])
+
+def desactivar_usuario_service(usuario_id):
+    """Service que permite desactivar un usuario."""
+
+    cursor = conectarse_db()
+
+    # Controlar que exista el usuario
+
+    respuesta = consultar_usuario_por_id(usuario_id, cursor)
+    control = _controlar_errores_query(respuesta, 400, "El usuario no existe.", 401, cursor)
+    if control is not None:
+        return control
+    
+    # Desactivar usuario
+
+    respuesta = desactivar_usuario(usuario_id, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 402, "No se ha podido desactivar al usuario.", 403, cursor)
+    if control is not None:
+        return control
+    
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return _msj_exito_helper("Se ha desactivado al usuario con éxito.", cursor)

@@ -9,9 +9,9 @@ def listar_empleados(cursor) -> dict:
     """Lista todos los usuarios que son empleados."""
     # UN PROFESOR TAMBIÉN ES UN EMPLEADOOOOOOO
     query = """
-        SELECT id, nombre, apellido, rol_id, dni, correo, genero, telefono
+        SELECT id, nombre, apellido, rol_id, dni, genero, telefono
         FROM Usuario
-        WHERE rol_id IN (0, 1, 2, 4, 5)
+        WHERE rol_id IN (0, 1, 2, 4, 5, 10, 11, 12, 14, 15, 20, 21, 22, 24, 25)
     """
     return ejecutar_fetchall(query, cursor)
 
@@ -20,7 +20,7 @@ def listar_correos_empleados(cursor) -> dict:
     query = """
         SELECT correo
         FROM Usuario
-        WHERE rol_id IN (0, 1, 2, 4, 5)
+        WHERE rol_id IN (0, 1, 2, 4, 5, 10, 11, 12, 14, 15, 20, 21, 22, 24, 25)
     """
     return ejecutar_fetchall(query, cursor)
 
@@ -29,6 +29,6 @@ def listar_dnis_empleados(cursor) -> dict:
     query = """
         SELECT dni
         FROM Usuario
-        WHERE rol_id = 0 OR rol_id = 1 OR rol_id = 2 OR rol_id = 4
+        WHERE rol_id IN (0, 1, 2, 4, 5, 10, 11, 12, 14, 15, 20, 21, 22, 24, 25)
     """
     return ejecutar_fetchall(query, cursor)

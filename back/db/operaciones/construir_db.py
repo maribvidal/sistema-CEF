@@ -194,7 +194,7 @@ def construir_tabla_cancelacion(cursor: sqlite.Cursor):
                             id            INTEGER PRIMARY KEY,
                             fecha         DATE NOT NULL,
                             usuario_id    INTEGER NOT NULL,
-                            inst_clase_id INTEGER NOT NULL,
+                            inst_clase_id INTEGER,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,
@@ -259,7 +259,7 @@ def construir_tabla_asistencias_clase(cursor: sqlite.Cursor):
                             id         INTEGER PRIMARY KEY,
                             usuario_id INTEGER NOT NULL,
                             con_mensualidad BOOLEAN NOT NULL,
-                            inst_clase_id   INTEGER NOT NULL,
+                            inst_clase_id   INTEGER,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL,

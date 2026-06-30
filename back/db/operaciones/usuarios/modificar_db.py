@@ -72,3 +72,25 @@ def modificar_estado_usuario(usuario_id: int, cursor):
     """
 
     return ejecutar_query(query,cursor)
+
+def desactivar_usuario(usuario_id: int, cursor):
+    """Recibe el id de un usuario y actualiza su rol al 13."""
+
+    query = f"""
+        UPDATE Usuario
+        SET rol_id = 13
+        WHERE id = {usuario_id}
+    """
+
+    return ejecutar_query(query,cursor)
+
+def borrar_usuario(usuario_id: int, cursor):
+    """Recibe el id de un usuario y actualiza su rol al 23."""
+
+    query = f"""
+        UPDATE Usuario
+        SET rol_id = 23
+        WHERE id = {usuario_id}
+    """
+
+    return ejecutar_query(query,cursor)
