@@ -81,6 +81,14 @@
                 </v-chip>
               </template>
 
+              <template v-slot:[`item.actividades`]="{ item }">
+                <div v-if="item.actividades">
+                  <v-chip v-for="actividad in item.actividades.split(',')" :key="actividad" size="small" class="ma-1">
+                    {{ actividad }}
+                  </v-chip>
+                </div>
+              </template>
+
               <template v-slot:[`item.acciones`]='{ item }'>
                 <div class="d-flex justify-end">
                   <v-btn
@@ -337,6 +345,7 @@ const allHeaders = [
   { title: 'Apellido', key: 'apellido' },
   { title: 'Teléfono', key: 'telefono' },
   { title: 'Correo', key: 'correo' },
+  { title: 'Actividades', key: 'actividades' },
   { title: 'Género', key: 'genero', align: 'center' },
   { title: 'Rol Actual', key: 'rol_id', align: 'center' }
 ]
@@ -356,9 +365,9 @@ const dynamicHeaders = computed(() => {
   } else if (rol === 'profesor') {
     return [...allHeaders.filter(h => h.key !== 'correo'), actionsHeader]
   } else if (rol === 'admin' || rol === 'recepcionista') {
-    return [...allHeaders.filter(h => h.key !== 'telefono'), actionsHeader]
+    return [...allHeaders.filter(h => h.key !== 'telefono' && h.key !== 'actividades'), actionsHeader]
   }
-  return [...allHeaders, actionsHeader] // Fallback para 'todos' y otros casos
+  return [...allHeaders.filter(h => h.key !== 'actividades'), actionsHeader] // Fallback para 'todos' y otros casos
 })
 
 const rolesASeleccionar = [
@@ -435,7 +444,8 @@ const cargarEmpleados = async () => {
       id: e.id ?? e[4],
       nombre: e.nombre ?? e[5],
       rol_id: e.rol_id ?? e[6],
-      telefono: e.telefono ?? e[7]
+      telefono: e.telefono ?? e[7],
+      actividades: e.actividades ?? e[8]
     }))
 
     empleados.value = fetched
