@@ -112,8 +112,6 @@ def revisar_si_hay_cupos(clase_id, cursor) -> dict:
     # falta filtrar por las clases vigentes porq actualmente te tira una clase de 2014 que tenga cupo por ejemplo 
     tuplas = consulta2["data"]
     
-    # se puede meter una condicion en la consulta anterior pero si queres sacarlo directamente borra esta funcion
-    tuplas = comprobar_vigencia_clases(tuplas, cursor)
     for tup in tuplas:
         key_name = f"{tup["inst_clase_id"]}"
         dict_cupos[key_name] = cupo_maximo - tup["cantidad_reservas"]

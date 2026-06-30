@@ -2,6 +2,7 @@ from db.operaciones.exception_handler import ejecutar_query
 
 def configurar_fin_mensualidad(id_mensualidad: int, cursor, fecha_fin=None):
     """Permite configurar la fecha de fin de una mensualidad."""
+    query = "UPDATE Mensualidad"
     
     if fecha_fin is not None:
         seteo=f""" SET fecha_fin = DATE('{fecha_fin}')"""
@@ -9,13 +10,13 @@ def configurar_fin_mensualidad(id_mensualidad: int, cursor, fecha_fin=None):
         seteo=f""" 
             SET
                 fecha_ini = CASE
-                    WHEN DATE(fecha_fin) < DATE('now')
+                    WHEN DATE(fecha_fin, '+10 days') < DATE('now')
                         THEN DATE('now')
                     ELSE fecha_ini
                 END,
                 
                 fecha_fin = CASE
-                    WHEN DATE(fecha_fin) < DATE('now')
+                    WHEN DATE(fecha_fin, '+10 days') < DATE('now')
                         THEN DATE('now', '+1 month')
                     ELSE DATE(fecha_fin, '+1 month')
                 END

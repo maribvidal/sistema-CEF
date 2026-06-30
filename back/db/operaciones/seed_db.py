@@ -52,9 +52,10 @@ def insertar_datos(cursor):
 
     # Crear profesores
     id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, [1, 2], cursor)
-    insertar_profesor('Ana', 'Martínez', '542215004013','F', 44332211, [1], cursor)
+    id_porf2 = insertar_profesor('Ana', 'Martínez', '542215004013','F', 44332211, [1], cursor)
 
     id_prof1 = id_prof1['data']
+    id_prof2 = id_porf2['data']
 
     insertar_mensualidad(1, cursor, '2026-01-01')
     insertar_mensualidad(2, cursor, '2026-02-02')
@@ -162,4 +163,10 @@ def insertar_datos(cursor):
     id_usuario = insertar_usuario(20010101, 'a', 'a', '11111111', '1990-01-01', 'tucorreo@ymail.com', 'pwd01','F', 3, cursor)
     
     mensualidad = insertar_mensualidad(id_usuario['data'], cursor, '2026-05-30')
+    
+    id_clas_martes = insertar_clase('Programada', 2, id_prof2, 1, "Miércoles", "18:00", 12, 550.0, cursor)
+    id_clas_martes = id_clas_martes['data']
+    inst_clase_martes = insertar_instancia_clase(id_clas_martes, '2026-07-01', 550.0, cursor)
+    inst_clase_martes = insertar_instancia_clase(id_clas_martes, '2026-07-10', 550.0, cursor)
+    inst_clase_martes = insertar_instancia_clase(id_clas_martes, '2026-09-10', 550.0, cursor)
     
