@@ -723,8 +723,14 @@ const iniciarFlujoPagoCaja = async () => {
 
   } catch (error) {
     console.error('Error detectado durante la transacción:', error)
-    const mensajeError = error.response?.data?.error || error.response?.data?.message || 'La operación fue cancelada o expiró.'
-    notificationStore.showNotification(mensajeError, 'danger')
+    const codigoError = error.status || error.response?.status || 'Desconocido'
+    if (codigoError === 501) {
+      notificationStore.showNotification('La clase seleccionada ya no tiene cupo disponible.', 'danger')
+    } else if (codigoError === 401) {
+      notificationStore.showNotification('El usuario ya se encuentra registrado en esa clase a ese mismo horario.', 'danger')
+    } else {
+      notificationStore.showNotification(`Hubo un error durante la transacción (Código: ${codigoError}).`, 'danger')
+    }
     qrDialog.value = false
     claseParaReservar.value = null
   }
@@ -742,12 +748,20 @@ const cancelarFlujoPago = () => {
 
 // 2. Modificamos la función que abre el flujo de reserva para agregar el escudo de seguridad
 const abrirDialogReserva = (clase) => {
-  if (comprobarClaseYaReservada(clase.id)) {
-    notificationStore.showNotification('Ya posees una reserva activa para esta clase.', 'warning')
+  try {
+    if (comprobarClaseYaReservada(clase.id)) {
+      notificationStore.showNotification('Ya estás anotado en esta clase.', 'info')
+      return
+    }
+    claseParaReservar.value = clase
+    reservaDialog.value = true
+  } catch (error) {
+    console.error('Error al comprobar si la clase ya está reservada:', error)
+    notificationStore.showNotification(error.message, 'danger')
     return
   }
-  claseParaReservar.value = clase
-  reservaDialog.value = true
+
+  
 }
 
 // 3. Lógica para la cancelación (Ya tenías el borrador al final de tu archivo, la dejamos pulida)
