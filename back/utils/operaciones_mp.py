@@ -335,3 +335,32 @@ def crear_sucursal_mp():
     respuesta = requests.post(url, json=datos, headers=headers)
 
     print(respuesta.json())
+    
+def crear_preferencia_checkout_pro(external_reference, total_amount, description, item, redirecciones_front, ):
+    url = "https://api.mercadopago.com/checkout/preferences"
+    headers = {
+        "Authorization": f"Bearer {Access_Token}",
+        "Content-Type": "application/json"
+    }
+
+    datos = {
+        "external_reference": str(external_reference),
+        "items": [
+            {
+                "title": item.get("title", description),
+                "description": description,
+                "quantity": int(item.get("quantity", 1)),
+                "unit_price": float(total_amount) 
+            }
+        ],
+        "notification_url": "http://127.0.0.1:5000/webhooks/pagoNormal",
+        "back_urls": { 
+            "success": redirecciones_front.get("success"),
+            "pending": redirecciones_front.get("pending"), 
+            "failure": redirecciones_front.get("failure") 
+        },
+        "auto_return": "approved"
+    }
+
+    respuesta = requests.post(url, json=datos, headers=headers)
+    return {"status": "success", "data": respuesta.json()}

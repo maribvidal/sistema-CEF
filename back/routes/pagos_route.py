@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
 import os
 from dotenv import load_dotenv
+import requests
 
+from utils.operaciones_mp import Access_Token
 from services.pagos_service import *
 
 pagos_bp = Blueprint("pagos", __name__)
@@ -32,6 +34,30 @@ def crear_pago_particular():
     respuesta, status = crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id)
 
     return jsonify(respuesta), status
+
+@pagos_bp.route("/webhook/pagoNormal", methods=["POST"])
+def crear_pago_particular():
+    payload = request.get_json(silent=True) or {}
+    data = payload.get("data") or {}
+    payment_id = data.get("id")
+    if not payment_id:
+        return 
+
+    r = requests.get(
+        f"https://api.mercadopago.com/v1/payments/{payment_id}",
+        headers={"Authorization": f"Bearer {Access_Token}"}
+    )
+    payment = r.json()
+
+    external_reference = payment.get("external_reference")
+    status = payment.get("status")  # approved / pending / rejected 
+
+    #id_pago, nuevo_estado, cursor
+    cursor = conectarse_db()
+    actualizar_estado_pago(external_reference, status, cursor)
+
+    return 
+
 
 #
 # @pagos_bp.route("/webhook/qr", methods=["POST"])
