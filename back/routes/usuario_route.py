@@ -10,7 +10,8 @@ from services.usuario_service import (
     confirmar_nueva_contrasena_service,
     subir_avatar_usuario_service,
     obtener_avatar_usuario_service,
-    verificar_correo_usuario_service
+    verificar_correo_usuario_service,
+    obtener_clases_usuario_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -123,14 +124,9 @@ def obtener_clases_usuario(usuario_id):
     """Este endpoint permite obtener una lista de las clases a las que un usuario está inscrito.
         Se conecta a la base de datos, consulta la tabla de clases y devuelve la lista de clases en formato JSON."""
 
-    ## TODO: Repensar implementación del endpoint
+    respuesta, status = obtener_clases_usuario_service(usuario_id)
 
-    return {
-        "status": "success",
-        "message": "En remodelación."
-    }, 200
-
-# falta un delete
+    return jsonify(respuesta), status
 
 @usuario_bp.route("/usuarios/<int:usuario_id>/avatar", methods=["POST"])
 def subir_avatar_usuario(usuario_id):
