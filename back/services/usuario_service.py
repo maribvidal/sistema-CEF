@@ -10,7 +10,7 @@ from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario
 from db.operaciones.mensualidades.consultar_db import consultar_mensualidad_cubre_clase
 from db.operaciones.empleados.consultar_db import listar_dnis_empleados
-from utils.envio_mails import enviar_mail, enviar_mail_confirmacion_nuevo_correo
+from utils.envio_mails import enviar_mail, enviar_mail_confirmacion_nuevo_correo, enviar_mail_verificacion_registro
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -145,6 +145,27 @@ def registrar_usuario_service(
         }, 500
 
     cursor.connection.commit()
+
+    # --- INICIO LÓGICA DE CORREO DE VERIFICACIÓN ---
+    try:
+        from flask import request
+        from utils.envio_mails import enviar_mail_verificacion_registro
+
+        nuevo_usuario_id: int = int(res["data"])
+
+        enlace_verificacion = (
+            f"{request.host_url}usuarios/{nuevo_usuario_id}/verificar_correo"
+        )
+
+        enviar_mail_verificacion_registro(
+            nuevo_usuario_id,
+            correo,
+            enlace_verificacion
+        )
+    except Exception as e:
+        print(f"Error al enviar el correo de registro al usuario {correo}: {e}")
+    # --- FIN LÓGICA DE CORREO ---
+
     cursor.connection.close()
     return {
         "message": "Usuario registrado exitosamente."
