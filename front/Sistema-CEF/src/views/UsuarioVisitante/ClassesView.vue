@@ -108,7 +108,7 @@
                   <v-btn
                     color="orange-darken-1"
                     :variant="$vuetify.display.mdAndUp ? 'tonal' : 'outlined'"
-                    prepend-icon="mdi-calendar-remove"
+  prepend-icon="mdi-calendar-remove"
                     :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
                     :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
                     :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
@@ -116,9 +116,11 @@
                     :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
                     v-if="userRole === 3 && clase.yaReservada"
                     @click="cancelarReserva(clase)"
-                  >
-                    Cancelar Reserva
-                  </v-btn>
+>
+  Cancelar Reserva
+</v-btn>
+
+
 
                   <v-btn
                     color="blue-darken-1"
@@ -288,8 +290,44 @@
         <v-card-actions class="pa-4">
           <v-btn color="grey-darken-1" variant="text" @click="reservaDialog = false">Cancelar</v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="elevated" @click="hacerReserva('particular')">Clase Particular</v-btn>
-          <v-btn color="green-darken-1" variant="elevated" @click="hacerReserva('mensualidad')">Con Mensualidad</v-btn>
+          <v-btn color="blue-darken-1" variant="elevated" @click="seleccionarTipoReserva('particular')">Clase Particular</v-btn>
+          <v-btn color="green-darken-1" variant="elevated" @click="seleccionarTipoReserva('mensualidad')">Con Mensualidad</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="qrDialog" max-width="450px" persistent>
+      <v-card rounded="lg" class="text-center pb-4">
+        <v-card-title class="pa-4 bg-black text-white mb-4">
+          <span class="text-h5">Abonar con Mercado Pago</span>
+        </v-card-title>
+        
+        <v-card-text>
+          <div v-if="qrImage" class="d-flex justify-center">
+            <v-img :src="qrImage" max-width="250" class="mb-4"></v-img>
+          </div>
+          <div v-else class="d-flex justify-center pa-8">
+            <v-progress-circular indeterminate color="black" size="50"></v-progress-circular>
+          </div>
+          
+          <p class="text-body-1 font-weight-bold mt-2 px-4">
+            Escanea el código QR desde la app de Mercado Pago
+          </p>
+          <p class="text-caption text-grey-darken-1 px-6">
+            Usa tu cuenta de prueba para abonar la modalidad de 
+            <strong>{{ tipoReserva === 'particular' ? 'Clase Particular' : 'Mensualidad' }}</strong>.
+          </p>
+          
+          <div class="d-flex justify-center align-center mt-6 text-blue-darken-2">
+            <v-progress-circular indeterminate size="18" width="2" class="me-2"></v-progress-circular>
+            <span class="text-body-2 font-weight-medium">Esperando confirmación del pago en tiempo real...</span>
+          </div>
+        </v-card-text>
+
+        <v-card-actions class="justify-center mt-2">
+          <v-btn color="grey-darken-2" variant="text" @click="cancelarFlujoPago">
+            Cancelar Operación
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -303,18 +341,23 @@ import { ClasesService } from '@/services/ClasesServices'
 
 import { useNotificationStore } from '@/stores/notificationStore.js'
 import { useAuth } from '@/services/UsuariosServices.js'
+import { PaymentsService } from '@/services/PaymentsService.js'
 const { userProfile, userRole } = useAuth()
 const isEditing = ref(false)
 const dialog = ref(false)
 const notificationStore = useNotificationStore()
 const reservaDialog = ref(false)
+const pagoDialog = ref(false)
 const claseParaReservar = ref(null)
 
 const horas = Array.from({ length: 14 }, (_, i) => (i + 8).toString().padStart(2, '0'))
 const horaSel = ref(null)
 
 const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del usuario
-
+const tipoReserva = ref(null)
+const cargandoPago = ref(false)
+const qrDialog = ref(false)
+const qrImage = ref(null)
 watch(horaSel, (h) => {
   nuevaClase.value.hora = `${h}:00`
 })
@@ -367,18 +410,21 @@ const fetchAuxData = async () => {
 }
 
 // Nueva función para obtener las clases a las que el usuario ya se anotó
+const clasesUsuario = ref([])
+
+// Función que pide los datos al backend (seguramente ya tenés algo muy parecido)
 const fetchClasesUsuario = async () => {
   // Solo consultamos si es un cliente (rol 3) y tenemos su ID
   if (userRole.value === 3 && userProfile.value?.id) {
-    try {
+  try {
       // Usamos la función que me indicaste
-      const response = await ClasesService.obtenerClase(userProfile.value.id)
+    const response = await ClasesService.obtenerClase(userProfile.value.id)
       const misClases = response.data || response // Ajusta según la estructura de Axios
       
       if (Array.isArray(misClases)) {
         clasesReservadasIds.value = misClases.map(c => c.id ?? c[0])
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Error al cargar clases del usuario:', error)
     }
   }
@@ -426,10 +472,13 @@ const fetchClases = async () => {
   }
 }
 
+
+
 onMounted(async () => {
   await fetchAuxData()
   await fetchClasesUsuario() // Obtenemos las reservas antes de renderizar la lista completa
   await fetchClases()
+  console.log('Clases del usuario:', clasesUsuario.value);
 })
 
 const abrirDialogCrear = () => {
@@ -608,6 +657,143 @@ const cancelarReserva = async (clase) => {
     notificationStore.showNotification('Hubo un error al cancelar la reserva', 'danger')
   }
 }
+
+const hacerPagoMercadoPago = async () => {
+  const clase = claseParaReservar.value
+  if (!clase) return
+
+  try {
+    const response = await PaymentsService.mothlyPayment(clase.id, claseParaReservar.value.id)
+    
+    // Simulación de éxito
+    notificationStore.showNotification('Redirigiendo a la pasarela de pago...', 'success')
+  } catch (error) {
+    console.error('Error al iniciar el pago:', error)
+    notificationStore.showNotification('Hubo un error al iniciar el pago', 'danger')
+  } finally {
+    pagoDialog.value = false
+    claseParaReservar.value = null
+  }
+}
+
+
+const seleccionarTipoReserva = async (tipo) => {
+  tipoReserva.value = tipo
+  reservaDialog.value = false // Cierra el modal de selección de tipo
+  
+  // Dispara inmediatamente el flujo síncrono coordinado con tu backend
+  await iniciarFlujoPagoCaja()
+}
+
+// Paso 2: Orquestación del flujo coordinado con el bucle síncrono del backend
+const iniciarFlujoPagoCaja = async () => {
+  const clase = claseParaReservar.value
+  if (!clase) return
+
+  try {
+    // A. Primero traemos el QR fijo asignado a la caja (.env) para mostrarlo en pantalla
+    const responseQr = await PaymentsService.getQRForPayment()
+    let responseData = responseQr.data
+    
+    if (typeof responseData === 'string') {
+      try {
+        responseData = JSON.parse(responseData.replace(/'/g, '"'))
+      } catch (e) {
+        console.error('Error al deserializar respuesta de QR:', e)
+      }
+    }
+    
+    if (responseData && responseData.image) {
+      qrImage.value = responseData.image
+      qrDialog.value = true // Abrimos el modal: El usuario ya está viendo el QR en pantalla
+    } else {
+      throw new Error('No se pudo inicializar la imagen del código QR de la caja.')
+    }
+
+    // B. Con el QR ya renderizado, disparamos la petición de pago que ingresará al bucle 'while'
+    const descripcion = `Pago QR de clase: ${clase.categoria}`
+    let responsePago
+
+    if (tipoReserva.value === 'mensualidad') {
+      // Usamos el ID del perfil tal como requiere la clave foránea del backend
+      responsePago = await PaymentsService.mothlyPayment(userProfile.value.id, clase.id)
+    } else {
+      // Pasamos los parámetros corregidos mapeando 'instancia_clase_id'
+      responsePago = await PaymentsService.oneTimePayment(userProfile.value.id, descripcion, clase.id)
+    }
+
+    // C. Si el backend responde con éxito (Status 200), significa que salió del loop porque el usuario pagó
+    notificationStore.showNotification('¡Pago verificado y reserva confirmada exitosamente!', 'success')
+    
+    // Refrescamos las vistas del usuario
+    if (typeof fetchClasesUsuario === 'function') await fetchClasesUsuario()
+    if (typeof fetchClases === 'function') await fetchClases()
+
+    // Limpieza de estados y cierre automático del modal
+    qrDialog.value = false
+    claseParaReservar.value = null
+
+  } catch (error) {
+    console.error('Error detectado durante la transacción:', error)
+    
+    // Extraemos el mensaje de error nativo del back (como el mensaje de expiración 400)
+    const mensajeError = error.response?.data?.error || error.response?.data?.message || 'La operación fue cancelada o expiró.'
+    notificationStore.showNotification(mensajeError, 'danger')
+    
+    qrDialog.value = false
+    claseParaReservar.value = null
+  }
+}
+
+// Cancelación explícita desde el front
+const cancelarFlujoPago = () => {
+  qrDialog.value = false
+  claseParaReservar.value = null
+  notificationStore.showNotification('Transacción cancelada por el usuario.', 'info')
+}
+
+// 1. Función para comprobar si el usuario ya está anotado en esta clase específica
+const yaTieneReserva = (claseId) => {
+  // Si no hay datos, o si los datos no son un Array, devolvemos false automáticamente
+  if (!clasesUsuario.value || !Array.isArray(clasesUsuario.value)) {
+    return false;
+  }
+  console.log('Verificando si el usuario ya tiene reserva para la clase con ID:', claseId, 'Clases del usuario:', clasesUsuario.value);
+  // Si es un array, procedemos a buscar
+  return clasesUsuario.value.some(c => c.id === claseId || c.id_clase === claseId);
+  
+};
+
+// 2. Modificamos la función que abre el flujo de reserva para agregar el escudo de seguridad
+const abrirDialogReserva = (clase) => {
+  // Si por alguna razón logra hacer click, el sistema lo frena acá
+  if (yaTieneReserva(clase.id)) {
+    notificationStore.showNotification('Ya posees una reserva activa para esta clase.', 'warning');
+    return;
+  }
+
+  claseParaReservar.value = clase;
+  reservaDialog.value = true;
+};
+
+// 3. Lógica para la cancelación (Ya tenías el borrador al final de tu archivo, la dejamos pulida)
+const ejecutarCancelarReserva = async (clase) => {
+  try {
+    // Usamos el ID correspondiente para dar de baja la reserva
+    await ClasesService.cancelarReserva(clase.id);
+    
+    // Refrescamos los datos inmediatamente para que los botones cambien en la pantalla
+    await fetchClasesUsuario();
+    await fetchClases();
+    
+    notificationStore.showNotification('Reserva cancelada exitosamente.', 'success');
+  } catch (error) {
+    console.error('Error al cancelar reserva:', error);
+    notificationStore.showNotification('Hubo un error al intentar cancelar la reserva.', 'danger');
+  }
+};
+
+
 </script>
 
 <style scoped>
