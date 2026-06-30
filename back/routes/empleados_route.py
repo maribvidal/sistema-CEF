@@ -4,14 +4,8 @@ from services.empleados_service import (
     listar_empleados_service,
     borrar_empleado_service,
     desactivar_empleado_service,
-    crear_recepcionista_service
-)
-from services.empleados_service import (
-    modificar_empleado_service,
-    listar_empleados_service,
-    borrar_empleado_service,
-    desactivar_empleado_service,
-    crear_recepcionista_service
+    crear_recepcionista_service,
+    listar_actividades_profesor_service
 )
 
 empleados_bp = Blueprint('empleados', __name__)
@@ -77,5 +71,17 @@ def crear_recepcionista():
     genero = data.get("genero")
 
     respuesta, status = crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, genero)
+
+    return jsonify(respuesta), status
+
+@empleados_bp.route('/empleados/listarActividadesProfesor', methods=['GET'])
+def listar_actividades_profesor():
+    """Endpoint para recibir una lista de actividades de un profesor."""
+
+    data = request.get_json()
+
+    id_profesor = data.get("id")
+
+    respuesta, status = listar_actividades_profesor_service(id_profesor)
 
     return jsonify(respuesta), status

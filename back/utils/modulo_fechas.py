@@ -62,3 +62,8 @@ def comprobar_fecha_anterior(fecha1: str, fecha2: str) -> bool:
     fecha2_normalizada = convertir_fecha_a_obj(fecha2)
 
     return fecha1_normalizada < fecha2_normalizada
+
+def obtener_numero_mes_actual() -> int:
+    """Devuelve el número de mes actual."""
+    mes_fecha_actual = date.today().month
+    return mes_fecha_actual

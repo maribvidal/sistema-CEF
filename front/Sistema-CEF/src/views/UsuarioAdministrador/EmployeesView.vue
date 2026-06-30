@@ -251,6 +251,7 @@
       <component
         :is="componenteEdicion"
         :empleado="empleadoSeleccionado"
+        :actividades="actividades"
         @close="dialogEditarEmpleado = false"
         @updated="cargarEmpleados"
         :key="empleadoSeleccionado?.dni || 'nuevo'"
@@ -288,7 +289,7 @@ import { ClasesService } from '@/services/ClasesServices'
 import EditEmployee from './EditEmployee.vue'
 import EditProfesor from './EditProfesor.vue'
 import { useNotificationStore } from '@/stores/notificationStore.js'
-import { consoleError } from 'vuetify/lib/util/console.js'
+
 
 const empleados = ref([])
 const profesores = ref([])
@@ -300,7 +301,7 @@ const filtroEstado = ref('activos')
 const dialogEditarEmpleado = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
-const nuevoGenero = ref(null)
+
 
 // Se removió 'isDisabled' de aquí ya que lo evaluamos fila por fila en el template.
 
@@ -469,7 +470,6 @@ const guardarProfesor = async () => {
       notificationStore.showNotification('Por favor complete los campos obligatorios', 'warning')
       return
     }
-    console.log(nuevoProfesor.value.actividades)
     await EmployeesService.createProfessor(nuevoProfesor.value) // El payload ya incluye las actividades
     notificationStore.showNotification('El profesor fue creado con éxito', 'success')
     dialogProfesor.value = false

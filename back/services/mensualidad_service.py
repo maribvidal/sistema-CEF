@@ -1,5 +1,6 @@
 import time
 
+from db.operaciones.mensualidades.insertar_db import agregar_nuevas_reservas_mensualidad
 from services.pagos_service import crear_pago_service_mensualidad
 from utils.envio_mails import enviar_mail
 from db.operaciones.mensualidades.borrar_db import borrar_mensualidad
@@ -59,6 +60,13 @@ def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin = 
     control = _controlar_errores_query_sin_none(respuesta, 500, "Error al configurar fin de mensualidad.", 402, cursor)
     if control is not None:
         return control
+    
+    respuesta = agregar_nuevas_reservas_mensualidad(id_mensualidad, usuario['data']['id'], cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 500, "Error al agregar nuevas reservas de la mensualidad.", 402, cursor)
+    if control is not None:
+        # hacer rollback pero ya estoy quemado
+        
+        return control
 
     cursor.connection.close()
     return _msj_exito_helper("Fin de mensualidad configurado exitosamente.", cursor)
@@ -86,6 +94,7 @@ def renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion):
         return control
     
     respuesta, status = crear_pago_service_mensualidad(usuario['data']['id'], descripcion, id_mensualidad)
+    #status = 200
     if status != 200:
         roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
         control = _controlar_errores_query_sin_none(roll_back, 500, "Error al restaurar la mensualidad.", 402, cursor)
@@ -93,6 +102,18 @@ def renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion):
             return control
         return respuesta, status
 
+    respuesta = agregar_nuevas_reservas_mensualidad(id_mensualidad, usuario['data']['id'], cursor)
+    
+    if respuesta['status'] != "success":
+        roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
+        control2 = _controlar_errores_query_sin_none(roll_back, 500, "Error al restaurar la mensualidad.", 402, cursor)
+        if control2 is not None:
+            return control2
+        
+        return {
+            "error": "Error al agregar nuevas reservas de la mensualidad."
+        }, 402
+        
     cursor.connection.close()
     return _msj_exito_helper("Mensualidad renovada exitosamente.", cursor)  
 

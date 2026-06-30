@@ -15,6 +15,7 @@ from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase, listar_instancias_clases_semana, obtener_instancia_clase_por_clase_id_semana
+from db.operaciones.instancias_clases.modificar_db import modificar_instancias_clases_montos_proximo_mes_por_clase
 from db.operaciones.instancias_clases import insertar_instancia_clase, crear_instancias_clase_por_un_año
 from db.operaciones.reservas import consultar_reserva_por_usuario_clase
 from db.operaciones.listas_espera.insertar_db import insertar_lista_espera_abonados, insertar_lista_espera_individual
@@ -139,7 +140,7 @@ def publicar_clase_service(
     # Insertar instancias de la clase e listas de esperas
 
     respuesta = insertar_lista_espera_abonados(clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 414, "No se pudo insertar la lista de espera de abonados.", 416, cursor)
+    control = _controlar_errores_query(respuesta, 415, "No se pudo insertar la lista de espera de abonados.", 416, cursor)
     if control is not None:
         return control
     
@@ -159,9 +160,11 @@ def modificar_clase_service(
     estado: str,
     id_profesor: int,
     sala: int,
+    monto: float = None
 ):
     """Service que modifica una clase"""
     cursor = conectarse_db()
+    monto_modificado = False if (monto is None) else True
 
     # Primero consultamos si la clase que queremos modificar, efectivamente existe en la base de datos
 
@@ -222,10 +225,19 @@ def modificar_clase_service(
         return _msj_error_helper("No se puede actualizar la clase porque existen reservas asociadas.", cursor), 403
 
     # Tercero, intentamos modificar la clase
-    respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor)
+    respuesta = modificar_clase(clase_id, estado, id_profesor, sala, cursor, monto)
 
     if respuesta['status'] == 'error':
         return _msj_error_helper(respuesta["message"], cursor), 404
+    
+    # Si todo lo anterior salió bien, entonces modificamos el monto de todas las instancias
+    # que estén a partir del próximo mes
+
+    if monto_modificado:
+        respuesta = modificar_instancias_clases_montos_proximo_mes_por_clase(clase_id, monto, cursor)
+        control = _controlar_errores_query_sin_none(respuesta, 413, "No se pudieron modificar los montos de las instancias.", 414, cursor)
+        if control is not None:
+            return control
     
     cursor.connection.commit()
     return _msj_exito_helper("Clase modificada exitosamente.", cursor)
