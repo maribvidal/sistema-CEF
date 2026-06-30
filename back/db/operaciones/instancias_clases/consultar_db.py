@@ -33,11 +33,6 @@ def obtener_instancia_clase_por_clase_id_semana(clase_id: int, cursor) -> dict:
     return ejecutar_fetchone(query, cursor)
 
 def revisar_validez_cupos(dict_cupos: dict, cursor, fecha_fin_mensualidad = None):
-    """Función que itera sobre todas las instancias de clases que
-        figuran en dict_cupos, y comprueba que en todas haya
-        cupos disponibles. Devuelve un diccionario con los cupos
-        disponibles por cada instancia de clase."""
-    
     dict_cupos_validos = {}
     for key in dict_cupos.keys():
         query = f"""
@@ -46,7 +41,9 @@ def revisar_validez_cupos(dict_cupos: dict, cursor, fecha_fin_mensualidad = None
             WHERE ic.id = {key} AND ic.fecha BETWEEN DATE('now') 
         """
         if fecha_fin_mensualidad is not None:
-            query += f""" AND DATE('{fecha_fin_mensualidad}')"""
+            # query += f""" AND DATE('{fecha_fin_mensualidad}')"""
+            # le sumo 10 dias para que se agreguen las reservas de la mensualidad en el periodo de gracia, luego en el renovar mensualidad solo se le suma 1 mes a la fecha de fin
+            query += f""" AND DATE('{fecha_fin_mensualidad}', '+10 days')"""
         else:
             query += f""" AND DATE('now', '+1 month')"""
         
