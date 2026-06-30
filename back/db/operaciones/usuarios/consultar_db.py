@@ -66,7 +66,9 @@ def obtener_usuario_esta_en_instancia_clase(id_ins_clase: int, id_usuario: int, 
     return ejecutar_fetchone(query, cursor)
 
 def listar_dnis_usuarios(cursor) -> dict:
-    query = "SELECT dni FROM Usuario"
+    """Hace una consulta para retornar todos los dnis registrados
+        de los usuarios."""
+    query = "SELECT dni FROM Usuario WHERE rol_id = 3"
     return ejecutar_fetchall(query, cursor)
 
 def verificar_usuario_abonado(cursor, id_usuario: int, id_clase: int) -> bool:
