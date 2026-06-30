@@ -2,7 +2,9 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.empleados.insertar_db import insertar_recepcionista
 from db.operaciones.empleados.modificar_db import modificar_empleado, borrar_empleado, desactivar_empleado, modificar_empleado_con_dni
 from db.operaciones.empleados.consultar_db import listar_empleados, listar_correos_empleados, listar_dnis_empleados, obtener_empleado_por_dni
+from db.operaciones.profesores.consultar_db import consultar_actividades_profesor, consultar_profesor_por_id
 from utils.envio_mails import enviar_mail_confirmacion_nuevo_correo
+from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
 
 def listar_empleados_service():
     """Service que lista los empleados."""
@@ -224,3 +226,24 @@ def crear_recepcionista_service(dni, nombre, apellido, correo, contraseña, gene
     return {
         "message": "El recepcionista ha sido creado con éxito."
     }, 200
+
+def listar_actividades_profesor_service(id_profesor: int):
+    """Service que devuelve la lista de actividades de un profesor."""
+    cursor = conectarse_db()
+
+    # Comprobar que el profesor exista
+
+    respuesta = consultar_profesor_por_id(id_profesor, cursor)
+    control = _controlar_errores_query(respuesta, 400, "El profesor no existe.", 401, cursor)
+    if control is not None:
+        return control
+
+    # Hacer consulta
+
+    respuesta = consultar_actividades_profesor(id_profesor, cursor)
+    control = _controlar_errores_query(respuesta, 402, "No se encontraron las actividades del profesor.", 403, cursor)
+    if control is not None:
+        return control
+    
+    cursor.connection.close()
+    return _msj_exito_helper("Se devolvieron las actividades del profesor con éxito", cursor, respuesta["data"])
