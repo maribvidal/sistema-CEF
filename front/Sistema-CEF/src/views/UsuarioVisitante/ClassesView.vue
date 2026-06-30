@@ -706,7 +706,7 @@ const iniciarFlujoPagoCaja = async () => {
     if (tipoReserva.value === 'mensualidad') {
       await PaymentsService.mothlyPayment(userProfile.value.id, clase.id)
       // 👇 acá va id_inst_clase, no clase.id
-      await PaymentsService.confirmarReservaAbonado(userProfile.value.id, clase.id)
+      //await PaymentsService.confirmarReservaAbonado(userProfile.value.id, clase.id)
       console.log("llamo")
     } else {
       await PaymentsService.oneTimePayment(userProfile.value.id, descripcion, clase.id)
