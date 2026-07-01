@@ -89,9 +89,9 @@
         <v-card-title class="text-h5">Estado de Mensualidad</v-card-title>
         <v-card-text>
           <div v-if="membershipStatus">
-            
-            <p>La mensualidad está activa.</p>
-            <p>Fecha de fin: <strong>{{ formatSpanishDate(membershipStatus.data) }}</strong></p>
+            <p v-if="membershipStatus.activa">La mensualidad está activa.</p>
+            <p v-else>La mensualidad debe renovarse.</p>
+            <p>Fecha de fin: <strong>{{ formatSpanishDate(membershipStatus.fechaFin) }}</strong></p>
           </div>
           <div v-else>
             <p>La mensualidad debe renovarse.</p>
@@ -246,13 +246,21 @@ const membershipStatus = ref(null)
 
 const showMembershipStatus = async () => {
   try {
-    // Primero obtenés la mensualidad para conseguir el id
     const mensualidad = await PaymentsService.getMensualidadUsuario(userDNI.value)
-    const id_mensualidad = mensualidad.message[0].id
 
-    // Luego consultás el estado pasando ambos params
-    const result = await PaymentsService.getEstadoMensualidad(userDNI.value, id_mensualidad)
-    membershipStatus.value = result
+    const mensualidades = mensualidad?.message ?? []
+    if (!Array.isArray(mensualidades) || mensualidades.length === 0) {
+      throw new Error('El usuario no posee mensualidades registradas.')
+    }
+
+    const mensualidadActiva = mensualidades.find(item => Number(item.estado) === 1) ?? mensualidades[0]
+    membershipStatus.value = {
+      activa: Number(mensualidadActiva.estado) === 1,
+      fechaFin: mensualidadActiva.fecha_fin,
+      fechaIni: mensualidadActiva.fecha_ini,
+      id: mensualidadActiva.id,
+      mensualidades
+    }
     dialogMembershipStatus.value = true
   } catch (error) {
     notificationStore.showNotification('El usuario no posee mensualidades activas', 'danger')

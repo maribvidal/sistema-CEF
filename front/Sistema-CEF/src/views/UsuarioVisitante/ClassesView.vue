@@ -6,12 +6,13 @@
 
         <div 
           v-if="userRole === 1 || userRole === 2" 
-          class="d-flex justify-center justify-md-end mb-6"
+          class="publish-clase-float d-flex justify-center justify-md-end"
         >
           <v-btn
             color="blue-darken-1"
             prepend-icon="mdi-plus"
             @click="abrirDialogCrear"
+            
           >
             Publicar Clase
           </v-btn>
@@ -363,7 +364,7 @@
             @click="ingresarListaEspera"
             :loading="ingresandoListaEspera"
           >
-            Agregar a lista de espera
+            Inscribirse en lista de espera
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -532,13 +533,13 @@ onMounted(async () => {
 
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '', monto: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', id_sala: '', cupo_maximo: '', monto: '' }
   dialog.value = true
 }
 
 const cerrarDialog = () => {
   dialog.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '', monto: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', id_sala: '', cupo_maximo: '', monto: '' }
   isEditing.value = false
 }
 
@@ -562,7 +563,7 @@ const crearClase = async () => {
   } catch (error) {
     console.error('Error al publicar la clase:', error)
     const statusCode = error.status
-    if (statusCode === 407 || statusCode === 406 || statusCode === "error") {
+    if (statusCode === 409) {
       notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
     } else if (statusCode === 408) {
       notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
@@ -623,7 +624,12 @@ const editarClase = (clase) => {
 }
 
 const eliminarClase = async (clase) => {
-  if (confirm(`¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`)) {
+  notificationStore.showNotification(
+    `¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`,
+    'danger',
+    0,
+    async () => {
+   {
     try {
       await ClasesService.eliminarClase(clase.id)
       notificationStore.showNotification('La clase fue eliminada con éxito', 'success')
@@ -631,13 +637,19 @@ const eliminarClase = async (clase) => {
     } catch (error) {
       console.error('Error al eliminar clase:', error)
       const statusCode = error.status;
-      if (statusCode === 402 || statusCode === 403) {
+      if (statusCode === 402 || statusCode === 403 ) {
         notificationStore.showNotification('No se puede eliminar una clase con usuarios inscriptos en alguna de sus instancias', 'danger');
-      } else {
+      }
+      else if (statusCode === 404) {
+        notificationStore.showNotification('No puede eliminar una clase con usuarios inscriptos en lista de espera', 'danger');
+      }
+      else {
         notificationStore.showNotification('Hubo un error al eliminar la clase', 'danger')
       }
     }
   }
+},    0
+  )
 }
 
 const cancelarClase = async (clase) => {
@@ -881,7 +893,12 @@ const abrirDialogReserva = (clase) => {
 // 3. Lógica para la cancelación (Ya tenías el borrador al final de tu archivo, la dejamos pulida)
 const ejecutarCancelarReserva = async (clase) => {
   try {
-    await ClasesService.cancelarReserva(clase.id)
+    // Primero obtenemos la instancia de la semana para saber qué reserva cancelar
+    const instResp = await ClasesService.obtenerInstClaseSem(clase.id)
+    const id_inst_clase = instResp?.data?.data?.id ?? instResp?.data?.id
+    if (!id_inst_clase) throw new Error('No se pudo obtener la instancia de clase')
+
+    await PaymentsService.cancelarReservaIndividual(userProfile.value.id, id_inst_clase)
     await fetchClasesUsuario()
     await fetchClases()
     notificationStore.showNotification('Reserva cancelada exitosamente.', 'success')
@@ -919,5 +936,25 @@ const ejecutarCancelarReserva = async (clase) => {
   font-size: 1.1rem !important;
   letter-spacing: 1px;
   width: 100%;
+}
+
+.publish-clase-float {
+  position: fixed;
+  top: 88px;
+  right: 24px;
+  z-index: 20;
+}
+
+@media (max-width: 959px) {
+  .publish-clase-float {
+    top: auto;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+  }
+
+  .publish-clase-float :deep(.v-btn) {
+    width: 100%;
+  }
 }
 </style>

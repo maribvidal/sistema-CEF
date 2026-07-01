@@ -51,9 +51,11 @@ export const PaymentsService = {
         })
     },
 
-    getMensualidadUsuario: async (dni_cliente) => {
-    const response = await apiClient.get(`/mensualidad/${dni_cliente}`)
-    return response.data
+    getMensualidadUsuario: async (dni_usuario) => {
+        const response = await apiClient.get('/mensualidad/ver_mensualidades_usuario', {
+            params: { dni_usuario }
+        })
+        return response.data
     },
 
     confirmarReservaIndividual: async (usuario_id, inst_clase_id) => {
