@@ -12,7 +12,7 @@ from db.operaciones.actividades.consultar_db import consultar_actividad_por_id
 from db.operaciones.profesores.consultar_db import consultar_profesor_por_id, consultar_clases_profesor_dia_hora
 from db.operaciones.salas.consultar_db import consultar_sala_profe_por_dia_hora, consultar_sala_por_id
 from db.operaciones.reservas.insertar_db import insertar_reserva
-from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reservas_usuario_inst_clase
+from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_dia_hora, obtener_reserva_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id, obtener_reservas_instancia_clase, listar_instancias_clases_semana, obtener_instancia_clase_por_clase_id_semana
 from db.operaciones.instancias_clases.modificar_db import modificar_instancias_clases_montos_proximo_mes_por_clase
@@ -95,7 +95,7 @@ def publicar_clase_service(
     # Comprobar que la sala no esté ocupada en ese día y hora
 
     respuesta = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
-    control = _controlar_errores_query_sin_none(respuesta, 406, "La sala ya se encuentra ocupada en ese día y hora.", 407, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 500, "La sala ya se encuentra ocupada en ese día y hora.", 409, cursor)
     if control is not None:
         return control
 
@@ -346,7 +346,7 @@ def reservar_clase_service(id_ins_clase: int, id_usuario: int):
 
     # Comprobar si el usuario ya tenía reservas hechas de la misma instancia de clase
 
-    respuesta = obtener_reservas_usuario_inst_clase(id_ins_clase, id_usuario, cursor)
+    respuesta = obtener_reserva_usuario_inst_clase(id_ins_clase, id_usuario, cursor)
     control = _controlar_errores_query_sin_none(respuesta, 402, "El usuario ya tenía una reserva hecha para esa misma clase en el mismo horario.", 403, cursor)
     if control is not None:
         return control
@@ -547,6 +547,7 @@ def obtener_instancia_clases_semana_clase_id_service(id_clase):
     # Controlar que exista la clase
 
     respuesta = consultar_clase_por_id(id_clase, cursor)
+    print(respuesta)
     control = _controlar_errores_query(respuesta, 400, "No se encontró la clase.", 401, cursor)
     if control is not None:
         return control
@@ -554,6 +555,7 @@ def obtener_instancia_clases_semana_clase_id_service(id_clase):
     # Obtener la instancia
 
     respuesta = obtener_instancia_clase_por_clase_id_semana(id_clase, cursor)
+    print(respuesta)
     control = _controlar_errores_query(respuesta, 402, "No se encontró una instancia para la clase en esta semana.", 403, cursor)
     if control is not None:
         return control

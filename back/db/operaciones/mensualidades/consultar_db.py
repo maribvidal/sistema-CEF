@@ -100,3 +100,13 @@ def obtener_clase_mensualidad(id_mensualidad: int, cursor) -> dict:
         WHERE ctm.mensualidad_id = {id_mensualidad}
     """
     return ejecutar_fetchone(query, cursor)
+
+
+def obtener_todas_las_mensualidades_usuario(usuario_id: int, cursor) -> dict:
+    """Hace una consulta para obtener todas las mensualidades de un usuario"""
+    query = f"""
+        SELECT *
+        FROM Mensualidad
+        WHERE usuario_id = {usuario_id}
+    """
+    return ejecutar_fetchall(query, cursor)

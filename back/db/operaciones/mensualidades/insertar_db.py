@@ -40,6 +40,13 @@ def insertar_mensualidad(usuario_id: int, cursor, fecha_ini = None):
     query += valores
     return ejecutar_insertar(query, cursor)
 
+def insertar_mensualidad_con_fin(usuario_id: int, cursor, fecha_ini, fecha_fin):
+    """Permite insertar una fila para la tabla Mensualidad"""
+    query = f"""INSERT INTO Mensualidad (fecha_ini, fecha_fin, usuario_id)
+                                VALUES  ('{fecha_ini}', '{fecha_fin}', {usuario_id});
+    """
+    return ejecutar_insertar(query, cursor)
+
 def insertar_reservas_mensualidad(usuario_id: int, instancias_clase: dict, cursor):
     """Permite insertar las reservas de una mensualidad"""
     ids = []

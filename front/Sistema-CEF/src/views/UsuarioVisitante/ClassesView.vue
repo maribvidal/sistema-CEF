@@ -91,31 +91,31 @@
                 <v-col cols="12" md="3" :class="$vuetify.display.mdAndUp ? 'pa-0' : 'pa-4 ga-2 bg-grey-lighten-4'" class="d-flex flex-column justify-center bg-md-transparent">
                   
                   <v-btn
-                    color="success"
-                    :variant="$vuetify.display.mdAndUp ? 'tonal' : 'elevated'"
-                    prepend-icon="mdi-calendar-check"
-                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
-                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
-                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
-                    block
-                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
-                    v-if="userRole === 3 && !clase.yaReservada"
-                    @click="abrirDialogoReserva(clase)"
-                  >
-                    Reservar Clase
-                  </v-btn>
+  color="success"
+  :variant="$vuetify.display.mdAndUp ? 'tonal' : 'elevated'"
+  prepend-icon="mdi-calendar-check"
+  :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+  :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+  :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+  block
+  :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
+  v-if="userRole === 3 && !clase.yaReservada"
+  @click="abrirDialogReserva(clase)"
+>
+  Reservar Clase
+</v-btn>
 
-                  <v-btn
-                    color="orange-darken-1"
-                    :variant="$vuetify.display.mdAndUp ? 'tonal' : 'outlined'"
+<v-btn
+  color="orange-darken-1"
+  :variant="$vuetify.display.mdAndUp ? 'tonal' : 'outlined'"
   prepend-icon="mdi-calendar-remove"
-                    :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
-                    :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
-                    :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
-                    block
-                    :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
-                    v-if="userRole === 3 && clase.yaReservada"
-                    @click="cancelarReserva(clase)"
+  :size="$vuetify.display.mdAndUp ? 'x-small' : 'small'"
+  :density="$vuetify.display.mdAndUp ? 'compact' : 'default'"
+  :rounded="$vuetify.display.mdAndUp ? '0' : 'lg'"
+  block
+  :class="{ 'flex-grow-1': $vuetify.display.mdAndUp }"
+  v-if="userRole === 3 && clase.yaReservada"
+  @click="ejecutarCancelarReserva(clase)"
 >
   Cancelar Reserva
 </v-btn>
@@ -437,30 +437,36 @@ const fetchAuxData = async () => {
 }
 
 // Nueva función para obtener las clases a las que el usuario ya se anotó
-const clasesUsuario = ref([])
+
 
 // Función que pide los datos al backend (seguramente ya tenés algo muy parecido)
 const fetchClasesUsuario = async () => {
-  // Solo consultamos si es un cliente (rol 3) y tenemos su ID
   if (userRole.value === 3 && userProfile.value?.id) {
-  try {
-      // Usamos la función que me indicaste
-    const response = await ClasesService.obtenerClase(userProfile.value.id)
-      const misClases = response.data || response // Ajusta según la estructura de Axios
-      
+    try {
+      const response = await ClasesService.obtenerClase(userProfile.value.id)
+      const misClases = response?.data?.data ?? response?.data ?? response
+
       if (Array.isArray(misClases)) {
-        clasesReservadasIds.value = misClases.map(c => c.id ?? c[0])
+        clasesReservadasIds.value = misClases.map(c => c.clase_id ?? c.id ?? c[0])
+        console.log('IDs de clases reservadas:', clasesReservadasIds.value)
+      } else {
+        console.warn('No se pudo extraer un array de clases reservadas:', misClases)
+        clasesReservadasIds.value = []
       }
-  } catch (error) {
+    } catch (error) {
       console.error('Error al cargar clases del usuario:', error)
+      clasesReservadasIds.value = []
     }
   }
+}
+
+const comprobarClaseYaReservada = (claseId) => {
+  return clasesReservadasIds.value.includes(claseId)
 }
 
 const fetchClases = async () => {
   try {
     const data = await ClasesService.listarClases()
-    
     if (!Array.isArray(data)) {
       console.error('Se esperaba un array de clases pero se recibió:', data)
       return
@@ -485,14 +491,17 @@ const fetchClases = async () => {
         sala_nombre: salas.value.find(s => s.id == (c.sala_id ?? c[6]))?.nombre 
                   || `Sala ID: ${c.sala_id ?? c[6]}`, // Ensure this is sala_nombre
         // Comparamos el ID actual con el array de reservas
-        yaReservada: clasesReservadasIds.value.includes(claseId), 
+        yaReservada: comprobarClaseYaReservada(claseId),
+        
         imagen: (() => {
           const nombre = actividades.value.find(a => a.id == (c.actividad_id ?? c[2]))?.nombre ?? '';
           if (nombre === 'Yoga') return 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=500';
           if (nombre === 'Pilates') return 'https://plus.unsplash.com/premium_photo-1737321091046-ae81c7360cf0?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
           return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=500'; // Funcional por defecto
-        })()
+        })(),
+        
       }
+      
     })
   } catch (error) {
     console.error('Error al cargar clases:', error)
@@ -505,7 +514,7 @@ onMounted(async () => {
   await fetchAuxData()
   await fetchClasesUsuario() // Obtenemos las reservas antes de renderizar la lista completa
   await fetchClases()
-  console.log('Clases del usuario:', clasesUsuario.value);
+  
 })
 
 const abrirDialogCrear = () => {
@@ -623,10 +632,7 @@ const cancelarClase = async (clase) => {
   }
 }
 
-const abrirDialogoReserva = (clase) => {
-  claseParaReservar.value = clase
-  reservaDialog.value = true
-}
+
 
 const hacerReserva = async (tipo) => {
   const clase = claseParaReservar.value
@@ -667,25 +673,6 @@ const hacerReserva = async (tipo) => {
   }
 }
 
-const cancelarReserva = async (clase) => {
-  try {
-    // Asegúrate de usar el endpoint correcto de tu backend para cancelar
-    // Por ejemplo: await ClasesService.cancelarReserva(clase.id, userProfile.value.id)
-    console.log(`Ejecutando cancelación de la clase ${clase.id} para el usuario ${userProfile.value.id}`);
-    
-    // Aquí deberías colocar tu llamada a la API
-    // await ClasesService.cancelarReserva(clase.id) 
-    
-    // Refrescamos los datos
-    await fetchClasesUsuario()
-    await fetchClases()
-    
-    notificationStore.showNotification('Reserva cancelada exitosamente', 'success')
-  } catch (error) {
-    console.error('Error al cancelar reserva:', error)
-    notificationStore.showNotification('Hubo un error al cancelar la reserva', 'danger')
-  }
-}
 
 const hacerPagoMercadoPago = async () => {
   const clase = claseParaReservar.value
@@ -854,45 +841,38 @@ const renderCheckoutBrick = async () => {
 }
 
 // 1. Función para comprobar si el usuario ya está anotado en esta clase específica
-const yaTieneReserva = (claseId) => {
-  // Si no hay datos, o si los datos no son un Array, devolvemos false automáticamente
-  if (!clasesUsuario.value || !Array.isArray(clasesUsuario.value)) {
-    return false;
-  }
-  console.log('Verificando si el usuario ya tiene reserva para la clase con ID:', claseId, 'Clases del usuario:', clasesUsuario.value);
-  // Si es un array, procedemos a buscar
-  return clasesUsuario.value.some(c => c.id === claseId || c.id_clase === claseId);
-  
-};
+
 
 // 2. Modificamos la función que abre el flujo de reserva para agregar el escudo de seguridad
 const abrirDialogReserva = (clase) => {
-  // Si por alguna razón logra hacer click, el sistema lo frena acá
-  if (yaTieneReserva(clase.id)) {
-    notificationStore.showNotification('Ya posees una reserva activa para esta clase.', 'warning');
-    return;
+  try {
+    if (comprobarClaseYaReservada(clase.id)) {
+      notificationStore.showNotification('Ya estás anotado en esta clase.', 'info')
+      return
+    }
+    claseParaReservar.value = clase
+    reservaDialog.value = true
+  } catch (error) {
+    console.error('Error al comprobar si la clase ya está reservada:', error)
+    notificationStore.showNotification(error.message, 'danger')
+    return
   }
 
-  claseParaReservar.value = clase;
-  reservaDialog.value = true;
-};
+  
+}
 
 // 3. Lógica para la cancelación (Ya tenías el borrador al final de tu archivo, la dejamos pulida)
 const ejecutarCancelarReserva = async (clase) => {
   try {
-    // Usamos el ID correspondiente para dar de baja la reserva
-    await ClasesService.cancelarReserva(clase.id);
-    
-    // Refrescamos los datos inmediatamente para que los botones cambien en la pantalla
-    await fetchClasesUsuario();
-    await fetchClases();
-    
-    notificationStore.showNotification('Reserva cancelada exitosamente.', 'success');
+    await ClasesService.cancelarReserva(clase.id)
+    await fetchClasesUsuario()
+    await fetchClases()
+    notificationStore.showNotification('Reserva cancelada exitosamente.', 'success')
   } catch (error) {
-    console.error('Error al cancelar reserva:', error);
-    notificationStore.showNotification('Hubo un error al intentar cancelar la reserva.', 'danger');
+    console.error('Error al cancelar reserva:', error)
+    notificationStore.showNotification('Hubo un error al intentar cancelar la reserva.', 'danger')
   }
-};
+}
 
 
 </script>

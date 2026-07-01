@@ -8,32 +8,40 @@
               <v-icon icon="mdi-account-cog" class="mr-3"></v-icon>
               <span class="text-h5">Administración de Usuarios</span>
               <v-spacer></v-spacer>
-              <v-text-field
-                v-model="search"
-                prepend-inner-icon="mdi-magnify"
-                label="Buscar por nombre o DNI"
-                variant="solo"
-                hide-details
-                density="compact"
-                class="search-field"
-                style="max-width: 300px;"
-              ></v-text-field>
             </v-card-title>
+            <v-card-text class="py-0 d-flex">
+              <v-chip-group
+                v-model="filtroEstado"
+                mandatory
+                selected-class="text-black bg-white"
+              >
+                <v-chip value="todos" size="small">Todos</v-chip>
+                <v-chip value="activos" size="small">Activos</v-chip>
+                <v-chip value="desactivados" size="small">Desactivados</v-chip>
+                <v-chip value="borrados" size="small">Borrados</v-chip>
+              </v-chip-group>
+            </v-card-text>
           </div>
 
           <template v-if="users.length > 0">
             <v-data-table
               :headers="headers"
-              :items="users"
+              :items="usuariosFiltrados"
               :search="search"
               :loading="loading"
               :header-props="{ class: 'font-weight-bold' }"
               loading-text="Cargando usuarios..."
               no-data-text="No se encontraron usuarios"
             >
+              <template v-slot:[`item.rol_id`]="{ item }">
+                <v-chip :color="getStatusColor(item.rol_id)" size="small" class="font-weight-bold">
+                  {{ getStatusName(item.rol_id) }}
+                </v-chip>
+              </template>
               <template v-slot:[`item.acciones`]="{ item }">
                 <div class="d-flex justify-end">
                    <v-btn 
+                    v-if="item.rol_id < 10"
                     icon="mdi-calendar-month"
                     variant="text"
                     color="orange-darken-2"
@@ -41,19 +49,23 @@
                     title="Cambiar fecha de mensualidad"
                     @click="handleChangeMonthlyPayment(item)"
                   ></v-btn>
-                   <v-btn 
+                  <v-btn
+                    v-if="item.rol_id < 20"
                     icon="mdi-account-off"
-                    variant="text"
-                    color="grey-darken-1"
+                    :variant="item.rol_id < 10 ? 'text' : 'tonal'"
+                    :color="item.rol_id < 10 ? 'grey-darken-1' : 'green-darken-1'"
                     size="small"
-                    title="Desactivar"
+                    :title="item.rol_id < 10 ? 'Desactivar' : 'Reactivar Usuario'"
+                    @click="item.rol_id < 10 ? deactivateUser(item) : reactivateUser(item)"
                   ></v-btn>
                   <v-btn
+                    v-if="item.rol_id < 20"
                     icon="mdi-delete"
                     variant="text"
                     color="red-darken-1"
                     size="small"
                     title="Eliminar"
+                    @click="handleDeleteUser(item)"
                   ></v-btn>
                 </div>
               </template>
@@ -89,13 +101,35 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
+        <v-dialog v-model="dialogMotivoEliminacionUsuario" max-width="500px">
+          <v-card rounded="lg">
+            <v-card-title class="bg-grey-lighten-3">Motivo de Eliminación</v-card-title>
+            <v-card-text class="pt-4">
+              <v-form>
+                <v-textarea
+                  v-model="motivoEliminacion"
+                  label="Ingrese el motivo de eliminación del usuario"
+                  variant="outlined"
+                  density="comfortable"
+                  rows="4"
+                ></v-textarea>
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn variant="text" @click="dialogMotivoEliminacionUsuario = false">Cancelar</v-btn>
+              <v-btn color="red-darken-1" variant="elevated" @click="confirmDeleteUser">Eliminar</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { UsersAdminService } from '@/services/UsuariosServices.js'
 import { useNotificationStore } from '@/stores/notificationStore.js'
 
@@ -104,11 +138,17 @@ const search = ref('')
 const loading = ref(false)
 const notificationStore = useNotificationStore()
 
+const filtroEstado = ref('todos')
 const dialog = ref(false)
 const fechaFin = ref('')
 const formValid = ref(false)
 const form = ref(null)
 const usuarioSeleccionado = ref(null)
+
+// Estados para eliminación de usuario
+const dialogMotivoEliminacionUsuario = ref(false)
+const motivoEliminacion = ref('')
+const usuarioAEliminar = ref(null)
 
 const headers = [
   { title: 'DNI', key: 'dni', sortable: true },
@@ -117,8 +157,35 @@ const headers = [
   { title: 'Teléfono', key: 'telefono' },
   { title: 'Correo', key: 'correo' },
   { title: 'Género', key: 'genero', align: 'center' },
+  { title: 'Rol', key: 'rol_id', align: 'center' },
   { title: 'Acciones', key: 'acciones', sortable: false, align: 'end' }
 ]
+
+const usuariosFiltrados = computed(() => {
+  const listaCompleta = users.value
+
+  switch (filtroEstado.value) {
+    case 'activos':
+      return listaCompleta.filter(u => u.rol_id > 0 && u.rol_id < 10)
+    case 'desactivados':
+      return listaCompleta.filter(u => u.rol_id >= 10 && u.rol_id < 20)
+    case 'borrados':
+      return listaCompleta.filter(u => u.rol_id >= 20)
+    case 'todos':
+    default:
+      return listaCompleta
+  }
+})
+
+const getStatusName = (id) => {
+  return 'Usuario'
+}
+
+const getStatusColor = (id) => {
+  if (id >= 20) return 'red-darken-1'
+  if (id >= 10) return 'grey-darken-1'
+  return 'green-darken-1'
+}
 
 const loadUsers = async () => {
   loading.value = true
@@ -138,7 +205,7 @@ const loadUsers = async () => {
       telefono: u.telefono ?? u[8]
     }));
 
-    users.value = fetchedUsers.filter(user => user.rol_id === 3);
+    users.value = fetchedUsers.filter(user => user.rol_id % 10 === 3);
   } catch (error) {
     notificationStore.showNotification('Error al cargar los usuarios.', 'danger')
     console.error('Error cargando usuarios:', error)
@@ -174,6 +241,87 @@ const submitChange = async () => {
     notificationStore.showNotification('Error al actualizar la fecha de mensualidad.', 'danger')
   }
 }
+
+const deactivateUser = (user) => {
+  if (!user.id) {
+    notificationStore.showNotification('No se pudo identificar al usuario.', 'danger');
+    return;
+  }
+
+  notificationStore.showNotification(
+    `¿Desactivar a ${user.nombre} ${user.apellido}?`,
+    'warning',
+    0, // Timeout 0 para que sea persistente
+    async () => {
+      try {
+        await UsersAdminService.deactivateUser(user.id);
+        notificationStore.showNotification('Usuario desactivado correctamente.', 'success');
+        await loadUsers(); // Recargar la lista de usuarios
+      } catch (error) {
+        console.error('Error al desactivar usuario:', error);
+        notificationStore.showNotification('Hubo un error al desactivar el usuario.', 'danger');
+      }
+    }
+  );
+};
+
+const reactivateUser = (user) => {
+  if (!user.id) {
+    notificationStore.showNotification('No se pudo identificar al usuario.', 'danger');
+    return;
+  }
+
+  notificationStore.showNotification(
+    `¿Reactivar a ${user.nombre} ${user.apellido}?`,
+    'info',
+    0,
+    async () => {
+      try {
+        await UsersAdminService.reactivateUser(user.id);
+        notificationStore.showNotification('Usuario reactivado correctamente.', 'success');
+        await loadUsers();
+      } catch (error) {
+        console.error('Error al reactivar usuario:', error);
+        notificationStore.showNotification('Hubo un error al reactivar el usuario.', 'danger');
+      }
+    }
+  );
+};
+
+const handleDeleteUser = (user) => {
+  if (!user.id) {
+    notificationStore.showNotification('No se pudo identificar al usuario.', 'danger');
+    return;
+  }
+  usuarioAEliminar.value = user;
+  motivoEliminacion.value = '';
+  dialogMotivoEliminacionUsuario.value = true;
+};
+
+const confirmDeleteUser = async () => {
+  if (!motivoEliminacion.value.trim()) {
+    notificationStore.showNotification('Por favor, ingrese un motivo de eliminación.', 'warning');
+    return;
+  }
+
+  dialogMotivoEliminacionUsuario.value = false;
+
+  notificationStore.showNotification(
+    `¿Eliminar permanentemente a ${usuarioAEliminar.value.nombre} ${usuarioAEliminar.value.apellido}?`,
+    'danger',
+    0,
+    async () => {
+      try {
+      await UsersAdminService.deleteUser(user.id);
+        notificationStore.showNotification('Usuario eliminado correctamente.', 'success');
+        await loadUsers(); // Recargar la lista de usuarios
+      } catch (error) {
+        console.error('Error al eliminar usuario:', error);
+        notificationStore.showNotification('Hubo un error al eliminar el usuario.', 'danger');
+      }
+    }
+  );
+};
 
 onMounted(() => {
   loadUsers()

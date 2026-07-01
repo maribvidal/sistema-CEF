@@ -36,13 +36,13 @@ def consultar_usuario_por_id(id: int, cursor) -> dict:
 
 def listar_usuarios(cursor) -> dict:
     """Hace una consulta para listar todos los usuarios, y devuelve una lista de tuplas"""
-    return ejecutar_fetchall("SELECT * FROM Usuario WHERE rol_id IN (0, 1, 2, 3, 4)", cursor)
+    return ejecutar_fetchall("SELECT * FROM Usuario WHERE rol_id IN (0, 1, 2, 3, 4, 13, 23)", cursor)
 
 def obtener_clases_usuario(id_usuario: int, cursor) -> dict:
-    """Hace una consulta para obtener las clases a las que un usuario está inscrito,
-        y devuelve una lista de tuplas"""
+    """Devuelve las clases (con su instancia específica) a las que un usuario está inscrito."""
     query = f"""
-        SELECT c.id, c.estado, c.actividad_id, c.profesor_id, c.sala_id, c.dia, c.hora, c.cupo_maximo, c.monto
+        SELECT c.id AS clase_id, ic.id AS inst_clase_id, c.estado, c.actividad_id, 
+               c.profesor_id, c.sala_id, c.dia, c.hora, c.cupo_maximo, c.monto, ic.fecha
         FROM Clase c INNER JOIN Instancia_Clase ic ON (c.id = ic.clase_id)
                     INNER JOIN Reserva r ON (ic.id = r.inst_clase_id)
                     INNER JOIN Usuario u ON (r.usuario_id = u.id)

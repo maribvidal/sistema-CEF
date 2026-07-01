@@ -56,5 +56,13 @@ export const PaymentsService = {
     return response.data
     },
 
+    confirmarReservaIndividual: async (usuario_id, inst_clase_id) => {
+        return apiClient.post(`/reservas/individual/${usuario_id}/${inst_clase_id}/confirmar`)
+    },
+    
+    confirmarReservaAbonado: async (usuario_id, clase_id) => {
+        return apiClient.post(`/reservas/abonado/${usuario_id}/${clase_id}/confirmar`)
+    }
+
 
 }
