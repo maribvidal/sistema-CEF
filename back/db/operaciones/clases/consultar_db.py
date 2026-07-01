@@ -72,17 +72,26 @@ def consultar_reservas_total_por_clase(id_clase: int, cursor) -> dict:
 
     return ejecutar_fetchone(query, cursor)
 
+def consultar_instancias_por_id(instancia_id: int, cursor) -> dict:
+    """Hace una consulta que devuelve la instancia de clase con el id recibido."""
+    query = f"""
+        SELECT *
+        FROM Instancia_Clase
+        WHERE id = {instancia_id}
+    """
+    return ejecutar_fetchone(query, cursor)
+
 def consultar_instancias_por_clase_id(id_clase: int, cursor) -> dict:
     """Hace una consulta que devuelve los ids de todas las instancias
         de clases que posea una clase, y hace la consulta con el
         id de la clase recibido."""
     query = f"""
-        SELECT ic.id, ic.fecha
+        SELECT ic.id, ic.fecha, ic.clase_id
         FROM Clase c
             INNER JOIN Instancia_Clase ic ON c.id = ic.clase_id
         WHERE c.id = {id_clase}
     """
-
+    
     return ejecutar_fetchall(query, cursor)
 
 def consultar_clase_por_id_instancia(instancia_id: int, cursor) -> dict:

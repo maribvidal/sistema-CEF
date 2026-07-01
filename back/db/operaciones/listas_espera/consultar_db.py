@@ -18,7 +18,7 @@ def consultar_lista_espera_individual_usuario_por_idInstanciaClase(idInstanciaCl
         SELECT 1
         FROM Lista_Espera_Individual l
         INNER JOIN Usuario_Pertenece_Lista_Espera_Individual up ON l.id = up.lei_id
-        INNER JOIN Usuarios u ON up.usuario_id = u.id
+        INNER JOIN Usuario u ON up.usuario_id = u.id
         WHERE l.inst_clase_id = {idInstanciaClase}
         AND u.dni = {dniUsuario};
     """
@@ -88,7 +88,7 @@ def obtener_lista_espera_individual_por_id_clase(id_clase: int, cursor):
     query = f"""
         SELECT id
         FROM Lista_Espera_Individual
-        WHERE clase_id = {id_clase};
+        WHERE inst_clase_id = {id_clase};
     """
     return ejecutar_fetchone(query, cursor)
 

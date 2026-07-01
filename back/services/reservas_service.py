@@ -11,7 +11,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.reservas.consultar_db import consultar_reserva_por_id
 from db.operaciones.cancelaciones.insertar_db import insertar_cancelacion
 from db.operaciones.reservas import borrar_reserva
-from db.operaciones.clases.consultar_db import consultar_cupo_disponible_por_clase, consultar_instancias_por_clase_id, obtener_cantidad_reservar_instancia_clase
+from db.operaciones.clases.consultar_db import consultar_cupo_disponible_por_clase, consultar_instancias_por_clase_id, consultar_instancias_por_id, obtener_cantidad_reservar_instancia_clase
 from db.operaciones import consultar_usuario_por_dni, consultar_clase_por_id, consultar_lista_espera_abonado_usuario_por_idClase, consultar_lista_espera_individual_usuario_por_idInstanciaClase,  obtener_lista_espera_abonados_por_id_clase, obtener_lista_espera_individual_por_id_clase
 
 from utils.modulo_manejo_listas import manejar_listas_de_espera_por_clase
@@ -39,9 +39,10 @@ def cancelar_reserva_service(reserva_id):
     
     cursor.connection.commit()
 
-    # res_ins_clase = consultar_instancia_clase_por_id(id_ins_clase, cursor)
-    # id_clase = res_ins_clase["data"]["clase_id"]
-    # manejar_listas_de_espera_por_clase(id_clase, cursor)
+    # notificar siguiente en la lista de espera
+    res_ins_clase = consultar_instancia_clase_por_id(id_ins_clase, cursor)
+    id_clase = res_ins_clase["data"]["clase_id"]
+    manejar_listas_de_espera_por_clase(id_clase, cursor)
     
     return _msj_exito_helper(f"Cancelación para la reserva con id {reserva_id} creada exitosamente.", cursor)
 
@@ -57,7 +58,7 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
         return control
     
     # Comprobar si la instancia de clase existe
-    inst_clase = consultar_instancias_por_clase_id(inst_clase_id, cursor)
+    inst_clase = consultar_instancias_por_id(inst_clase_id, cursor)
     control = _controlar_errores_query(inst_clase, 400, "Instancia de clase no encontrada.", 401, cursor)
     if control is not None:
         return control
@@ -72,7 +73,7 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
     # 3- comparar la cantidad de reservas existentes con la cantidad de cupo disponible
     if reservas_existentes['data']['cantidad_reservas'] >= cupo_disponible['data']['cupo_maximo']:
         # en front tienen que mostrar el pop up parecido al del pagar mensualidad y luego si apreta que si, mandar a la ruta de agregar lista de espera
-        return _msj_error_helper("No hay cupo disponible para esta instancia de clase.", cursor), 407
+        return _msj_error_helper("No hay cupo disponible para esta instancia de clase.", cursor), 409
 
     # Pagar
     respuesta, status = crear_pago_service_particular(usuario_id, "Reserva individual", inst_clase_id)
@@ -94,12 +95,12 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
 
     return _msj_exito_helper(f"La reserva {respuesta["data"]} ha sido creada exitosamente.", cursor)
 
-def agregar_usuario_a_lista_espera_individual(dni_cliente, inst_clase_id):
+def agregar_usuario_a_lista_espera_individual(usuario_id, inst_clase_id):
     """Agrega un usuario a la lista de espera individual para una instancia de clase específica."""
     cursor = conectarse_db()
     
     # Comprobar si el usuario existe
-    usuario = consultar_usuario_por_dni(dni_cliente, cursor)
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
     control = _controlar_errores_query(usuario, 400, "Usuario no encontrado.", 401, cursor)
     if control is not None:
         return control
@@ -111,7 +112,7 @@ def agregar_usuario_a_lista_espera_individual(dni_cliente, inst_clase_id):
         return control
 
     # verificar si el usuario ya está en la lista de espera
-    respuesta = consultar_lista_espera_individual_usuario_por_idInstanciaClase(inst_clase_id, dni_cliente, cursor)
+    respuesta = consultar_lista_espera_individual_usuario_por_idInstanciaClase(inst_clase_id, usuario['data']['dni'], cursor)
     control = _controlar_errores_query_sin_none(respuesta, 400, "Usuario ya está en la lista de espera.", 401, cursor)
     if control is not None:
         return control
