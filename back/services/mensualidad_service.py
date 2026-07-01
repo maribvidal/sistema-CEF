@@ -212,7 +212,7 @@ def verificar_mensualidades_por_vencer():
         SELECT m.id, m.usuario_id, m.fecha_fin
         FROM Mensualidad m
         LEFT JOIN Notificaciones_Enviadas ne ON m.id = ne.mensualidad_id
-        WHERE m.fecha_fin BETWEEN DATETIME('now') AND DATETIME('now', '+7 days')
+        WHERE m.fecha_fin BETWEEN DATETIME('now') AND DATETIME('now', '+7 days') AND m.estado = 0
         AND ne.mensualidad_id IS NULL
     """)
 

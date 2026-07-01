@@ -4,6 +4,7 @@ import uuid
 import requests
 
 Access_Token = getenv("Access_Token")
+Access_Token_Prueba = getenv("Access_Token_Prueba")
 
 external_codes = {
     "mensualidad": "MENSUALIDAD",
@@ -336,31 +337,34 @@ def crear_sucursal_mp():
 
     print(respuesta.json())
     
-# def crear_preferencia_checkout_pro(external_reference, total_amount, description, item, redirecciones_front, ):
-#     url = "https://api.mercadopago.com/checkout/preferences"
-#     headers = {
-#         "Authorization": f"Bearer {Access_Token}",
-#         "Content-Type": "application/json"
-#     }
+import tunel_state
+    
+def crear_preferencia_checkout_pro(external_reference, total_amount, description, item ):
+    url = "https://api.mercadopago.com/checkout/preferences"
+    headers = {
+        "Authorization": f"Bearer {Access_Token_Prueba}",
+        "Content-Type": "application/json"
+    }
 
-#     datos = {
-#         "external_reference": str(external_reference),
-#         "items": [
-#             {
-#                 "title": item.get("title", description),
-#                 "description": description,
-#                 "quantity": int(item.get("quantity", 1)),
-#                 "unit_price": float(total_amount) 
-#             }
-#         ],
-#         "notification_url": "http://127.0.0.1:5000/webhooks/pagoNormal",
-#         "back_urls": { 
-#             "success": redirecciones_front.get("success"),
-#             "pending": redirecciones_front.get("pending"), 
-#             "failure": redirecciones_front.get("failure") 
-#         },
-#         "auto_return": "approved"
-#     }
+    # esos de los backs_urls hay que verlo bien
+    datos = {
+        "external_reference": str(external_reference),
+        "items": [
+            {
+                "title": item.get("title", description),
+                "description": description,
+                "quantity": int(item.get("quantity", 1)),
+                "unit_price": float(total_amount) 
+            }
+        ],
+        "notification_url": f"{tunel_state.backend_url_state}/webhook/pagoNormal",
+        "back_urls": { 
+            "success": f"{tunel_state.frontend_url_state}/clases",
+            "pending": f"{tunel_state.frontend_url_state}/clases",
+            "failure": f"{tunel_state.frontend_url_state}/clases"
+        },
+        "auto_return": "approved"
+    }
 
-#     respuesta = requests.post(url, json=datos, headers=headers)
-#     return {"status": "success", "data": respuesta.json()}
+    respuesta = requests.post(url, json=datos, headers=headers)
+    return {"status": "success", "data": respuesta.json()}
