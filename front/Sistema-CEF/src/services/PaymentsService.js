@@ -21,7 +21,7 @@ export const PaymentsService = {
     },
 
     renewMembership: async (dni_cliente, descripcion ,id_mensualidad) => {
-        return apiClient.post(`/mensualidad/renovar_mensualidad`, {
+        return apiClient.put(`/mensualidad/renovar_mensualidad`, {
             dni_cliente: dni_cliente,
             descripcion: descripcion,
             id_mensualidad: id_mensualidad

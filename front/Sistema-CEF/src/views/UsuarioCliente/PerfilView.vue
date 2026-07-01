@@ -84,19 +84,34 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="dialogMembershipStatus" max-width="500px">
+    <v-dialog v-model="dialogMembershipStatus" max-width="800px">
       <v-card>
         <v-card-title class="text-h5">Estado de Mensualidad</v-card-title>
         <v-card-text>
-          <div v-if="membershipStatus">
-            <p v-if="membershipStatus.activa">La mensualidad está activa.</p>
-            <p v-else>La mensualidad debe renovarse.</p>
-            <p>Fecha de fin: <strong>{{ formatSpanishDate(membershipStatus.fechaFin) }}</strong></p>
-          </div>
-          <div v-else>
-            <p>La mensualidad debe renovarse.</p>
-            <button>Renovar Mensualidad</button>
-          </div>
+          <v-table>
+            <thead>
+              <tr>
+                <th class="text-left">ID</th>
+                <th class="text-left">Fecha Inicio</th>
+                <th class="text-left">Fecha Fin</th>
+                <th class="text-left">Estado</th>
+                <th class="text-left">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="mensualidad in membershipStatus?.mensualidades" :key="mensualidad.id">
+                <td>{{ mensualidad.id }}</td>
+                <td>{{ formatSpanishDate(mensualidad.fecha_ini) }}</td>
+                <td>{{ formatSpanishDate(mensualidad.fecha_fin) }}</td>
+                <td>{{ mensualidad.activa ? 'Activa' : 'Inactiva' }}</td>
+                <td>
+                  <v-btn v-if="mensualidad.activa !== 1" color="primary" @click="renewMembership(userDNI, mensualidad.id)">Renovar</v-btn>
+                  <span v-else> - </span>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+          
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -268,6 +283,18 @@ const showMembershipStatus = async () => {
 }
 
 const renewMembership = async (userId, id_mensualidad) => {
+  try {
+    const response = await PaymentsService.renewMembership(userId, "desc",id_mensualidad)
+    if (response && response.status === 200) {
+      notificationStore.showNotification('Mensualidad renovada exitosamente.', 'success')
+      showMembershipStatus()
+    } else {
+      throw new Error('Error al renovar la mensualidad.')
+    }
+  } catch (error) {
+    console.error('Error al renovar la mensualidad:', error)
+    notificationStore.showNotification('Error al renovar la mensualidad.', 'danger')
+  }
 
 }
 </script>
