@@ -3,7 +3,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
 from services import _controlar_errores_query
 from services.pagos_service import crear_pago_service_mensualidad, verificar_poder_pagar_mensualidad_service
-from services.mensualidad_service import cancelar_mensualidad_service, configurar_fin_mensualidad_service, obtener_mensualidad_service, obtener_mensualidad_usuario_service, renovar_mensualidad_service, ver_estado_mensualidad_service
+from services.mensualidad_service import cancelar_mensualidad_service, configurar_fin_mensualidad_service, obtener_mensualidad_service, obtener_mensualidad_usuario_service, renovar_mensualidad_service, ver_estado_mensualidad_service, obtener_todas_las_mensualidades_usuario_service
 
 mensualidad_bp = Blueprint('mensualidad', __name__)
 
@@ -95,5 +95,17 @@ def cancelar_mensualidad_route():
     id_mensualidad = data.get("id_mensualidad")
 
     respuesta, status = cancelar_mensualidad_service(dni_cliente, id_mensualidad)
+    
+    return jsonify(respuesta), status
+
+
+@mensualidad_bp.route("/mensualidad/ver_mensualidades_usuario", methods=["GET"])
+def ver_mensualidades_usuario():
+    """
+        Endpoint para obtener todas las mensualidades de un usuario.
+    """
+    data = request.get_json()
+    dni_cliente = data.get("dni_usuario")
+    respuesta, status = obtener_todas_las_mensualidades_usuario_service(dni_cliente)
     
     return jsonify(respuesta), status
