@@ -110,12 +110,18 @@ watch(() => props.empleado, (newVal) => {
 const fetchProfesorActivities = async () => {
   if (!employee.value.id) return
   try {
-    const resAct = await EmployeesService.listarActividadesProfesor(employee.value.id)
-    if (Array.isArray(resAct)) {
-      employee.value.actividades = resAct.map(a => a.id ?? a[0])
+    const response = await EmployeesService.listarActividadesProfesor(employee.value.id)
+    // El servicio devuelve un objeto { status, data }
+    if (response && response.status === 'success' && Array.isArray(response.data)) {
+      // El backend devuelve un array de objetos como [{ actividad_id: 1 }, ...]
+      employee.value.actividades = response.data.map((a) => a.actividad_id)
+    } else {
+      employee.value.actividades = []
     }
   } catch (error) {
     console.error("Error fetching professor's activities:", error)
+    // Si el backend devuelve 403 (sin actividades), se captura aquí.
+    // Queremos mostrar una lista vacía en ese caso.
     employee.value.actividades = []
   }
 }
