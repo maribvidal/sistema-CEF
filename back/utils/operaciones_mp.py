@@ -336,31 +336,48 @@ def crear_sucursal_mp():
 
     print(respuesta.json())
     
-# def crear_preferencia_checkout_pro(external_reference, total_amount, description, item, redirecciones_front, ):
-#     url = "https://api.mercadopago.com/checkout/preferences"
-#     headers = {
-#         "Authorization": f"Bearer {Access_Token}",
-#         "Content-Type": "application/json"
-#     }
+def crear_preferencia_checkout_pro(external_reference, total_amount, description, item):
+    """
+    Se comunica con Mercado Pago para crear una Preferencia (Checkout Pro).
+    Devuelve el ID de la preferencia que necesita el Frontend para renderizar el botón.
+    """
+    try:
+        url = "https://api.mercadopago.com/checkout/preferences"
+        headers = {
+            "Authorization": f"Bearer {Access_Token}",
+            "Content-Type": "application/json"
+        }
 
-#     datos = {
-#         "external_reference": str(external_reference),
-#         "items": [
-#             {
-#                 "title": item.get("title", description),
-#                 "description": description,
-#                 "quantity": int(item.get("quantity", 1)),
-#                 "unit_price": float(total_amount) 
-#             }
-#         ],
-#         "notification_url": "http://127.0.0.1:5000/webhooks/pagoNormal",
-#         "back_urls": { 
-#             "success": redirecciones_front.get("success"),
-#             "pending": redirecciones_front.get("pending"), 
-#             "failure": redirecciones_front.get("failure") 
-#         },
-#         "auto_return": "approved"
-#     }
+        datos = {
+            "external_reference": str(external_reference),
+            "items": [
+                {
+                    "title": item.get("title", description),
+                    "description": description,
+                    "quantity": int(item.get("quantity", 1)),
+                    "unit_price": float(total_amount) 
+                }
+            ],
+            # Rutas de tu frontend donde volverá el usuario luego de pagar
+            "back_urls": { 
+                "success": "http://localhost:5173/pago-exitoso",
+                "pending": "http://localhost:5173/pago-pendiente", 
+                "failure": "http://localhost:5173/pago-fallido" 
+            },
+            "auto_return": "approved",
+            # Acá el webhook donde MP le avisa a tu backend que se aprobó el pago
+            "notification_url": "https://tu-dominio-en-ngrok.com/webhooks/pagoNormal" 
+        }
 
-#     respuesta = requests.post(url, json=datos, headers=headers)
-#     return {"status": "success", "data": respuesta.json()}
+        respuesta = requests.post(url, json=datos, headers=headers)
+        respuesta_json = respuesta.json()
+
+        return {
+            "status": "success",
+            "data": respuesta_json  # MP devuelve el 'id' de la preferencia aquí
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }

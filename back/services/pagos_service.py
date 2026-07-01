@@ -18,6 +18,7 @@ from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp
 from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad, borrar_mensualidad, borrar_pago_pagar_mensualidad
 from db.operaciones.conectar_db import conectarse_db
 
+from utils.operaciones_mp import crear_preferencia_checkout_pro
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
 
 # esto lo podria replantear como que las inserciones se hagan luego del pago asi no tengo que andar haciendo rollbacks
@@ -316,59 +317,25 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
         "unit_price": str(instancia_clase['data']['monto']),
         "quantity": 1,
         "unit_measure": "unit",
-        "external_categories": [
-        {"id": "personal-training"}
-        ]
+        "external_categories": [{"id": "personal-training"}]
     }
     
-    respuesta_json = crear_orden_qr_mp(id_pago, instancia_clase['data']['monto'], descripcion, item)
-   
-    control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
+    # 1. Llamamos a nuestra nueva función
+    respuesta_json = crear_preferencia_checkout_pro(id_pago, instancia_clase['data']['monto'], descripcion, item)
+    
+    control = _controlar_errores_query(respuesta_json, 500, "Error al crear la preferencia de pago en MercadoPago.", 400, cursor)
     if control is not None:
         return control
     
-    respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
+    # ¡LISTO! Obtenemos el ID de la preferencia.
+    preference_id = respuesta_json["data"]["id"]
     
-    control = _controlar_errores_query(respuesta, 500, "Error al consultar los datos de la orden de pago en MercadoPago.", 400, cursor)
-    if control is not None:
-        return control
-    
-    while(respuesta['data']['status'] == "created"):
-        time.sleep(2)
-        respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
-
-        control = _controlar_errores_query(respuesta, 500, "Error al consultar los datos de la orden de pago en MercadoPago.", 400, cursor)
-        if control is not None:
-            return control
-        
-    if respuesta['data']['status'] == "expired" or respuesta['data']['status'] == "refunded":
-        respuesta = borrar_pago_pagar_clase(id_pago, cursor)
-        control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar el pago pagar clase.", 400, cursor)
-        if control is not None:
-            return control
-        
-        
-        respuesta = borrar_pago(cursor, id_pago)
-        control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar el pago.", 400, cursor)
-        if control is not None:
-            return control
-        
-        cursor.connection.close()
-        return {
-            "error": f"La orden de pago con id {respuesta_json['data']['id']} ha expirado o fue cancelada."
-        }, 400    
-    
-    # actuaizar estado del pago
-    res_actualizar = actualizar_estado_pago(id_pago, respuesta['data']['status'], cursor)
-    control = _controlar_errores_query_sin_none(res_actualizar, 500, "Error al actualizar el estado del pago.", 400, cursor)
-    if control is not None:
-        return control
-    
+    cursor.connection.commit()
     cursor.connection.close()
         
     return {
         "message": "Orden de pago creada exitosamente.",
-        "status_mp": respuesta_json.get("status")
+        "preference_id": preference_id # <--- ESTE ES EL STRING QUE NECESITA VUE.JS
     }, 200    
     
 # def actualizar_estado_pago_service(id_pago, estado):

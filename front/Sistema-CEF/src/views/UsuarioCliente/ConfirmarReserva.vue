@@ -1,91 +1,137 @@
 <template>
-    <v-container fluid class="fill-height d-flex align-center justify-center" style="min-height: 100dvh;">
-        <v-card class="pa-6 login-card" width="420" elevation="8" color="bg-card" rounded="lg">
+  <v-container class="py-10">
+    <v-row justify="center">
+      <v-col cols="12" md="8" lg="6">
+        <v-card class="pa-6 text-center" rounded="lg" elevation="6">
+          <v-card-title class="justify-center text-h5 font-weight-bold">
+            {{ titulo }}
+          </v-card-title>
 
-            <h1>Confirmar Reserva</h1>
-            <p>
-                ¿Desea confirmar su reserva para la clase de
-                {{ claseSeleccionada?.actividad?.nombre || 'desconocida' }} del día
-                {{ claseSeleccionada?.dia || 'desconocido' }}?
+          <v-card-text class="pt-3">
+            <p class="text-body-1 mb-2">{{ descripcion }}</p>
+            <p class="text-caption text-grey-darken-1">
+              Usuario #{{ usuarioId }} · Clase #{{ claseId }} · Instancia #{{ instanciaId }}
             </p>
-            <v-btn class="mr-2" color="primary" @click="confirmarReserva">Confirmar</v-btn>
-            <v-btn color="red" @click="cancelarReserva">Cancelar</v-btn>
+
+            <v-alert v-if="!usuarioId || !claseId || !instanciaId" type="warning" variant="tonal" class="mt-4">
+              Faltan parámetros para confirmar la reserva.
+            </v-alert>
+
+            <div class="d-flex flex-wrap justify-center ga-3 mt-4">
+              <v-btn
+                v-if="!mostrarBotonMP"
+                color="primary"
+                @click="iniciarProcesoDePago"
+                :loading="loading"
+                :disabled="!usuarioId || !claseId || !instanciaId"
+              >
+                Generar Pago
+              </v-btn>
+
+              <v-btn variant="text" color="grey-darken-1" @click="emit('cancelar')">
+                Cancelar
+              </v-btn>
+            </div>
+
+            <div id="wallet_container" class="mt-4"></div>
+          </v-card-text>
         </v-card>
-    </v-container>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup>
-import { useAuth } from '@/services/UsuariosServices.js'
-import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { loadMercadoPago } from '@mercadopago/sdk-js'
+import { PaymentsService } from '@/services/PaymentsService.js'
 import { useNotificationStore } from '@/stores/notificationStore.js'
-import { ref, computed, onMounted } from 'vue'
-import { ClasesService } from '@/services/ClasesServices'
 
-const { userProfile } = useAuth()
-const notificationStore = useNotificationStore()
-const router = useRouter()
-
-const actividades = ref([
-    {
-        id: 1,
-        nombre: 'Yoga',
-        dia: 'desconocido',
-    },
-    {
-        id: 2,
-        nombre: 'Pilates',
-        dia: 'desconocido',
-    },
-    {
-        id: 3,
-        nombre: 'Funcional',
-        dia: 'desconocido',
-    },
-])
-
-const claseSeleccionada = computed(() => actividades.value?.[0] || null)
-
-const obtenerClases = async () => {
-    try {
-        const responseClases = await ClasesService.listarClases()
-        const responseActividades = await ClasesService.listarActividades()
-        
-        const clasesList = Array.isArray(responseClases) ? responseClases : []
-        const actividadesList = Array.isArray(responseActividades) ? responseActividades : []
-
-        actividades.value = clasesList.map(clase => ({
-            ...clase,
-            actividad: actividadesList.find(a => a.id === clase.actividad_id) || { nombre: 'desconocida' }
-        }))
-    } catch (error) {
-        console.error('Error al obtener información de clases:', error)
-        notificationStore.addNotification?.({
-            message: 'No se pudo cargar la información de la clase.',
-            type: 'error',
-        })
-    }
-}
-
-const confirmarReserva = async () => {
-    notificationStore.addNotification?.({
-        message: 'Reserva confirmada correctamente.',
-        type: 'success',
-    })
-
-    await router.push(`/perfil/${userProfile?.id}`)
-}
-
-const cancelarReserva = async () => {
-    await router.push(`/perfil/${userProfile?.id}`)
-}
-
-onMounted(() => {
-    obtenerClases()
+const props = defineProps({
+  clase_id: {
+    type: [String, Number],
+    required: true,
+  },
+  inst_clase_id: {
+    type: [String, Number],
+    required: true,
+  },
+  usuario_id: {
+    type: [String, Number],
+    required: true,
+  },
+  tipo: {
+    type: String,
+    default: 'particular',
+  },
 })
 
+const emit = defineEmits(['cancelar', 'confirmado'])
+
+const notificationStore = useNotificationStore()
+
+const loading = ref(false)
+const mostrarBotonMP = ref(false)
+const tipoReserva = computed(() => String(props.tipo ?? 'particular'))
+const esMensualidad = computed(() => tipoReserva.value === 'mensualidad')
+
+const usuarioId = computed(() => Number(props.usuario_id))
+const claseId = computed(() => Number(props.clase_id))
+const instanciaId = computed(() => Number(props.inst_clase_id))
+
+const titulo = computed(() => (esMensualidad.value ? 'Confirmar Pago de Mensualidad' : 'Confirmar Pago de Clase'))
+const descripcion = computed(() => (
+  esMensualidad.value
+    ? 'Genera el pago para tu reserva con mensualidad.'
+    : 'Genera el pago para tu reserva particular.'
+))
+
+const iniciarProcesoDePago = async () => {
+  loading.value = true
+  
+  try {
+    const response = esMensualidad.value
+      ? await PaymentsService.mothlyPayment(usuarioId.value, claseId.value)
+      : await PaymentsService.oneTimePayment(usuarioId.value, instanciaId.value)
+
+    const preferenceId =
+      response?.data?.preference_id ??
+      response?.data?.id ??
+      response?.data?.data?.preference_id ??
+      response?.data?.data?.id
+
+    if (!preferenceId) {
+      throw new Error('No se recibió un identificador de preferencia válido.')
+    }
+
+    await loadMercadoPago()
+
+    const mp = new window.MercadoPago('APP_USR-8554081431795174-061416-6c816c273726ca188a84e32e3ec0c0f7-3472007957', {
+      locale: 'es-AR'
+    })
+
+    mp.checkout({
+      preference: {
+        id: preferenceId
+      },
+      render: {
+        container: '#wallet_container',
+        label: 'Pagar con Mercado Pago',
+      }
+    })
+
+    mostrarBotonMP.value = true
+    notificationStore.showNotification('Pago generado correctamente.', 'success')
+    emit('confirmado')
+
+  } catch (error) {
+    console.error('Error al inicializar Mercado Pago:', error)
+    notificationStore.showNotification(
+      error.response?.data?.message || error.message || 'No se pudo iniciar el pago.',
+      'danger'
+    )
+  } finally {
+    loading.value = false
+  }
+}
 </script>
-
-<style scoped>
-
-
-</style>

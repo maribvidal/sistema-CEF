@@ -298,40 +298,15 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="qrDialog" max-width="450px" persistent>
-      <v-card rounded="lg" class="text-center pb-4">
-        <v-card-title class="pa-4 bg-black text-white mb-4">
-          <span class="text-h5">Abonar con Mercado Pago</span>
-        </v-card-title>
-        
-        <v-card-text>
-          <div v-if="qrImage" class="d-flex justify-center">
-            <v-img :src="qrImage" max-width="250" class="mb-4"></v-img>
-          </div>
-          <div v-else class="d-flex justify-center pa-8">
-            <v-progress-circular indeterminate color="black" size="50"></v-progress-circular>
-          </div>
-          
-          <p class="text-body-1 font-weight-bold mt-2 px-4">
-            Escanea el código QR desde la app de Mercado Pago
-          </p>
-          <p class="text-caption text-grey-darken-1 px-6">
-            Usa tu cuenta de prueba para abonar la modalidad de 
-            <strong>{{ tipoReserva === 'particular' ? 'Clase Particular' : 'Mensualidad' }}</strong>.
-          </p>
-          
-          <div class="d-flex justify-center align-center mt-6 text-blue-darken-2">
-            <v-progress-circular indeterminate size="18" width="2" class="me-2"></v-progress-circular>
-            <span class="text-body-2 font-weight-medium">Esperando confirmación del pago en tiempo real...</span>
-          </div>
-        </v-card-text>
-
-        <v-card-actions class="justify-center mt-2">
-          <v-btn color="grey-darken-2" variant="text" @click="cancelarFlujoPago">
-            Cancelar Operación
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+    <v-dialog v-model="confirmarReservaDialog" max-width="760px" persistent>
+      <ConfirmarReserva
+        :clase_id="claseParaReservar?.id"
+        :inst_clase_id="instanciaSeleccionada"
+        :usuario_id="userProfile?.id"
+        :tipo="tipoReserva"
+        @cancelar="cerrarConfirmacionReserva"
+        @confirmado="finalizarConfirmacionReserva"
+      />
     </v-dialog>
 
     <v-dialog v-model="listaEsperaDialog" max-width="450px" persistent>
@@ -376,6 +351,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { ClasesService } from '@/services/ClasesServices'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
+import ConfirmarReserva from '@/views/UsuarioCliente/ConfirmarReserva.vue'
 
 import { useNotificationStore } from '@/stores/notificationStore.js'
 import { useAuth } from '@/services/UsuariosServices.js'
@@ -385,8 +361,10 @@ const isEditing = ref(false)
 const dialog = ref(false)
 const notificationStore = useNotificationStore()
 const reservaDialog = ref(false)
+const confirmarReservaDialog = ref(false)
 const pagoDialog = ref(false)
 const claseParaReservar = ref(null)
+const instanciaSeleccionada = ref(null)
 
 const horas = Array.from({ length: 14 }, (_, i) => (i + 8).toString().padStart(2, '0'))
 const horaSel = ref("08") // Valor por defecto para la hora seleccionada
@@ -469,6 +447,10 @@ const fetchClasesUsuario = async () => {
       }
     } catch (error) {
       console.error('Error al cargar clases del usuario:', error)
+      if (error.status === 403) {
+        clasesReservadasIds.value = []
+        return
+      }
       clasesReservadasIds.value = []
     }
   }
@@ -727,96 +709,40 @@ const hacerPagoMercadoPago = async () => {
 
 const seleccionarTipoReserva = async (tipo) => {
   tipoReserva.value = tipo
-  reservaDialog.value = false // Cierra el modal de selección de tipo
-  
-  // Dispara inmediatamente el flujo síncrono coordinado con tu backend
-  await iniciarFlujoPagoCaja()
-}
-
-// Paso 2: Orquestación del flujo coordinado con el bucle síncrono del backend
-const iniciarFlujoPagoCaja = async () => {
   const clase = claseParaReservar.value
-  if (!clase) return
+  if (!clase || !userProfile.value?.id) return
 
   try {
-    // 1. Resolver la instancia de clase de esta semana ANTES de cualquier pago
     const instResp = await ClasesService.obtenerInstClaseSem(clase.id)
-    const id_inst_clase = instResp?.data?.data?.id ?? instResp?.data?.id
-    if (!id_inst_clase) {
+    const idInstClase = instResp?.data?.data?.id ?? instResp?.data?.id
+
+    if (!idInstClase) {
       throw new Error('No se pudo obtener la instancia de la clase para esta semana.')
     }
-    console.log('clase.id (plantilla):', clase.id, '→ id_inst_clase (instancia real):', id_inst_clase)
 
-    // A. QR (igual que tenías)
-    const responseQr = await PaymentsService.getQRForPayment()
-    let responseData = responseQr.data
-    if (typeof responseData === 'string') {
-      try { responseData = JSON.parse(responseData.replace(/'/g, '"')) } catch (e) { console.error(e) }
-    }
-    if (responseData?.image) {
-      qrImage.value = responseData.image
-      qrDialog.value = true
-    } else {
-      throw new Error('No se pudo inicializar la imagen del código QR de la caja.')
-    }
-
-    // B. Pago
-    const descripcion = `Pago QR de clase: ${clase.categoria}`
-    if (tipoReserva.value === 'mensualidad') {
-      await PaymentsService.mothlyPayment(userProfile.value.id, clase.id)
-      // 👇 acá va id_inst_clase, no clase.id
-      //await PaymentsService.confirmarReservaAbonado(userProfile.value.id, clase.id)
-      console.log("llamo")
-    } else {
-      // Pasamos los parámetros corregidos mapeando 'instancia_clase_id'
-      try{
-        responsePago = await PaymentsService.oneTimePayment(userProfile.value.id, clase.id)
-        console.log('Respuesta de pago de clase particular:', responsePago)
-      }catch(err){
-        console.error('Error al ejecutar el pago de clase particular:', err)
-        console.error("Error details:", err.response?.data || err.message || err)
-        console.error("Error status:",  err.status || 'Unknown')
-        throw err
-      }
-    }
-
-    notificationStore.showNotification('¡Pago verificado y reserva confirmada exitosamente!', 'success')
-    await fetchClasesUsuario()
-    await fetchClases()
-    qrDialog.value = false
-    claseParaReservar.value = null
-
+    instanciaSeleccionada.value = idInstClase
+    reservaDialog.value = false
+    confirmarReservaDialog.value = true
   } catch (error) {
-    console.error('Error detectado durante la transacción:', error)
-    
-    // Para clases particulares: error 409 (sin cupo disponible)
-    if (tipoReserva.value === 'particular' && error.status === 409) {
-      qrDialog.value = false
-      listaEsperaDialog.value = true
-      return
-    }
-    
-    // Para mensualidades: error 501 (sin cupo para abonados, mostrar confirmación)
-    if (tipoReserva.value === 'mensualidad' && error.status === 501) {
-      qrDialog.value = false
-      listaEsperaDialog.value = true
-      return
-    }
-    
-    // Extraemos el mensaje de error nativo del back
-    const mensajeError = error.response?.data?.error || error.response?.data?.message || 'La operación fue cancelada o expiró.'
-    notificationStore.showNotification(mensajeError, 'danger')
-    
-    qrDialog.value = false
-    claseParaReservar.value = null
+    console.error('Error al abrir la confirmación de reserva:', error)
+    notificationStore.showNotification(error.message || 'No se pudo abrir la confirmación de reserva', 'danger')
   }
 }
 
-// Cancelación explícita desde el front
-const cancelarFlujoPago = () => {
-  qrDialog.value = false
+const cerrarConfirmacionReserva = () => {
+  confirmarReservaDialog.value = false
+  instanciaSeleccionada.value = null
   claseParaReservar.value = null
-  notificationStore.showNotification('Transacción cancelada por el usuario.', 'info')
+  tipoReserva.value = null
+}
+
+const finalizarConfirmacionReserva = async () => {
+  confirmarReservaDialog.value = false
+  instanciaSeleccionada.value = null
+  claseParaReservar.value = null
+  await fetchClasesUsuario()
+  await fetchClases()
+  notificationStore.showNotification('Reserva confirmada exitosamente.', 'success')
 }
 
 // Ingresar a lista de espera cuando no hay cupo
@@ -897,11 +823,9 @@ const ejecutarCancelarReserva = async (clase) => {
     const instancia = await ClasesService.obtenerInstClaseSem(clase.id)
     if (!instancia?.data?.data?.id) throw new Error('No se pudo obtener la instancia de clase para esta semana')
     const datos = await PaymentsService.obtenerReservasUsuario(userProfile.value.id, instancia.data.data.id)
-    
-
-    
-
-    await PaymentsService.cancelarReservaIndividual(datos.data.id)
+    console.log('Datos de reserva obtenidos:', datos)
+    console.log('ID de reserva a cancelar:', datos.data.data.id)
+    await PaymentsService.cancelarReservaIndividual(datos.data.data.id)
     await fetchClasesUsuario()
     await fetchClases()
     notificationStore.showNotification('Reserva cancelada exitosamente.', 'success')
@@ -961,3 +885,4 @@ const ejecutarCancelarReserva = async (clase) => {
   }
 }
 </style>
+
