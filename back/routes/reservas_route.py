@@ -22,8 +22,8 @@ def confirmar_agregar_lista_espera(usuario_id, inst_clase_id):
     respuesta, status = agregar_usuario_a_lista_espera_individual(usuario_id, inst_clase_id)
     return jsonify(respuesta), status
 
-@reservas_bp.route('/reservas/abonado/<int:dni_usuario>/<int:clase_id>/confirmar', methods=['POST'])
-def crear_reserva_abonado(dni_usuario, clase_id):
+@reservas_bp.route('/reservas/abonado/<int:usuario_id>/<int:clase_id>/confirmar', methods=['POST'])
+def crear_reserva_abonado(usuario_id, clase_id):
     """Endpoint para crear una reserva para un usuario abonado."""
-    respuesta, status = agregar_usuario_a_lista_espera_abonados(dni_usuario, clase_id)
+    respuesta, status = agregar_usuario_a_lista_espera_abonados(usuario_id, clase_id)
     return jsonify(respuesta), status

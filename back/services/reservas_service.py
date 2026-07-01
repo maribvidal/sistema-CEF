@@ -5,7 +5,7 @@ from db.operaciones.usuario_pertenece_lista_espera_abonados.insertar_db import i
 from db.operaciones.mensualidades.consultar_db import verificar_disponibilidad_usuario
 from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
-from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_abonado, consultar_lista_espera_individual
+from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_abonado, consultar_lista_espera_individual, consultar_lista_espera_individual_usuario_por_ClaseID
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verificar_usuario_abonado
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.reservas.consultar_db import consultar_reserva_por_id
@@ -106,8 +106,8 @@ def agregar_usuario_a_lista_espera_individual(usuario_id, inst_clase_id):
         return control
     
     # verificar que la clase existe
-    respuesta  = consultar_instancia_clase_por_id(inst_clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 400, "Clase no encontrada.", 401, cursor)
+    clase  = consultar_instancia_clase_por_id(inst_clase_id, cursor)
+    control = _controlar_errores_query(clase, 400, "Clase no encontrada.", 401, cursor)
     if control is not None:
         return control
 
@@ -117,6 +117,12 @@ def agregar_usuario_a_lista_espera_individual(usuario_id, inst_clase_id):
     if control is not None:
         return control
     
+    # verificar que el usuario no este en la lista de espera de abonados
+    respuesta = consultar_lista_espera_abonado_usuario_por_idClase(clase['data']['clase_id'], usuario_id, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 400, "Usuario ya está en la lista de espera de abonados.", 401, cursor)
+    if control is not None:
+        return control
+
     # verificar si existe una lista de espera para la instancia de clase
     respuesta = obtener_lista_espera_individual_por_id_clase(inst_clase_id, cursor)
     if respuesta['status'] == "error":
@@ -144,12 +150,12 @@ def agregar_usuario_a_lista_espera_individual(usuario_id, inst_clase_id):
     return _msj_exito_helper("Usuario agregado a la lista de espera de abonados exitosamente.", cursor)
     
 
-def agregar_usuario_a_lista_espera_abonados(dni_cliente, clase_id):
+def agregar_usuario_a_lista_espera_abonados(usuario_id, clase_id):
     """Agrega un usuario a la lista de espera de abonados para una clase específica."""
     cursor = conectarse_db()
     
     # Comprobar si el usuario existe
-    usuario = consultar_usuario_por_dni(dni_cliente, cursor)
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
     control = _controlar_errores_query(usuario, 400, "Usuario no encontrado.", 401, cursor)
     if control is not None:
         return control
@@ -161,8 +167,14 @@ def agregar_usuario_a_lista_espera_abonados(dni_cliente, clase_id):
         return control
 
     # verificar si el usuario ya está en la lista de espera
-    respuesta = consultar_lista_espera_abonado_usuario_por_idClase(clase_id, dni_cliente, cursor)
+    respuesta = consultar_lista_espera_abonado_usuario_por_idClase(clase_id, usuario_id, cursor)
     control = _controlar_errores_query_sin_none(respuesta, 400, "Usuario ya está en la lista de espera.", 401, cursor)
+    if control is not None:
+        return control
+    
+    # verificar que el usuario no este en la lista de espera individual
+    respuesta = consultar_lista_espera_individual_usuario_por_ClaseID(clase_id, usuario_id, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 400, "Usuario ya está en la lista de espera individual.", 401, cursor)
     if control is not None:
         return control
     

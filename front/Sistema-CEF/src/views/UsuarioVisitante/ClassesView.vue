@@ -390,6 +390,7 @@ const horas = Array.from({ length: 14 }, (_, i) => (i + 8).toString().padStart(2
 const horaSel = ref(null)
 
 const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del usuario
+const clasesReservadasInstancia = ref([]) // Track instance reservations locally
 const tipoReserva = ref(null)
 const cargandoPago = ref(false)
 const qrDialog = ref(false)
@@ -766,7 +767,6 @@ const iniciarFlujoPagoCaja = async () => {
         console.error('Error al ejecutar el pago de clase particular:', err)
         console.error("Error details:", err.response?.data || err.message || err)
         console.error("Error status:",  err.status || 'Unknown')
-        console.error
         throw err
       }
     }
@@ -785,8 +785,15 @@ const iniciarFlujoPagoCaja = async () => {
   } catch (error) {
     console.error('Error detectado durante la transacción:', error)
     
-    // Verificar si es error 409 (sin cupo disponible)
-    if (error.status === 409) {
+    // Para clases particulares: error 409 (sin cupo disponible)
+    if (tipoReserva.value === 'particular' && error.status === 409) {
+      qrDialog.value = false
+      listaEsperaDialog.value = true
+      return
+    }
+    
+    // Para mensualidades: error 501 (sin cupo para abonados, mostrar confirmación)
+    if (tipoReserva.value === 'mensualidad' && error.status === 501) {
       qrDialog.value = false
       listaEsperaDialog.value = true
       return
@@ -815,19 +822,32 @@ const ingresarListaEspera = async () => {
 
   ingresandoListaEspera.value = true
   try {
-    // Obtener la instancia de clase
-    const inst_clase = await ClasesService.obtenerInstClaseSem(clase.id)
-    if (!inst_clase?.data?.data?.id) {
-      throw new Error('No se pudo obtener la instancia de clase')
+    // Para mensualidades: usar endpoint de abonados
+    if (tipoReserva.value === 'mensualidad') {
+      const response = await PaymentsService.agregarListaEsperaAbonados(
+        userProfile.value.id,
+        clase.id
+      )
+    } else {
+      // Para clases particulares: obtener instancia y usar endpoint individual
+      const inst_clase = await ClasesService.obtenerInstClaseSem(clase.id)
+      if (!inst_clase?.data?.data?.id) {
+        throw new Error('No se pudo obtener la instancia de clase')
+      }
+
+      const response = await PaymentsService.agregarListaEsperaIndividual(
+        userProfile.value.id, 
+        inst_clase.data.data.id
+      )
     }
 
-    // Llamar al servicio para agregar a la lista de espera individual
-    const response = await PaymentsService.agregarListaEsperaIndividual(
-      userProfile.value.id, 
-      inst_clase.data.data.id
-    )
-
-    notificationStore.showNotification('¡Te has agregado a la lista de espera exitosamente!', 'success')
+    const tipo = tipoReserva.value === 'mensualidad' ? 'de abonados ' : ''
+    notificationStore.showNotification(`¡Te has agregado a la lista de espera ${tipo}exitosamente!`, 'success')
+    
+    // Guardar localmente como reserva de instancia (para particulares)
+    if (tipoReserva.value === 'particular' && clase.id && !clasesReservadasInstancia.value.includes(clase.id)) {
+      clasesReservadasInstancia.value.push(clase.id)
+    }
     
     // Cerrar diálogos y limpiar estado
     listaEsperaDialog.value = false
