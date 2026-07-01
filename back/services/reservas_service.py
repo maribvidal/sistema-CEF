@@ -86,7 +86,7 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
         return respuesta, status
 
     # EXTRAEMOS EL PREFERENCE ID
-    preference_id = respuesta.get("preference_id")
+    preference_id = respuesta["data"]
 
     # Intentar crear la reserva
     respuesta = insertar_reserva(usuario_id, inst_clase_id, cursor)

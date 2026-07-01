@@ -693,9 +693,11 @@ def obtener_clases_usuario_service(usuario_id):
         return control
 
     respuesta = obtener_clases_usuario(usuario_id, cursor)
-    control = _controlar_errores_query(respuesta, 402, "No se pudieron obtener las clases de usuario.", 403, cursor)
-    if control is not None:
-        return control
+    if respuesta["status"] == "error":
+        cursor.connection.close()
+        return {
+            "error": "No se pudieron obtener las clases de usuario."
+        }, 500
     
     cursor.connection.close()
     return _msj_exito_helper(

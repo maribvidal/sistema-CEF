@@ -134,7 +134,15 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
             return control
         
         cursor_cleanup.connection.close()
-    return respuesta, status
+
+    preference_id = respuesta["data"]
+    
+    # Devolvemos la estructura que espera Vue
+    return {
+        "status": "success",
+        "message": "Orden de pago creada exitosamente.",
+        "preference_id": preference_id
+    }, 200
 
 def obtener_pagos_service():
     cursor = conectarse_db()
@@ -285,18 +293,23 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
     }
     
     # aca no estoy seguro si es con o sin none
+    print(" > Antes de hacer el crear_preferencia_checkout_pro")
     respuesta_json = crear_preferencia_checkout_pro(id_pago, montos_mensualidad['data']['total'] * 0.7, descripcion, item)
+    preference_id = respuesta_json["data"]
     print("respuesta_json", respuesta_json)
+    print(" > Después de hacer el crear_preferencia_checkout_pro")
     # control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
     # if control is not None:
     #     return control
     
     cursor.connection.close()
-        
+    
+    print(preference_id["id"])
+
     return {
         "message": "Preferencia de pago creada exitosamente.",
         "status_mp": respuesta_json.get("status"),
-        "preference_id": respuesta_json.get("data", {}).get("id"),
+        "data": preference_id["id"]
     }, 200
 
 # funcion anterior de pago con qr:
@@ -495,14 +508,14 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
             "detalles_mp": respuesta_json
         }, 500
 
-    preference_id = respuesta_json["data"]["id"]
+    preference_id = respuesta_json["data"]
     
     cursor.connection.commit()
     cursor.connection.close()
         
     return {
         "message": "Orden de pago creada exitosamente.",
-        "preference_id": preference_id # <--- ESTE ES EL STRING QUE NECESITA VUE.JS
+        "data": preference_id["id"] # <--- ESTE ES EL STRING QUE NECESITA VUE.JS
     }, 200    
     
 # def actualizar_estado_pago_service(id_pago, estado):

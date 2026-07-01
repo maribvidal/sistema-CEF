@@ -143,19 +143,27 @@ def renovar_mensualidad_service(dni_cliente, id_mensualidad, descripcion):
                 return control
         
         return respuesta, status
-        
-    preference_id = respuesta.get("preference_id")
+    
+    print(" > Esto es en renovar_mensualidad_service al crear el pago de mensualidad")
+    print(respuesta)
 
+    # EXTRAEMOS EL PREFERENCE ID DE LA ESTRUCTURA CORRECTA
+    preference_id = respuesta["data"]
+        
     # Cambiar el estado de la mensualidad
-    respuesta = cambiar_estado_mensualidad(datos_mensualidad['id'], cursor)
-    control = _controlar_errores_query_sin_none(respuesta, 500, "Error al cambiar el estado de la mensualidad.", 413, cursor)
+    respuesta_estado = cambiar_estado_mensualidad(datos_mensualidad['id'], cursor)
+    control = _controlar_errores_query_sin_none(respuesta_estado, 500, "Error al cambiar el estado de la mensualidad.", 413, cursor)
     if control is not None:
         return control
 
     cursor.connection.commit()
     cursor.connection.close()
     
-    return _msj_exito_helper("Mensualidad renovada exitosamente.", cursor, preference_id)
+    return {
+        "status": "success",
+        "message": "Mensualidad renovada exitosamente.",
+        "preference_id": preference_id
+    }, 200
 
 def ver_estado_mensualidad_service(dni_cliente, id_mensualidad):
     cursor = conectarse_db()
