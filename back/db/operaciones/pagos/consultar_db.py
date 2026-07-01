@@ -22,8 +22,10 @@ def consultar_pagos_de_usuario(usuario_id: int, cursor) -> dict:
        y devuelve una lista de tuplas."""
     query = f"""
         SELECT
+            p.id,
             p.monto,
             p.fecha,
+            p.estado,
             u.correo,
             a.nombre AS actividad_nombre
         FROM Pago p

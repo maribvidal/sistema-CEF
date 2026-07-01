@@ -16,7 +16,9 @@ from db.operaciones.pagos.borrar_db import borrar_pago
 from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
 from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp, crear_preferencia_checkout_pro
 from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad, borrar_mensualidad, borrar_pago_pagar_mensualidad
+from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.operaciones.conectar_db import conectarse_db
+import time
 
 from utils.operaciones_mp import crear_preferencia_checkout_pro
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_error_helper, _msj_exito_helper
@@ -145,6 +147,77 @@ def obtener_pagos_service():
         return control
 
     return pagos['data'], 200
+
+def crear_preferencia_pagos_seleccionados_service(usuario_id, payment_ids):
+    cursor = conectarse_db()
+
+    if not usuario_id or not payment_ids:
+        cursor.connection.close()
+        return {
+            "error": "Faltan datos requeridos para crear la preferencia de pago."
+        }, 400
+
+    pagos_usuario = consultar_pagos_de_usuario(usuario_id, cursor)
+    control = _controlar_errores_query(pagos_usuario, 500, "No se pudieron obtener los pagos del usuario.", 400, cursor)
+    if control is not None:
+        return control
+
+    pagos_disponibles = pagos_usuario["data"] or []
+    ids_solicitados = []
+    for payment_id in payment_ids:
+        try:
+            ids_solicitados.append(int(payment_id))
+        except (TypeError, ValueError):
+            cursor.connection.close()
+            return {
+                "error": "Uno de los pagos seleccionados no es válido."
+            }, 400
+
+    pagos_seleccionados = [p for p in pagos_disponibles if int(p.get("id", 0)) in ids_solicitados]
+
+    if len(pagos_seleccionados) != len(set(ids_solicitados)):
+        cursor.connection.close()
+        return {
+            "error": "Uno o más pagos seleccionados no pertenecen al usuario."
+        }, 403
+
+    estados_permitidos = {"pending", "created"}
+    pagos_no_pagables = [p for p in pagos_seleccionados if str(p.get("estado", "")).lower() not in estados_permitidos]
+    if pagos_no_pagables:
+        cursor.connection.close()
+        return {
+            "error": "Sólo se pueden pagar pagos pendientes."
+        }, 409
+
+    total = sum(float(p.get("monto", 0) or 0) for p in pagos_seleccionados)
+    if total <= 0:
+        cursor.connection.close()
+        return {
+            "error": "El total seleccionado no es válido."
+        }, 400
+
+    descripcion = f"Pago de {len(pagos_seleccionados)} comprobantes"
+    item = {
+        "title": "Pagos seleccionados",
+        "quantity": 1,
+        "unit_measure": "unit",
+        "external_categories": [{"id": "selected-payments"}]
+    }
+    external_reference = f"PAGOS-{usuario_id}-{int(time.time())}"
+
+    respuesta_json = crear_preferencia_checkout_pro(external_reference, total, descripcion, item)
+    control = _controlar_errores_query(respuesta_json, 500, "Error al crear la preferencia de pago en MercadoPago.", 400, cursor)
+    if control is not None:
+        return control
+
+    cursor.connection.close()
+
+    return {
+        "message": "Preferencia de pago creada exitosamente.",
+        "preference_id": respuesta_json.get("data", {}).get("id"),
+        "total": total,
+        "cantidad": len(pagos_seleccionados)
+    }, 200
 
 def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
     cursor = conectarse_db()

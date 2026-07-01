@@ -14,6 +14,15 @@ def obtener_pagos():
     
     return jsonify(respuesta), status
 
+@pagos_bp.route("/pagos/pagar_seleccionados", methods=["POST"])
+def pagar_pagos_seleccionados():
+    data = request.get_json() or {}
+    usuario_id = data.get("usuario_id")
+    payment_ids = data.get("payment_ids") or []
+
+    respuesta, status = crear_preferencia_pagos_seleccionados_service(usuario_id, payment_ids)
+    return jsonify(respuesta), status
+
 # para hacer el pago primero llaman desde el front para obtener el qr y luego llaman para crear la orden de pago y luego preguntan por el estado del pago hasta que cambie de created
 @pagos_bp.route("/pagos/obtenerQR", methods=["GET"])
 def obtener_qr_mp():    

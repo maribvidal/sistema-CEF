@@ -12,7 +12,7 @@ import subprocess
 import re
 import time
 import tunel_state
- 
+import platform
 load_dotenv()
 
 def create_app(testing=False, db_name="database.db"):
@@ -75,11 +75,16 @@ scheduler.add_job(
 #     minutes=1
 # )
 
-CLOUDFLARED = os.path.join(
-    os.path.dirname(__file__),
-    "tools",
-    "cloudflared-windows-amd64.exe"
-)
+# Detecta si el sistema operativo es Windows o Linux
+if platform.system() == "Windows":
+    CLOUDFLARED = os.path.join(
+        os.path.dirname(__file__),
+        "tools",
+        "cloudflared-windows-amd64.exe",
+    )
+else:
+    # En Linux, asume que está instalado globalmente
+    CLOUDFLARED = "/usr/bin/cloudflared"
 
 def start_tunnel(port):
     process = subprocess.Popen(

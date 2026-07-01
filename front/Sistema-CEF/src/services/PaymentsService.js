@@ -9,6 +9,13 @@ export const PaymentsService = {
         return apiClient.get(`/usuarios/${usuario_id}/pagos`)
     },
 
+    crearPreferenciaPagosSeleccionados: async (usuario_id, payment_ids) => {
+        return apiClient.post('/pagos/pagar_seleccionados', {
+            usuario_id,
+            payment_ids,
+        })
+    },
+
     getQRForPayment: async () => {
         return apiClient.get(`/pagos/obtenerQR`)
     },
