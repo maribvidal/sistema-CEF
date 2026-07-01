@@ -209,9 +209,11 @@ def verificar_mensualidades_por_vencer(cursor_externo=None):
     cursor = conectarse_db()
 
     query = cursor.execute("""
-        SELECT id, usuario_id, fecha_fin
-        FROM Mensualidad
+        SELECT m.id, m.usuario_id, m.fecha_fin
+        FROM Mensualidad m
+        LEFT JOIN Notificaciones_Enviadas ne ON m.id = ne.mensualidad_id
         WHERE DATE(fecha_fin) BETWEEN DATETIME('now', '-1 day') AND DATETIME('now', '+10 days')
+        AND ne.mensualidad_id IS NULL
     """)
 
     mensualidades = cursor.fetchall()
@@ -227,11 +229,12 @@ def verificar_mensualidades_por_vencer(cursor_externo=None):
 
         usuario = cursor.fetchone()
 
-        link = f"http://localhost:5173/Renovar_mensualidad/{mensualidad['id']}/{usuario_id}"
+        link = f"http://localhost:5173/RenovarMensualidad/{mensualidad['id']}/{usuario_id}"
 
         if usuario:
             enviar_mail_vencimiento_mensualidad(usuario_id, usuario["correo"], link)
 
+            # Enviar una notificación para que no se le envíen mas en el futuro
             cursor.execute(f"""
                 INSERT INTO Notificaciones_Enviadas (mensualidad_id, fecha_envio)
                 VALUES ({mensualidad["id"]}, DATETIME('now'))
