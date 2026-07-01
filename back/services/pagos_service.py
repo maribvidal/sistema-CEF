@@ -407,8 +407,21 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la preferencia de pago en MercadoPago.", 400, cursor)
     if control is not None:
         return control
-    
-    # ¡LISTO! Obtenemos el ID de la preferencia.
+   
+    # Imprimimos la respuesta en consola para ver QUÉ se quejó Mercado Pago
+    print("\n--- RESPUESTA MERCADO PAGO ---")
+    print(respuesta_json)
+    print("------------------------------\n")
+
+    # Si Mercado Pago no nos devolvió el ID, detenemos el proceso ordenadamente
+    if "data" not in respuesta_json or "id" not in respuesta_json.get("data", {}):
+        cursor.connection.close()
+        return {
+            "status": "error",
+            "message": "Mercado Pago rechazó la creación de la preferencia.",
+            "detalles_mp": respuesta_json
+        }, 500
+
     preference_id = respuesta_json["data"]["id"]
     
     cursor.connection.commit()
