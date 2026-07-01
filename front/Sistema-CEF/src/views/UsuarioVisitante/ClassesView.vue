@@ -331,6 +331,42 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="listaEsperaDialog" max-width="450px" persistent>
+      <v-card rounded="lg">
+        <v-card-title class="pa-4 bg-black text-white">
+          <span class="text-h5">Sin cupo disponible</span>
+        </v-card-title>
+        <v-card-text class="pt-4">
+          <p class="text-body-1 mb-4">
+            No hay cupo disponible para la clase <strong>{{ claseParaReservar?.categoria }}</strong> en este horario.
+          </p>
+          <p class="text-body-2 text-grey-darken-1">
+            ¿Deseas ingresar a la lista de espera? Te notificaremos cuando haya un lugar disponible.
+          </p>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn 
+            color="grey-darken-1" 
+            variant="text" 
+            @click="listaEsperaDialog = false"
+            :disabled="ingresandoListaEspera"
+          >
+            Cancelar
+          </v-btn>
+          <v-btn 
+            color="blue-darken-1" 
+            variant="elevated" 
+            @click="ingresarListaEspera"
+            :loading="ingresandoListaEspera"
+          >
+            Agregar a lista de espera
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -358,6 +394,8 @@ const tipoReserva = ref(null)
 const cargandoPago = ref(false)
 const qrDialog = ref(false)
 const qrImage = ref(null)
+const listaEsperaDialog = ref(false)
+const ingresandoListaEspera = ref(false)
 watch(horaSel, (h) => {
   nuevaClase.value.hora = `${h}:00`
 })
@@ -721,7 +759,16 @@ const iniciarFlujoPagoCaja = async () => {
       responsePago = await PaymentsService.mothlyPayment(userProfile.value.id, clase.id)
     } else {
       // Pasamos los parámetros corregidos mapeando 'instancia_clase_id'
-      responsePago = await PaymentsService.oneTimePayment(userProfile.value.id, descripcion, clase.id)
+      try{
+        responsePago = await PaymentsService.oneTimePayment(userProfile.value.id, clase.id)
+        console.log('Respuesta de pago de clase particular:', responsePago)
+      }catch(err){
+        console.error('Error al ejecutar el pago de clase particular:', err)
+        console.error("Error details:", err.response?.data || err.message || err)
+        console.error("Error status:",  err.status || 'Unknown')
+        console.error
+        throw err
+      }
     }
 
     // C. Si el backend responde con éxito (Status 200), significa que salió del loop porque el usuario pagó
@@ -738,7 +785,14 @@ const iniciarFlujoPagoCaja = async () => {
   } catch (error) {
     console.error('Error detectado durante la transacción:', error)
     
-    // Extraemos el mensaje de error nativo del back (como el mensaje de expiración 400)
+    // Verificar si es error 409 (sin cupo disponible)
+    if (error.status === 409) {
+      qrDialog.value = false
+      listaEsperaDialog.value = true
+      return
+    }
+    
+    // Extraemos el mensaje de error nativo del back
     const mensajeError = error.response?.data?.error || error.response?.data?.message || 'La operación fue cancelada o expiró.'
     notificationStore.showNotification(mensajeError, 'danger')
     
@@ -752,6 +806,43 @@ const cancelarFlujoPago = () => {
   qrDialog.value = false
   claseParaReservar.value = null
   notificationStore.showNotification('Transacción cancelada por el usuario.', 'info')
+}
+
+// Ingresar a lista de espera cuando no hay cupo
+const ingresarListaEspera = async () => {
+  const clase = claseParaReservar.value
+  if (!clase) return
+
+  ingresandoListaEspera.value = true
+  try {
+    // Obtener la instancia de clase
+    const inst_clase = await ClasesService.obtenerInstClaseSem(clase.id)
+    if (!inst_clase?.data?.data?.id) {
+      throw new Error('No se pudo obtener la instancia de clase')
+    }
+
+    // Llamar al servicio para agregar a la lista de espera individual
+    const response = await PaymentsService.agregarListaEsperaIndividual(
+      userProfile.value.id, 
+      inst_clase.data.data.id
+    )
+
+    notificationStore.showNotification('¡Te has agregado a la lista de espera exitosamente!', 'success')
+    
+    // Cerrar diálogos y limpiar estado
+    listaEsperaDialog.value = false
+    claseParaReservar.value = null
+    
+    // Refrescar datos
+    if (typeof fetchClasesUsuario === 'function') await fetchClasesUsuario()
+    if (typeof fetchClases === 'function') await fetchClases()
+  } catch (error) {
+    console.error('Error al agregar a lista de espera:', error)
+    const mensajeError = error.response?.data?.message || error.message || 'Error al agregar a la lista de espera'
+    notificationStore.showNotification(mensajeError, 'danger')
+  } finally {
+    ingresandoListaEspera.value = false
+  }
 }
 
 // 1. Función para comprobar si el usuario ya está anotado en esta clase específica
