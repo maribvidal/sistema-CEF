@@ -71,7 +71,7 @@
                 <td>${{ payment.monto }}</td> 
               </tr>
               <tr v-else>
-               <td colspan="3" class="text-center">Sin pagos registrados</td>
+               <td colspan="3" class="text-center">Sin pagos registrados.</td>
               </tr>
             </tbody>
           </v-table>
