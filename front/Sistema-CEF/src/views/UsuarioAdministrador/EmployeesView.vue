@@ -28,17 +28,6 @@
               >
                 Crear Recepcionista
               </v-btn>
-              <v-spacer></v-spacer>
-              <v-text-field
-                v-model="search"
-                prepend-inner-icon="mdi-magnify"
-                label="Buscar por nombre o DNI"
-                variant="solo"
-                hide-details
-                density="compact"
-                class="search-field"
-                style="max-width: 300px;"
-              ></v-text-field>
             </v-card-title>
             <v-card-text class="py-0 d-flex">
               <v-chip-group
