@@ -30,10 +30,14 @@ def cancelar_reserva_service(reserva_id):
     if control is not None:
         return control
 
+    id_usuario = respuesta["data"]["usuario_id"]
+    id_ins_clase = respuesta["data"]["inst_clase_id"]
+
     # Cancelar reserva (insertar una cancelación)
     res_elim_reserva = borrar_reserva(reserva_id, cursor)
-    id_usuario = res_elim_reserva["data"]["usuario_id"]
-    id_ins_clase = res_elim_reserva["data"]["inst_clase_id"]
+    if res_elim_reserva['status'] == 'error':
+        return _msj_error_helper(res_elim_reserva['message'], cursor), 403
+
     res_ins_cancelacion = insertar_cancelacion(id_usuario, id_ins_clase, cursor)
     if res_ins_cancelacion['status'] == 'error':
         return _msj_error_helper(res_ins_cancelacion['message'], cursor), 402

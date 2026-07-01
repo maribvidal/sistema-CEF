@@ -33,7 +33,7 @@ def publicar_clase():
         "id_sala",
         "dia",
         "hora",
-        "cupo_maximo"
+        "cupo_maximo",
     ]
 
     for campo in campos:

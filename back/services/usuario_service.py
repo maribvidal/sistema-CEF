@@ -5,6 +5,7 @@ from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.imagenes.insertar_db import insertar_imagen
 from db.operaciones.imagenes.consultar_db import consultar_imagen_actual_usuario
+from db.operaciones.reservas.consultar_db import obtener_reserva_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario, listar_dnis_usuarios, obtener_estado_usuario
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario, desactivar_usuario
@@ -12,6 +13,7 @@ from db.operaciones.mensualidades.consultar_db import consultar_mensualidad_cubr
 from db.operaciones.empleados.consultar_db import listar_dnis_empleados
 from db.operaciones.usuarios.consultar_db import obtener_clases_usuario
 
+from db.operaciones.instancias_clases.consultar_db import consultar_instancia_clase_por_id
 from utils.envio_mails import enviar_mail, enviar_mail_confirmacion_nuevo_correo, enviar_mail_verificacion_registro
 from services import _controlar_errores_query, _msj_exito_helper, _controlar_errores_query_sin_none
 
@@ -205,6 +207,32 @@ def listar_pagos_usuario_service(usuario_id: int):
 
     cursor.connection.close()
     return pagos['data'], 200
+
+def obtener_reserva_usuario_instancia_service(usuario_id: int, inst_clase_id: int):
+    """Devolver el id de la reserva que tiene el usuario para dicha instancia de clase."""
+    cursor = conectarse_db()
+
+    # Comprobar si el usuario existe
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+    control = _controlar_errores_query(usuario, 400, "Usuario no encontrado.", 401, cursor)
+    if control is not None:
+        return control
+
+    # Comprobar que la instancia de la clase exista
+    inst_clase = consultar_instancia_clase_por_id(inst_clase_id, cursor)
+    control = _controlar_errores_query(usuario, 402, "Instancia de la clase no encontrada.", 403, cursor)
+    if control is not None:
+        return control
+
+    # Obtener las reservas (si se canceló una reserva, se borra la reserva, así que no tendría que haber problemas si se crean varias)
+    reserva = obtener_reserva_usuario_inst_clase(inst_clase_id, usuario_id, cursor)
+    control = _controlar_errores_query(usuario, 404, "Instancia de la clase no encontrada.", 405, cursor)
+    if control is not None:
+        return control
+
+    cursor.connection.close()
+
+    return _msj_exito_helper("Se devolvió la reserva con éxito.", cursor, reserva["data"])
     
 def editar_perfil_usuario_service(
     usuario_id: int,
@@ -670,7 +698,11 @@ def obtener_clases_usuario_service(usuario_id):
         return control
     
     cursor.connection.close()
-    return _msj_exito_helper("Se devolvieron las clases a las cuales el usuario está inscript con éxito.", cursor, respuesta["data"])
+    return _msj_exito_helper(
+        "Se devolvieron las clases a las cuales el usuario está inscript con éxito.",
+        cursor,
+        respuesta["data"] or []
+    )
 
 def desactivar_usuario_service(usuario_id):
     """Service que permite desactivar un usuario."""

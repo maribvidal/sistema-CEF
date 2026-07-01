@@ -21,7 +21,7 @@ export const PaymentsService = {
     },
 
     renewMembership: async (dni_cliente, descripcion ,id_mensualidad) => {
-        return apiClient.post(`/mensualidad/renovar_mensualidad`, {
+        return apiClient.put(`/mensualidad/renovar_mensualidad`, {
             dni_cliente: dni_cliente,
             descripcion: descripcion,
             id_mensualidad: id_mensualidad
@@ -51,9 +51,11 @@ export const PaymentsService = {
         })
     },
 
-    getMensualidadUsuario: async (dni_cliente) => {
-    const response = await apiClient.get(`/mensualidad/${dni_cliente}`)
-    return response.data
+    getMensualidadUsuario: async (dni_usuario) => {
+        const response = await apiClient.post('/mensualidad/ver_mensualidades_usuario', {
+            dni_usuario: dni_usuario
+        })
+        return response.data
     },
 
     confirmarReservaIndividual: async (usuario_id, inst_clase_id) => {
@@ -62,7 +64,13 @@ export const PaymentsService = {
     
     confirmarReservaAbonado: async (usuario_id, clase_id) => {
         return apiClient.post(`/reservas/abonado/${usuario_id}/${clase_id}/confirmar`)
-    }
+    },
 
+    cancelarReservaIndividual: async (reserva_id) => {
+        return apiClient.delete(`/reservas/${reserva_id}/cancelar`)
+    },
 
+    obtenerReservasUsuario: async (usuario_id, inst_clase) => {
+        return apiClient.get(`/usuarios/${usuario_id}/${inst_clase}/reserva`)
+    },
 }

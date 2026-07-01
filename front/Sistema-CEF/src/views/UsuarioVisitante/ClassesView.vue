@@ -6,12 +6,13 @@
 
         <div 
           v-if="userRole === 1 || userRole === 2" 
-          class="d-flex justify-center justify-md-end mb-6"
+          class="publish-clase-float d-flex justify-center justify-md-end"
         >
           <v-btn
             color="blue-darken-1"
             prepend-icon="mdi-plus"
             @click="abrirDialogCrear"
+            
           >
             Publicar Clase
           </v-btn>
@@ -227,6 +228,7 @@
                   label="Hora"
                   variant="outlined"
                   density="compact"
+
                 ></v-select>
               </v-col>
               <v-col cols="12" sm="6">
@@ -349,7 +351,7 @@
             @click="ingresarListaEspera"
             :loading="ingresandoListaEspera"
           >
-            Agregar a lista de espera
+            Inscribirse en lista de espera
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -362,6 +364,7 @@ import { ref, onMounted, watch, computed, nextTick } from 'vue'
 import { loadMercadoPago } from '@mercadopago/sdk-js'
 import { ClasesService } from '@/services/ClasesServices'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
+import ConfirmarReserva from '@/views/UsuarioCliente/ConfirmarReserva.vue'
 
 import { useNotificationStore } from '@/stores/notificationStore.js'
 import { useAuth } from '@/services/UsuariosServices.js'
@@ -371,11 +374,13 @@ const isEditing = ref(false)
 const dialog = ref(false)
 const notificationStore = useNotificationStore()
 const reservaDialog = ref(false)
+const confirmarReservaDialog = ref(false)
 const pagoDialog = ref(false)
 const claseParaReservar = ref(null)
+const instanciaSeleccionada = ref(null)
 
 const horas = Array.from({ length: 14 }, (_, i) => (i + 8).toString().padStart(2, '0'))
-const horaSel = ref(null)
+const horaSel = ref("08") // Valor por defecto para la hora seleccionada
 
 const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del usuario
 const clasesReservadasInstancia = ref([]) // Track instance reservations locally
@@ -403,7 +408,7 @@ const clases = ref([])
 const actividades = ref([])
 const profesores = ref([])
 const salas = ref([])
-const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+const diasSemana = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado']
 
 const normalizarNoNegativo = (value) => {
   if (value === '' || value === null || value === undefined) return ''
@@ -455,6 +460,10 @@ const fetchClasesUsuario = async () => {
       }
     } catch (error) {
       console.error('Error al cargar clases del usuario:', error)
+      if (error.status === 403) {
+        clasesReservadasIds.value = []
+        return
+      }
       clasesReservadasIds.value = []
     }
   }
@@ -519,13 +528,13 @@ onMounted(async () => {
 
 const abrirDialogCrear = () => {
   isEditing.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '', monto: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', id_sala: '', cupo_maximo: '', monto: '' }
   dialog.value = true
 }
 
 const cerrarDialog = () => {
   dialog.value = false
-  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '', id_sala: '', cupo_maximo: '', monto: '' }
+  nuevaClase.value = { id_actividad: null, id_profesor: null, dia: '', hora: '08:00', id_sala: '', cupo_maximo: '', monto: '' }
   isEditing.value = false
 }
 
@@ -549,13 +558,13 @@ const crearClase = async () => {
   } catch (error) {
     console.error('Error al publicar la clase:', error)
     const statusCode = error.status
-    if (statusCode === 406 || statusCode === 407) {
+    if (statusCode === 409) {
       notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
     } else if (statusCode === 408) {
       notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
     } else if (statusCode === 400) {
       notificationStore.showNotification('Este profesor no puede dar una clase de esa categoría', 'danger');
-    } else if (statusCode === 411) {
+    } else if (statusCode === 411 || statusCode === 500) {
       notificationStore.showNotification('El profesor ya se encuentra ocupado en ese día y hora', 'danger');
     } else {
       // Mensaje genérico para otros errores
@@ -566,6 +575,8 @@ const crearClase = async () => {
 
 const actualizarClase = async () => {
   try {
+    const montoViejo = clases.value.find(c => c.id === nuevaClase.value.id)?.monto
+    console.log('Monto viejo:', montoViejo, 'Monto nuevo:', nuevaClase.value.monto)
     // Para editar, solo enviamos los campos que el backend permite modificar ahora
     const payload = {
       estado: 'Activa',
@@ -575,7 +586,12 @@ const actualizarClase = async () => {
     }
     
     await ClasesService.modificarClase(nuevaClase.value.id, payload)
-    notificationStore.showNotification('Clase actualizada exitosamente', 'success')
+    if(montoViejo !== nuevaClase.value.monto) {
+      notificationStore.showNotification('Clase actualizada exitosamente, el precio se modificará a partir del proximo mes', 'success')
+    }
+    else {
+      notificationStore.showNotification('Clase actualizada exitosamente', 'success')
+    }
     await fetchClases()
     cerrarDialog()
   } catch (error) {
@@ -603,7 +619,12 @@ const editarClase = (clase) => {
 }
 
 const eliminarClase = async (clase) => {
-  if (confirm(`¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`)) {
+  notificationStore.showNotification(
+    `¿Estás seguro de que deseas eliminar la clase de ${clase.categoria}?`,
+    'danger',
+    0,
+    async () => {
+   {
     try {
       await ClasesService.eliminarClase(clase.id)
       notificationStore.showNotification('La clase fue eliminada con éxito', 'success')
@@ -611,13 +632,19 @@ const eliminarClase = async (clase) => {
     } catch (error) {
       console.error('Error al eliminar clase:', error)
       const statusCode = error.status;
-      if (statusCode === 402 || statusCode === 403) {
+      if (statusCode === 402 || statusCode === 403 ) {
         notificationStore.showNotification('No se puede eliminar una clase con usuarios inscriptos en alguna de sus instancias', 'danger');
-      } else {
+      }
+      else if (statusCode === 404) {
+        notificationStore.showNotification('No puede eliminar una clase con usuarios inscriptos en lista de espera', 'danger');
+      }
+      else {
         notificationStore.showNotification('Hubo un error al eliminar la clase', 'danger')
       }
     }
   }
+},    0
+  )
 }
 
 const cancelarClase = async (clase) => {
@@ -698,16 +725,8 @@ const hacerPagoMercadoPago = async () => {
 
 const seleccionarTipoReserva = async (tipo) => {
   tipoReserva.value = tipo
-  reservaDialog.value = false // Cierra el modal de selección de tipo
-  
-  // Dispara inmediatamente el flujo síncrono coordinado con tu backend
-  await iniciarFlujoPagoCaja()
-}
-
-// Paso 2: Orquestación del flujo coordinado con el bucle síncrono del backend
-const iniciarFlujoPagoCaja = async () => {
   const clase = claseParaReservar.value
-  if (!clase) return
+  if (!clase || !userProfile.value?.id) return
 
   try {
     let responsePago
@@ -761,11 +780,20 @@ const iniciarFlujoPagoCaja = async () => {
   }
 }
 
-// Cancelación explícita desde el front
-const cancelarFlujoPago = () => {
-  qrDialog.value = false
+const cerrarConfirmacionReserva = () => {
+  confirmarReservaDialog.value = false
+  instanciaSeleccionada.value = null
   claseParaReservar.value = null
-  notificationStore.showNotification('Transacción cancelada por el usuario.', 'info')
+  tipoReserva.value = null
+}
+
+const finalizarConfirmacionReserva = async () => {
+  confirmarReservaDialog.value = false
+  instanciaSeleccionada.value = null
+  claseParaReservar.value = null
+  await fetchClasesUsuario()
+  await fetchClases()
+  notificationStore.showNotification('Reserva confirmada exitosamente.', 'success')
 }
 
 // Ingresar a lista de espera cuando no hay cupo
@@ -864,7 +892,13 @@ const abrirDialogReserva = (clase) => {
 // 3. Lógica para la cancelación (Ya tenías el borrador al final de tu archivo, la dejamos pulida)
 const ejecutarCancelarReserva = async (clase) => {
   try {
-    await ClasesService.cancelarReserva(clase.id)
+    // Primero obtenemos la instancia de la semana para saber qué reserva cancelar
+    const instancia = await ClasesService.obtenerInstClaseSem(clase.id)
+    if (!instancia?.data?.data?.id) throw new Error('No se pudo obtener la instancia de clase para esta semana')
+    const datos = await PaymentsService.obtenerReservasUsuario(userProfile.value.id, instancia.data.data.id)
+    console.log('Datos de reserva obtenidos:', datos)
+    console.log('ID de reserva a cancelar:', datos.data.data.id)
+    await PaymentsService.cancelarReservaIndividual(datos.data.data.id)
     await fetchClasesUsuario()
     await fetchClases()
     notificationStore.showNotification('Reserva cancelada exitosamente.', 'success')
@@ -903,4 +937,25 @@ const ejecutarCancelarReserva = async (clase) => {
   letter-spacing: 1px;
   width: 100%;
 }
+
+.publish-clase-float {
+  position: fixed;
+  top: 88px;
+  right: 24px;
+  z-index: 20;
+}
+
+@media (max-width: 959px) {
+  .publish-clase-float {
+    top: auto;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+  }
+
+  .publish-clase-float :deep(.v-btn) {
+    width: 100%;
+  }
+}
 </style>
+

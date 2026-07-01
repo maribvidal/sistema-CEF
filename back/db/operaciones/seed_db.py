@@ -42,6 +42,7 @@ def insertar_datos(cursor):
     insertar_usuario_verificado(20000008, 'Lucas', 'Molina', '88888888', '1997-08-08', 'lucas.molina@yopmail.com', 'pwd08','M', 3, cursor)
     insertar_usuario_verificado(20000009, 'Camila', 'Ortiz', '99999999', '1998-09-09', 'camila.ortiz@yopmail.com', 'pwd09','F', 3, cursor)
     insertar_usuario_verificado(20000010, 'Joaquin', 'Herrera', '10101010', '1999-10-10', 'joaquin.herrera@yopmail.com', 'pwd10','M', 3, cursor)
+    insertar_usuario(20010101, 'a', 'a', '11111111', '1990-01-01', 'tucorreo@ymail.com', 'pwd01','F', 23, cursor)
 
     # Crear actividades
     insertar_actividad('Yoga', 50.0, cursor)
