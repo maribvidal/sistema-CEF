@@ -58,13 +58,14 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
 
     # Comprobar si el usuario existe
     usuario = consultar_usuario_por_id(usuario_id, cursor)
+    print(usuario)
     control = _controlar_errores_query(usuario, 400, "Usuario no encontrado.", 401, cursor)
     if control is not None:
         return control
     
     # Comprobar si la instancia de clase existe
     inst_clase = consultar_instancias_por_id(inst_clase_id, cursor)
-    control = _controlar_errores_query(inst_clase, 400, "Instancia de clase no encontrada.", 401, cursor)
+    control = _controlar_errores_query(inst_clase, 402, "Instancia de clase no encontrada.", 403, cursor)
     if control is not None:
         return control
 
@@ -90,13 +91,14 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
 
     # Intentar crear la reserva
     respuesta = insertar_reserva(usuario_id, inst_clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 400, "La reserva ya había sido creada.", 401, cursor)
+    control = _controlar_errores_query(respuesta, 405, "La reserva ya había sido creada.", 406, cursor)
     if control is not None:
         return control
 
     # Insertar usuario en lista de espera individual
     respuesta = insertar_usuario_pertenece_lista_espera_individual(usuario_id, inst_clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 400, "Error al agregar usuario a la lista de espera individual.", 401, cursor)
+    print(respuesta)
+    control = _controlar_errores_query(respuesta, 410, "Error al agregar usuario a la lista de espera individual.", 411, cursor)
     if control is not None:
         return control
     

@@ -17,6 +17,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-  
+  server: {
+    allowedHosts: true // Permite cualquier URL de túnel (Cloudflare, Ngrok, etc.)
+  }
 })
-
