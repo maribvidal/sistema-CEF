@@ -296,37 +296,24 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="qrDialog" max-width="450px" persistent>
-      <v-card rounded="lg" class="text-center pb-4">
-        <v-card-title class="pa-4 bg-black text-white mb-4">
-          <span class="text-h5">Abonar con Mercado Pago</span>
+    <v-dialog v-model="checkoutDialog" max-width="500px" persistent>
+      <v-card rounded="lg">
+        <v-card-title class="pa-4 bg-black text-white">
+          <span class="text-h5">Pagar con Mercado Pago</span>
         </v-card-title>
-        
+
         <v-card-text>
-          <div v-if="qrImage" class="d-flex justify-center">
-            <v-img :src="qrImage" max-width="250" class="mb-4"></v-img>
-          </div>
-          <div v-else class="d-flex justify-center pa-8">
-            <v-progress-circular indeterminate color="black" size="50"></v-progress-circular>
-          </div>
-          
-          <p class="text-body-1 font-weight-bold mt-2 px-4">
-            Escanea el código QR desde la app de Mercado Pago
-          </p>
-          <p class="text-caption text-grey-darken-1 px-6">
-            Usa tu cuenta de prueba para abonar la modalidad de 
-            <strong>{{ tipoReserva === 'particular' ? 'Clase Particular' : 'Mensualidad' }}</strong>.
-          </p>
-          
-          <div class="d-flex justify-center align-center mt-6 text-blue-darken-2">
-            <v-progress-circular indeterminate size="18" width="2" class="me-2"></v-progress-circular>
-            <span class="text-body-2 font-weight-medium">Esperando confirmación del pago en tiempo real...</span>
-          </div>
+          <div id="walletBrick_container"></div>
         </v-card-text>
 
-        <v-card-actions class="justify-center mt-2">
-          <v-btn color="grey-darken-2" variant="text" @click="cancelarFlujoPago">
-            Cancelar Operación
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="grey-darken-1"
+            variant="text"
+            @click="checkoutDialog = false"
+          >
+            Cancelar
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -371,7 +358,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, nextTick } from 'vue'
+import { loadMercadoPago } from '@mercadopago/sdk-js'
 import { ClasesService } from '@/services/ClasesServices'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
 
@@ -393,8 +381,8 @@ const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del
 const clasesReservadasInstancia = ref([]) // Track instance reservations locally
 const tipoReserva = ref(null)
 const cargandoPago = ref(false)
-const qrDialog = ref(false)
-const qrImage = ref(null)
+const checkoutDialog = ref(false)
+const preferenceId = ref(null)
 const listaEsperaDialog = ref(false)
 const ingresandoListaEspera = ref(false)
 watch(horaSel, (h) => {
@@ -691,7 +679,10 @@ const hacerPagoMercadoPago = async () => {
   if (!clase) return
 
   try {
-    const response = await PaymentsService.mothlyPayment(clase.id, claseParaReservar.value.id)
+    const response = await PaymentsService.mothlyPayment(
+        userProfile.value.id,
+        clase.id
+      )
     
     // Simulación de éxito
     notificationStore.showNotification('Redirigiendo a la pasarela de pago...', 'success')
@@ -719,75 +710,53 @@ const iniciarFlujoPagoCaja = async () => {
   if (!clase) return
 
   try {
-    // 1. Resolver la instancia de clase de esta semana ANTES de cualquier pago
-    const instResp = await ClasesService.obtenerInstClaseSem(clase.id)
-    const id_inst_clase = instResp?.data?.data?.id ?? instResp?.data?.id
-    if (!id_inst_clase) {
-      throw new Error('No se pudo obtener la instancia de la clase para esta semana.')
-    }
-    console.log('clase.id (plantilla):', clase.id, '→ id_inst_clase (instancia real):', id_inst_clase)
+    let responsePago
 
-    // A. QR (igual que tenías)
-    const responseQr = await PaymentsService.getQRForPayment()
-    let responseData = responseQr.data
-    if (typeof responseData === 'string') {
-      try { responseData = JSON.parse(responseData.replace(/'/g, '"')) } catch (e) { console.error(e) }
-    }
-    if (responseData?.image) {
-      qrImage.value = responseData.image
-      qrDialog.value = true
-    } else {
-      throw new Error('No se pudo inicializar la imagen del código QR de la caja.')
-    }
-
-    // B. Pago
-    const descripcion = `Pago QR de clase: ${clase.categoria}`
     if (tipoReserva.value === 'mensualidad') {
-      await PaymentsService.mothlyPayment(userProfile.value.id, clase.id)
-      // 👇 acá va id_inst_clase, no clase.id
-      //await PaymentsService.confirmarReservaAbonado(userProfile.value.id, clase.id)
-      console.log("llamo")
+      responsePago = await PaymentsService.mothlyPayment(
+        userProfile.value.id,
+        clase.id
+      )
     } else {
-      // Pasamos los parámetros corregidos mapeando 'instancia_clase_id'
-      try{
-        responsePago = await PaymentsService.oneTimePayment(userProfile.value.id, clase.id)
-        console.log('Respuesta de pago de clase particular:', responsePago)
-      }catch(err){
-        console.error('Error al ejecutar el pago de clase particular:', err)
-        console.error("Error details:", err.response?.data || err.message || err)
-        console.error("Error status:",  err.status || 'Unknown')
-        throw err
-      }
-    }
+      const inst_clase = await ClasesService.obtenerInstClaseSem(clase.id)
 
-    notificationStore.showNotification('¡Pago verificado y reserva confirmada exitosamente!', 'success')
-    await fetchClasesUsuario()
-    await fetchClases()
-    qrDialog.value = false
-    claseParaReservar.value = null
+      responsePago = await PaymentsService.oneTimePayment(
+        userProfile.value.id,
+        inst_clase.data.data.id
+      )
+    }
+    console.log("Respuesta del backend para el pago:", responsePago)
+    console.log("Preference ID recibido:", responsePago.data.preference_id)
+    console.log("Datos adicionales:", responsePago.data)
+    preferenceId.value = responsePago.data.preference_id
+
+    checkoutDialog.value = true
+
+    await renderCheckoutBrick()
 
   } catch (error) {
     console.error('Error detectado durante la transacción:', error)
-    
-    // Para clases particulares: error 409 (sin cupo disponible)
+
     if (tipoReserva.value === 'particular' && error.status === 409) {
-      qrDialog.value = false
+      checkoutDialog.value = false
       listaEsperaDialog.value = true
       return
     }
-    
-    // Para mensualidades: error 501 (sin cupo para abonados, mostrar confirmación)
+
     if (tipoReserva.value === 'mensualidad' && error.status === 501) {
-      qrDialog.value = false
+      checkoutDialog.value = false
       listaEsperaDialog.value = true
       return
     }
-    
-    // Extraemos el mensaje de error nativo del back
-    const mensajeError = error.response?.data?.error || error.response?.data?.message || 'La operación fue cancelada o expiró.'
+
+    const mensajeError =
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      'No se pudo iniciar el pago.'
+
     notificationStore.showNotification(mensajeError, 'danger')
-    
-    qrDialog.value = false
+
+    checkoutDialog.value = false
     claseParaReservar.value = null
   }
 }
@@ -847,6 +816,28 @@ const ingresarListaEspera = async () => {
   } finally {
     ingresandoListaEspera.value = false
   }
+}
+
+const renderCheckoutBrick = async () => {
+  await loadMercadoPago()
+
+  const mp = new MercadoPago(
+    "TEST-0ab006b8-5870-41d6-939a-ef1ec18f1b8c"
+  )
+
+  const bricksBuilder = mp.bricks()
+
+  await nextTick()
+
+  await bricksBuilder.create(
+    "wallet",
+    "walletBrick_container",
+    {
+      initialization: {
+        preferenceId: preferenceId.value
+      }
+    }
+  )
 }
 
 // 1. Función para comprobar si el usuario ya está anotado en esta clase específica

@@ -15,7 +15,7 @@ export const PaymentsService = {
 
     mothlyPayment: async (usuario_id, clase_id) => {
         return apiClient.post(`/mensualidad/pagar_mensualidad`, {
-            usuario_id : usuario_id,
+            usuario_id: usuario_id,
             clase_id: clase_id
         })
     },

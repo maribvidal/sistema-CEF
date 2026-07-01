@@ -8,6 +8,10 @@ from routes import *
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
 from services.mensualidad_service import verificar_mensualidades_por_vencer, verificar_notificaciones_viejas
+import subprocess
+import re
+import time
+import tunel_state
  
 load_dotenv()
 
@@ -71,7 +75,47 @@ scheduler.add_job(
 #     minutes=1
 # )
 
+CLOUDFLARED = os.path.join(
+    os.path.dirname(__file__),
+    "tools",
+    "cloudflared-windows-amd64.exe"
+)
+
+def start_tunnel(port):
+    process = subprocess.Popen(
+        [
+            CLOUDFLARED,
+            "tunnel",
+            "--url",
+            f"http://localhost:{port}"
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+
+    url = None
+
+    for line in process.stdout:
+        print(line.strip())
+
+        match = re.search(r"https://[^\s]+trycloudflare\.com", line)
+        if match:
+            url = match.group(0)
+            break
+
+    return process, url
+
 if __name__ == "__main__":
     app = create_app()
     scheduler.start()
+
+    backend_proc, backend_url = start_tunnel(5000)
+    frontend_proc, frontend_url = start_tunnel(5173)
+
+    tunel_state.backend_url_state = backend_url
+    tunel_state.frontend_url_state = frontend_url
+
+    print("BACKEND:", tunel_state.backend_url_state)
+    print("FRONTEND:", tunel_state.frontend_url_state)
     app.run(debug=False)

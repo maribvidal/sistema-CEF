@@ -14,7 +14,7 @@ from db.operaciones.pago_pagar_clase.insertar_db import insertar_pago_pagar_clas
 from db.operaciones.pago_pagar_mensualidad.insertar_db import insertar_pago_pagar_mensualidad
 from db.operaciones.pagos.borrar_db import borrar_pago
 from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
-from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp
+from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp, crear_preferencia_checkout_pro
 from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad, borrar_mensualidad, borrar_pago_pagar_mensualidad
 from db.operaciones.conectar_db import conectarse_db
 
@@ -211,55 +211,136 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
     }
     
     # aca no estoy seguro si es con o sin none
-    respuesta_json = crear_orden_qr_mp(id_pago, montos_mensualidad['data']['total'] * 0.7, descripcion, item)
+    respuesta_json = crear_preferencia_checkout_pro(id_pago, montos_mensualidad['data']['total'] * 0.7, descripcion, item)
     print("respuesta_json", respuesta_json)
-    control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
-    if control is not None:
-        return control
-    
-    respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
-    print("respuesta", respuesta)
-    control = _controlar_errores_query(respuesta, 500, "Error al consultar los datos de la orden de pago en MercadoPago.", 400, cursor)
-    if control is not None:
-        return control
-    
-    while(respuesta['data']['status'] == "created"):
-        time.sleep(2)
-        respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
-        control = _controlar_errores_query(respuesta, 500, "Error al consultar los datos de la orden de pago en MercadoPago.", 400, cursor)
-        if control is not None:
-            return control
-        
-    print("respuesta['data']['status']", respuesta['data']['status'])
-    if respuesta['data']['status'] == "expired" or respuesta['data']['status'] == "refunded":
-        respuesta = borrar_pago_pagar_mensualidad(id_pago, id_mensualidad, cursor)
-        control = _controlar_errores_query_sin_none(respuesta, 500,"Error al borrar el pago pagar mensualidad.", 400, cursor)
-        if control is not None:
-            return control
-        
-        respuesta = borrar_pago(cursor, id_pago)
-        control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar el pago.", 400, cursor)
-        if control is not None:
-            return control
-
-        cursor.connection.close()
-        return {
-            "error": f"La orden de pago con id {respuesta_json['data']['id']} ha expirado o fue cancelada."
-        }, 400    
-    
-    # actuaizar estado del pago
-    res_actualizar = actualizar_estado_pago(id_pago, respuesta['data']['status'], cursor)
-    
-    control = _controlar_errores_query_sin_none(res_actualizar, 500, "Error al actualizar el estado del pago.", 400, cursor)
-    if control is not None:
-        return control
+    # control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
+    # if control is not None:
+    #     return control
     
     cursor.connection.close()
         
     return {
-        "message": "Orden de pago creada exitosamente.",
-        "status_mp": respuesta_json.get("status")
-    }, 200    
+        "message": "Preferencia de pago creada exitosamente.",
+        "status_mp": respuesta_json.get("status"),
+        "preference_id": respuesta_json.get("data", {}).get("id"),
+    }, 200
+
+# funcion anterior de pago con qr:
+# def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
+#     cursor = conectarse_db()
+    
+#     if not usuario_id or not descripcion or not id_mensualidad:
+#         cursor.connection.close()
+#         return {
+#             "error": "Faltan datos requeridos para crear el pago."
+#         }, 400
+    
+#     # verificar que el usuario tenga esa mensualidad
+#     verificacion = verificar_usuario_tenga_mensualidad(usuario_id, id_mensualidad, cursor)
+#     control = _controlar_errores_query(verificacion, 500, "El usuario no tiene esta mensualidad.", 400, cursor)
+#     if control is not None:
+#         return control
+
+#     # verificar montos de clases de la mensualidad
+#     montos_mensualidad = consultar_montos_mensualidad(id_mensualidad, cursor)
+#     control = _controlar_errores_query(montos_mensualidad, 500, "No se pudo consultar los montos de la mensualidad.", 400, cursor)
+#     if control is not None:
+#         return control
+    
+#     if montos_mensualidad['data']['total'] is None:
+#         # pasa cuando por ejemplo existe la clase 3 pero las instancias de clase que existen
+#         # no tienen la fecha dentro del rango de la mensualidad
+#         cursor.connection.close()
+#         return {
+#             "error": "No existen instancias de clase asignables para esta mensualidad."
+#         }, 406
+
+#     # Crear el pago en la base de datos con estado "pending"
+#     pago = insertar_pago(montos_mensualidad['data']['total'] * 0.7, usuario_id, cursor)
+    
+#     control = _controlar_errores_query(pago, 500, "No se pudo crear el pago.", 400, cursor)
+#     if control is not None:
+#         return control
+    
+#     id_pago_raw = pago['data']
+
+#     try:
+#         id_pago = int(id_pago_raw)
+#     except (TypeError, ValueError):
+#         cursor.connection.close()
+#         return {
+#             "error": "El id del pago creado no es válido."
+#         }, 500
+    
+#     resultado = insertar_pago_pagar_mensualidad(id_pago, id_mensualidad, cursor)
+#     control = _controlar_errores_query(resultado, 500, "No se pudo crear el pago pagar mensualidad.", 400, cursor)
+#     if control is not None:
+#         respuesta = borrar_pago(cursor, id_pago)
+#         control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar el pago.", 400, cursor)
+#         if control2 is not None:
+#             return control2
+#         return control
+    
+#     item = {
+#         "title": "Mensualidad",
+#         "unit_price": str(montos_mensualidad['data']['total'] * 0.7), # se le descuenta el 30% por tener la mensualidad
+#         "quantity": 1,
+#         "unit_measure": "unit",
+#         "external_categories": [
+#         {"id": "gym-membership"}
+#         ]
+#     }
+    
+#     # aca no estoy seguro si es con o sin none
+#     respuesta_json = crear_orden_qr_mp(id_pago, montos_mensualidad['data']['total'] * 0.7, descripcion, item)
+#     print("respuesta_json", respuesta_json)
+#     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
+#     if control is not None:
+#         return control
+    
+#     respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
+#     print("respuesta", respuesta)
+#     control = _controlar_errores_query(respuesta, 500, "Error al consultar los datos de la orden de pago en MercadoPago.", 400, cursor)
+#     if control is not None:
+#         return control
+    
+#     while(respuesta['data']['status'] == "created"):
+#         time.sleep(2)
+#         respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
+#         control = _controlar_errores_query(respuesta, 500, "Error al consultar los datos de la orden de pago en MercadoPago.", 400, cursor)
+#         if control is not None:
+#             return control
+        
+#     print("respuesta['data']['status']", respuesta['data']['status'])
+#     if respuesta['data']['status'] == "expired" or respuesta['data']['status'] == "refunded":
+#         respuesta = borrar_pago_pagar_mensualidad(id_pago, id_mensualidad, cursor)
+#         control = _controlar_errores_query_sin_none(respuesta, 500,"Error al borrar el pago pagar mensualidad.", 400, cursor)
+#         if control is not None:
+#             return control
+        
+#         respuesta = borrar_pago(cursor, id_pago)
+#         control = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar el pago.", 400, cursor)
+#         if control is not None:
+#             return control
+
+#         cursor.connection.close()
+#         return {
+#             "error": f"La orden de pago con id {respuesta_json['data']['id']} ha expirado o fue cancelada."
+#         }, 400    
+    
+#     # actuaizar estado del pago
+#     res_actualizar = actualizar_estado_pago(id_pago, respuesta['data']['status'], cursor)
+    
+#     control = _controlar_errores_query_sin_none(res_actualizar, 500, "Error al actualizar el estado del pago.", 400, cursor)
+#     if control is not None:
+#         return control
+    
+#     cursor.connection.close()
+        
+#     return {
+#         "message": "Orden de pago creada exitosamente.",
+#         "status_mp": respuesta_json.get("status")
+#     }, 200    
     
 def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     cursor = conectarse_db()
