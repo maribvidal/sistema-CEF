@@ -60,7 +60,9 @@ export const PaymentsService = {
     
     confirmarReservaAbonado: async (usuario_id, clase_id) => {
         return apiClient.post(`/reservas/abonado/${usuario_id}/${clase_id}/confirmar`)
-    }
+    },
 
-
+    cancelarReservaIndividual: async (reserva_id) => {
+        return apiClient.delete(`/reservas/${reserva_id}/cancelar`)
+    },
 }
