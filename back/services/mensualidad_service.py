@@ -1,3 +1,4 @@
+from pprint import pprint
 import time
 
 from db.operaciones.reservas.borrar_db import borrar_reserva
@@ -5,7 +6,7 @@ from db.operaciones.mensualidades.insertar_db import agregar_nuevas_reservas_men
 from services.pagos_service import crear_pago_service_mensualidad
 from utils.envio_mails import enviar_mail, enviar_mail_vencimiento_mensualidad
 from db.operaciones.mensualidades.borrar_db import borrar_mensualidad
-from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidades_activa
+from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidades_activa, obtener_todas_las_mensualidades_usuario
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, obtener_mensualidad_usuario, verificar_usuario_tiene_mensualidad
 from db.operaciones.usuarios import consultar_usuario_por_dni
@@ -254,3 +255,28 @@ def verificar_notificaciones_viejas():
 
     cursor.connection.commit()
     cursor.connection.close()
+
+
+def obtener_todas_las_mensualidades_usuario_service(dni_cliente):
+    cursor = conectarse_db()
+    usuario = consultar_usuario_por_dni(dni_cliente, cursor)
+
+    # Validar si el usuario existe
+    usuario = consultar_usuario_por_dni(dni_cliente, cursor)
+    control = _controlar_errores_query(usuario, 500, "No se encontró el usuario.", 400, cursor)
+    if control is not None:
+        return control
+    
+    usuario_id = usuario['data']['id']
+
+    mensualidades = obtener_todas_las_mensualidades_usuario(usuario_id, cursor)
+    if mensualidades['status'] == "error":
+        return _msj_error_helper("Error al obtener las mensualidades del usuario.", cursor), 500
+    elif mensualidades['data'] is None:
+        return _msj_error_helper("No se encontraron mensualidades para este usuario.", cursor), 404
+
+
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return _msj_exito_helper(mensualidades['data'], cursor)

@@ -95,7 +95,7 @@ def publicar_clase_service(
     # Comprobar que la sala no esté ocupada en ese día y hora
 
     respuesta = consultar_clase_por_sala_dia_hora(id_sala, dia, hora, cursor)
-    control = _controlar_errores_query_sin_none(respuesta, 406, "La sala ya se encuentra ocupada en ese día y hora.", 407, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 500, "La sala ya se encuentra ocupada en ese día y hora.", 409, cursor)
     if control is not None:
         return control
 
