@@ -5,6 +5,7 @@ from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.imagenes.insertar_db import insertar_imagen
 from db.operaciones.imagenes.consultar_db import consultar_imagen_actual_usuario
+from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario, listar_dnis_usuarios, obtener_estado_usuario
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario, desactivar_usuario
@@ -205,6 +206,26 @@ def listar_pagos_usuario_service(usuario_id: int):
 
     cursor.connection.close()
     return pagos['data'], 200
+
+def obtener_reserva_usuario_instancia_service(usuario_id: int, inst_clase_id: int):
+    cursor = conectarse_db()
+
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+    if usuario['status'] == 'error':
+        cursor.connection.close()
+        return {"message": usuario['message']}, 400
+
+    reservas = obtener_reservas_usuario_inst_clase(inst_clase_id, usuario_id, cursor)
+    if reservas['status'] == 'error':
+        cursor.connection.close()
+        return {"message": reservas['message']}, 500
+
+    if not reservas['data']:
+        cursor.connection.close()
+        return {"message": "No se encontró una reserva para ese usuario en esa instancia de clase."}, 404
+
+    cursor.connection.close()
+    return reservas['data'][0], 200
     
 def editar_perfil_usuario_service(
     usuario_id: int,

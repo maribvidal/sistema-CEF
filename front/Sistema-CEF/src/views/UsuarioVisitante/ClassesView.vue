@@ -894,11 +894,14 @@ const abrirDialogReserva = (clase) => {
 const ejecutarCancelarReserva = async (clase) => {
   try {
     // Primero obtenemos la instancia de la semana para saber qué reserva cancelar
-    const instResp = await ClasesService.obtenerInstClaseSem(clase.id)
-    const id_inst_clase = instResp?.data?.data?.id ?? instResp?.data?.id
-    if (!id_inst_clase) throw new Error('No se pudo obtener la instancia de clase')
+    const instancia = await ClasesService.obtenerInstClaseSem(clase.id)
+    if (!instancia?.data?.data?.id) throw new Error('No se pudo obtener la instancia de clase para esta semana')
+    const datos = await PaymentsService.obtenerReservasUsuario(userProfile.value.id, instancia.data.data.id)
+    
 
-    await PaymentsService.cancelarReservaIndividual(userProfile.value.id, id_inst_clase)
+    
+
+    await PaymentsService.cancelarReservaIndividual(datos.data.id)
     await fetchClasesUsuario()
     await fetchClases()
     notificationStore.showNotification('Reserva cancelada exitosamente.', 'success')

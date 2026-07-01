@@ -69,4 +69,8 @@ export const PaymentsService = {
     cancelarReservaIndividual: async (reserva_id) => {
         return apiClient.delete(`/reservas/${reserva_id}/cancelar`)
     },
+
+    obtenerReservasUsuario: async (usuario_id, inst_clase) => {
+        return apiClient.get(`/usuarios/${usuario_id}/${inst_clase}/reserva`)
+    },
 }

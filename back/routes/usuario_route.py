@@ -12,7 +12,8 @@ from services.usuario_service import (
     obtener_avatar_usuario_service,
     verificar_correo_usuario_service,
     obtener_clases_usuario_service,
-    desactivar_usuario_service
+    desactivar_usuario_service,
+    obtener_reserva_usuario_instancia_service
 )
 
 usuario_bp = Blueprint("usuario", __name__)
@@ -23,6 +24,13 @@ def listar_pagos_usuario(usuario_id):
         por un usuario específico."""
     respuesta, status = listar_pagos_usuario_service(usuario_id)
 
+    return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/<int:inst_clase_id>/reserva", methods=["GET"])
+def obtener_reserva_usuario_instancia(usuario_id, inst_clase_id):
+    """Este endpoint permite obtener la reserva de un usuario para una instancia de clase específica."""
+
+    respuesta, status = obtener_reserva_usuario_instancia_service(usuario_id, inst_clase_id)
     return jsonify(respuesta), status
 
 @usuario_bp.route("/usuarios/<int:usuario_id>/perfil", methods=["GET"])
