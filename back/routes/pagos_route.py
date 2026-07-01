@@ -36,28 +36,33 @@ def obtener_qr_mp():
 
 #     return jsonify(respuesta), status
 
-# @pagos_bp.route("/webhook/pagoNormal", methods=["POST"])
-# def crear_pago_particular():
-#     payload = request.get_json(silent=True) or {}
-#     data = payload.get("data") or {}
-#     payment_id = data.get("id")
-#     if not payment_id:
-#         return 
+@pagos_bp.route("/webhook/pagoNormal", methods=["POST"])
+def crear_pago_particular():
+    payload = request.get_json(silent=True) or {}
+    print("Payload:", payload)
+    data = payload.get("data") or {}
+    print("Data:", data)
+    payment_id = data.get("id")
+    if not payment_id:
+        return "", 200
 
-#     r = requests.get(
-#         f"https://api.mercadopago.com/v1/payments/{payment_id}",
-#         headers={"Authorization": f"Bearer {Access_Token}"}
-#     )
-#     payment = r.json()
+    r = requests.get(
+        f"https://api.mercadopago.com/v1/payments/{payment_id}",
+        headers={"Authorization": f"Bearer {Access_Token}"}
+    )
+    payment = r.json()
 
-#     external_reference = payment.get("external_reference")
-#     status = payment.get("status")  # approved / pending / rejected 
+    external_reference = payment.get("external_reference")
+    status = payment.get("status")  # approved / pending / rejected 
 
-#     #id_pago, nuevo_estado, cursor
-#     cursor = conectarse_db()
-#     actualizar_estado_pago(external_reference, status, cursor)
+    print("External Reference:", external_reference)
+    print("Payment Status:", status)
 
-#     return 
+    #id_pago, nuevo_estado, cursor
+    # cursor = conectarse_db()
+    # actualizar_estado_pago(external_reference, status, cursor)
+    # cursor.connection.close()
+    return "", 200
 
 
 #

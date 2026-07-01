@@ -298,15 +298,27 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="confirmarReservaDialog" max-width="760px" persistent>
-      <ConfirmarReserva
-        :clase_id="claseParaReservar?.id"
-        :inst_clase_id="instanciaSeleccionada"
-        :usuario_id="userProfile?.id"
-        :tipo="tipoReserva"
-        @cancelar="cerrarConfirmacionReserva"
-        @confirmado="finalizarConfirmacionReserva"
-      />
+    <v-dialog v-model="checkoutDialog" max-width="500px" persistent>
+      <v-card rounded="lg">
+        <v-card-title class="pa-4 bg-black text-white">
+          <span class="text-h5">Pagar con Mercado Pago</span>
+        </v-card-title>
+
+        <v-card-text>
+          <div id="walletBrick_container"></div>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="grey-darken-1"
+            variant="text"
+            @click="checkoutDialog = false"
+          >
+            Cancelar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
 
     <v-dialog v-model="listaEsperaDialog" max-width="450px" persistent>
@@ -348,7 +360,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, nextTick } from 'vue'
+import { loadMercadoPago } from '@mercadopago/sdk-js'
 import { ClasesService } from '@/services/ClasesServices'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
 import ConfirmarReserva from '@/views/UsuarioCliente/ConfirmarReserva.vue'
@@ -373,8 +386,8 @@ const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del
 const clasesReservadasInstancia = ref([]) // Track instance reservations locally
 const tipoReserva = ref(null)
 const cargandoPago = ref(false)
-const qrDialog = ref(false)
-const qrImage = ref(null)
+const checkoutDialog = ref(false)
+const preferenceId = ref(null)
 const listaEsperaDialog = ref(false)
 const ingresandoListaEspera = ref(false)
 watch(horaSel, (h) => {
@@ -693,7 +706,10 @@ const hacerPagoMercadoPago = async () => {
   if (!clase) return
 
   try {
-    const response = await PaymentsService.mothlyPayment(clase.id, claseParaReservar.value.id)
+    const response = await PaymentsService.mothlyPayment(
+        userProfile.value.id,
+        clase.id
+      )
     
     // Simulación de éxito
     notificationStore.showNotification('Redirigiendo a la pasarela de pago...', 'success')
@@ -713,19 +729,54 @@ const seleccionarTipoReserva = async (tipo) => {
   if (!clase || !userProfile.value?.id) return
 
   try {
-    const instResp = await ClasesService.obtenerInstClaseSem(clase.id)
-    const idInstClase = instResp?.data?.data?.id ?? instResp?.data?.id
+    let responsePago
 
-    if (!idInstClase) {
-      throw new Error('No se pudo obtener la instancia de la clase para esta semana.')
+    if (tipoReserva.value === 'mensualidad') {
+      responsePago = await PaymentsService.mothlyPayment(
+        userProfile.value.id,
+        clase.id
+      )
+    } else {
+      const inst_clase = await ClasesService.obtenerInstClaseSem(clase.id)
+
+      responsePago = await PaymentsService.oneTimePayment(
+        userProfile.value.id,
+        inst_clase.data.data.id
+      )
+    }
+    console.log("Respuesta del backend para el pago:", responsePago)
+    console.log("Preference ID recibido:", responsePago.data.preference_id)
+    console.log("Datos adicionales:", responsePago.data)
+    preferenceId.value = responsePago.data.preference_id
+
+    checkoutDialog.value = true
+
+    await renderCheckoutBrick()
+
+  } catch (error) {
+    console.error('Error detectado durante la transacción:', error)
+
+    if (tipoReserva.value === 'particular' && error.status === 409) {
+      checkoutDialog.value = false
+      listaEsperaDialog.value = true
+      return
     }
 
-    instanciaSeleccionada.value = idInstClase
-    reservaDialog.value = false
-    confirmarReservaDialog.value = true
-  } catch (error) {
-    console.error('Error al abrir la confirmación de reserva:', error)
-    notificationStore.showNotification(error.message || 'No se pudo abrir la confirmación de reserva', 'danger')
+    if (tipoReserva.value === 'mensualidad' && error.status === 501) {
+      checkoutDialog.value = false
+      listaEsperaDialog.value = true
+      return
+    }
+
+    const mensajeError =
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      'No se pudo iniciar el pago.'
+
+    notificationStore.showNotification(mensajeError, 'danger')
+
+    checkoutDialog.value = false
+    claseParaReservar.value = null
   }
 }
 
@@ -793,6 +844,28 @@ const ingresarListaEspera = async () => {
   } finally {
     ingresandoListaEspera.value = false
   }
+}
+
+const renderCheckoutBrick = async () => {
+  await loadMercadoPago()
+
+  const mp = new MercadoPago(
+    "TEST-0ab006b8-5870-41d6-939a-ef1ec18f1b8c"
+  )
+
+  const bricksBuilder = mp.bricks()
+
+  await nextTick()
+
+  await bricksBuilder.create(
+    "wallet",
+    "walletBrick_container",
+    {
+      initialization: {
+        preferenceId: preferenceId.value
+      }
+    }
+  )
 }
 
 // 1. Función para comprobar si el usuario ya está anotado en esta clase específica
