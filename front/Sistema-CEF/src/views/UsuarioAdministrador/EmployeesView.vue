@@ -50,7 +50,7 @@
               >
                 <v-chip value="activos" size="small">Activos</v-chip>
                 <v-chip value="desactivados" size="small">Desactivados</v-chip>
-                <v-chip value="borrados" size="small">Borrados</v-chip>
+                <v-chip value="borrados" size="small">Eliminados</v-chip>
               </v-chip-group>
             </v-card-text>
           </div>

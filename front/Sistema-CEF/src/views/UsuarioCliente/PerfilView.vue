@@ -23,15 +23,17 @@
                 <v-col cols="12" sm="6">
                   <v-btn color="error" block variant="flat" @click="goToChangePassword">Cambiar contraseña</v-btn>
                 </v-col>
-                <v-col cols="12" sm="6">
-                  <v-btn color="secondary" block variant="flat" @click="handleGenerateQR">Generar QR</v-btn>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-btn color="success" block variant="flat" @click="showPayments">Ver Pagos</v-btn>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-btn color="primary" block variant="flat" @click="showMembershipStatus">Ver Estado de Mensualidad</v-btn>
-                </v-col>
+                <v-row v-if="userProfile?.rol === 3 || userRole === 3">
+                  <v-col cols="12" sm="6">
+                    <v-btn color="secondary" block variant="flat" @click="handleGenerateQR">Generar QR</v-btn>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-btn color="success" block variant="flat" @click="showPayments">Ver Pagos</v-btn>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-btn color="primary" block variant="flat" @click="showMembershipStatus">Ver Estado de Mensualidad</v-btn>
+                  </v-col>
+              </v-row>
               </v-row>
             </v-col>
           </v-row>
@@ -128,6 +130,7 @@ const { formatSpanishDate } = DateFormatterService
 const profileData = ref(null)
 // 2. avatarSrc ahora es un ref, inicializado con el logo por defecto
 const avatarSrc = ref(defaultLogo) 
+const userRole = computed(() => profileData.value?.rol_id || currentUser.value?.rol)
 
 const getProfile = async () => {
   try {

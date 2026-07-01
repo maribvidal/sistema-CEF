@@ -227,6 +227,7 @@
                   label="Hora"
                   variant="outlined"
                   density="compact"
+
                 ></v-select>
               </v-col>
               <v-col cols="12" sm="6">
@@ -387,7 +388,7 @@ const pagoDialog = ref(false)
 const claseParaReservar = ref(null)
 
 const horas = Array.from({ length: 14 }, (_, i) => (i + 8).toString().padStart(2, '0'))
-const horaSel = ref(null)
+const horaSel = ref("08") // Valor por defecto para la hora seleccionada
 
 const clasesReservadasIds = ref([]) // Estado para guardar las IDs de clases del usuario
 const clasesReservadasInstancia = ref([]) // Track instance reservations locally
@@ -415,7 +416,7 @@ const clases = ref([])
 const actividades = ref([])
 const profesores = ref([])
 const salas = ref([])
-const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+const diasSemana = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado']
 
 const normalizarNoNegativo = (value) => {
   if (value === '' || value === null || value === undefined) return ''
@@ -561,13 +562,13 @@ const crearClase = async () => {
   } catch (error) {
     console.error('Error al publicar la clase:', error)
     const statusCode = error.status
-    if (statusCode === 406 || statusCode === 407) {
+    if (statusCode === 407 || statusCode === 406 || statusCode === "error") {
       notificationStore.showNotification('Ya hay una clase en esa sala en ese horario', 'danger');
     } else if (statusCode === 408) {
       notificationStore.showNotification('La clase no se pudo publicar debido a que el cupo máximo elegido supera la capacidad que tiene la sala', 'danger');
     } else if (statusCode === 400) {
       notificationStore.showNotification('Este profesor no puede dar una clase de esa categoría', 'danger');
-    } else if (statusCode === 411) {
+    } else if (statusCode === 411 || statusCode === 500) {
       notificationStore.showNotification('El profesor ya se encuentra ocupado en ese día y hora', 'danger');
     } else {
       // Mensaje genérico para otros errores
@@ -578,6 +579,8 @@ const crearClase = async () => {
 
 const actualizarClase = async () => {
   try {
+    const montoViejo = clases.value.find(c => c.id === nuevaClase.value.id)?.monto
+    console.log('Monto viejo:', montoViejo, 'Monto nuevo:', nuevaClase.value.monto)
     // Para editar, solo enviamos los campos que el backend permite modificar ahora
     const payload = {
       estado: 'Activa',
@@ -587,7 +590,12 @@ const actualizarClase = async () => {
     }
     
     await ClasesService.modificarClase(nuevaClase.value.id, payload)
-    notificationStore.showNotification('Clase actualizada exitosamente', 'success')
+    if(montoViejo !== nuevaClase.value.monto) {
+      notificationStore.showNotification('Clase actualizada exitosamente, el precio se modificará a partir del proximo mes', 'success')
+    }
+    else {
+      notificationStore.showNotification('Clase actualizada exitosamente', 'success')
+    }
     await fetchClases()
     cerrarDialog()
   } catch (error) {
