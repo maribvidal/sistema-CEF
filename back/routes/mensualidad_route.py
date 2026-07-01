@@ -99,13 +99,16 @@ def cancelar_mensualidad_route():
     return jsonify(respuesta), status
 
 
-@mensualidad_bp.route("/mensualidad/ver_mensualidades_usuario", methods=["GET", "POST"])
+@mensualidad_bp.route("/mensualidad/ver_mensualidades_usuario", methods=["POST"])
 def ver_mensualidades_usuario():
     """
         Endpoint para obtener todas las mensualidades de un usuario.
     """
-    data = request.get_json(silent=True) or {}
-    dni_cliente = data.get("dni_usuario") or request.args.get("dni_usuario")
+    print("MONEDA BILLETE")
+    data = request.get_json()
+    print("data: ", data)
+    dni_cliente = data.get("dni_usuario")
+    print("dni_cliente: ", dni_cliente)
     respuesta, status = obtener_todas_las_mensualidades_usuario_service(dni_cliente)
     
     return jsonify(respuesta), status

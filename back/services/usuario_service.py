@@ -5,7 +5,7 @@ from db.checkeos.checkear_inputs import checkear_inputs
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.imagenes.insertar_db import insertar_imagen
 from db.operaciones.imagenes.consultar_db import consultar_imagen_actual_usuario
-from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_inst_clase
+from db.operaciones.reservas.consultar_db import obtener_reserva_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario, listar_dnis_usuarios, obtener_estado_usuario
 from db.operaciones.usuarios.insertar_db import insertar_usuario
 from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario, desactivar_usuario
@@ -215,7 +215,7 @@ def obtener_reserva_usuario_instancia_service(usuario_id: int, inst_clase_id: in
         cursor.connection.close()
         return {"message": usuario['message']}, 400
 
-    reservas = obtener_reservas_usuario_inst_clase(inst_clase_id, usuario_id, cursor)
+    reservas = obtener_reserva_usuario_inst_clase(inst_clase_id, usuario_id, cursor)
     if reservas['status'] == 'error':
         cursor.connection.close()
         return {"message": reservas['message']}, 500

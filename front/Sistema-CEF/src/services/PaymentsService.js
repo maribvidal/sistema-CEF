@@ -52,8 +52,8 @@ export const PaymentsService = {
     },
 
     getMensualidadUsuario: async (dni_usuario) => {
-        const response = await apiClient.get('/mensualidad/ver_mensualidades_usuario', {
-            params: { dni_usuario }
+        const response = await apiClient.post('/mensualidad/ver_mensualidades_usuario', {
+            dni_usuario: dni_usuario
         })
         return response.data
     },
