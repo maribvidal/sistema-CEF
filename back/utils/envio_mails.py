@@ -25,13 +25,20 @@ def enviar_mail(correo: str, sujeto: str, mensaje: str):
     finally:
         server.quit()
 
-def enviar_mail_confirmacion_asistencia(id_usuario: int, cursor):
+def enviar_mail_confirmacion_asistencia(id_usuario: int, cursor, clase_id = None, id_instancia_clase = None):
     """Función que envía un correo electrónico al usuario para avisarle que
         puede tener una reserva para una clase en la cual estaba esperando."""
     consulta = consultar_usuario_por_id(id_usuario, cursor)
     correo = consulta["data"]["correo"]
-
-    enviar_mail(correo, "Confirmación de asistencia", "Buenos días, tiene la posibilidad de reservar si lo desea.\nHaga click en este enlace para confirmar.")
+    
+    mensaje = "Buenos días, tiene la posibilidad de reservar si lo desea.\nHaga click en este enlace para confirmar. \n http://localhost:5173/confirmar-reserva"
+    
+    if clase_id is not None:
+        mensaje += f"&clase_id={clase_id}"
+    elif id_instancia_clase is not None:
+        mensaje += f"&inst_clase_id={id_instancia_clase}"
+    
+    enviar_mail(correo, "Confirmación de asistencia", mensaje)
 
 def enviar_mail_confirmacion_nuevo_correo(id_usuario: int, enlace: str, cursor):
     """Función que envía un correo electrónico al usuario para avisarle que

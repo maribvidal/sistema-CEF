@@ -28,14 +28,16 @@ export const PaymentsService = {
         })
     },
 
-    oneTimePayment: async (usuario_id, descripcion, instancia_clase_id) => {
-        return apiClient.post(`/pagos/particular`, {
-            usuario_id: usuario_id,
-            descripcion: descripcion,
-            instancia_clase_id: instancia_clase_id // <-- Nombre corregido
-        })
+    oneTimePayment: async (usuario_id, instancia_clase_id) => {
+        return apiClient.post(`/reservas/individual/${usuario_id}/${instancia_clase_id}`)
     },
-    getEstadoMensualidad: async (dni_cliente, id_mensualidad) => {
+    agregarListaEsperaIndividual: async (usuario_id, instancia_clase_id) => {
+        return apiClient.post(`/reservas/individual/${usuario_id}/${instancia_clase_id}/confirmar`, {})
+    },
+    
+    agregarListaEsperaAbonados: async (dni_usuario, clase_id) => {
+        return apiClient.post(`/reservas/abonado/${dni_usuario}/${clase_id}/confirmar`, {})
+    },    getEstadoMensualidad: async (dni_cliente, id_mensualidad) => {
     const response = await apiClient.get('/mensualidad/ver_estado', { 
         params: { dni_cliente, id_mensualidad } //id_mensualidad mediante Query params
     })
