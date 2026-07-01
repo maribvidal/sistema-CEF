@@ -14,8 +14,8 @@ export const PaymentsService = {
     },
 
     mothlyPayment: async (usuario_id, clase_id) => {
-        return apiClient.post(`/mensualidad/pagar_mensualidad `, {
-            usuario_id: usuario_id,
+        return apiClient.post(`/mensualidad/pagar_mensualidad`, {
+            usuario_id : usuario_id,
             clase_id: clase_id
         })
     },
@@ -55,6 +55,14 @@ export const PaymentsService = {
     const response = await apiClient.get(`/mensualidad/${dni_cliente}`)
     return response.data
     },
+
+    confirmarReservaIndividual: async (usuario_id, inst_clase_id) => {
+        return apiClient.post(`/reservas/individual/${usuario_id}/${inst_clase_id}/confirmar`)
+    },
+    
+    confirmarReservaAbonado: async (usuario_id, clase_id) => {
+        return apiClient.post(`/reservas/abonado/${usuario_id}/${clase_id}/confirmar`)
+    }
 
 
 }
