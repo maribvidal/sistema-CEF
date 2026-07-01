@@ -3,7 +3,7 @@ import time
 from db.operaciones.reservas.borrar_db import borrar_reserva
 from db.operaciones.mensualidades.insertar_db import agregar_nuevas_reservas_mensualidad
 from services.pagos_service import crear_pago_service_mensualidad
-from utils.envio_mails import enviar_mail
+from utils.envio_mails import enviar_mail, enviar_mail_vencimiento_mensualidad
 from db.operaciones.mensualidades.borrar_db import borrar_mensualidad
 from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidades_activa
 from db.operaciones.conectar_db import conectarse_db
@@ -205,15 +205,13 @@ def cancelar_mensualidad_service(dni_cliente, id_mensualidad):
     return _msj_exito_helper("Mensualidad cancelada exitosamente.", cursor)
 
 # habria que hacer un boton o algo en el front que llame directamente a esta funcion asi lo mostramos en la demo, sino va a ser imposible
-def verificar_mensualidades_por_vencer():
+def verificar_mensualidades_por_vencer(cursor_externo=None):
     cursor = conectarse_db()
 
-    cursor.execute("""
-        SELECT m.id, m.usuario_id, m.fecha_fin
-        FROM Mensualidad m
-        LEFT JOIN Notificaciones_Enviadas ne ON m.id = ne.mensualidad_id
-        WHERE m.fecha_fin BETWEEN DATETIME('now') AND DATETIME('now', '+7 days')
-        AND ne.mensualidad_id IS NULL
+    query = cursor.execute("""
+        SELECT id, usuario_id, fecha_fin
+        FROM Mensualidad
+        WHERE DATE(fecha_fin) BETWEEN DATETIME('now', '-1 day') AND DATETIME('now', '+10 days')
     """)
 
     mensualidades = cursor.fetchall()
@@ -222,7 +220,7 @@ def verificar_mensualidades_por_vencer():
         usuario_id = mensualidad["usuario_id"]
 
         cursor.execute(f"""
-            SELECT correo
+            SELECT id, correo
             FROM Usuario
             WHERE id = {usuario_id}
         """)
@@ -232,11 +230,7 @@ def verificar_mensualidades_por_vencer():
         link = f"http://localhost:5173/Renovar_mensualidad/{mensualidad['id']}/{usuario_id}"
 
         if usuario:
-            enviar_mail(
-                usuario["correo"],
-                "Aviso de mensualidad por vencer",
-                f"Tu mensualidad está por vencer /n Por favor, renueva tu mensualidad para seguir disfrutando de nuestros servicios. /n {link}"
-            )
+            enviar_mail_vencimiento_mensualidad(usuario_id, usuario["correo"], link)
 
             cursor.execute(f"""
                 INSERT INTO Notificaciones_Enviadas (mensualidad_id, fecha_envio)
