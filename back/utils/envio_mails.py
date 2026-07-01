@@ -49,6 +49,22 @@ def enviar_mail_confirmacion_nuevo_correo(id_usuario: int, enlace: str, cursor):
     html = f"Le contactamos desde el equipo del Sistema CEF para que confirme su nuevo correo \ntocando <a href=\"{enlace}\">este enlace.</a>\nSi no fue usted quien realizó este cambio, por favor contacte con el soporte técnico."
     enviar_mail(correo, "Confirmación de cambio de correo", html)
 
+def enviar_mail_vencimiento_mensualidad(id_usuario: int, correo: str, enlace: str):
+    """Función que envía un correo electrónico al usuario para avisarle 
+       que su mensualidad venció y tiene 10 días de gracia para abonar."""
+    
+    html = f"""
+    <h3>Aviso de Vencimiento - Sistema CEF</h3>
+    <p>Hola,</p>
+    <p>Te escribimos para informarte que tu mensualidad en el CEF ha <strong>vencido</strong>.</p>
+    <p>Sabemos que a veces se nos pasa, por eso te recordamos que tenés un <strong>período de gracia de 10 días</strong> desde la fecha de vencimiento para regularizar el pago sin perder tu lugar en las clases ni tus beneficios.</p>
+    <p>Por favor, hacé clic en <a href="{enlace}">este enlace para renovar tu mensualidad</a> lo antes posible.</p>
+    <p>¡Te esperamos para seguir entrenando!</p>
+    <p>Saludos,<br>El equipo de Sistema CEF</p>
+    """
+    
+    enviar_mail(correo, "Tu mensualidad ha vencido - Período de gracia de 10 días", html)
+
 def enviar_mail_verificacion_registro(id_usuario: int, correo: str, enlace: str):
     """Función que envía un correo electrónico al usuario recién registrado
        para que verifique su cuenta."""

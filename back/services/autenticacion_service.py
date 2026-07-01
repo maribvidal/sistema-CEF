@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from pprint import pprint
 from db.operaciones.clases.consultar_db import consultar_clase_por_id
-from db.operaciones.reservas.consultar_db import obtener_reservas_usuario_inst_clase
+from db.operaciones.reservas.consultar_db import obtener_reserva_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_correo
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.insertar_db import insertar_usuario
@@ -165,7 +165,7 @@ def validar_reserva_service(inst_clase_id: int, id_usuario: int):
 
     # Primero verificamos que en la tabla Reserva exista una reserva con id_cliente e id_inst_clase.
     cursor = conectarse_db()
-    reserva = obtener_reservas_usuario_inst_clase(
+    reserva = obtener_reserva_usuario_inst_clase(
         id_usuario=id_usuario, 
         id_ins_clase=inst_clase_id, 
         cursor=cursor

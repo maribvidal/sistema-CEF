@@ -10,7 +10,8 @@ from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id, verif
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.reservas.consultar_db import consultar_reserva_por_id
 from db.operaciones.cancelaciones.insertar_db import insertar_cancelacion
-from db.operaciones.reservas import borrar_reserva
+from db.operaciones.reservas.borrar_db import borrar_reserva
+from db.operaciones.reservas.consultar_db import obtener_reserva_usuario_inst_clase
 from db.operaciones.clases.consultar_db import consultar_cupo_disponible_por_clase, consultar_instancias_por_clase_id, consultar_instancias_por_id, obtener_cantidad_reservar_instancia_clase
 from db.operaciones import consultar_usuario_por_dni, consultar_clase_por_id, consultar_lista_espera_abonado_usuario_por_idClase, consultar_lista_espera_individual_usuario_por_idInstanciaClase,  obtener_lista_espera_abonados_por_id_clase, obtener_lista_espera_individual_por_id_clase
 
@@ -203,4 +204,29 @@ def agregar_usuario_a_lista_espera_abonados(usuario_id, clase_id):
         return control
     
     return _msj_exito_helper("Usuario agregado a la lista de espera de abonados exitosamente.", cursor)
+
+def obtener_reserva_usuario_inst_clase_service(usuario_id: int, inst_clase_id: int):
+    """Devolver el id de la reserva que tiene el usuario para dicha instancia de clase."""
+    cursor = conectarse_db()
+
+    # Comprobar si el usuario existe
+    usuario = consultar_usuario_por_id(usuario_id, cursor)
+    control = _controlar_errores_query(usuario, 400, "Usuario no encontrado.", 401, cursor)
+    if control is not None:
+        return control
     
+    # Comprobar que la instancia de la clase exista
+    inst_clase = consultar_instancia_clase_por_id(inst_clase_id, cursor)
+    control = _controlar_errores_query(usuario, 402, "Instancia de la clase no encontrada.", 403, cursor)
+    if control is not None:
+        return control
+    
+    # Obtener las reservas (si se canceló una reserva, se borra la reserva, así que no tendría que haber problemas si se crean varias)
+    reserva = obtener_reserva_usuario_inst_clase(inst_clase_id, usuario_id, cursor)
+    control = _controlar_errores_query(usuario, 404, "Instancia de la clase no encontrada.", 405, cursor)
+    if control is not None:
+        return control
+    
+    cursor.connection.close()
+    
+    return _msj_exito_helper("Se devolvió la reserva con éxito.", cursor, reserva["data"])

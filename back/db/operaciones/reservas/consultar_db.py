@@ -15,11 +15,11 @@ def obtener_reservas_usuario_dia_hora(id_usuario: int, dia: str, hora: str, curs
                 WHERE r.usuario_id = {id_usuario} AND c.dia = '{dia}' AND c.hora = '{hora}';"""
     return ejecutar_fetchall(query, cursor)
  
-def obtener_reservas_usuario_inst_clase(id_ins_clase: int, id_usuario: int, cursor):
+def obtener_reserva_usuario_inst_clase(id_ins_clase: int, id_usuario: int, cursor):
     """Operación que consulta por reservas según el id de la instancia de la clase, y del
         id del usuario asociados a la reserva."""
     query = f"SELECT * FROM Reserva WHERE usuario_id = {id_usuario} AND inst_clase_id = {id_ins_clase};"
-    return ejecutar_fetchall(query, cursor)
+    return ejecutar_fetchone(query, cursor)
 
 def consultar_reserva_por_usuario_clase(id_usuario: int, id_clase: int, cursor):
     """Operación que consulta por reservas según el id del usuario y el id de la clase asociada a la reserva."""

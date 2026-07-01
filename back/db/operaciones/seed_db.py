@@ -2,7 +2,7 @@ from db.operaciones.asistencias.insertar_db import registrar_asistencia
 from db.operaciones.pago_pagar_mensualidad.insertar_db import insertar_pago_pagar_mensualidad
 from db.operaciones.clase_tener_mensualidad.insertar_db import insertar_clase_tener_mensualidad
 from db.operaciones.cancelaciones.insertar_db import insertar_cancelacion
-from db.operaciones.mensualidades.insertar_db import insertar_mensualidad
+from db.operaciones.mensualidades.insertar_db import insertar_mensualidad, insertar_mensualidad_con_fin
 from db.operaciones.usuarios.insertar_db import insertar_usuario, insertar_usuario_verificado
 from db.operaciones.profesores.insertar_db import insertar_profesor
 from db.operaciones.actividades.insertar_db import insertar_actividad
@@ -168,9 +168,9 @@ def insertar_datos(cursor):
     """)
     
     # Datos para probar el scheduler de notificaciones
-    id_usuario = insertar_usuario(20010101, 'a', 'a', '11111111', '1990-01-01', 'tucorreo@ymail.com', 'pwd01','F', 3, cursor)
+    id_usuario = insertar_usuario(20010101, 'a', 'a', '11111111', '1990-01-01', 'tucorreo@yopmail.com', 'pwd01','F', 3, cursor)["data"]
     
-    mensualidad = insertar_mensualidad(id_usuario['data'], cursor, '2026-05-30')
+    mensualidad = insertar_mensualidad_con_fin(id_usuario, cursor, '2026-06-02', '2026-07-01')
     
     id_clas_martes = insertar_clase('Programada', 2, id_prof2, 1, "Miércoles", "18:00", 12, 550.0, cursor)
     id_clas_martes = id_clas_martes['data']
