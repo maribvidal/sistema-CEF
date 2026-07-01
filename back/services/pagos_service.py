@@ -404,9 +404,21 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     
     respuesta_json = crear_orden_qr_mp(id_pago, instancia_clase['data']['monto'], descripcion, item)
    
-    control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
-    if control is not None:
-        return control
+    # Imprimimos la respuesta en consola para ver QUÉ se quejó Mercado Pago
+    print("\n--- RESPUESTA MERCADO PAGO ---")
+    print(respuesta_json)
+    print("------------------------------\n")
+
+    # Si Mercado Pago no nos devolvió el ID, detenemos el proceso ordenadamente
+    if "data" not in respuesta_json or "id" not in respuesta_json.get("data", {}):
+        cursor.connection.close()
+        return {
+            "status": "error",
+            "message": "Mercado Pago rechazó la creación de la preferencia.",
+            "detalles_mp": respuesta_json
+        }, 500
+
+    preference_id = respuesta_json["data"]["id"]
     
     respuesta = consultar_datos_orden_qr_mp(respuesta_json["data"]["id"])
     
@@ -449,7 +461,8 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
         
     return {
         "message": "Orden de pago creada exitosamente.",
-        "status_mp": respuesta_json.get("status")
+        "status_mp": respuesta_json.get("status"),
+        "preference_id": preference_id
     }, 200    
     
 # def actualizar_estado_pago_service(id_pago, estado):
