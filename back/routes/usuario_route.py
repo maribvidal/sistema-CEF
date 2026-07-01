@@ -16,6 +16,10 @@ from services.usuario_service import (
     obtener_reserva_usuario_instancia_service
 )
 
+from services.reservas_service import (
+    obtener_reserva_usuario_inst_clase_service
+)
+
 usuario_bp = Blueprint("usuario", __name__)
 
 @usuario_bp.route("/usuarios/<int:usuario_id>/pagos", methods=["GET"])
@@ -181,5 +185,14 @@ def desactivar_usuario(usuario_id):
         una respuesta de confirmación si todo salió bien."""
     
     respuesta, status = desactivar_usuario_service(usuario_id)
+
+    return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/<int:inst_clase_id>/reserva")
+def obtener_reserva_usuario_inst_clase(usuario_id, inst_clase_id):
+    """Este endpoint permite obtener la reserva de
+        un usuario en una instancia de clase dada."""
+    
+    respuesta, status = obtener_reserva_usuario_inst_clase_service(usuario_id, inst_clase_id)
 
     return jsonify(respuesta), status

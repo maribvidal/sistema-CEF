@@ -51,9 +51,8 @@ scheduler = BackgroundScheduler()
 # Ejecuta el verificar_mensualidades_por_vencer todos los días a las 9:00
 scheduler.add_job(
     verificar_mensualidades_por_vencer,
-    trigger="cron",
-    hour=9,
-    minute=0
+    trigger="interval",
+    minutes=1
 )
 
 # Ejecuta el verificar_notificaciones_viejas el día 1 de cada mes a las 00:00
@@ -62,7 +61,7 @@ scheduler.add_job(
     trigger="cron",
     day=1,
     hour=0,
-    minute=0
+    minute=1
 )
 
 # Esto deberia de funcionar para probar que funciona el scheduler:
