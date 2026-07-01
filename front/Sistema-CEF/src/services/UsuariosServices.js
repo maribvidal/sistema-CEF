@@ -140,8 +140,25 @@ export const UsersAdminService = {
     fecha_fin
   })
   return response.data
-}
+  },
 
+  deactivateUser: async (userId) => {
+  // El endpoint es PUT según la definición del backend
+  const response = await apiClient.put(`/usuarios/${userId}/desactivar`);
+  return response.data;
+  },
+
+  reactivateUser: async (userId) => {
+  // El endpoint es PUT según la definición del backend
+  const response = await apiClient.put(`/usuarios/${userId}/reactivar`);
+  return response.data;
+  },
+
+  deleteUser: async (userId) => {
+  // El endpoint es PUT según la definición del backend
+  const response = await apiClient.put(`/usuarios/${userId}/eliminar`);
+  return response.data;
+  }
   
 }
 /**
@@ -323,7 +340,7 @@ export const useAuth = () => {
   const confirmNewPassword = async (nueva_contraseña, correo) => {
     return await AuthApiService.confirmNewPass(nueva_contraseña, correo)
   }
-
+  
 
   return {
     // Estado (solo lectura para componentes)

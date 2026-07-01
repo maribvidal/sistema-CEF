@@ -36,7 +36,7 @@ def consultar_usuario_por_id(id: int, cursor) -> dict:
 
 def listar_usuarios(cursor) -> dict:
     """Hace una consulta para listar todos los usuarios, y devuelve una lista de tuplas"""
-    return ejecutar_fetchall("SELECT * FROM Usuario WHERE rol_id IN (0, 1, 2, 3, 4)", cursor)
+    return ejecutar_fetchall("SELECT * FROM Usuario WHERE rol_id IN (0, 1, 2, 3, 4, 13, 23)", cursor)
 
 def obtener_clases_usuario(id_usuario: int, cursor) -> dict:
     """Hace una consulta para obtener las clases a las que un usuario está inscrito,
