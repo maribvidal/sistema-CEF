@@ -26,6 +26,24 @@ def obtener_detalles_clase(id_clase: int, cursor) -> dict:
     """
     return ejecutar_fetchone(query, cursor)
 
+def consultar_cupo_disponible_por_clase(id_clase: int, cursor) -> dict:
+    """Hace una consulta que devuelve la cantidad de cupo disponible para una clase."""
+    query = f"""
+        SELECT cupo_maximo
+        FROM Clase
+        WHERE id = {id_clase}
+    """
+    return ejecutar_fetchone(query, cursor)
+
+def obtener_cantidad_reservar_instancia_clase(id_instancia: int, cursor) -> dict:
+    """Hace una consulta que devuelve la cantidad de reservas existentes para una instancia de clase."""
+    query = f"""
+        SELECT COUNT(*) AS cantidad_reservas
+        FROM Reserva
+        WHERE inst_clase_id = {id_instancia}
+    """
+    return ejecutar_fetchone(query, cursor)
+
 def consultar_reservas_instancias_por_clase(id_clase: int, cursor) -> dict:
     """Hace una consulta que devuelve la cantidad de reservas por instancia de clase.
        Devuelve una fila por cada instancia_clase de la clase indicada con su conteo de reservas."""
@@ -54,17 +72,26 @@ def consultar_reservas_total_por_clase(id_clase: int, cursor) -> dict:
 
     return ejecutar_fetchone(query, cursor)
 
+def consultar_instancias_por_id(instancia_id: int, cursor) -> dict:
+    """Hace una consulta que devuelve la instancia de clase con el id recibido."""
+    query = f"""
+        SELECT *
+        FROM Instancia_Clase
+        WHERE id = {instancia_id}
+    """
+    return ejecutar_fetchone(query, cursor)
+
 def consultar_instancias_por_clase_id(id_clase: int, cursor) -> dict:
     """Hace una consulta que devuelve los ids de todas las instancias
         de clases que posea una clase, y hace la consulta con el
         id de la clase recibido."""
     query = f"""
-        SELECT ic.id, ic.fecha
+        SELECT ic.id, ic.fecha, ic.clase_id
         FROM Clase c
             INNER JOIN Instancia_Clase ic ON c.id = ic.clase_id
         WHERE c.id = {id_clase}
     """
-
+    
     return ejecutar_fetchall(query, cursor)
 
 def consultar_clase_por_id_instancia(instancia_id: int, cursor) -> dict:

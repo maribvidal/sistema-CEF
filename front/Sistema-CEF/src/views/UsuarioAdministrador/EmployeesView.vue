@@ -28,17 +28,6 @@
               >
                 Crear Recepcionista
               </v-btn>
-              <v-spacer></v-spacer>
-              <v-text-field
-                v-model="search"
-                prepend-inner-icon="mdi-magnify"
-                label="Buscar por nombre o DNI"
-                variant="solo"
-                hide-details
-                density="compact"
-                class="search-field"
-                style="max-width: 300px;"
-              ></v-text-field>
             </v-card-title>
             <v-card-text class="py-0 d-flex">
               <v-chip-group
@@ -84,7 +73,7 @@
               <template v-slot:[`item.actividades`]="{ item }">
                 <div v-if="item.actividades">
                   <v-chip v-for="actividad in item.actividades.split(',')" :key="actividad" size="small" class="ma-1">
-                    {{ actividad }}
+                    {{ actividad.trim() }}
                   </v-chip>
                 </div>
               </template>
@@ -297,6 +286,7 @@ import { ClasesService } from '@/services/ClasesServices'
 import EditEmployee from './EditEmployee.vue'
 import EditProfesor from './EditProfesor.vue'
 import { useNotificationStore } from '@/stores/notificationStore.js'
+import { consoleError } from 'vuetify/lib/util/console.js'
 
 
 const empleados = ref([])
@@ -309,7 +299,6 @@ const filtroEstado = ref('activos')
 const dialogEditarEmpleado = ref(false)
 const empleadoSeleccionado = ref(null)
 const nuevoRolId = ref(null)
-
 
 // Se removió 'isDisabled' de aquí ya que lo evaluamos fila por fila en el template.
 
@@ -448,8 +437,31 @@ const cargarEmpleados = async () => {
       actividades: e.actividades ?? e[8]
     }))
 
-    empleados.value = fetched
-    // Se eliminó la validación incorrecta de isDisabled aquí.
+    const professorPromises = fetched
+      .filter(e => e.rol_id % 10 === 5)
+      .map(async (prof) => {
+        try {
+          const response = await EmployeesService.listarActividadesProfesor(prof.id)
+          const actividadesIds = response.data.map(item => item.actividad_id)
+          
+          const activityNames = actividades.value
+            .filter(act => actividadesIds.includes(act.id))
+            .map(act => act.nombre)
+            .join(', ')
+          
+          prof.actividades = activityNames
+        } catch (error) {
+          if (error.status === 403) {
+            prof.actividades = '' // No hay actividades asignadas
+          } else {
+            console.error(`Error al obtener actividades para el profesor ${prof.id}:`, error)
+            prof.actividades = 'No se pudo cargar'
+          }
+        }
+      })
+
+    await Promise.all(professorPromises)
+    empleados.value = fetched    
   } catch (error) {
     console.error('Error cargando empleados:', error)
     empleados.value = []
@@ -635,9 +647,9 @@ const confirmarCambioRol = async () => {
   }
 }
 
-onMounted(() => {
-  cargarEmpleados()
-  fetchActividades()
+onMounted(async () => {
+  await fetchActividades()
+  await cargarEmpleados()
 })
 </script>
 
