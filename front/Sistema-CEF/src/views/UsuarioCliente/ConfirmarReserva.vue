@@ -106,7 +106,7 @@ const iniciarProcesoDePago = async () => {
 
     await loadMercadoPago()
 
-    const mp = new window.MercadoPago('APP_USR-8554081431795174-061416-6c816c273726ca188a84e32e3ec0c0f7-3472007957', {
+    const mp = new window.MercadoPago('APP_USR-07fa4e87-0b6c-4bd8-a671-6ffd56b5e362', {
       locale: 'es-AR'
     })
 

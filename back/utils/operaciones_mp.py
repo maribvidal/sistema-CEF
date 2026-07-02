@@ -342,7 +342,7 @@ import tunel_state
 def crear_preferencia_checkout_pro(external_reference, total_amount, description, item ):
     url = "https://api.mercadopago.com/checkout/preferences"
     headers = {
-        "Authorization": f"Bearer {Access_Token_Prueba}",
+        "Authorization": f"Bearer {Access_Token}",
         "Content-Type": "application/json"
     }
 
