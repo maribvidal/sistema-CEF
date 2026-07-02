@@ -47,3 +47,11 @@ def cambiar_estado_mensualidad(mensualidad_id: int, cursor):
     """Permite cambiar el estado de la mensualidad"""
     query = f"UPDATE Mensualidad SET estado = 1 WHERE id = {mensualidad_id}"
     return ejecutar_query(query, cursor)
+
+def extender_mensualidad_un_mes(mensualidad_id: int, cursor):
+    query = f"""
+        UPDATE Mensualidad
+        SET fecha_fin = DATE(fecha_fin, '+1 month')
+        WHERE id = {mensualidad_id}
+    """
+    return ejecutar_query(query, cursor)

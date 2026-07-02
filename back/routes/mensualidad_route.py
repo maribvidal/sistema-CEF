@@ -3,7 +3,7 @@ from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni
 from services import _controlar_errores_query
 from services.pagos_service import crear_pago_service_mensualidad, verificar_poder_pagar_mensualidad_service
-from services.mensualidad_service import cancelar_mensualidad_service, configurar_fin_mensualidad_service, obtener_mensualidad_service, obtener_mensualidad_usuario_service, renovar_mensualidad_service, ver_estado_mensualidad_service, obtener_todas_las_mensualidades_usuario_service
+from services.mensualidad_service import cancelar_mensualidad_service, configurar_fin_mensualidad_service, obtener_mensualidad_service, obtener_mensualidad_usuario_service, renovar_mensualidad_service, una_vez_que_se_aprobo_el_pago_service, ver_estado_mensualidad_service, obtener_todas_las_mensualidades_usuario_service
 
 mensualidad_bp = Blueprint('mensualidad', __name__)
 
@@ -110,4 +110,10 @@ def ver_mensualidades_usuario():
     print("dni_cliente: ", dni_cliente)
     respuesta, status = obtener_todas_las_mensualidades_usuario_service(dni_cliente)
     
+    return jsonify(respuesta), status
+
+@mensualidad_bp.route("/mensualidad/<int:id_pago>/confirmar_pago_aprobado/", methods=["GET"])
+def confirmar_pago_aprobado(id_pago):
+    print(f" > Llegó el pago {id_pago} ")
+    respuesta, status = una_vez_que_se_aprobo_el_pago_service(id_pago)
     return jsonify(respuesta), status

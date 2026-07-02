@@ -98,3 +98,7 @@ def verificar_estado_pago_por_id(id_pago: int, cursor) -> dict:
         WHERE p.id = {id_pago};
     """
     return ejecutar_fetchone(query, cursor)
+
+def consultar_pago_por_id(id_pago: int, cursor) -> dict:
+    query = f"SELECT * FROM Pago WHERE id = {id_pago}"
+    return ejecutar_fetchone(query, cursor)

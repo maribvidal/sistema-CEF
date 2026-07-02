@@ -1,12 +1,20 @@
 from pprint import pprint
 import time
 
+from db.operaciones.mensualidades.modificar_db import extender_mensualidad_un_mes
+from db.operaciones.clases.consultar_db import consultar_clase_por_id
+from db.operaciones.instancias_clases.consultar_db import revisar_validez_cupos
+from utils.modulo_manejo_listas import revisar_cupos_disponible_abonado, revisar_si_hay_cupos
+from db.operaciones.info_mensualidad.consultar_db import comprobar_existe_info_mensualidad, consultar_info_mensualidad
+from db.operaciones.pagos.consultar_db import consultar_pago_por_id
+from db.operaciones.pagos.modificar_db import aprobar_pago
+from db.operaciones.clase_tener_mensualidad.insertar_db import insertar_clase_tener_mensualidad
 from db.operaciones.reservas.borrar_db import borrar_reserva
-from db.operaciones.mensualidades.insertar_db import agregar_nuevas_reservas_mensualidad
+from db.operaciones.mensualidades.insertar_db import agregar_nuevas_reservas_mensualidad, insertar_reservas_mensualidad
 from services.pagos_service import crear_pago_service_mensualidad
 from utils.envio_mails import enviar_mail, enviar_mail_vencimiento_mensualidad
 from db.operaciones.mensualidades.borrar_db import borrar_mensualidad
-from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidades_activa, obtener_todas_las_mensualidades_usuario 
+from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidad_por_id, obtener_mensualidades_activa, obtener_todas_las_mensualidades_usuario
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, obtener_mensualidad_usuario, verificar_usuario_tiene_mensualidad
 from db.operaciones.usuarios import consultar_usuario_por_dni
@@ -278,7 +286,6 @@ def verificar_notificaciones_viejas():
     cursor.connection.commit()
     cursor.connection.close()
 
-
 def obtener_todas_las_mensualidades_usuario_service(dni_cliente):
     cursor = conectarse_db()
     # consulto usuario por dni. Sin embargo esta query tambien termina buscando para aquellos con rol_id != 3, por lo tanto busca para también administradores
@@ -304,3 +311,89 @@ def obtener_todas_las_mensualidades_usuario_service(dni_cliente):
     cursor.connection.close()
 
     return _msj_exito_helper(mensualidades['data'], cursor)
+
+def una_vez_que_se_aprobo_el_pago_service(pago_id: int):
+    # En este service se revisa si la mensualidad se paga por primera vez, o si se renueva
+
+    cursor = conectarse_db()
+
+    aprobar_pago(pago_id, cursor)
+    info_pago = consultar_pago_por_id(pago_id, cursor)
+    id_mensualidad = info_pago["data"]["mensualidad_id"]
+
+    # Cambiar el estado de la mensualidad
+    cambiar_estado_mensualidad(id_mensualidad, cursor)
+    
+    # Con la mensualidad, obtener la información relacionada a la mensualidad
+    info_inf_mens = comprobar_existe_info_mensualidad(id_mensualidad, cursor)
+    info_inf = consultar_info_mensualidad(info_inf_mens["data"], cursor)
+    inf_renovada = info_inf["data"]["renovada"]
+
+    if not inf_renovada:
+        # Si la mensualidad no había sido renovada...
+        info_mens = obtener_mensualidad_por_id(id_mensualidad, cursor)
+        info_inf_mens = comprobar_existe_info_mensualidad(id_mensualidad, cursor)
+        info_inf = consultar_info_mensualidad(info_inf_mens["data"], cursor)
+        clase_id = info_inf["data"]["clase_id"]
+        usuario_id = info_mens["data"]["usuario_id"]
+        resp = crear_reservas_y_clase_tener_mensualidad_service(id_mensualidad, clase_id, usuario_id, pago_id, cursor)
+        return resp
+    else:
+        # Si no, renovarla nada mas
+        resp = extender_mensualidad_un_mes(id_mensualidad, cursor)
+        return resp
+
+def extender_mensualidad_service(id_mensualidad: int, cursor):
+    # Si la mensualidad ya había sido creada, y el usuario la pagó a tiempo, renovarla...
+    extender_mensualidad_un_mes(id_mensualidad, cursor)
+
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return _msj_exito_helper("Se renovó la mensualidad con éxito.", cursor)
+
+def crear_reservas_y_clase_tener_mensualidad_service(id_mensualidad: int, clase_id: int, usuario_id: int, pago_id: int, cursor):
+    # OBTENER LOS CUPOS
+    clase = consultar_clase_por_id(clase_id, cursor)
+    control = _controlar_errores_query(clase, 500, "No se encontro la clase asociada a la mensualidad.", 404, cursor)
+    if control is not None:
+        return control
+
+    dict_cupos = revisar_si_hay_cupos(clase['data']['id'], cursor) # me devuelve { inst_clase_id: numero_cupos }
+    # revisar que las instancias de clase que me manda este dentro del rango de la mensualidad que se va a crear
+    
+    dict_cupos = revisar_validez_cupos(dict_cupos, cursor)
+    hay_cupos = revisar_cupos_disponible_abonado(dict_cupos)
+
+    # INSERTAR CLASE_TENER_MENSUALIDAD
+    respuesta = insertar_clase_tener_mensualidad(respuesta['data'], clase_id, cursor)
+    control = _controlar_errores_query(respuesta, 500, "No se pudo asociar la mensualidad a la clase.", 400, cursor)
+    if control is not None:
+        respuesta = borrar_mensualidad(respuesta['data'], cursor)
+        
+        control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
+        if control2 is not None:
+            return control2
+        
+        return control
+
+    # CREAR LAS RESERVAS
+    respuesta = insertar_reservas_mensualidad(usuario_id, dict_cupos, cursor)
+    control = _controlar_errores_query(respuesta, 500, "No se pudo insertar las reservas de la mensualidad.", 400, cursor)
+    if control is not None:
+        respuesta = borrar_clase_tener_mensualidad(id_mensualidad, cursor)
+        control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la clase tener mensualidad.", 400, cursor)
+        if control2 is not None:
+            return control2
+        
+        respuesta = borrar_mensualidad(id_mensualidad, cursor)
+        control3 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
+        if control3 is not None:
+            return control3
+        
+        return control
+    
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return _msj_exito_helper("Se crearon las reservas y la información de la Mensualidad con éxito", cursor)
