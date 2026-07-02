@@ -119,10 +119,9 @@ if __name__ == "__main__":
 
     http_tunnel = ngrok.connect(5000)
     backend_url = http_tunnel.public_url
-    frontend_proc, frontend_url = start_tunnel(5173)
 
     tunel_state.backend_url_state = backend_url
-    tunel_state.frontend_url_state = frontend_url
+    tunel_state.frontend_url_state = "http://localhost:5173"
 
     print("BACKEND:", tunel_state.backend_url_state)
     print("FRONTEND:", tunel_state.frontend_url_state)
