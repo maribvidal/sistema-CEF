@@ -400,29 +400,18 @@ watch(horaSel, (h) => {
 const route = useRoute()
 const router = useRouter()
 
-onMounted(async () => {
+onMounted(() => {
   // 1. Revisamos si la URL trae el parámetro "collection_status" de Mercado Pago
+  
   if (route.query.collection_status === 'approved') {
-    
-    // 2. Acá podés disparar tu notificación verde de éxito (como vi que tenés en tu sistema)
-    // notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
-    
-    notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
     const externalReference = route.query.external_reference
-    
-    if (externalReference) {
-      try {
-        await PaymentsService.confirmarPagoAprobado(externalReference)
-        notificationStore.showNotification('Pago confirmado y reservas procesadas', 'success')
-      } catch (error) {
-        console.error('Error confirmando pago aprobado:', error)
-        notificationStore.showNotification('No se pudo confirmar el pago aprobado', 'error')
-      }
-    } else {
-      console.warn('No se obtuvo external_reference para confirmar pago aprobado')
-    }
-    
+    notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
     window.location.href = 'http://localhost:5173/clases'
+    if (externalReference < 1000) {
+      PaymentsService.confirmarPagoAprobado(externalReference)
+    } else {
+      PaymentsService.confirmarPagoAprobadoIndividual(externalReference - 1000)
+    }
   } 
   else if (route.query.collection_status === 'rejected' || route.query.collection_status === 'pending') {
     // También podés atajar si el pago falló o quedó pendiente

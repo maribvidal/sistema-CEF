@@ -47,6 +47,7 @@ def cancelar_reserva_service(reserva_id):
     # notificar siguiente en la lista de espera
     res_ins_clase = consultar_instancia_clase_por_id(id_ins_clase, cursor)
     id_clase = res_ins_clase["data"]["clase_id"]
+    print(id_clase)
     manejar_listas_de_espera_por_clase(id_clase, cursor)
     
     return _msj_exito_helper(f"Cancelación para la reserva con id {reserva_id} creada exitosamente.", cursor)
@@ -87,24 +88,17 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
         return respuesta, status
 
     # EXTRAEMOS EL PREFERENCE ID
-    preference_id = respuesta["data"]
-
-    # Intentar crear la reserva
-    respuesta = insertar_reserva(usuario_id, inst_clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 405, "La reserva ya había sido creada.", 406, cursor)
-    if control is not None:
-        return control
-
-    # Insertar usuario en lista de espera individual
-    respuesta = insertar_usuario_pertenece_lista_espera_individual(usuario_id, inst_clase_id, cursor)
-    print(respuesta)
-    control = _controlar_errores_query(respuesta, 410, "Error al agregar usuario a la lista de espera individual.", 411, cursor)
-    if control is not None:
-        return control
+    preference_id = respuesta["preference_id"]
     
     cursor.connection.commit()
+    cursor.connection.close()
 
-    return _msj_exito_helper(f"La reserva {respuesta["data"]} ha sido creada exitosamente.", cursor, preference_id)
+    # Devolvemos la estructura que espera Vue
+    return {
+        "status": "success",
+        "message": "Orden de pago creada exitosamente.",
+        "preference_id": preference_id
+    }, 200
 
 def agregar_usuario_a_lista_espera_individual(usuario_id, inst_clase_id):
     """Agrega un usuario a la lista de espera individual para una instancia de clase específica."""

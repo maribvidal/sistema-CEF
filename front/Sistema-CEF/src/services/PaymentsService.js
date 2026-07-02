@@ -24,6 +24,10 @@ export const PaymentsService = {
         return apiClient.get(`/mensualidad/${id_pago}/confirmar_pago_aprobado/`)
     },
 
+    confirmarPagoAprobadoIndividual: async (id_pago) => {
+        return apiClient.get(`/pagos/${id_pago}/confirmar_pago_aprobado/`)
+    },
+
     mothlyPayment: async (usuario_id, clase_id) => {
         return apiClient.post(`/mensualidad/pagar_mensualidad`, {
             usuario_id: usuario_id,

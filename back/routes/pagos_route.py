@@ -68,6 +68,11 @@ def obtener_qr_mp():
     
     return jsonify(QR), 200
 
+@pagos_bp.route("/pagos/<int:id_pago>/confirmar_pago_aprobado/", methods=["GET"])
+def aprobar_pago_individ(id_pago):
+    respuesta, status = aprobar_pago_individual(id_pago)
+    return jsonify(respuesta), status
+
 # esto se hace en el endpoint de reservas, cuando se crea la reserva individual
 # @pagos_bp.route("/pagos/particular", methods=["POST"])
 # def crear_pago_particular():

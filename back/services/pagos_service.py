@@ -1,5 +1,10 @@
 import time
 
+from db.operaciones.info_individual.insertar_db import insertar_info_individual
+from db.operaciones.info_individual.consultar_db import obtener_info_individual_por_pago_id
+from db.operaciones.pagos.modificar_db import aprobar_pago
+from db.operaciones.reservas.insertar_db import insertar_reserva
+from db.operaciones.pagos.insertar_db import insertar_pago_sin_monto
 from db.operaciones.mensualidades.borrar_db import borrar_reservas_mensualidad
 from db.operaciones.clase_tener_mensualidad.borrar_db import borrar_clase_tener_mensualidad
 from db.operaciones.mensualidades.consultar_db import verificar_usuario_tenga_mensualidad_clase, verificar_disponibilidad_usuario
@@ -16,7 +21,7 @@ from db.operaciones.pagos.borrar_db import borrar_pago
 from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
 from utils.operaciones_mp import crear_preferencia_checkout_pro
 from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad, borrar_mensualidad, borrar_pago_pagar_mensualidad
-from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
+from db.operaciones.pagos.consultar_db import consultar_pago_por_id, consultar_pagos_de_usuario
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.info_mensualidad.consultar_db import comprobar_existe_info_mensualidad
 from db.operaciones.info_mensualidad.modificar_db import cambiar_estado_info_mensualidad
@@ -83,17 +88,31 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
         return control
     
     id_mensualidad = int(respuesta['data'])
+
+    # INSERTAR CLASE_TENER_MENSUALIDAD
+    respuesta = insertar_clase_tener_mensualidad(id_mensualidad, clase_id, cursor)
+    control = _controlar_errores_query(respuesta, 500, "No se pudo asociar la mensualidad a la clase.", 400, cursor)
+    if control is not None:
+        respuesta = borrar_mensualidad(respuesta['data'], cursor)
+        
+        control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
+        if control2 is not None:
+            return control2
+        
+        return control
     
     # Revisar si ya existe la mensualidad.
     # - Si ya existe la mensualidad, entonces no tengo que crear reservas ni nada...
     # - Poner el renovada en True, así desde el otro endpoint no se crea nada mas
     # - Un Info_Mensualidad debería corresponder a una sola mensualidad nada mas
+    print("Heeeeey")
     respuesta = comprobar_existe_info_mensualidad(id_mensualidad, cursor)
-    print(respuesta)
-    if respuesta: # Si es true que existe
+    if respuesta["data"]: # Si es true que existe
         cambiar_estado_info_mensualidad(id_mensualidad, cursor)
     else:
         insertar_info_mensualidad(id_mensualidad, clase_id, cursor)
+
+    print("Hooo")
 
     cursor.connection.commit()
     cursor.connection.close()
@@ -102,6 +121,7 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
     # para pruebas:
     #status = 200
     # time.sleep(10)
+    print(status)
     
     if status != 200:
         cursor_cleanup = conectarse_db()
@@ -244,9 +264,12 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
         return {
             "error": "No existen instancias de clase asignables para esta mensualidad."
         }, 406
+    
+    # PRIMER CALCULO
+    monto_pago = montos_mensualidad['data']['total'] * 0.7
 
     # Crear el pago en la base de datos con estado "pending"
-    pago = insertar_pago(montos_mensualidad['data']['total'] * 0.7, usuario_id, cursor)
+    pago = insertar_pago(monto_pago, usuario_id, cursor)
     
     control = _controlar_errores_query(pago, 500, "No se pudo crear el pago.", 400, cursor)
     if control is not None:
@@ -273,6 +296,7 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
     
     item = {
         "title": "Mensualidad",
+        # OTRA VEZ EL CALCULO?
         "unit_price": str(montos_mensualidad['data']['total'] * 0.7), # se le descuenta el 30% por tener la mensualidad
         "quantity": 1,
         "unit_measure": "unit",
@@ -440,6 +464,11 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     
     id_pago_raw = pago['data']
 
+    # Crear la información Info_Individual
+    inf_ind = insertar_info_individual(id_pago_raw, instancia_clase_id, cursor)
+
+    cursor.connection.commit()
+
     # lo agregue por errores de tipado que me saltaban
     try:
         id_pago = int(id_pago_raw)
@@ -477,7 +506,7 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     }
     
     # 1. Llamamos a nuestra nueva función
-    respuesta_json = crear_preferencia_checkout_pro(id_pago, instancia_clase['data']['monto'], descripcion, item)
+    respuesta_json = crear_preferencia_checkout_pro(id_pago + 1000, instancia_clase['data']['monto'], descripcion, item)
     
     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la preferencia de pago en MercadoPago.", 400, cursor)
     if control is not None:
@@ -488,15 +517,6 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     print(respuesta_json)
     print("------------------------------\n")
 
-    # Si Mercado Pago no nos devolvió el ID, detenemos el proceso ordenadamente
-    if "data" not in respuesta_json or "id" not in respuesta_json.get("data", {}):
-        cursor.connection.close()
-        return {
-            "status": "error",
-            "message": "Mercado Pago rechazó la creación de la preferencia.",
-            "detalles_mp": respuesta_json
-        }, 500
-
     preference_id = respuesta_json["data"]
     
     cursor.connection.commit()
@@ -504,8 +524,9 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
         
     return {
         "message": "Orden de pago creada exitosamente.",
-        "data": preference_id["id"] # <--- ESTE ES EL STRING QUE NECESITA VUE.JS
-    }, 200    
+        "status_mp": respuesta_json.get("status"),
+        "preference_id": preference_id["id"] # <--- ESTE ES EL STRING QUE NECESITA VUE.JS
+    }, 200
     
 # def actualizar_estado_pago_service(id_pago, estado):
 #     cursor = conectarse_db()
@@ -577,3 +598,20 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
         "message": "Datos de la orden de pago obtenidos exitosamente.",
         "data": estado['data']
     }, 200
+
+def aprobar_pago_individual(pago_id: int):
+    # En este service se aprueba el pago hecho a una clase individual
+
+    cursor = conectarse_db()
+
+    aprobar_pago(pago_id, cursor)
+    resp_ind = obtener_info_individual_por_pago_id(pago_id, cursor)
+    usuario_id = consultar_pago_por_id(pago_id, cursor)["data"]["usuario_id"]
+    print(resp_ind)
+    inst_clase_id = resp_ind["data"]["inst_clase_id"]
+    insertar_reserva(usuario_id, inst_clase_id, cursor)
+
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return _msj_exito_helper("Se aprobó el pago individual con éxito.", cursor)
