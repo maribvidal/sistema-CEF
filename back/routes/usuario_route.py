@@ -16,7 +16,9 @@ from services.usuario_service import (
     verificar_correo_usuario_service,
     obtener_clases_usuario_service,
     desactivar_usuario_service,
-    obtener_reserva_usuario_instancia_service
+    obtener_reserva_usuario_instancia_service,
+    reactivar_usuario_service,
+    eliminar_cliente_service
 )
 
 from services.reservas_service import (
@@ -226,3 +228,17 @@ def confirmar_cambio_correo(usuario_id, nuevo_correo):
         "message": "Tu correo electrónico ha sido actualizado con éxito."
     }), 200
 
+
+@usuario_bp.route("/usuarios/<int:usuario_id>/reactivar", methods=["PUT"])
+def reactivar_usuario(usuario_id):
+    """Endpoint para reactivar un usuario desactivado."""
+    respuesta, status = reactivar_usuario_service(usuario_id)
+    return jsonify(respuesta), status
+
+#   const response = await apiClient.put(`/usuarios/${userId}/eliminar`);
+@usuario_bp.route("/usuarios/<int:usuario_id>/eliminar", methods=["PUT"])
+def eliminar_cliente(usuario_id):
+    """Endpoint para eliminar un cliente (cambiar su rol a +20)."""
+    print("HOLAAAAAAAAAAAAAAAAAAAAAAA")
+    respuesta, status = eliminar_cliente_service(usuario_id)
+    return jsonify(respuesta), status

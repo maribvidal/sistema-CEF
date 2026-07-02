@@ -1,5 +1,5 @@
 from requests import request
-
+from pprint import pprint
 from db.operaciones.clases.consultar_db import consultar_clase_por_id
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
@@ -10,7 +10,7 @@ from db.operaciones.imagenes.consultar_db import consultar_imagen_actual_usuario
 from db.operaciones.reservas.consultar_db import obtener_reserva_usuario_inst_clase
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, consultar_usuario_por_correo, consultar_usuario_por_id, listar_usuarios, obtener_clases_usuario, listar_dnis_usuarios, obtener_estado_usuario
 from db.operaciones.usuarios.insertar_db import insertar_usuario
-from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario, desactivar_usuario
+from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario, modificar_contraseña, modificar_avatar, modificar_estado_usuario, desactivar_usuario, modificar_rol_usuario, reactivar_cliente
 from db.operaciones.mensualidades.consultar_db import consultar_mensualidad_cubre_clase
 from db.operaciones.empleados.consultar_db import listar_dnis_empleados
 from db.operaciones.usuarios.consultar_db import obtener_clases_usuario
@@ -737,3 +737,55 @@ def desactivar_usuario_service(usuario_id):
     cursor.connection.close()
 
     return _msj_exito_helper("Se ha desactivado al usuario con éxito.", cursor)
+
+def reactivar_usuario_service(usuario_id):
+    """Service que permite reactivar un usuario desactivado."""
+
+    cursor = conectarse_db()
+
+    # Controlar que exista el usuario
+    respuesta = consultar_usuario_por_id(usuario_id, cursor)
+    control = _controlar_errores_query(respuesta, 400, "El usuario no existe.", 401, cursor)
+    if control is not None:
+        return control
+    
+    # Reactivar usuario
+    respuesta = reactivar_cliente(usuario_id, cursor)
+    
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    print("Se ha reactivado al usuario con éxito!!!!!!!!!")
+    return _msj_exito_helper("Se ha reactivado al usuario con éxito.", cursor)
+
+
+def eliminar_cliente_service(usuario_id):
+    """Service que permite eliminar un cliente (cambiar su rol a +20)."""
+
+    cursor = conectarse_db()
+
+    # Controlar que exista el usuario
+    respuesta = consultar_usuario_por_id(usuario_id, cursor)
+ 
+    control = _controlar_errores_query(respuesta, 400, "El usuario no existe.", 401, cursor)
+    if control is not None:
+        return control
+
+    
+    # Agarramos el rol del usuario
+    rol_usuario = 23
+    usuario_id = respuesta['data']['id']
+    print("Rol de usuario nuevo: ", rol_usuario)
+    print("ID de usuario : ", usuario_id)
+
+    respuesta = modificar_rol_usuario(usuario_id, rol_usuario, cursor)
+    control = _controlar_errores_query_sin_none(respuesta, 402, "No se ha podido eliminar al usuario.", 403, cursor)
+    if control is not None:
+        return control
+
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return _msj_exito_helper("Se ha eliminado al usuario con éxito.", cursor)
+    
+    
