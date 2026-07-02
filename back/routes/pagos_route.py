@@ -70,6 +70,7 @@ def obtener_qr_mp():
     print("Payment Status:", status)
 
     # Comprobar el estado del pago, y si este es 'approved'
+    print(status)
     if status == 'approved':
         cursor = conectarse_db()
         aprobar_pago(id_pago, cursor)
