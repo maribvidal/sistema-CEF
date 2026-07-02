@@ -94,3 +94,26 @@ def borrar_usuario(usuario_id: int, cursor):
     """
 
     return ejecutar_query(query,cursor)
+
+def reactivar_cliente(usuario_id: int, cursor):
+    """Recibe el id de un usuario y actualiza su rol al 1."""
+
+    query = f"""
+        UPDATE Usuario
+        SET rol_id = 3
+        WHERE id = {usuario_id}
+    """
+
+    return ejecutar_query(query,cursor)
+
+def modificar_rol_usuario(usuario_id: int, nuevo_rol_id: int, cursor):
+    """Recibe el id de un usuario y el nuevo rol_id, y lo actualiza cambiando
+        su rol al nuevo rol_id."""
+
+    query = f"""
+        UPDATE Usuario
+        SET rol_id = {nuevo_rol_id}
+        WHERE id = {usuario_id};
+    """
+
+    return ejecutar_query(query,cursor)
