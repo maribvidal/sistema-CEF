@@ -8,6 +8,8 @@ from routes import *
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
 from services.mensualidad_service import verificar_mensualidades_por_vencer, verificar_notificaciones_viejas
+from pyngrok import ngrok
+
 import subprocess
 import re
 import time
@@ -115,7 +117,8 @@ if __name__ == "__main__":
     app = create_app()
     scheduler.start()
 
-    backend_proc, backend_url = start_tunnel(5000)
+    http_tunnel = ngrok.connect(5000)
+    backend_url = http_tunnel.public_url
     frontend_proc, frontend_url = start_tunnel(5173)
 
     tunel_state.backend_url_state = backend_url
