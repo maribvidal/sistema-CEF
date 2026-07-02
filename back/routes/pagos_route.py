@@ -5,6 +5,7 @@ import requests
 
 from utils.operaciones_mp import Access_Token
 from services.pagos_service import *
+from db.operaciones.pagos.modificar_db import aprobar_pago
 
 pagos_bp = Blueprint("pagos", __name__)
 
@@ -62,17 +63,24 @@ def obtener_qr_mp():
 #     )
 #     payment = r.json()
 
-#     external_reference = payment.get("external_reference")
-#     status = payment.get("status")  # approved / pending / rejected 
+    id_pago = payment.get("external_reference")
+    status = payment.get("status")  # approved / pending / rejected 
 
-#     print("External Reference:", external_reference)
-#     print("Payment Status:", status)
+    print("External Reference:", id_pago)
+    print("Payment Status:", status)
 
-#     #id_pago, nuevo_estado, cursor
-#     # cursor = conectarse_db()
-#     # actualizar_estado_pago(external_reference, status, cursor)
-#     # cursor.connection.close()
-#     return "", 200
+    # Comprobar el estado del pago, y si este es 'approved'
+    if status == 'approved':
+        cursor = conectarse_db()
+        aprobar_pago(id_pago, cursor)
+        cursor.connection.commit()
+        cursor.connection.close()
+
+    #id_pago, nuevo_estado, cursor
+    # cursor = conectarse_db()
+    # actualizar_estado_pago(external_reference, status, cursor)
+    # cursor.connection.close()
+    return "", 200
 
 
 #

@@ -6,3 +6,8 @@ def actualizar_estado_pago(id_pago: int, nuevo_estado: str, cursor):
                 SET estado = '{nuevo_estado}'
                 WHERE id = {id_pago};"""
     return ejecutar_query(query, cursor)
+
+def aprobar_pago(id_pago: int, cursor):
+    """Permitir actualizar el estado de un pago a 'approved'."""
+    query = f"UPDATE Pago SET estado = 'approved' WHERE id = {id_pago}"
+    return ejecutar_query(query, cursor)
