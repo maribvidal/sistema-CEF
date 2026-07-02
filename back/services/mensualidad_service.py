@@ -1,6 +1,7 @@
 from pprint import pprint
 import time
 
+from db.operaciones.pago_pagar_mensualidad.consultar_db import consultar_mensualidad_por_pago_id
 from db.operaciones.mensualidades.modificar_db import extender_mensualidad_un_mes
 from db.operaciones.clases.consultar_db import consultar_clase_por_id
 from db.operaciones.instancias_clases.consultar_db import revisar_validez_cupos
@@ -312,22 +313,24 @@ def una_vez_que_se_aprobo_el_pago_service(pago_id: int):
     cursor = conectarse_db()
 
     aprobar_pago(pago_id, cursor)
-    info_pago = consultar_pago_por_id(pago_id, cursor)
-    id_mensualidad = info_pago["data"]["mensualidad_id"]
+    info_pago_mens = consultar_mensualidad_por_pago_id(pago_id, cursor)
+    id_mensualidad = info_pago_mens["data"]["mensualidad_id"]
 
     # Cambiar el estado de la mensualidad
     cambiar_estado_mensualidad(id_mensualidad, cursor)
     
     # Con la mensualidad, obtener la información relacionada a la mensualidad
     info_inf_mens = comprobar_existe_info_mensualidad(id_mensualidad, cursor)
-    info_inf = consultar_info_mensualidad(info_inf_mens["data"], cursor)
+    print(info_inf_mens)
+    info_inf = consultar_info_mensualidad(info_inf_mens["data"]["id"], cursor)
     inf_renovada = info_inf["data"]["renovada"]
 
-    if not inf_renovada:
+    print(inf_renovada)
+    if inf_renovada == 0:
         # Si la mensualidad no había sido renovada...
         info_mens = obtener_mensualidad_por_id(id_mensualidad, cursor)
-        info_inf_mens = comprobar_existe_info_mensualidad(id_mensualidad, cursor)
-        info_inf = consultar_info_mensualidad(info_inf_mens["data"], cursor)
+        print(info_inf["data"])
+        print(info_inf["data"]["clase_id"])
         clase_id = info_inf["data"]["clase_id"]
         usuario_id = info_mens["data"]["usuario_id"]
         resp = crear_reservas_y_clase_tener_mensualidad_service(id_mensualidad, clase_id, usuario_id, pago_id, cursor)
@@ -359,17 +362,7 @@ def crear_reservas_y_clase_tener_mensualidad_service(id_mensualidad: int, clase_
     dict_cupos = revisar_validez_cupos(dict_cupos, cursor)
     hay_cupos = revisar_cupos_disponible_abonado(dict_cupos)
 
-    # INSERTAR CLASE_TENER_MENSUALIDAD
-    respuesta = insertar_clase_tener_mensualidad(respuesta['data'], clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 500, "No se pudo asociar la mensualidad a la clase.", 400, cursor)
-    if control is not None:
-        respuesta = borrar_mensualidad(respuesta['data'], cursor)
-        
-        control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
-        if control2 is not None:
-            return control2
-        
-        return control
+    print(dict_cupos)
 
     # CREAR LAS RESERVAS
     respuesta = insertar_reservas_mensualidad(usuario_id, dict_cupos, cursor)
@@ -386,6 +379,8 @@ def crear_reservas_y_clase_tener_mensualidad_service(id_mensualidad: int, clase_
             return control3
         
         return control
+    
+    print(respuesta)
     
     cursor.connection.commit()
     cursor.connection.close()

@@ -1,5 +1,6 @@
 import time
 
+from db.operaciones.pagos.insertar_db import insertar_pago_sin_monto
 from db.operaciones.mensualidades.borrar_db import borrar_reservas_mensualidad
 from db.operaciones.clase_tener_mensualidad.borrar_db import borrar_clase_tener_mensualidad
 from db.operaciones.mensualidades.consultar_db import verificar_usuario_tenga_mensualidad_clase, verificar_disponibilidad_usuario
@@ -83,17 +84,31 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
         return control
     
     id_mensualidad = int(respuesta['data'])
+
+    # INSERTAR CLASE_TENER_MENSUALIDAD
+    respuesta = insertar_clase_tener_mensualidad(id_mensualidad, clase_id, cursor)
+    control = _controlar_errores_query(respuesta, 500, "No se pudo asociar la mensualidad a la clase.", 400, cursor)
+    if control is not None:
+        respuesta = borrar_mensualidad(respuesta['data'], cursor)
+        
+        control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
+        if control2 is not None:
+            return control2
+        
+        return control
     
     # Revisar si ya existe la mensualidad.
     # - Si ya existe la mensualidad, entonces no tengo que crear reservas ni nada...
     # - Poner el renovada en True, así desde el otro endpoint no se crea nada mas
     # - Un Info_Mensualidad debería corresponder a una sola mensualidad nada mas
+    print("Heeeeey")
     respuesta = comprobar_existe_info_mensualidad(id_mensualidad, cursor)
-    print(respuesta)
-    if respuesta: # Si es true que existe
+    if respuesta["data"]: # Si es true que existe
         cambiar_estado_info_mensualidad(id_mensualidad, cursor)
     else:
         insertar_info_mensualidad(id_mensualidad, clase_id, cursor)
+
+    print("Hooo")
 
     cursor.connection.commit()
     cursor.connection.close()
@@ -102,6 +117,7 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
     # para pruebas:
     #status = 200
     # time.sleep(10)
+    print(status)
     
     if status != 200:
         cursor_cleanup = conectarse_db()
@@ -244,9 +260,11 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
         return {
             "error": "No existen instancias de clase asignables para esta mensualidad."
         }, 406
+    
+    monto_pago = montos_mensualidad['data']['total'] * 0.7
 
     # Crear el pago en la base de datos con estado "pending"
-    pago = insertar_pago(montos_mensualidad['data']['total'] * 0.7, usuario_id, cursor)
+    pago = insertar_pago(monto_pago, usuario_id, cursor)
     
     control = _controlar_errores_query(pago, 500, "No se pudo crear el pago.", 400, cursor)
     if control is not None:

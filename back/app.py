@@ -121,7 +121,7 @@ if __name__ == "__main__":
     #backend_url = http_tunnel.public_url
     #print(backend_url)
     backend_url = "https://stir-brunt-strength.ngrok-free.dev" # Fijarse en el momento qué ngrok tenemos
-    frontend_url = "https://773fc12558df7a.lhr.life" # Ejecutar "ssh -R 80:localhost:5173 nokey@localhost.run"
+    frontend_url = "https://592a64878e3381.lhr.life" # Ejecutar "ssh -R 80:localhost:5173 nokey@localhost.run"
 
     tunel_state.backend_url_state = backend_url
     tunel_state.frontend_url_state = frontend_url
