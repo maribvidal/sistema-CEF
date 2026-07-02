@@ -50,6 +50,13 @@ def login_service(correo: str, contraseña: str) -> tuple:
         return {
             "error": usuario["message"]
         }, 500
+    
+    usuario_rol_id = usuario['data']['rol_id']
+    if usuario_rol_id not in [1, 2, 3]:  # 1: Administrador, 2: Recepcionista, 3: Cliente
+        cursor.connection.close()
+        return {
+            "error": "Rol de usuario no válido."
+        }, 403
 
 
     # ------------- VERIFICACIÓN DE ESTADO DEL USUARIO (CORREO VERIFICADO) -------------
