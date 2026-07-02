@@ -6,12 +6,13 @@ from db.operaciones.mensualidades.insertar_db import agregar_nuevas_reservas_men
 from services.pagos_service import crear_pago_service_mensualidad
 from utils.envio_mails import enviar_mail, enviar_mail_vencimiento_mensualidad
 from db.operaciones.mensualidades.borrar_db import borrar_mensualidad
-from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidades_activa, obtener_todas_las_mensualidades_usuario
+from db.operaciones.mensualidades.consultar_db import obtener_mensualidad_activa, obtener_mensualidad_activa_por_usuario, obtener_mensualidades_activa, obtener_todas_las_mensualidades_usuario 
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.usuarios.consultar_db import consultar_usuario_por_dni, obtener_mensualidad_usuario, verificar_usuario_tiene_mensualidad
 from db.operaciones.usuarios import consultar_usuario_por_dni
 from db.operaciones.mensualidades import configurar_fin_mensualidad, cancelar_mensualidad, configurar_datos_mensualidad, cambiar_estado_mensualidad
 from db.operaciones.clase_tener_mensualidad import borrar_clase_tener_mensualidad
+from db.operaciones.usuarios.consultar_db import consultar_cliente_por_dni
 
 from services import _controlar_errores_query,_controlar_errores_query_sin_none, _msj_exito_helper, _msj_error_helper
 
@@ -280,7 +281,9 @@ def verificar_notificaciones_viejas():
 
 def obtener_todas_las_mensualidades_usuario_service(dni_cliente):
     cursor = conectarse_db()
-    usuario = consultar_usuario_por_dni(dni_cliente, cursor)
+    # consulto usuario por dni. Sin embargo esta query tambien termina buscando para aquellos con rol_id != 3, por lo tanto busca para también administradores
+    # usuario = consultar_usuario_por_dni(dni_cliente, cursor)
+    usuario = consultar_cliente_por_dni(dni_cliente, cursor)
 
     # Validar si el usuario existe
     usuario = consultar_usuario_por_dni(dni_cliente, cursor)

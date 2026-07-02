@@ -104,7 +104,6 @@ def ver_mensualidades_usuario():
     """
         Endpoint para obtener todas las mensualidades de un usuario.
     """
-    print("MONEDA BILLETE")
     data = request.get_json()
     print("data: ", data)
     dni_cliente = data.get("dni_usuario")

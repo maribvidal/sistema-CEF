@@ -1,4 +1,4 @@
-from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone, ejecutar_query
 
 def consultar_usuario_por_dni(dni: int, cursor) -> dict:
     """Hace una consulta por un Usuario con un dni pasado por parámetro,
@@ -108,3 +108,12 @@ def obtener_estado_usuario(usuario_id: int, cursor) -> dict:
         FROM Usuario
         WHERE id = {usuario_id}"""
     return ejecutar_fetchone(query, cursor)
+
+def consultar_cliente_por_dni(dni_cliente: int, cursor) -> dict:
+    """Hace una consulta para obtener un cliente por su dni"""
+    query = f"""
+        SELECT *
+        FROM Usuario
+        WHERE dni = {dni_cliente} AND rol_id = 3
+    """
+    return ejecutar_query(query, cursor)
