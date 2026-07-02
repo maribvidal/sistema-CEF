@@ -18,9 +18,9 @@
           </v-btn>
         </div>
         
-        <v-row v-if="clases.length > 0">
+        <v-row v-if="clasesVisibles.length > 0">
           <v-col 
-            v-for="clase in clases"  
+            v-for="clase in clasesVisibles"  
             :key="clase.id" 
             cols="12"
           >
@@ -502,6 +502,16 @@ const fetchClasesUsuario = async () => {
 const comprobarClaseYaReservada = (claseId) => {
   return clasesReservadasIds.value.includes(claseId)
 }
+
+// Propiedad computada para filtrar clases según el rol del usuario
+const clasesVisibles = computed(() => {
+  if (userRole.value === 3) {
+    // Los usuarios con rol 3 no ven clases canceladas o borradas
+    return clases.value.filter(c => c.estado !== 'Cancelada' && c.estado !== 'Borrado')
+  }
+  // Los demás roles ven todas las clases
+  return clases.value
+})
 
 const fetchClases = async () => {
   try {
