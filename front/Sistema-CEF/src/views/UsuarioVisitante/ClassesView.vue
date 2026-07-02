@@ -363,6 +363,7 @@
 import { ref, onMounted, watch, computed, nextTick } from 'vue'
 import { loadMercadoPago } from '@mercadopago/sdk-js'
 import { ClasesService } from '@/services/ClasesServices'
+import { useRoute, useRouter } from 'vue-router'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
 import ConfirmarReserva from '@/views/UsuarioCliente/ConfirmarReserva.vue'
 
@@ -392,6 +393,32 @@ const listaEsperaDialog = ref(false)
 const ingresandoListaEspera = ref(false)
 watch(horaSel, (h) => {
   nuevaClase.value.hora = `${h}:00`
+})
+
+// PARA QUE SE REDIRIJA A LA PÁGINA SI EL PAGO FUE APROBADO - GEMINI
+// Inicializamos las herramientas de enrutamiento
+const route = useRoute()
+const router = useRouter()
+
+onMounted(() => {
+  // 1. Revisamos si la URL trae el parámetro "collection_status" de Mercado Pago
+  if (route.query.collection_status === 'approved') {
+    
+    // 2. Acá podés disparar tu notificación verde de éxito (como vi que tenés en tu sistema)
+    // notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
+    alert("¡Pago procesado con éxito!") // (O usa tu propio sistema de alertas)
+    alert(route.query.external_reference)
+    // ACÁ LLAMAR AL ENDPOINT PARA APROBAR UN PAGO Y CREAR RESERVAS
+
+    // 3. Redirigimos automáticamente a la página principal ('/')
+    // Usamos .replace() en lugar de .push() para no dejar esa URL larga en el historial del navegador
+    window.location.href = 'http://localhost:5173/clases'
+  } 
+  else if (route.query.collection_status === 'rejected' || route.query.collection_status === 'pending') {
+    // También podés atajar si el pago falló o quedó pendiente
+    alert("El pago no se pudo completar o está pendiente.")
+    window.location.href = 'http://localhost:5173/clases'
+  }
 })
 
 const nuevaClase = ref({

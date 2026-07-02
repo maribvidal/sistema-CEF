@@ -51,7 +51,6 @@ def crear_pago_particular():
     payload = request.get_json(silent=True) or {}
     print("Payload:", payload)
     data = payload.get("data") or {}
-    print("Data:", data)
     payment_id = data.get("id")
     if not payment_id:
         return "", 200
@@ -65,8 +64,7 @@ def crear_pago_particular():
     id_pago = payment.get("external_reference")
     status = payment.get("status")  # approved / pending / rejected 
 
-    print("External Reference:", id_pago)
-    print("Payment Status:", status)
+    print(f"Ext. Ref.: {id_pago} / Payment Status: {status}")
 
     # Comprobar el estado del pago, y si este es 'approved'
     if status == 'approved':

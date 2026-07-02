@@ -274,7 +274,6 @@ def verificar_notificaciones_viejas():
     cursor.connection.commit()
     cursor.connection.close()
 
-
 def obtener_todas_las_mensualidades_usuario_service(dni_cliente):
     cursor = conectarse_db()
     usuario = consultar_usuario_por_dni(dni_cliente, cursor)
@@ -298,3 +297,6 @@ def obtener_todas_las_mensualidades_usuario_service(dni_cliente):
     cursor.connection.close()
 
     return _msj_exito_helper(mensualidades['data'], cursor)
+
+def crear_reservas_y_clase_tener_mensualidad_service():
+    pass
