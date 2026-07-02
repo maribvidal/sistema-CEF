@@ -25,6 +25,43 @@ def pagar_pagos_seleccionados():
     return jsonify(respuesta), status
 
 # para hacer el pago primero llaman desde el front para obtener el qr y luego llaman para crear la orden de pago y luego preguntan por el estado del pago hasta que cambie de created
+
+@pagos_bp.route("/webhook/pagoNormal", methods=["POST"])
+def crear_pago_particular():
+    payload = request.get_json(silent=True) or {}
+    print("Payload:", payload)
+    data = payload.get("data") or {}
+    print("Data:", data)
+    payment_id = data.get("id")
+    if not payment_id:
+        return "", 200
+
+    r = requests.get(
+        f"https://api.mercadopago.com/v1/payments/{payment_id}",
+        headers={"Authorization": f"Bearer {Access_Token}"}
+    )
+    payment = r.json()
+
+    id_pago = payment.get("external_reference")
+    status = payment.get("status")  # approved / pending / rejected 
+
+    print("External Reference:", id_pago)
+    print("Payment Status:", status)
+
+    # Comprobar el estado del pago, y si este es 'approved'
+    print("impresion de status:", status)
+    if status == 'approved':
+        cursor = conectarse_db()
+        aprobar_pago(id_pago, cursor)
+        cursor.connection.commit()
+        cursor.connection.close()
+
+    #id_pago, nuevo_estado, cursor
+    # cursor = conectarse_db()
+    # actualizar_estado_pago(external_reference, status, cursor)
+    # cursor.connection.close()
+    return "", 200
+
 @pagos_bp.route("/pagos/obtenerQR", methods=["GET"])
 def obtener_qr_mp():    
     load_dotenv()
@@ -107,54 +144,4 @@ def obtener_qr_mp():
 
 
 # IMPLEMENTACION MIA ----------------------------------------------------------------------
-@pagos_bp.route("/webhook/pagoNormal", methods=["POST"])
-def crear_pago_particular():
-    payload = request.get_json(silent=True) or {}
-    print("Payload recibido: ", payload)
 
-    # 1. Verificamos qué tipo de evento nos manda MP
-    tipo_evento = payload.get("type") or payload.get("topic")
-    if tipo_evento != "payment":
-        return "", 200
-        
-    data = payload.get("data") or {}
-    payment_id = data.get("id")
-
-    if not payment_id:
-        return "", 200
-    
-    # 2. Buscamos la info real de MP con manejo de errores y timeout
-    try:
-        r = requests.get(
-            f"https://api.mercadopago.com/v1/payments/{payment_id}",
-            headers={"Authorization": f"Bearer {Access_Token}"},
-            timeout=10 
-        )  
-        r.raise_for_status()
-        payment = r.json()
-
-        external_reference = payment.get("external_reference")
-        status = payment.get("status") 
-        
-        print("PROCESANDO PAGOOOOOOOO")
-        print("Status del pago:", status)
-        print("External Reference:", external_reference)
-        
-        # 3. Impactamos en la base de datos de forma segura
-        if external_reference:
-            print("EXTERNAL REFERENCEEEEEEEEEEEEEEEEEEEEEEEEEEEEE:", external_reference)
-            # Descomentar cuando la lógica de BD esté lista
-            # cursor = conectarse_db()
-            # actualizar_estado_pago(external_reference, status, cursor)
-            # cursor.connection.close()
-            pass
-
-        return "", 200
-        
-    except requests.exceptions.RequestException as e:
-        print(f"Error al obtener el pago de MP: {e}")
-        return "", 500
-        
-    except Exception as e:
-        print(f"Error inesperado: {e}")
-        return "", 500
