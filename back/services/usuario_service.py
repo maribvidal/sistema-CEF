@@ -773,7 +773,7 @@ def eliminar_cliente_service(usuario_id):
 
     
     # Agarramos el rol del usuario
-    rol_usuario = respuesta['data']['rol_id'] + 20
+    rol_usuario = 23
     usuario_id = respuesta['data']['id']
     print("Rol de usuario nuevo: ", rol_usuario)
     print("ID de usuario : ", usuario_id)

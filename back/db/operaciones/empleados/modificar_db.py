@@ -158,7 +158,11 @@ def borrar_empleado(empleado_dni: int, cursor) -> dict:
 
     # Tras una consulta del profesor y charla con el equipo, se decidió que todos los empleados (incluido también clientes) sean de borrado lógico
     # si es un +20, es borrado lógico, 
-    rol_actual += 20
+    
+    if rol_actual > 10 and rol_actual < 20:
+        rol_actual += 10
+    else: 
+        rol_actual += 20
 
     query_update = f"""
         UPDATE Usuario
