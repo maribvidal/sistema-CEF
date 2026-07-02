@@ -1,3 +1,5 @@
+from requests import request
+
 from db.operaciones.clases.consultar_db import consultar_clase_por_id
 from db.operaciones.conectar_db import conectarse_db
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
@@ -309,7 +311,7 @@ def editar_perfil_usuario_service(
         nombre or None,
         apellido or None,
         fecha_nac or None,
-        correo or None,
+        None,
         telefono or None
     )
     
@@ -320,17 +322,23 @@ def editar_perfil_usuario_service(
         }, 500
 
     cursor.connection.commit()
-    if correo is None:
-        cursor.connection.close()
+    if not correo or correo == usuario["data"]["correo"]:
         return {
             "message": "Perfil actualizado exitosamente."
         }, 200
-    else:
-        enviar_mail_confirmacion_nuevo_correo(usuario_id, f"https://www.google.com", cursor) #El link está como placeholder mientras vemos que hacer
-        cursor.connection.close()
+
+    try:
+        from flask import request
+
+        enlace_verificacion = f"{request.host_url}usuarios/confirmar_cambio_correo/{usuario_id}/{correo}"
+        enviar_mail_confirmacion_nuevo_correo(correo, enlace_verificacion)
         return {
-            "message": "Perfil actualizado exitosamente. Se ha enviado un correo de aviso al nuevo correo electrónico."
+            "message": "Perfil actualizado exitosamente. Se ha enviado un correo de confirmación al nuevo correo electrónico."
         }, 200
+    
+    except Exception as e:
+        print(f"Error al enviar el mail: {e}")
+        return {"message": "Perfil actualizado, pero falló el envío del mail."}, 500        
 
 def confirmar_nuevo_correo_service(usuario_id: int, correo: str):
     cursor = conectarse_db()
