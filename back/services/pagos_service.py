@@ -14,7 +14,7 @@ from db.operaciones.pago_pagar_clase.insertar_db import insertar_pago_pagar_clas
 from db.operaciones.pago_pagar_mensualidad.insertar_db import insertar_pago_pagar_mensualidad
 from db.operaciones.pagos.borrar_db import borrar_pago
 from db.operaciones.pagos import verificar_existencia_pago_por_id, actualizar_estado_pago, verificar_estado_pago_por_id, insertar_pago
-from utils.operaciones_mp import consultar_datos_orden_qr_mp, crear_orden_qr_mp, crear_preferencia_checkout_pro
+from utils.operaciones_mp import crear_preferencia_checkout_pro
 from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad, borrar_mensualidad, borrar_pago_pagar_mensualidad
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.operaciones.conectar_db import conectarse_db
