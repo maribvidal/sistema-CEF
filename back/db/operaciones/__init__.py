@@ -20,3 +20,4 @@ from .cancelaciones import *
 from .reservas import *
 from .instancias_clases import *
 from .listas_espera import *
+from .info_mensualidad import *
