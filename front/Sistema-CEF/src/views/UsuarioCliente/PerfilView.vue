@@ -373,7 +373,7 @@ const showPayments = async () => {
 const renderCheckoutBrick = async () => {
   await loadMercadoPago()
 
-  const mp = new window.MercadoPago('APP_USR-3d8be2c7-4df5-4334-8582-5e848fa461eb', {
+  const mp = new window.MercadoPago('APP_USR-07fa4e87-0b6c-4bd8-a671-6ffd56b5e362', {
     locale: 'es-AR'
   })
 

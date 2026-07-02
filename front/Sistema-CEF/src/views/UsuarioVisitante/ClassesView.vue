@@ -400,18 +400,28 @@ watch(horaSel, (h) => {
 const route = useRoute()
 const router = useRouter()
 
-onMounted(() => {
+onMounted(async () => {
   // 1. Revisamos si la URL trae el parámetro "collection_status" de Mercado Pago
   if (route.query.collection_status === 'approved') {
     
     // 2. Acá podés disparar tu notificación verde de éxito (como vi que tenés en tu sistema)
     // notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
     alert("¡Pago procesado con éxito!") // (O usa tu propio sistema de alertas)
-    alert(route.query.external_reference)
-    // ACÁ LLAMAR AL ENDPOINT PARA APROBAR UN PAGO Y CREAR RESERVAS
-
-    // 3. Redirigimos automáticamente a la página principal ('/')
-    // Usamos .replace() en lugar de .push() para no dejar esa URL larga en el historial del navegador
+    notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
+    const externalReference = route.query.external_reference
+    
+    if (externalReference) {
+      try {
+        await PaymentsService.confirmarPagoAprobado(externalReference)
+        notificationStore.showNotification('Pago confirmado y reservas procesadas', 'success')
+      } catch (error) {
+        console.error('Error confirmando pago aprobado:', error)
+        notificationStore.showNotification('No se pudo confirmar el pago aprobado', 'error')
+      }
+    } else {
+      console.warn('No se obtuvo external_reference para confirmar pago aprobado')
+    }
+    
     window.location.href = 'http://localhost:5173/clases'
   } 
   else if (route.query.collection_status === 'rejected' || route.query.collection_status === 'pending') {
@@ -877,7 +887,7 @@ const renderCheckoutBrick = async () => {
   await loadMercadoPago()
 
   const mp = new MercadoPago(
-    "APP_USR-3d8be2c7-4df5-4334-8582-5e848fa461eb"
+    "APP_USR-07fa4e87-0b6c-4bd8-a671-6ffd56b5e362"
   )
 
   const bricksBuilder = mp.bricks()
