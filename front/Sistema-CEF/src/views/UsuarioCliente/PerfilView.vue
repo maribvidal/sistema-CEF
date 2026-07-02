@@ -166,7 +166,6 @@
           <v-table>
             <thead>
               <tr>
-                <th class="text-left">ID</th>
                 <th class="text-left">Fecha Inicio</th>
                 <th class="text-left">Fecha Fin</th>
                 <th class="text-left">Estado</th>
@@ -175,12 +174,11 @@
             </thead>
             <tbody>
               <tr v-for="mensualidad in membershipStatus?.mensualidades" :key="mensualidad.id">
-                <td>{{ mensualidad.id }}</td>
                 <td>{{ formatSpanishDate(mensualidad.fecha_ini) }}</td>
                 <td>{{ formatSpanishDate(mensualidad.fecha_fin) }}</td>
-                <td>{{ mensualidad.activa ? 'Activa' : 'Inactiva' }}</td>
+                <td>{{ obtenerEstadoMensualidad(mensualidad) }}</td>
                 <td>
-                  <v-btn v-if="mensualidad.activa !== 1" color="primary" @click="renewMembership(userDNI, mensualidad.id)">Renovar</v-btn>
+                  <v-btn v-if="Number(mensualidad?.estado) === 0" color="primary" @click="renewMembership(userDNI, mensualidad.id)">Renovar</v-btn>
                   <span v-else> - </span>
                 </td>
               </tr>
@@ -426,26 +424,24 @@ const pagarSeleccionados = async () => {
 const dialogMembershipStatus = ref(false)
 const membershipStatus = ref(null)
 
+const obtenerEstadoMensualidad = (mensualidad) => {
+  return Number(mensualidad?.estado) === 1 ? 'Activa' : 'Inactiva'
+}
+
 const showMembershipStatus = async () => {
   try {
     const mensualidad = await PaymentsService.getMensualidadUsuario(userDNI.value)
 
     const mensualidades = mensualidad?.message ?? []
-    if (!Array.isArray(mensualidades) || mensualidades.length === 0) {
-      throw new Error('El usuario no posee mensualidades registradas.')
-    }
-
-    const mensualidadActiva = mensualidades.find(item => Number(item.estado) === 1) ?? mensualidades[0]
     membershipStatus.value = {
-      activa: Number(mensualidadActiva.estado) === 1,
-      fechaFin: mensualidadActiva.fecha_fin,
-      fechaIni: mensualidadActiva.fecha_ini,
-      id: mensualidadActiva.id,
       mensualidades
     }
     dialogMembershipStatus.value = true
+    if (!Array.isArray(mensualidades) || mensualidades.length === 0) {
+      notificationStore.showNotification('El usuario no posee mensualidades registradas.', 'danger')
+    }
   } catch (error) {
-    notificationStore.showNotification('El usuario no posee mensualidades activas', 'danger')
+    notificationStore.showNotification('No se pudieron cargar las mensualidades del usuario.', 'danger')
   }
 }
 
