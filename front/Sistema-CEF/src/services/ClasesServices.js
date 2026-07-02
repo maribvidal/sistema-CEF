@@ -37,5 +37,18 @@ export const ClasesService = {
       return response.data.data
     }
     throw new Error(response.data?.message || 'Error al obtener salas')
+  },
+
+  confirmarAsistenciaQR: async (inst_clase_id) => {
+    const response = await apiClient.post(`/clientes/${inst_clase_id}/validar_qr`)
+    return response.data
+  },
+
+  confirmarAsistenciaDNI: async (inst_clase_id, usuario_dni) => {
+    const response = await apiClient.post(`/clientes/${inst_clase_id}/validar_dni/`, {
+      usuario_dni
+    })
+   
+    return response.data
   }
 }
