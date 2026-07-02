@@ -410,7 +410,7 @@ onMounted(() => {
     if (externalReference < 1000) {
       PaymentsService.confirmarPagoAprobado(externalReference)
     } else {
-      PaymentsService.confirmarPagoAprobadoIndividual(externalReference)
+      PaymentsService.confirmarPagoAprobadoIndividual(externalReference - 1000)
     }
   } 
   else if (route.query.collection_status === 'rejected' || route.query.collection_status === 'pending') {
