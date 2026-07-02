@@ -63,21 +63,14 @@
           </v-chip>
         </v-card-title>
         <v-card-text>
-          <v-alert
-            v-if="payments.length"
-            type="info"
-            variant="tonal"
-            class="mb-4"
-          >
-            Marca uno o más pagos para habilitar el botón de Mercado Pago.
-          </v-alert>
           <v-table>
             <thead>
               <tr>
-                <th class="text-left" style="width: 48px;"></th>
+            
                 <th class="text-left">Actividad</th>
                 <th class="text-left">Fecha</th>
                 <th class="text-left">Monto</th>
+                <th class="text-left">Estado</th>
               </tr>
             </thead>
             <tbody>
@@ -87,15 +80,7 @@
                 v-if="payments?.length"
                 :class="{ 'bg-amber-lighten-5': selectedPaymentIndexes.includes(index) }"
               >
-                <td>
-                  <v-checkbox-btn
-                    v-model="selectedPaymentIndexes"
-                    :value="index"
-                    density="compact"
-                    color="amber-darken-2"
-                    :disabled="!esPagable(payment)"
-                  />
-                </td>
+                
                 <td>{{ payment.actividad_nombre }}</td>
                 <td>{{ formatSpanishDate(payment.fecha) }}</td>
                 <td>${{ payment.monto }}</td> 
@@ -166,7 +151,7 @@
       <v-card>
         <v-card-title class="text-h5">Estado de Mensualidad</v-card-title>
         <v-card-text>
-          <v-table>
+          <v-table v-if="membershipStatus?.mensualidades?.length">
             <thead>
               <tr>
                 <th class="text-left">Fecha Inicio</th>
@@ -187,7 +172,9 @@
               </tr>
             </tbody>
           </v-table>
-          
+          <div v-else class="text-center pa-6">
+            <p class="text-body-1 text-grey-darken-1">El usuario no posee mensualidades registradas.</p>
+          </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -368,24 +355,17 @@ const showPayments = async () => {
     payments.value = normalizarPagos(result?.data ?? result)
     console.log('Pagos obtenidos:', payments.value)
     selectedPaymentIndexes.value = []
-
-    if (!payments.value || payments.value.length === 0) {
-      notificationStore.showNotification('Este usuario no tiene pagos asociados', 'danger')
-      return
-    }
     dialogPayments.value = true
   } catch (error) {
-    notificationStore.showNotification('Este usuario no tiene pagos asociados', 'danger')
+    console.error('Error al cargar pagos:', error)
+    payments.value = []
+    selectedPaymentIndexes.value = []
+    dialogPayments.value = true
   }
 }
 
 const renderCheckoutBrick = async () => {
   await loadMercadoPago()
-
-  const container = document.getElementById('walletBrick_container')
-  if (container) {
-    container.innerHTML = ''
-  }
 
   const mp = new window.MercadoPago('APP_USR-3d8be2c7-4df5-4334-8582-5e848fa461eb', {
     locale: 'es-AR'
@@ -448,17 +428,17 @@ const obtenerEstadoMensualidad = (mensualidad) => {
 const showMembershipStatus = async () => {
   try {
     const mensualidad = await PaymentsService.getMensualidadUsuario(userDNI.value)
-
     const mensualidades = mensualidad?.message ?? []
     membershipStatus.value = {
       mensualidades
     }
     dialogMembershipStatus.value = true
-    if (!Array.isArray(mensualidades) || mensualidades.length === 0) {
-      notificationStore.showNotification('El usuario no posee mensualidades registradas.', 'danger')
-    }
   } catch (error) {
-    notificationStore.showNotification('No se pudieron cargar las mensualidades del usuario.', 'danger')
+    console.error('Error al cargar mensualidades:', error)
+    membershipStatus.value = {
+      mensualidades: []
+    }
+    dialogMembershipStatus.value = true
   }
 }
 

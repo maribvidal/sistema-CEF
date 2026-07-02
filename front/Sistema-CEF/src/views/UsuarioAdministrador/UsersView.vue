@@ -312,7 +312,7 @@ const confirmDeleteUser = async () => {
     0,
     async () => {
       try {
-      await UsersAdminService.deleteUser(user.id);
+      await UsersAdminService.deleteUser(usuarioAEliminar.value.id);
         notificationStore.showNotification('Usuario eliminado correctamente.', 'success');
         await loadUsers(); // Recargar la lista de usuarios
       } catch (error) {

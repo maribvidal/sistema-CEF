@@ -14,9 +14,10 @@ from .usuario_tener_descuento import *
 from .usuarios import *
 from .construir_db import *
 from .conectar_db import *
-from .seed_db import *
+from .seed_db_demo import *
 from .imagenes import *
 from .cancelaciones import *
 from .reservas import *
 from .instancias_clases import *
 from .listas_espera import *
+from .info_mensualidad import *

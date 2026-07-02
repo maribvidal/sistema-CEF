@@ -18,6 +18,9 @@ from utils.operaciones_mp import crear_preferencia_checkout_pro
 from db.operaciones import listar_pagos, consultar_clase_por_id, verificar_usuario_tenga_mensualidad, borrar_mensualidad, borrar_pago_pagar_mensualidad
 from db.operaciones.pagos.consultar_db import consultar_pagos_de_usuario
 from db.operaciones.conectar_db import conectarse_db
+from db.operaciones.info_mensualidad.consultar_db import comprobar_existe_info_mensualidad
+from db.operaciones.info_mensualidad.modificar_db import cambiar_estado_info_mensualidad
+from db.operaciones.info_mensualidad.insertar_db import insertar_info_mensualidad
 import time
 
 from utils.operaciones_mp import crear_preferencia_checkout_pro
@@ -80,33 +83,19 @@ def verificar_poder_pagar_mensualidad_service(usuario_id, clase_id):
         return control
     
     id_mensualidad = int(respuesta['data'])
-
-    respuesta = insertar_clase_tener_mensualidad(respuesta['data'], clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 500, "No se pudo asociar la mensualidad a la clase.", 400, cursor)
-    if control is not None:
-        respuesta = borrar_mensualidad(respuesta['data'], cursor)
-        
-        control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
-        if control2 is not None:
-            return control2
-        
-        return control
     
-    respuesta = insertar_reservas_mensualidad(usuario_id, dict_cupos, cursor)
-    control = _controlar_errores_query(respuesta, 500, "No se pudo insertar las reservas de la mensualidad.", 400, cursor)
-    if control is not None:
-        respuesta = borrar_clase_tener_mensualidad(id_mensualidad, cursor)
-        control2 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la clase tener mensualidad.", 400, cursor)
-        if control2 is not None:
-            return control2
-        
-        respuesta = borrar_mensualidad(id_mensualidad, cursor)
-        control3 = _controlar_errores_query_sin_none(respuesta, 500, "Error al borrar la mensualidad.", 400, cursor)
-        if control3 is not None:
-            return control3
-        
-        return control
+    # Revisar si ya existe la mensualidad.
+    # - Si ya existe la mensualidad, entonces no tengo que crear reservas ni nada...
+    # - Poner el renovada en True, así desde el otro endpoint no se crea nada mas
+    # - Un Info_Mensualidad debería corresponder a una sola mensualidad nada mas
+    respuesta = comprobar_existe_info_mensualidad(id_mensualidad, cursor)
+    print(respuesta)
+    if respuesta: # Si es true que existe
+        cambiar_estado_info_mensualidad(id_mensualidad, cursor)
+    else:
+        insertar_info_mensualidad(id_mensualidad, clase_id, cursor)
 
+    cursor.connection.commit()
     cursor.connection.close()
     
     respuesta, status = crear_pago_service_mensualidad(usuario_id, "Pago de mensualidad", id_mensualidad)
@@ -296,7 +285,7 @@ def crear_pago_service_mensualidad(usuario_id, descripcion, id_mensualidad):
     print(" > Antes de hacer el crear_preferencia_checkout_pro")
     respuesta_json = crear_preferencia_checkout_pro(id_pago, montos_mensualidad['data']['total'] * 0.7, descripcion, item)
     preference_id = respuesta_json["data"]
-    print("respuesta_json", respuesta_json)
+    #print("respuesta_json", respuesta_json)
     print(" > Después de hacer el crear_preferencia_checkout_pro")
     # control = _controlar_errores_query(respuesta_json, 500, "Error al crear la orden de pago en MercadoPago.", 400, cursor)
     # if control is not None:

@@ -1,4 +1,5 @@
 from datetime import datetime
+from pprint import pprint
 from db.operaciones.listas_espera.consultar_db import consultar_lista_espera_individual, consultar_lista_espera_abonado
 from db.operaciones.listas_espera.borrar_db import borrar_listas_espera_individuales_clase, borrar_listas_espera_abonados_clase
 from db.operaciones.instancias_clases.borrar_db import borrar_instancias_clases_por_clase
@@ -545,9 +546,9 @@ def obtener_instancia_clases_semana_clase_id_service(id_clase):
     cursor = conectarse_db()
 
     # Controlar que exista la clase
-
     respuesta = consultar_clase_por_id(id_clase, cursor)
-    print(respuesta)
+    print("RESPUESTA A LA CONSULTA CLASE POR ID A VER SI EXISTE: ")
+    pprint(respuesta)
     control = _controlar_errores_query(respuesta, 400, "No se encontró la clase.", 401, cursor)
     if control is not None:
         return control
@@ -555,7 +556,8 @@ def obtener_instancia_clases_semana_clase_id_service(id_clase):
     # Obtener la instancia
 
     respuesta = obtener_instancia_clase_por_clase_id_semana(id_clase, cursor)
-    print(respuesta)
+    print("RESPUESTA A LA CONSULTA INSTANCIA CLASE POR ID Y SEMANA: ")
+    pprint(respuesta)
     control = _controlar_errores_query(respuesta, 402, "No se encontró una instancia para la clase en esta semana.", 403, cursor)
     if control is not None:
         return control

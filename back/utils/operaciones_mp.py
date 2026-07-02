@@ -359,9 +359,9 @@ def crear_preferencia_checkout_pro(id_pago, total_amount, description, item):
         ],
         "notification_url": f"{tunel_state.backend_url_state}/webhook/pagoNormal",
         "back_urls": { 
-            "success": "http://localhost:5173/clases",
-            "pending": "http://localhost:5173/clases",
-            "failure": "http://localhost:5173/clases"
+            "success": f"{tunel_state.frontend_url_state}/clases",
+            "pending": f"{tunel_state.frontend_url_state}/clases",
+            "failure": f"{tunel_state.frontend_url_state}/clases"
         },
         "auto_return": "approved"
     }

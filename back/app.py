@@ -117,9 +117,11 @@ if __name__ == "__main__":
     app = create_app()
     scheduler.start()
 
-    http_tunnel = ngrok.connect(5000)
-    backend_url = http_tunnel.public_url
-    frontend_proc, frontend_url = start_tunnel(5173)
+    #http_tunnel = ngrok.connect(5000)
+    #backend_url = http_tunnel.public_url
+    #print(backend_url)
+    backend_url = "https://stir-brunt-strength.ngrok-free.dev" # Fijarse en el momento qué ngrok tenemos
+    frontend_url = "https://8014953785d6e5.lhr.life" # Ejecutar "ssh -R 80:localhost:5173 nokey@localhost.run"
 
     tunel_state.backend_url_state = backend_url
     tunel_state.frontend_url_state = frontend_url

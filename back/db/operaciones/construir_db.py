@@ -65,6 +65,7 @@ def construir_tablas(cursor: sqlite.Cursor):
     construir_tabla_usuario_pertenece_lista_espera_abonados(cursor)
     construir_tabla_usuario_pertenece_lista_espera_individual(cursor)
     construir_tabla_profesor_actividad(cursor)
+    construir_tabla_info_mensualidad(cursor)
     
     construir_tabla_proximas_notificaciones(cursor)
 
@@ -372,3 +373,16 @@ def construir_tabla_proximas_notificaciones(cursor: sqlite.Cursor):
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                         )""")
+    
+def construir_tabla_info_mensualidad(cursor: sqlite.Cursor):
+    """Construye la tabla Info_Mensualidad."""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Info_Mensualidad (
+                        id          INTEGER PRIMARY KEY,
+                        mensualidad_id INTEGER NOT NULL UNIQUE,
+                        clase_id    INTEGER,
+                        fecha       DATE,
+                        renovada    INTEGER NOT NULL DEFAULT 0,
+                        FOREIGN KEY (mensualidad_id) REFERENCES Mensualidad(id)
+                                        ON UPDATE CASCADE
+                                        ON DELETE SET NULL
+                   )""")

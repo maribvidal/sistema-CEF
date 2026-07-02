@@ -40,14 +40,20 @@ def enviar_mail_confirmacion_asistencia(id_usuario: int, cursor, clase_id = None
     
     enviar_mail(correo, "Confirmación de asistencia", mensaje)
 
-def enviar_mail_confirmacion_nuevo_correo(id_usuario: int, enlace: str, cursor):
-    """Función que envía un correo electrónico al usuario para avisarle que
-        su correo ha sido cambiado exitosamente."""
-    consulta = consultar_usuario_por_id(id_usuario, cursor)
-    correo = consulta["data"]["correo"]
-
-    html = f"Le contactamos desde el equipo del Sistema CEF para que confirme su nuevo correo \ntocando <a href=\"{enlace}\">este enlace.</a>\nSi no fue usted quien realizó este cambio, por favor contacte con el soporte técnico."
-    enviar_mail(correo, "Confirmación de cambio de correo", html)
+def enviar_mail_confirmacion_nuevo_correo(correo: str, enlace: str):
+    """Función que envía un correo electrónico al usuario para que confirme
+       su nueva dirección de correo electrónico."""
+    
+    html = f"""
+    <h3>Modificación de correo - Sistema CEF</h3>
+    <p>Hemos recibido una solicitud para cambiar la dirección de correo electrónico asociada a su cuenta.</p>
+    <p>Para completar este proceso y validar su nueva dirección, por favor haga clic en el siguiente enlace:</p>
+    <p><a href="{enlace}">Confirmar mi nuevo correo electrónico</a></p>
+    <br>
+    <p><small style="color: #555;">Si usted no solicitó este cambio, por favor ignore este correo o póngase en contacto con el soporte técnico si cree que su seguridad se ha visto comprometida.</small></p>
+    """
+    
+    enviar_mail(correo, "Confirme su nuevo correo electrónico - Sistema CEF", html)
 
 def enviar_mail_vencimiento_mensualidad(id_usuario: int, correo: str, enlace: str):
     """Función que envía un correo electrónico al usuario para avisarle 

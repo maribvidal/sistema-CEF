@@ -18,9 +18,9 @@
           </v-btn>
         </div>
         
-        <v-row v-if="clases.length > 0">
+        <v-row v-if="clasesVisibles.length > 0">
           <v-col 
-            v-for="clase in clases"  
+            v-for="clase in clasesVisibles"  
             :key="clase.id" 
             cols="12"
           >
@@ -363,6 +363,7 @@
 import { ref, onMounted, watch, computed, nextTick } from 'vue'
 import { loadMercadoPago } from '@mercadopago/sdk-js'
 import { ClasesService } from '@/services/ClasesServices'
+import { useRoute, useRouter } from 'vue-router'
 // IMPORTANTE: Asegúrate de que UsuariosService exporte la función obtenerClase
 import ConfirmarReserva from '@/views/UsuarioCliente/ConfirmarReserva.vue'
 
@@ -392,6 +393,42 @@ const listaEsperaDialog = ref(false)
 const ingresandoListaEspera = ref(false)
 watch(horaSel, (h) => {
   nuevaClase.value.hora = `${h}:00`
+})
+
+// PARA QUE SE REDIRIJA A LA PÁGINA SI EL PAGO FUE APROBADO - GEMINI
+// Inicializamos las herramientas de enrutamiento
+const route = useRoute()
+const router = useRouter()
+
+onMounted(async () => {
+  // 1. Revisamos si la URL trae el parámetro "collection_status" de Mercado Pago
+  if (route.query.collection_status === 'approved') {
+    
+    // 2. Acá podés disparar tu notificación verde de éxito (como vi que tenés en tu sistema)
+    // notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
+    
+    notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
+    const externalReference = route.query.external_reference
+    
+    if (externalReference) {
+      try {
+        await PaymentsService.confirmarPagoAprobado(externalReference)
+        notificationStore.showNotification('Pago confirmado y reservas procesadas', 'success')
+      } catch (error) {
+        console.error('Error confirmando pago aprobado:', error)
+        notificationStore.showNotification('No se pudo confirmar el pago aprobado', 'error')
+      }
+    } else {
+      console.warn('No se obtuvo external_reference para confirmar pago aprobado')
+    }
+    
+    window.location.href = 'http://localhost:5173/clases'
+  } 
+  else if (route.query.collection_status === 'rejected' || route.query.collection_status === 'pending') {
+    // También podés atajar si el pago falló o quedó pendiente
+    alert("El pago no se pudo completar o está pendiente.")
+    window.location.href = 'http://localhost:5173/clases'
+  }
 })
 
 const nuevaClase = ref({
@@ -472,6 +509,16 @@ const fetchClasesUsuario = async () => {
 const comprobarClaseYaReservada = (claseId) => {
   return clasesReservadasIds.value.includes(claseId)
 }
+
+// Propiedad computada para filtrar clases según el rol del usuario
+const clasesVisibles = computed(() => {
+  if (userRole.value === 3) {
+    // Los usuarios con rol 3 no ven clases canceladas o borradas
+    return clases.value.filter(c => c.estado !== 'Cancelada' && c.estado !== 'Borrado')
+  }
+  // Los demás roles ven todas las clases
+  return clases.value
+})
 
 const fetchClases = async () => {
   try {
