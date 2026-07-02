@@ -3,7 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 from db.operaciones.construir_db import reconstruir_db
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.seed_db import insertar_datos
+from db.operaciones.seed_db_demo import insertar_datos
 from routes import *
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
