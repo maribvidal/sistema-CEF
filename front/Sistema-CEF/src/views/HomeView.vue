@@ -7,38 +7,24 @@
         </v-container>
 
         <v-card-text class="elige-planes" v-if="userRole === 3">
-        <h2 class="text-center mb-4">Elige tu forma de pago</h2>
+        <h2 class="text-center mb-4">¿Quieres accceder a nuestras clases?</h2>
         <v-row class="justify-center">
-          <v-col cols="12" md="4">
+          <v-col cols="12" md="4" sm="6" class="mb-4">
             <v-card class="pa-4" color="--bg-card">
-              <v-card-title class="text-h6">Por Clase</v-card-title>
+              <v-card-title class="text-h6">Elige tu clase</v-card-title>
               <v-card-text>
-                Acceso a las instalaciones en horarios específicos.
+                
                 <ul>
-                  <li>Acceso limitado a ciertas áreas.</li>
-                  <li>Sin clases grupales.</li>
+                  <li>Acceso a todas las clases grupales.</li>
+                  <li>Paga tus clases de forma mensual o individual.</li>
                 </ul>
               </v-card-text>
               <v-card-actions>
-                <v-btn block color="red" size="large" :to="'/clases'">Seleccionar</v-btn>
+                <v-btn block color="red" size="large" :to="'/clases'">Ir a nuestras clases</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
-          <v-col cols="12" md="4">
-            <v-card class="pa-4" color="--bg-card">
-              <v-card-title class="text-h6">Mensual</v-card-title>
-              <v-card-text>
-                Acceso completo a las instalaciones durante todo el horario de apertura.
-                <ul>
-                  <li>Acceso a todas las áreas.</li>
-                  <li>Incluye clases grupales ilimitadas.</li>
-                </ul>
-              </v-card-text>
-              <v-card-actions>
-                <v-btn block color="red" size="large">Seleccionar</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
+          
         </v-row>
       </v-card-text>
     </v-container>
