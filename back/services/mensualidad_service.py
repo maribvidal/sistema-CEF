@@ -64,8 +64,11 @@ def configurar_fin_mensualidad_service(dni_cliente, id_mensualidad, fecha_fin = 
         return control
     
     reservas_agregadas = agregar_nuevas_reservas_mensualidad(id_mensualidad, usuario['data']['id'], cursor)
+    print("reservas_agregadas", reservas_agregadas)
     if reservas_agregadas['status'] != "success":
+        
         roll_back = configurar_datos_mensualidad(datos_mensualidad, cursor)
+
         control2 = _controlar_errores_query_sin_none(roll_back, 500, "Error al restaurar la mensualidad.", 403, cursor)
         if control2 is not None:
             return control2
