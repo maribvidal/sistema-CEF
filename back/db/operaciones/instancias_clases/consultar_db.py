@@ -24,11 +24,12 @@ def listar_instancias_clases_semana(cursor) -> dict:
 
 def obtener_instancia_clase_por_clase_id_semana(clase_id: int, cursor) -> dict:
     """Hace una consulta para devolver la instancia de clase para un clase_id
-        y una fecha."""
+        y la semana actual (Lunes a Domingo)."""
     query = f"""
                 SELECT *
                 FROM Instancia_Clase
-                WHERE fecha BETWEEN DATE('now') AND DATE('now', '+7 days') AND clase_id = {clase_id}
+                WHERE fecha BETWEEN DATE('now', '-6 days', 'weekday 1') AND DATE('now', 'weekday 0') 
+                  AND clase_id = {clase_id}
             """
     return ejecutar_fetchone(query, cursor)
 
