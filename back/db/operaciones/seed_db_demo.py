@@ -42,6 +42,7 @@ def insertar_datos(cursor):
     id_prof1 = insertar_profesor('Carlos', 'López', '542215004012', 'M', 11223344, [1, 2], cursor)
     insertar_profesor('Ana', 'Martínez', '542215004013','F', 44332211, [1], cursor)    
 
+    id_prof1 = id_prof1['data']
     # Crear salas
     insertar_sala('Sala 1', 10, cursor)
     insertar_sala('Sala 2', 25, cursor)
@@ -49,15 +50,32 @@ def insertar_datos(cursor):
 
     # Crear clases
     id_clas = insertar_clase('Programada', 1, id_prof1, 1, "Lunes", "10:00", 1, 300.0, cursor)
-    id_clas = id_clas['data']
     lista_ids_cla_1 = crear_instancias_clase_por_un_año(id_clas, 300, cursor, "Lunes")
     for idi in lista_ids_cla_1:
         insertar_lista_espera_individual(idi, cursor)
     
-
-    # Mensualidades
     
+    # Crear la lista de espera de abonados para la clase
+    inst_clase_id = lista_ids_cla_1[0]
+    id_lea = insertar_lista_espera_abonados(id_clas, cursor)["data"]
+
+    # Inscribir usuario a clase
+    insertar_reserva(5, inst_clase_id, cursor)
+
+    # Crear pagos
+    insertar_pago(50.0, 5, cursor)
+    insertar_pago(60.0, 5, cursor)
+    insertar_pago(70.0, 5, cursor)
+
+    # Crear pagos pagar clase
+    insertar_pago_pagar_clase(1, 1, cursor)
+    
+    insertar_pago_pagar_mensualidad(2, 1, cursor)
+    insertar_pago_pagar_mensualidad(3, 1, cursor)
+    
+    insertar_clase_tener_mensualidad(1, 1, cursor)
 
 
-    
-    
+    insertar_cancelacion(5, lista_ids_cla_1[0], cursor)
+    insertar_cancelacion(5, lista_ids_cla_1[0], cursor)
+

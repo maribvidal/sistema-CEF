@@ -76,6 +76,13 @@ const router = createRouter({
       path: '/metricas',
       name: 'metricas',
       component: () => import('../views/UsuarioAdministrador/MetricasView.vue'),
+    },
+    {
+      path: '/asistencias',
+      name: 'asistencias',
+      component: () => import('../views/UsuarioAdministrador/AsistenciasView.vue'),
+    },
+    {
     }
   ],
 })

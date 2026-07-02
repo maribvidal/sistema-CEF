@@ -886,7 +886,7 @@ const renderCheckoutBrick = async () => {
   await loadMercadoPago()
 
   const mp = new MercadoPago(
-    "APP_USR-07fa4e87-0b6c-4bd8-a671-6ffd56b5e362"
+    "APP_USR-3d8be2c7-4df5-4334-8582-5e848fa461eb"
   )
 
   const bricksBuilder = mp.bricks()

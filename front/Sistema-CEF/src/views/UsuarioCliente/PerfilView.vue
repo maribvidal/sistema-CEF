@@ -33,6 +33,10 @@
                   <v-col cols="12" sm="6">
                     <v-btn color="primary" block variant="flat" @click="showMembershipStatus">Ver Estado de Mensualidad</v-btn>
                   </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-btn color="success" block variant="flat" @click="showBenefits(userDNI)">Ver beneficios</v-btn>
+                  </v-col>
+                
               </v-row>
               </v-row>
             </v-col>
@@ -70,33 +74,32 @@
                 <th class="text-left">Actividad</th>
                 <th class="text-left">Fecha</th>
                 <th class="text-left">Monto</th>
-                <th class="text-left">Estado</th>
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="(payment, index) in payments"
-                :key="payment?.id ?? `${payment?.fecha ?? 'payment'}-${index}`"
-                v-if="payments?.length"
-                :class="{ 'bg-amber-lighten-5': selectedPaymentIndexes.includes(index) }"
-              >
-                
-                <td>{{ payment.actividad_nombre }}</td>
-                <td>{{ formatSpanishDate(payment.fecha) }}</td>
-                <td>${{ payment.monto }}</td> 
-                <td>
-                  <v-chip
-                    size="small"
-                    :color="payment.estado === 'pending' ? 'amber-darken-2' : 'green-darken-1'"
-                    variant="tonal"
-                    label
-                  >
-                    {{ payment.estado }}
-                  </v-chip>
-                </td>
-              </tr>
+              <template v-if="pagosActivos.length">
+                <tr
+                  v-for="(payment, index) in pagosActivos"
+                  :key="payment?.id ?? `${payment?.fecha ?? 'payment'}-${index}`"
+                  :class="{ 'bg-amber-lighten-5': selectedPaymentIndexes.includes(index) }"
+                >
+                  <td>{{ payment.actividad_nombre }}</td>
+                  <td>{{ formatSpanishDate(payment.fecha) }}</td>
+                  <td>${{ payment.monto }}</td>
+                  <td>
+                    <v-chip
+                      size="small"
+                      :color="esPagable(payment) ? 'primary' : 'amber-darken-2'"
+                      variant="tonal"
+                      label
+                    >
+                      {{ payment.estado }}
+                    </v-chip>
+                  </td>
+                </tr>
+              </template>
               <tr v-else>
-               <td colspan="5" class="text-center">Sin pagos registrados.</td>
+                <td colspan="4" class="text-center">Sin pagos activos registrados.</td>
               </tr>
             </tbody>
           </v-table>
@@ -182,6 +185,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    
   </v-container>
 </template>
 
@@ -210,6 +214,8 @@ const profileData = ref(null)
 // 2. avatarSrc ahora es un ref, inicializado con el logo por defecto
 const avatarSrc = ref(defaultLogo) 
 const userRole = computed(() => profileData.value?.rol_id || currentUser.value?.rol)
+const benefitsDialog = ref(false)
+const benefits = ref([])
 
 const getProfile = async () => {
   try {
@@ -310,9 +316,19 @@ const checkoutDialog = ref(false)
 const preferenceId = ref(null)
 const checkoutContext = ref('pagos')
 
+const esPagoActivo = (payment) => {
+  const estado = String(payment?.estado ?? '').trim().toLowerCase()
+
+  if (!estado) return false
+
+  return estado === 'approved'
+}
+
+const pagosActivos = computed(() => payments.value.filter(esPagoActivo))
+
 const pagosSeleccionados = computed(() =>
   selectedPaymentIndexes.value
-    .map((index) => payments.value[index])
+    .map((index) => pagosActivos.value[index])
     .filter(Boolean)
 )
 
@@ -353,7 +369,6 @@ const showPayments = async () => {
   try {
     const result = await PaymentsService.getUserPayments(route.params.id)
     payments.value = normalizarPagos(result?.data ?? result)
-    console.log('Pagos obtenidos:', payments.value)
     selectedPaymentIndexes.value = []
     dialogPayments.value = true
   } catch (error) {
@@ -367,7 +382,7 @@ const showPayments = async () => {
 const renderCheckoutBrick = async () => {
   await loadMercadoPago()
 
-  const mp = new window.MercadoPago('APP_USR-07fa4e87-0b6c-4bd8-a671-6ffd56b5e362', {
+  const mp = new window.MercadoPago('APP_USR-3d8be2c7-4df5-4334-8582-5e848fa461eb', {
     locale: 'es-AR'
   })
 

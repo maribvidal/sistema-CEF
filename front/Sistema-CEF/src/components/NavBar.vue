@@ -19,6 +19,7 @@
               <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/administracionEmpleados">Administracion Empleados</v-btn>
               <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/administracionUsuarios">Administracion Usuarios</v-btn>
               <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/metricas" >Métricas</v-btn>
+              <v-btn variant="text" class="text-none text-subtitle-1 mx-1" color="blue-darken-3" to="/asistencias" >Asistencias</v-btn>
             </template>
             <!-- Botón de Registro modificado -->
             <v-btn variant="flat" color="blue-darken-3" class="text-none text-subtitle-1 ml-4 mr-2" to="/inicioSesion" v-if="!isLoggedIn">
