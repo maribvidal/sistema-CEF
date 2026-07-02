@@ -359,12 +359,17 @@ def crear_preferencia_checkout_pro(external_reference, total_amount, description
         ],
         "notification_url": f"{tunel_state.backend_url_state}/webhook/pagoNormal",
         "back_urls": { 
-            "success": f"{tunel_state.frontend_url_state}/clases",
-            "pending": f"{tunel_state.frontend_url_state}/clases",
-            "failure": f"{tunel_state.frontend_url_state}/clases"
+            "success": "http://localhost:5173/clases",
+            "pending": "http://localhost:5173/clases",
+            "failure": "http://localhost:5173/clases"
         },
         "auto_return": "approved"
     }
+
+    # === AGREGAMOS ESTE PRINT ===
+    print("\n--- DATOS ENVIADOS A MP ---")
+    print(datos)
+    print("---------------------------\n")
 
     respuesta = requests.post(url, json=datos, headers=headers)
     return {"status": "success", "data": respuesta.json()}

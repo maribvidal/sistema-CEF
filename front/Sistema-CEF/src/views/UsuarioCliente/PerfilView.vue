@@ -146,14 +146,17 @@
           <span class="text-h5">Pagar con Mercado Pago</span>
         </v-card-title>
         <v-card-text class="pt-4">
-          <p class="text-body-1 mb-2">
+          <p v-if="checkoutContext === 'pagos'" class="text-body-1 mb-2">
             Vas a pagar {{ pagosSeleccionados.length }} pago(s) por ${{ totalSeleccionado.toFixed(2) }}.
+          </p>
+          <p v-else class="text-body-1 mb-2">
+            Vas a renovar tu mensualidad con Mercado Pago.
           </p>
           <div id="walletBrick_container"></div>
         </v-card-text>
         <v-card-actions class="pa-4">
           <v-spacer />
-          <v-btn variant="text" color="grey-darken-1" @click="checkoutDialog = false">
+          <v-btn variant="text" color="grey-darken-1" @click="cerrarCheckoutDialog">
             Cerrar
           </v-btn>
         </v-card-actions>
@@ -318,6 +321,7 @@ const selectedPaymentIndexes = ref([])
 const cargandoPago = ref(false)
 const checkoutDialog = ref(false)
 const preferenceId = ref(null)
+const checkoutContext = ref('pagos')
 
 const pagosSeleccionados = computed(() =>
   selectedPaymentIndexes.value
@@ -331,6 +335,12 @@ const totalSeleccionado = computed(() =>
 
 const limpiarSeleccionPagos = () => {
   selectedPaymentIndexes.value = []
+}
+
+const cerrarCheckoutDialog = () => {
+  checkoutDialog.value = false
+  preferenceId.value = null
+  checkoutContext.value = 'pagos'
 }
 
 const esPagable = (payment) => {
@@ -356,6 +366,7 @@ const showPayments = async () => {
   try {
     const result = await PaymentsService.getUserPayments(route.params.id)
     payments.value = normalizarPagos(result?.data ?? result)
+    console.log('Pagos obtenidos:', payments.value)
     selectedPaymentIndexes.value = []
 
     if (!payments.value || payments.value.length === 0) {
@@ -370,6 +381,11 @@ const showPayments = async () => {
 
 const renderCheckoutBrick = async () => {
   await loadMercadoPago()
+
+  const container = document.getElementById('walletBrick_container')
+  if (container) {
+    container.innerHTML = ''
+  }
 
   const mp = new window.MercadoPago('APP_USR-3d8be2c7-4df5-4334-8582-5e848fa461eb', {
     locale: 'es-AR'
@@ -406,6 +422,7 @@ const pagarSeleccionados = async () => {
       throw new Error('No se recibió una preferencia válida.')
     }
 
+    checkoutContext.value = 'pagos'
     checkoutDialog.value = true
     await renderCheckoutBrick()
 
@@ -448,12 +465,18 @@ const showMembershipStatus = async () => {
 const renewMembership = async (userId, id_mensualidad) => {
   try {
     const response = await PaymentsService.renewMembership(userId, "desc",id_mensualidad)
-    if (response && response.status === 200) {
-      notificationStore.showNotification('Mensualidad renovada exitosamente.', 'success')
-      showMembershipStatus()
-    } else {
+    const preference = response?.data?.preference_id || response?.data?.data?.id
+
+    if (!preference) {
       throw new Error('Error al renovar la mensualidad.')
     }
+
+    preferenceId.value = preference
+    checkoutContext.value = 'renovacion'
+    checkoutDialog.value = true
+    await renderCheckoutBrick()
+
+    notificationStore.showNotification('Renovación preparada correctamente.', 'success')
   } catch (error) {
     console.error('Error al renovar la mensualidad:', error)
     notificationStore.showNotification('Error al renovar la mensualidad.', 'danger')
