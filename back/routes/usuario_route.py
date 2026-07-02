@@ -1,5 +1,8 @@
 from flask import Blueprint, request, jsonify
 
+from db.operaciones.usuarios.modificar_db import modificar_perfil_usuario
+from db.operaciones.conectar_db import conectarse_db
+
 from services.usuario_service import (
     listar_usuarios_service,
     listar_pagos_usuario_service,
@@ -196,3 +199,30 @@ def obtener_reserva_usuario_inst_clase(usuario_id, inst_clase_id):
     respuesta, status = obtener_reserva_usuario_inst_clase_service(usuario_id, inst_clase_id)
 
     return jsonify(respuesta), status
+
+@usuario_bp.route("/usuarios/confirmar_cambio_correo/<int:usuario_id>/<nuevo_correo>", methods=["GET"])
+def confirmar_cambio_correo(usuario_id, nuevo_correo):
+    """Endpoint simplificado. Recibe los datos del link y actualiza."""
+    
+    cursor = conectarse_db()
+    
+    # Hacemos el cambio real del correo en la base de datos
+    res = modificar_perfil_usuario(
+        cursor,
+        usuario_id,
+        None, None, None, None,  # No tocamos los otros datos
+        nuevo_correo,            # Guardamos el nuevo correo definitivamente
+        None
+    )
+
+    if res['status'] == 'error':
+        cursor.connection.close()
+        return jsonify({"message": "Error al procesar el cambio de correo."}), 500
+
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return jsonify({
+        "message": "Tu correo electrónico ha sido actualizado con éxito."
+    }), 200
+
