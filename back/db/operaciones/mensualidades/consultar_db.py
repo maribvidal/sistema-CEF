@@ -96,7 +96,7 @@ def obtener_clase_mensualidad(id_mensualidad: int, cursor) -> dict:
     """Hace una consulta para obtener la clase de una mensualidad"""
     query = f"""
         SELECT ctm.clase_id
-        FROM Clase_tener_Mensualidad ctm
+        FROM Clase_Tener_Mensualidad ctm
         WHERE ctm.mensualidad_id = {id_mensualidad}
     """
     return ejecutar_fetchone(query, cursor)

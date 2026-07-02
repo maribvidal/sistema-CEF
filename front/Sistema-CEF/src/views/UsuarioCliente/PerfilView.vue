@@ -146,14 +146,17 @@
           <span class="text-h5">Pagar con Mercado Pago</span>
         </v-card-title>
         <v-card-text class="pt-4">
-          <p class="text-body-1 mb-2">
+          <p v-if="checkoutContext === 'pagos'" class="text-body-1 mb-2">
             Vas a pagar {{ pagosSeleccionados.length }} pago(s) por ${{ totalSeleccionado.toFixed(2) }}.
+          </p>
+          <p v-else class="text-body-1 mb-2">
+            Vas a renovar tu mensualidad con Mercado Pago.
           </p>
           <div id="walletBrick_container"></div>
         </v-card-text>
         <v-card-actions class="pa-4">
           <v-spacer />
-          <v-btn variant="text" color="grey-darken-1" @click="checkoutDialog = false">
+          <v-btn variant="text" color="grey-darken-1" @click="cerrarCheckoutDialog">
             Cerrar
           </v-btn>
         </v-card-actions>
@@ -166,7 +169,6 @@
           <v-table>
             <thead>
               <tr>
-                <th class="text-left">ID</th>
                 <th class="text-left">Fecha Inicio</th>
                 <th class="text-left">Fecha Fin</th>
                 <th class="text-left">Estado</th>
@@ -175,12 +177,11 @@
             </thead>
             <tbody>
               <tr v-for="mensualidad in membershipStatus?.mensualidades" :key="mensualidad.id">
-                <td>{{ mensualidad.id }}</td>
                 <td>{{ formatSpanishDate(mensualidad.fecha_ini) }}</td>
                 <td>{{ formatSpanishDate(mensualidad.fecha_fin) }}</td>
-                <td>{{ mensualidad.activa ? 'Activa' : 'Inactiva' }}</td>
+                <td>{{ obtenerEstadoMensualidad(mensualidad) }}</td>
                 <td>
-                  <v-btn v-if="mensualidad.activa !== 1" color="primary" @click="renewMembership(userDNI, mensualidad.id)">Renovar</v-btn>
+                  <v-btn v-if="Number(mensualidad?.estado) === 0" color="primary" @click="renewMembership(userDNI, mensualidad.id)">Renovar</v-btn>
                   <span v-else> - </span>
                 </td>
               </tr>
@@ -320,6 +321,7 @@ const selectedPaymentIndexes = ref([])
 const cargandoPago = ref(false)
 const checkoutDialog = ref(false)
 const preferenceId = ref(null)
+const checkoutContext = ref('pagos')
 
 const pagosSeleccionados = computed(() =>
   selectedPaymentIndexes.value
@@ -333,6 +335,12 @@ const totalSeleccionado = computed(() =>
 
 const limpiarSeleccionPagos = () => {
   selectedPaymentIndexes.value = []
+}
+
+const cerrarCheckoutDialog = () => {
+  checkoutDialog.value = false
+  preferenceId.value = null
+  checkoutContext.value = 'pagos'
 }
 
 const esPagable = (payment) => {
@@ -358,6 +366,7 @@ const showPayments = async () => {
   try {
     const result = await PaymentsService.getUserPayments(route.params.id)
     payments.value = normalizarPagos(result?.data ?? result)
+    console.log('Pagos obtenidos:', payments.value)
     selectedPaymentIndexes.value = []
 
     if (!payments.value || payments.value.length === 0) {
@@ -408,6 +417,7 @@ const pagarSeleccionados = async () => {
       throw new Error('No se recibió una preferencia válida.')
     }
 
+    checkoutContext.value = 'pagos'
     checkoutDialog.value = true
     await renderCheckoutBrick()
 
@@ -426,38 +436,42 @@ const pagarSeleccionados = async () => {
 const dialogMembershipStatus = ref(false)
 const membershipStatus = ref(null)
 
+const obtenerEstadoMensualidad = (mensualidad) => {
+  return Number(mensualidad?.estado) === 1 ? 'Activa' : 'Inactiva'
+}
+
 const showMembershipStatus = async () => {
   try {
     const mensualidad = await PaymentsService.getMensualidadUsuario(userDNI.value)
 
     const mensualidades = mensualidad?.message ?? []
-    if (!Array.isArray(mensualidades) || mensualidades.length === 0) {
-      throw new Error('El usuario no posee mensualidades registradas.')
-    }
-
-    const mensualidadActiva = mensualidades.find(item => Number(item.estado) === 1) ?? mensualidades[0]
     membershipStatus.value = {
-      activa: Number(mensualidadActiva.estado) === 1,
-      fechaFin: mensualidadActiva.fecha_fin,
-      fechaIni: mensualidadActiva.fecha_ini,
-      id: mensualidadActiva.id,
       mensualidades
     }
     dialogMembershipStatus.value = true
+    if (!Array.isArray(mensualidades) || mensualidades.length === 0) {
+      notificationStore.showNotification('El usuario no posee mensualidades registradas.', 'danger')
+    }
   } catch (error) {
-    notificationStore.showNotification('El usuario no posee mensualidades activas', 'danger')
+    notificationStore.showNotification('No se pudieron cargar las mensualidades del usuario.', 'danger')
   }
 }
 
 const renewMembership = async (userId, id_mensualidad) => {
   try {
     const response = await PaymentsService.renewMembership(userId, "desc",id_mensualidad)
-    if (response && response.status === 200) {
-      notificationStore.showNotification('Mensualidad renovada exitosamente.', 'success')
-      showMembershipStatus()
-    } else {
+    const preference = response?.data?.preference_id || response?.data?.data?.id
+
+    if (!preference) {
       throw new Error('Error al renovar la mensualidad.')
     }
+
+    preferenceId.value = preference
+    checkoutContext.value = 'renovacion'
+    checkoutDialog.value = true
+    await renderCheckoutBrick()
+
+    notificationStore.showNotification('Renovación preparada correctamente.', 'success')
   } catch (error) {
     console.error('Error al renovar la mensualidad:', error)
     notificationStore.showNotification('Error al renovar la mensualidad.', 'danger')
