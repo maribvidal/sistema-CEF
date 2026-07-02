@@ -292,7 +292,7 @@ def construir_tabla_mensualidad(cursor: sqlite.Cursor):
                             fecha_ini  DATE NOT NULL,
                             fecha_fin  DATE,
                             usuario_id INTEGER NOT NULL,
-                            estado BOOLEAN NOT NULL DEFAULT 0, 
+                            estado INTEGER NOT NULL DEFAULT 0, 
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
