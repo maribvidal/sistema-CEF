@@ -3,7 +3,7 @@ from flask import Flask
 from flask_cors import CORS
 from db.operaciones.construir_db import reconstruir_db
 from db.operaciones.conectar_db import conectarse_db
-from db.operaciones.seed_db_demo import insertar_datos
+from db.operaciones.seed_db import insertar_datos
 from routes import *
 from dotenv import load_dotenv
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     #backend_url = http_tunnel.public_url
     #print(backend_url)
     backend_url = "https://stir-brunt-strength.ngrok-free.dev" # Fijarse en el momento qué ngrok tenemos
-    frontend_url = "https://bbd5e3069b613b.lhr.life" # Ejecutar "ssh -R 80:localhost:5173 nokey@localhost.run"
+    frontend_url = "https://8e37e4b3ce14c9.lhr.life" # Ejecutar "ssh -R 80:localhost:5173 nokey@localhost.run"
 
     tunel_state.backend_url_state = backend_url
     tunel_state.frontend_url_state = frontend_url

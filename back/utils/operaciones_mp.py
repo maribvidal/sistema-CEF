@@ -339,7 +339,7 @@ def crear_sucursal_mp():
     
 import tunel_state
     
-def crear_preferencia_checkout_pro(id_pago, total_amount, description, item):
+def crear_preferencia_checkout_pro(ext_ref, total_amount, description, item):
     url = "https://api.mercadopago.com/checkout/preferences"
     headers = {
         "Authorization": f"Bearer {Access_Token}",
@@ -348,7 +348,7 @@ def crear_preferencia_checkout_pro(id_pago, total_amount, description, item):
 
     # esos de los backs_urls hay que verlo bien
     datos = {
-        "external_reference": str(id_pago),
+        "external_reference": str(ext_ref),
         "items": [
             {
                 "title": item.get("title", description),

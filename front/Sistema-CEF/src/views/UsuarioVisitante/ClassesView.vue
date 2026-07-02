@@ -402,19 +402,15 @@ const router = useRouter()
 
 onMounted(() => {
   // 1. Revisamos si la URL trae el parámetro "collection_status" de Mercado Pago
-  console.log(route.query.collection_status)
+  
   if (route.query.collection_status === 'approved') {
-    
-    // 2. Acá podés disparar tu notificación verde de éxito (como vi que tenés en tu sistema)
-    // notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
     const externalReference = route.query.external_reference
     notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
-    
     window.location.href = 'http://localhost:5173/clases'
-
-    console.log(externalReference)
-    if (externalReference) {
+    if (externalReference < 1000) {
       PaymentsService.confirmarPagoAprobado(externalReference)
+    } else {
+      PaymentsService.confirmarPagoAprobadoIndividual(externalReference)
     }
   } 
   else if (route.query.collection_status === 'rejected' || route.query.collection_status === 'pending') {

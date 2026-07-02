@@ -88,19 +88,6 @@ def crear_reserva_individual_service(usuario_id: int, inst_clase_id: int):
 
     # EXTRAEMOS EL PREFERENCE ID
     preference_id = respuesta["data"]
-
-    # Intentar crear la reserva
-    respuesta = insertar_reserva(usuario_id, inst_clase_id, cursor)
-    control = _controlar_errores_query(respuesta, 405, "La reserva ya había sido creada.", 406, cursor)
-    if control is not None:
-        return control
-
-    # Insertar usuario en lista de espera individual
-    respuesta = insertar_usuario_pertenece_lista_espera_individual(usuario_id, inst_clase_id, cursor)
-    print(respuesta)
-    control = _controlar_errores_query(respuesta, 410, "Error al agregar usuario a la lista de espera individual.", 411, cursor)
-    if control is not None:
-        return control
     
     cursor.connection.commit()
 

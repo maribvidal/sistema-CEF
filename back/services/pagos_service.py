@@ -1,5 +1,9 @@
 import time
 
+from db.operaciones.info_individual.insertar_db import insertar_info_individual
+from db.operaciones.info_individual.consultar_db import obtener_info_individual_por_pago_id
+from db.operaciones.pagos.modificar_db import aprobar_pago
+from db.operaciones.reservas.insertar_db import insertar_reserva
 from db.operaciones.pagos.insertar_db import insertar_pago_sin_monto
 from db.operaciones.mensualidades.borrar_db import borrar_reservas_mensualidad
 from db.operaciones.clase_tener_mensualidad.borrar_db import borrar_clase_tener_mensualidad
@@ -458,6 +462,9 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     
     id_pago_raw = pago['data']
 
+    # Crear la información Info_Individual
+    inf_ind = insertar_info_individual(id_pago_raw, instancia_clase, cursor)
+
     # lo agregue por errores de tipado que me saltaban
     try:
         id_pago = int(id_pago_raw)
@@ -495,7 +502,7 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     }
     
     # 1. Llamamos a nuestra nueva función
-    respuesta_json = crear_preferencia_checkout_pro(id_pago, instancia_clase['data']['monto'], descripcion, item)
+    respuesta_json = crear_preferencia_checkout_pro(id_pago + 1000, instancia_clase['data']['monto'], descripcion, item)
     
     control = _controlar_errores_query(respuesta_json, 500, "Error al crear la preferencia de pago en MercadoPago.", 400, cursor)
     if control is not None:
@@ -505,15 +512,6 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
     print("\n--- RESPUESTA MERCADO PAGO ---")
     print(respuesta_json)
     print("------------------------------\n")
-
-    # Si Mercado Pago no nos devolvió el ID, detenemos el proceso ordenadamente
-    if "data" not in respuesta_json or "id" not in respuesta_json.get("data", {}):
-        cursor.connection.close()
-        return {
-            "status": "error",
-            "message": "Mercado Pago rechazó la creación de la preferencia.",
-            "detalles_mp": respuesta_json
-        }, 500
 
     preference_id = respuesta_json["data"]
     
@@ -595,3 +593,21 @@ def crear_pago_service_particular(usuario_id, descripcion, instancia_clase_id):
         "message": "Datos de la orden de pago obtenidos exitosamente.",
         "data": estado['data']
     }, 200
+
+def aprobar_pago_individual(pago_id: int):
+    # En este service se aprueba el pago hecho a una clase individual
+
+    pago_id_descifrado = pago_id - 1000
+
+    cursor = conectarse_db()
+
+    aprobar_pago(pago_id_descifrado, cursor)
+    resp_ind = obtener_info_individual_por_pago_id(pago_id_descifrado, cursor)
+    usuario_id = resp_ind["data"]["usuario_id"]
+    inst_clase_id = resp_ind["data"]["inst_clase_id"]
+    insertar_reserva(usuario_id, inst_clase_id, cursor)
+
+    cursor.connection.commit()
+    cursor.connection.close()
+
+    return _msj_exito_helper("Se aprobó el pago individual con éxito.", cursor)

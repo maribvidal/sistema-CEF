@@ -386,3 +386,12 @@ def construir_tabla_info_mensualidad(cursor: sqlite.Cursor):
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
                    )""")
+    
+def construir_tabla_info_individual(cursor: sqlite.Cursor):
+    """Construye la tabla Info_Individual."""
+    cursor.execute("""CREATE TABLE IF NOT EXISTS Info_Individual (
+                        id          INTEGER PRIMARY KEY,
+                        pago_id     INTEGER,
+                        inst_clase_id INTEGER,
+                        fecha DATE
+                   )""")
