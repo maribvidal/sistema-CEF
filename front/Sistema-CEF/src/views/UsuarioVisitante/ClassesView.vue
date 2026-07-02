@@ -406,7 +406,7 @@ onMounted(async () => {
     
     // 2. Acá podés disparar tu notificación verde de éxito (como vi que tenés en tu sistema)
     // notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
-    alert("¡Pago procesado con éxito!") // (O usa tu propio sistema de alertas)
+    
     notificationStore.showNotification('¡Pago realizado con éxito!', 'success')
     const externalReference = route.query.external_reference
     
@@ -897,7 +897,7 @@ const renderCheckoutBrick = async () => {
   await loadMercadoPago()
 
   const mp = new MercadoPago(
-    "APP_USR-07fa4e87-0b6c-4bd8-a671-6ffd56b5e362"
+    "APP_USR-3d8be2c7-4df5-4334-8582-5e848fa461eb"
   )
 
   const bricksBuilder = mp.bricks()
