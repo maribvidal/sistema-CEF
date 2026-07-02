@@ -5,6 +5,7 @@ import requests
 
 from utils.operaciones_mp import Access_Token
 from services.pagos_service import *
+from db.operaciones.pagos.modificar_db import aprobar_pago
 
 pagos_bp = Blueprint("pagos", __name__)
 
@@ -61,11 +62,18 @@ def crear_pago_particular():
     )
     payment = r.json()
 
-    external_reference = payment.get("external_reference")
+    id_pago = payment.get("external_reference")
     status = payment.get("status")  # approved / pending / rejected 
 
-    print("External Reference:", external_reference)
+    print("External Reference:", id_pago)
     print("Payment Status:", status)
+
+    # Comprobar el estado del pago, y si este es 'approved'
+    if status == 'approved':
+        cursor = conectarse_db()
+        aprobar_pago(id_pago, cursor)
+        cursor.connection.commit()
+        cursor.connection.close()
 
     #id_pago, nuevo_estado, cursor
     # cursor = conectarse_db()

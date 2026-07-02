@@ -339,7 +339,7 @@ def crear_sucursal_mp():
     
 import tunel_state
     
-def crear_preferencia_checkout_pro(external_reference, total_amount, description, item ):
+def crear_preferencia_checkout_pro(id_pago, total_amount, description, item):
     url = "https://api.mercadopago.com/checkout/preferences"
     headers = {
         "Authorization": f"Bearer {Access_Token}",
@@ -348,7 +348,7 @@ def crear_preferencia_checkout_pro(external_reference, total_amount, description
 
     # esos de los backs_urls hay que verlo bien
     datos = {
-        "external_reference": str(external_reference),
+        "external_reference": str(id_pago),
         "items": [
             {
                 "title": item.get("title", description),
@@ -365,6 +365,8 @@ def crear_preferencia_checkout_pro(external_reference, total_amount, description
         },
         "auto_return": "approved"
     }
+
+    # Modificar pago con cierto id para meterle la external reference
 
     respuesta = requests.post(url, json=datos, headers=headers)
     return {"status": "success", "data": respuesta.json()}

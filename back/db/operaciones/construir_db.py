@@ -276,7 +276,6 @@ def construir_tabla_pago(cursor: sqlite.Cursor):
                             fecha     DATE,
                             usuario_id INTEGER NOT NULL,
                             estado      VARCHAR(20) NOT NULL,
-                            mp_order_id VARCHAR(75) UNIQUE,
                             FOREIGN KEY (usuario_id) REFERENCES Usuario(id)
                                         ON UPDATE CASCADE
                                         ON DELETE SET NULL
