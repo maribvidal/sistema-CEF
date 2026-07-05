@@ -1,0 +1,85 @@
+import smtplib
+from email.mime.text import MIMEText
+from db.operaciones.usuarios.consultar_db import consultar_usuario_por_id
+
+def enviar_mail(correo: str, sujeto: str, mensaje: str):
+    """Función que envía un correo electrónico al usuario para restablecer su contraseña."""
+    servidor_smtp = "smtp.gmail.com"
+    puerto = 587
+
+    msg = MIMEText(mensaje, 'html')
+    msg['Subject'] = sujeto
+    msg['From'] = "sistemacef@gmail.com"
+    msg['To'] = correo
+
+    try:
+        server = smtplib.SMTP(servidor_smtp, puerto)
+        server.starttls() 
+        server.login("sistemacef@gmail.com", "saal ixel tbum pohe")
+        
+        server.send_message(msg)
+    except Exception as e:
+        return {
+            "error": str(e)
+        }, 402
+    finally:
+        server.quit()
+
+def enviar_mail_confirmacion_asistencia(id_usuario: int, cursor, clase_id = None, id_instancia_clase = None):
+    """Función que envía un correo electrónico al usuario para avisarle que
+        puede tener una reserva para una clase en la cual estaba esperando."""
+    consulta = consultar_usuario_por_id(id_usuario, cursor)
+    correo = consulta["data"]["correo"]
+    
+    mensaje = "Buenos días, tiene la posibilidad de reservar si lo desea.\nHaga click en este enlace para confirmar. \n http://localhost:5173/confirmar-reserva"
+    
+    if clase_id is not None:
+        mensaje += f"&clase_id={clase_id}"
+    elif id_instancia_clase is not None:
+        mensaje += f"&inst_clase_id={id_instancia_clase}"
+    
+    enviar_mail(correo, "Confirmación de asistencia", mensaje)
+
+def enviar_mail_confirmacion_nuevo_correo(correo: str, enlace: str):
+    """Función que envía un correo electrónico al usuario para que confirme
+       su nueva dirección de correo electrónico."""
+    
+    html = f"""
+    <h3>Modificación de correo - Sistema CEF</h3>
+    <p>Hemos recibido una solicitud para cambiar la dirección de correo electrónico asociada a su cuenta.</p>
+    <p>Para completar este proceso y validar su nueva dirección, por favor haga clic en el siguiente enlace:</p>
+    <p><a href="{enlace}">Confirmar mi nuevo correo electrónico</a></p>
+    <br>
+    <p><small style="color: #555;">Si usted no solicitó este cambio, por favor ignore este correo o póngase en contacto con el soporte técnico si cree que su seguridad se ha visto comprometida.</small></p>
+    """
+    
+    enviar_mail(correo, "Confirme su nuevo correo electrónico - Sistema CEF", html)
+
+def enviar_mail_vencimiento_mensualidad(id_usuario: int, correo: str, enlace: str):
+    """Función que envía un correo electrónico al usuario para avisarle 
+       que su mensualidad venció y tiene 10 días de gracia para abonar."""
+    
+    html = f"""
+    <h3>Aviso de Vencimiento - Sistema CEF</h3>
+    <p>Hola,</p>
+    <p>Te escribimos para informarte que tu mensualidad en el CEF ha <strong>vencido</strong>.</p>
+    <p>Sabemos que a veces se nos pasa, por eso te recordamos que tenés un <strong>período de gracia de 10 días</strong> desde la fecha de vencimiento para regularizar el pago sin perder tu lugar en las clases ni tus beneficios.</p>
+    <p>Por favor, hacé clic en <a href="{enlace}">este enlace para renovar tu mensualidad</a> lo antes posible.</p>
+    <p>¡Te esperamos para seguir entrenando!</p>
+    <p>Saludos,<br>El equipo de Sistema CEF</p>
+    """
+    
+    enviar_mail(correo, "Tu mensualidad ha vencido - Período de gracia de 10 días", html)
+
+def enviar_mail_verificacion_registro(id_usuario: int, correo: str, enlace: str):
+    """Función que envía un correo electrónico al usuario recién registrado
+       para que verifique su cuenta."""
+    
+    html = f"""
+    <h3>¡Bienvenido al Sistema CEF!</h3>
+    <p>Gracias por registrarte. Para poder utilizar su cuenta, necesitamos que confirme su dirección de correo electrónico.</p>
+    <p>Por favor, haga clic en <a href="{enlace}">este enlace para verificar su cuenta.</a></p>
+    <p>Si usted no solicitó este registro, ignore este correo.</p>
+    """
+    
+    enviar_mail(correo, "Verifique su cuenta en el Sistema CEF", html)

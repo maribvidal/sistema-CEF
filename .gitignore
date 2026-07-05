@@ -205,3 +205,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Yo
+database.db
+poetry.lock
+__pycache__
+package-lock.json
+copy.py
+node_modules/

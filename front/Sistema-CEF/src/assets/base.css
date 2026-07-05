@@ -1,0 +1,40 @@
+/* Color pallete from website conectada a Vuetify */
+:root {
+  /* Al usar rgb(var(...)), le decimos a nuestras variables que lean los colores 
+     exactos que definiste en vuetify.js (background, surface, etc.) */
+  --bg-main: rgb(var(--v-theme-background));
+  --bg-card: rgb(var(--v-theme-surface));
+  --bg-navBar: rgb(var(--v-theme-surface));
+  
+  /* Vuetify genera "--v-theme-on-surface" para el texto que va sobre las tarjetas */
+  --text-main: rgb(var(--v-theme-on-surface));
+  --text-secondary: rgba(var(--v-theme-on-surface), 0.6);
+  
+  --primary-color: rgb(var(--v-theme-primary));
+  --nav-bg: black;
+  --nav-text: white;
+  --shadow-color: rgba(0,0,0,0.2);
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+}
+
+/* ¡Ya no necesitas el html[data-theme="dark"] para estas variables principales! 
+  Vuetify cambiará los valores de --v-theme-surface y --v-theme-background 
+  automáticamente cuando detecte el modo oscuro, y tus variables --bg-card y --bg-main 
+  heredarán el cambio al instante.
+*/
+html[data-theme="dark"] {
+  /* Solo dejas las cosas que Vuetify no maneja directamente */
+  --nav-bg: #1f1f1f;
+  --nav-text: #e0e0e0;
+  --shadow-color: rgba(0,0,0,0.5);
+  --overlay-bg: rgba(0, 0, 0, 0.8);
+}
+
+/* Clases utilitarias reemplazo */
+.bg-light, .bg-main {
+  background-color: var(--bg-main) !important;
+}
+
+.text-main {
+  color: var(--text-main) !important;
+}

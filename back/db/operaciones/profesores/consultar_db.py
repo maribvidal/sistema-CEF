@@ -1,0 +1,64 @@
+from db.operaciones.exception_handler import ejecutar_fetchall, ejecutar_fetchone
+
+def consultar_profesor_por_id(id: int, cursor) -> dict:
+    """Hace una consulta para devolver la tupla de un profesor por su id."""
+    return ejecutar_fetchone(f"SELECT * FROM Usuario WHERE rol_id = 5 AND id = {id};", cursor)
+
+def listar_profesores(cursor) -> dict:
+    """Hace una consulta para listar todos los profesores, y devuelve una lista de tuplas"""
+    return ejecutar_fetchall("SELECT * FROM Usuario WHERE rol_id = 5", cursor)
+
+def listar_dnis_profesores(cursor) -> dict:
+    """Hace una consulta para listar todos los dnis de los
+        profesores, y devuelve una lista de tuplas."""
+    return ejecutar_fetchall("SELECT dni FROM Usuario WHERE rol_id = 5", cursor)
+
+def consultar_clases_profesor_dia_hora(id_profesor: int, dia: str, hora: str, cursor) -> dict:
+    """Hace una consulta para devolver las clases de un profesor en un día y hora específicos."""
+    query = f"""
+        SELECT * 
+        FROM Clase 
+        WHERE profesor_id = {id_profesor} AND dia = '{dia}' AND hora = '{hora}';
+    """
+    return ejecutar_fetchall(query, cursor)
+
+def verificar_actividad_profesor(id_profesor: int, id_actividad: int, cursor) -> dict:
+    """Verifica si un profesor está habilitado para dar una actividad específica."""
+    query = f"""
+        SELECT 1 
+        FROM Profesor_Actividad 
+        WHERE profesor_id = {id_profesor} AND actividad_id = {id_actividad}
+    """
+    resultado = ejecutar_fetchone(query, cursor)
+    
+    if resultado['status'] == 'error':
+        return resultado
+    
+    # Si 'data' no es None, significa que encontró el registro (está habilitado)
+    esta_habilitado = resultado['data'] is not None
+    return {"status": "success", "data": esta_habilitado}
+
+# def consultar_profesor_actividad(id_profesor: int, id_actividad: int, cursor):
+#     """
+#     Verifica si el profesor tiene asignada la aptitud para dar una actividad.
+#     Requiere que exista la tabla intermedia 'Profesor_Actividad'.
+#     """
+#     query = """
+#         SELECT 1 
+#         FROM Profesor_Actividad 
+#         WHERE profesor_id = ? AND actividad_id = ?
+#     """
+#     cursor.execute(query, (id_profesor, id_actividad))
+#     resultado = cursor.fetchone()
+#     
+#     # Si devuelve algo, es porque existe el registro (es apto). Si es None, no lo es.
+#     return resultado is not None
+
+def consultar_actividades_profesor(id_profesor: int, cursor):
+    """Hace una consulta para devolver las actividades que da un profesor."""
+    query = f"""
+        SELECT actividad_id
+        FROM Profesor_Actividad
+        WHERE profesor_id = {id_profesor}
+    """
+    return ejecutar_fetchall(query, cursor)
